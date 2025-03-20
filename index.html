@@ -6,12 +6,15 @@
     <title>Kevin Lin - Professional Profile</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <meta name="description" content="Kevin Lin - Software Developer based in Singapore">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#0366d6">
+    <meta name="theme-color" content="#0063a3">
 </head>
 <body>
     <header>
@@ -42,7 +45,11 @@
             <h2>About Me</h2>
             <p>
                 I'm a passionate software developer with expertise in web technologies and application development.
-                Based in Singapore, I focus on creating efficient and user-friendly applications.
+                Based in Singapore, I focus on creating efficient, scalable, and user-friendly applications that solve real-world problems.
+            </p>
+            <p>
+                With a strong foundation in both frontend and backend technologies, I enjoy building comprehensive solutions
+                that deliver exceptional user experiences while maintaining robust and maintainable codebases.
             </p>
         </div>
     </section>
@@ -52,28 +59,33 @@
             <h2>Technical Skills</h2>
             <div class="skill-categories">
                 <div class="skill-category">
-                    <h3>Frontend</h3>
+                    <h3>Frontend Development</h3>
                     <ul>
-                        <li>Angular</li>
-                        <li>TypeScript</li>
-                        <li>JavaScript</li>
-                        <li>HTML/CSS</li>
+                        <li>Angular Framework</li>
+                        <li>TypeScript/JavaScript</li>
+                        <li>Responsive Design</li>
+                        <li>HTML5/CSS3/SASS</li>
+                        <li>UI/UX Implementation</li>
                     </ul>
                 </div>
                 <div class="skill-category">
-                    <h3>Backend</h3>
+                    <h3>Backend Development</h3>
                     <ul>
                         <li>Spring Boot</li>
                         <li>Node.js</li>
+                        <li>RESTful API Design</li>
                         <li>WebSockets</li>
+                        <li>Database Management</li>
                     </ul>
                 </div>
                 <div class="skill-category">
-                    <h3>Other</h3>
+                    <h3>Tools & Practices</h3>
                     <ul>
-                        <li>Git</li>
-                        <li>RESTful APIs</li>
-                        <li>Real-time Applications</li>
+                        <li>Git Version Control</li>
+                        <li>CI/CD Pipelines</li>
+                        <li>Agile Development</li>
+                        <li>Test-Driven Development</li>
+                        <li>Performance Optimization</li>
                     </ul>
                 </div>
             </div>
@@ -85,45 +97,57 @@
             <h2>Featured Projects</h2>
             <div class="project-grid">
                 <div class="project-card">
-                    <h3>Angular Toastr</h3>
-                    <p>Bootstrap styled notification manager for Angular applications</p>
-                    <p class="tech-stack">TypeScript</p>
-                    <a href="https://github.com/kevinlin/angular-toastr" target="_blank" class="project-link">
-                        <i class="fab fa-github"></i> View Project
-                    </a>
-                </div>
-                <div class="project-card">
-                    <h3>Handsontable Demo</h3>
-                    <p>A proof of concept on Handsontable for Base Metal order screen</p>
-                    <p class="tech-stack">TypeScript</p>
-                    <a href="https://github.com/kevinlin/handsontable-demo" target="_blank" class="project-link">
-                        <i class="fab fa-github"></i> View Project
-                    </a>
-                </div>
-                <div class="project-card">
-                    <h3>STOMP Chat Application</h3>
-                    <p>A real-time chat application using WebSockets with Spring Boot backend and TypeScript frontend</p>
-                    <p class="tech-stack">Spring Boot, TypeScript, WebSockets</p>
-                    <div class="project-links">
-                        <a href="https://github.com/kevinlin/springBootStompChatServer" target="_blank" class="project-link">
-                            <i class="fab fa-github"></i> Backend
-                        </a>
-                        <a href="https://github.com/kevinlin/stompChatUI" target="_blank" class="project-link">
-                            <i class="fab fa-github"></i> Frontend
-                        </a>
+                    <div class="project-card-content">
+                        <h3>Angular Toastr</h3>
+                        <p>Bootstrap styled notification manager for Angular applications. Provides an easy way to display toast notifications in your Angular projects.</p>
+                        <p class="tech-stack">TypeScript</p>
+                        <div class="project-links">
+                            <a href="https://github.com/kevinlin/angular-toastr" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> View Project
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="project-card">
-                    <h3>Twitter Live Wall</h3>
-                    <p>A real-time Twitter feed display application</p>
-                    <p class="tech-stack">TypeScript, JavaScript</p>
-                    <div class="project-links">
-                        <a href="https://github.com/kevinlin/twitter-live-wall-client" target="_blank" class="project-link">
-                            <i class="fab fa-github"></i> Frontend
-                        </a>
-                        <a href="https://github.com/kevinlin/twitter-live-wall-server" target="_blank" class="project-link">
-                            <i class="fab fa-github"></i> Backend
-                        </a>
+                    <div class="project-card-content">
+                        <h3>Handsontable Demo</h3>
+                        <p>A proof of concept implementation using Handsontable for Base Metal order screen. Demonstrates advanced data grid capabilities with Excel-like features.</p>
+                        <p class="tech-stack">TypeScript</p>
+                        <div class="project-links">
+                            <a href="https://github.com/kevinlin/handsontable-demo" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> View Project
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-card-content">
+                        <h3>STOMP Chat Application</h3>
+                        <p>A real-time chat application using WebSockets with Spring Boot backend and TypeScript frontend. Features include real-time messaging, user presence, and message history.</p>
+                        <p class="tech-stack">Spring Boot, TypeScript, WebSockets</p>
+                        <div class="project-links">
+                            <a href="https://github.com/kevinlin/springBootStompChatServer" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Backend
+                            </a>
+                            <a href="https://github.com/kevinlin/stompChatUI" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Frontend
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-card-content">
+                        <h3>Twitter Live Wall</h3>
+                        <p>A real-time Twitter feed display application that shows tweets based on hashtags or user accounts. Perfect for events, conferences, and marketing campaigns.</p>
+                        <p class="tech-stack">TypeScript, JavaScript</p>
+                        <div class="project-links">
+                            <a href="https://github.com/kevinlin/twitter-live-wall-client" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Frontend
+                            </a>
+                            <a href="https://github.com/kevinlin/twitter-live-wall-server" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Backend
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -133,13 +157,13 @@
     <section class="contact">
         <div class="container">
             <h2>Get In Touch</h2>
-            <p>Feel free to reach out to me on GitHub or LinkedIn for collaboration or opportunities.</p>
+            <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out to me through any of the platforms below.</p>
             <div class="contact-links">
                 <a href="https://github.com/kevinlin" target="_blank" class="contact-button">
-                    <i class="fab fa-github"></i> GitHub
+                    <i class="fab fa-github"></i> Connect on GitHub
                 </a>
                 <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" class="contact-button">
-                    <i class="fab fa-linkedin"></i> LinkedIn
+                    <i class="fab fa-linkedin"></i> Connect on LinkedIn
                 </a>
             </div>
         </div>
@@ -147,7 +171,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Kevin Lin. All rights reserved.</p>
+            <p>&copy; 2025 Kevin Lin. All rights reserved. | Software Developer based in Singapore</p>
         </div>
     </footer>
     <script src="script.js"></script>
