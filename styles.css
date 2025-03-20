@@ -290,32 +290,53 @@ header::before {
     position: relative;
 }
 
-.skill-category ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+/* Skill Bars */
+.skill-bars {
+    margin-top: 20px;
 }
 
-.skill-category li {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--light-text);
-    font-size: 1.1rem;
+.skill-item {
+    margin-bottom: 20px;
+}
+
+.skill-info {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
 }
 
-.skill-category li:before {
-    content: '•';
+.skill-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.skill-percentage {
+    font-weight: 600;
     color: var(--primary-color);
-    font-weight: bold;
-    display: inline-block; 
-    width: 1em;
-    margin-right: 10px;
 }
 
-.skill-category li:last-child {
-    border-bottom: none;
+.progress-bar-container {
+    background-color: var(--section-bg);
+    border-radius: 10px;
+    height: 10px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    border-radius: 10px;
+    transition: width 1.5s cubic-bezier(0.1, 0.5, 0.2, 1);
+}
+
+.skill-item:hover .progress-bar {
+    filter: brightness(1.1);
+}
+
+.skill-item:last-child {
+    margin-bottom: 0;
 }
 
 /* Projects Section */

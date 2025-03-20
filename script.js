@@ -50,6 +50,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Function to animate progress bars
+    const animateProgressBars = function() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        
+        progressBars.forEach(bar => {
+            const parent = bar.closest('.skill-item');
+            const percentage = parent.querySelector('.skill-percentage').innerText;
+            const valueWidth = percentage.replace('%', '');
+            const barPosition = bar.getBoundingClientRect().top;
+            const windowHeight = window.innerHeight;
+            
+            if (barPosition < windowHeight - 50) {
+                // Set width based on percentage value
+                bar.style.width = percentage;
+            }
+        });
+    };
+    
     // Add animation to elements when they come into view
     const animateOnScroll = function() {
         const elements = document.querySelectorAll('.project-card, .skill-category, .github-embed-item, .photo-slide');
@@ -62,6 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.classList.add('visible');
             }
         });
+        
+        // Also animate progress bars
+        animateProgressBars();
     };
     
     // Run animation check on scroll
