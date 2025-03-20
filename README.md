@@ -2,6 +2,13 @@
 
 This repository contains the code for my personal professional profile website, hosted on GitHub Pages.
 
+## Important: Profile Photo
+
+To use your LinkedIn profile photo:
+1. Download your profile photo from LinkedIn
+2. Rename it to `profile-photo.jpg`
+3. Add it to the root directory of this repository
+
 ## Overview
 
 This is a simple, responsive personal website that showcases my:
