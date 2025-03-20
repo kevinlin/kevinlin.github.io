@@ -399,43 +399,61 @@ header::before {
     color: var(--light-text);
 }
 
-.github-stats {
+.github-embeds {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 30px;
-    margin-bottom: 60px;
+    margin-bottom: 50px;
 }
 
-.github-stat-card {
+.github-embed-item {
     background-color: white;
     border-radius: 8px;
-    padding: 30px;
-    text-align: center;
+    padding: 20px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
     transition: var(--transition);
 }
 
-.github-stat-card:hover {
-    transform: translateY(-10px);
+.github-embed-item:hover {
+    transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
-.github-stat-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-    color: var(--secondary-color);
+.embed-container {
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
 }
 
-.stat-number {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 10px;
+.embed-container iframe {
+    max-width: 100%;
+    overflow: hidden;
 }
 
-.github-stat-card p {
-    color: var(--light-text);
-    font-size: 0.95rem;
+.github-profile-link {
+    text-align: center;
+    margin-top: 40px;
+}
+
+@media (min-width: 768px) {
+    .github-embeds {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .profile-card {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1200px) {
+    .github-embeds {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    
+    .profile-card {
+        grid-column: 1 / -1;
+    }
 }
 
 .github-calendar {
@@ -463,66 +481,9 @@ header::before {
     border-radius: 4px;
 }
 
-.recent-activity {
-    background-color: white;
-    border-radius: 8px;
-    padding: 30px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-}
-
-.recent-activity h3 {
-    margin-bottom: 20px;
-    font-size: 1.4rem;
-}
-
-.activity-list {
-    list-style: none;
-    padding: 0;
-}
-
-.activity-item {
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-icon {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    margin-top: 3px;
-}
-
-.activity-content {
-    flex-grow: 1;
-}
-
-.activity-title {
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.activity-details {
-    color: var(--light-text);
-    font-size: 0.9rem;
-}
-
-.activity-time {
-    color: var(--light-text);
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-
-.activity-placeholder {
-    padding: 20px 0;
-    text-align: center;
-    color: var(--light-text);
+.contribution-graph {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Contact Section */
