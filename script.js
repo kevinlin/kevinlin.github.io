@@ -1,3 +1,37 @@
+// Theme toggle functionality
+function initThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Check for saved theme preference or use the system preference
+    const currentTheme = localStorage.getItem('theme') || 
+                        (prefersDarkScheme.matches ? 'dark' : 'light');
+    
+    // Apply the theme on initial load
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    
+    // Toggle theme when button is clicked
+    themeToggle.addEventListener('click', function() {
+        let theme;
+        
+        // If the current theme is dark, switch to light
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            document.documentElement.removeAttribute('data-theme');
+            theme = 'light';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            theme = 'dark';
+        }
+        
+        // Save the preference
+        localStorage.setItem('theme', theme);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -38,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize the photo slider
     initPhotoSlider();
+    
+    // Initialize theme toggle
+    initThemeToggle();
 });
 
 function initPhotoSlider() {

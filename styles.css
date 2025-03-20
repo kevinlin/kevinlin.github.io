@@ -1,5 +1,6 @@
 /* Global Styles */
 :root {
+    /* Light Theme (Default) */
     --primary-color: #0063a3; /* Zuhlke blue */
     --secondary-color: #333333;
     --accent-color: #ff5a5f;
@@ -10,6 +11,19 @@
     --border-color: #e6e6e6;
     --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     --transition: all 0.3s ease;
+}
+
+[data-theme="dark"] {
+    /* Dark Theme */
+    --primary-color: #4389b9; /* Lighter Zuhlke blue */
+    --secondary-color: #f8f9fa;
+    --accent-color: #ff8085;
+    --text-color: #f8f9fa;
+    --light-text: #cccccc;
+    --background-color: #121212;
+    --section-bg: #1e1e1e;
+    --border-color: #3a3a3a;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -173,7 +187,7 @@ header::before {
     margin-top: 30px;
 }
 
-.social-links a {
+.social-links a, .social-links button {
     color: var(--primary-color);
     font-size: 1.4rem;
     transition: var(--transition);
@@ -184,12 +198,32 @@ header::before {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    cursor: pointer;
 }
 
-.social-links a:hover {
+.social-links a:hover, .social-links button:hover {
     transform: translateY(-5px);
     background-color: var(--primary-color);
     color: white;
+}
+
+/* Theme Toggle Styles */
+#theme-toggle {
+    position: relative;
+    overflow: hidden;
+}
+
+#light-icon {
+    display: none;
+}
+
+[data-theme="dark"] #dark-icon {
+    display: none;
+}
+
+[data-theme="dark"] #light-icon {
+    display: inline-block;
 }
 
 /* About Section */
