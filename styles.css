@@ -239,6 +239,34 @@ header::before {
     color: var(--light-text);
 }
 
+.resume-btn-container {
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.resume-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 5px 15px rgba(0, 99, 163, 0.2);
+}
+
+.resume-btn:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 99, 163, 0.3);
+}
+
+.resume-btn .fas {
+    margin-right: 10px;
+}
+
 /* Skills Section */
 .skills {
     padding: 100px 0;
