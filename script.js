@@ -177,108 +177,149 @@ function initPhotoSlider() {
     const prevButton = document.querySelector('.prev-button');
     const nextButton = document.querySelector('.next-button');
     
-    // Sample photo data - replace with your actual Flickr photos later
-    const photos = [
-        {
-            url: 'https://source.unsplash.com/random/1200x800/?singapore',
-            title: 'Singapore Skyline',
-            description: 'The beautiful skyline of Singapore captured during sunset'
-        },
-        {
-            url: 'https://source.unsplash.com/random/1200x800/?travel',
-            title: 'Travel Adventures',
-            description: 'Exploring new places and capturing memories'
-        },
-        {
-            url: 'https://source.unsplash.com/random/1200x800/?nature',
-            title: 'Natural Beauty',
-            description: 'The stunning colors and patterns found in nature'
-        },
-        {
-            url: 'https://source.unsplash.com/random/1200x800/?architecture',
-            title: 'Urban Architecture',
-            description: 'Modern and traditional architectural marvels'
-        },
-        {
-            url: 'https://source.unsplash.com/random/1200x800/?portrait',
-            title: 'Portrait Photography',
-            description: 'Capturing the essence and emotions of people'
-        }
-    ];
-    
     let currentSlide = 0;
+    let photos = [];
     
-    // Create slides and dots
-    photos.forEach((photo, index) => {
-        // Create slide
-        const slide = document.createElement('div');
-        slide.className = 'photo-slide';
-        slide.style.backgroundImage = `url(${photo.url})`;
-        
-        const description = document.createElement('div');
-        description.className = 'photo-description';
-        description.innerHTML = `
-            <h3>${photo.title}</h3>
-            <p>${photo.description}</p>
-        `;
-        
-        slide.appendChild(description);
-        photoSlider.appendChild(slide);
-        
-        // Create dot
-        const dot = document.createElement('div');
-        dot.className = 'slider-dot';
-        if (index === 0) dot.classList.add('active');
-        
-        dot.addEventListener('click', () => {
-            goToSlide(index);
-        });
-        
-        sliderDots.appendChild(dot);
-    });
+    // Flickr API configuration
+    const FLICKR_USER_ID = '91923312@N00'; // Your Flickr user ID (you may need to find this)
+    const FLICKR_API_KEY = '2883b23b15ab0136845cb7007ef2f2ec'; // You'll need to get this from Flickr
     
-    // Set initial position
-    updateSliderPosition();
-    
-    // Add event listeners for buttons
-    prevButton.addEventListener('click', previousSlide);
-    nextButton.addEventListener('click', nextSlide);
-    
-    // Add keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') previousSlide();
-        if (e.key === 'ArrowRight') nextSlide();
-    });
-    
-    // Add touch swipe support
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    photoSlider.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-    
-    photoSlider.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-    
-    function handleSwipe() {
-        if (touchEndX < touchStartX - 50) nextSlide();
-        if (touchEndX > touchStartX + 50) previousSlide();
+    // Function to load photos from Flickr with randomization
+    async function loadFlickrPhotos() {
+        try {
+            // First, get the total number of photos to calculate random page
+            const totalResponse = await fetch(`https://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=${FLICKR_API_KEY}&user_id=${FLICKR_USER_ID}&format=json&nojsoncallback=1&per_page=1`);
+            
+            if (!totalResponse.ok) {
+                throw new Error('Flickr API request failed');
+            }
+            
+            const totalData = await totalResponse.json();
+            
+            if (totalData.stat !== 'ok' || totalData.photos.total === 0) {
+                throw new Error('No public photos found');
+            }
+            
+            const totalPhotos = parseInt(totalData.photos.total);
+            const photosPerPage = 20;
+            const maxPages = Math.ceil(totalPhotos / photosPerPage);
+            
+            // Generate a random page number
+            const randomPage = Math.floor(Math.random() * maxPages) + 1;
+            
+            // Fetch photos from the random page
+            const response = await fetch(`https://api.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=${FLICKR_API_KEY}&user_id=${FLICKR_USER_ID}&format=json&nojsoncallback=1&per_page=${photosPerPage}&page=${randomPage}&extras=url_l,description`);
+            
+            if (!response.ok) {
+                throw new Error('Flickr API request failed');
+            }
+            
+            const data = await response.json();
+            
+            if (data.stat === 'ok' && data.photos.photo.length > 0) {
+                // Shuffle the photos for additional randomization
+                const shuffledPhotos = data.photos.photo.sort(() => Math.random() - 0.5);
+                
+                return shuffledPhotos.map(photo => ({
+                    url: photo.url_l || `https://live.staticflickr.com/${photo.server}/${photo.id}_${photo.secret}_b.jpg`,
+                    title: photo.title,
+                    description: photo.description._content || ''
+                }));
+            } else {
+                throw new Error('No photos found on selected page');
+            }
+        } catch (error) {
+            console.log('Flickr photos not available:', error.message);
+            return [];
+        }
     }
     
-    // Auto advance slides
-    let slideInterval = setInterval(nextSlide, 5000);
-    
-    // Pause auto-advance on hover
-    photoSlider.addEventListener('mouseenter', () => {
-        clearInterval(slideInterval);
-    });
-    
-    photoSlider.addEventListener('mouseleave', () => {
-        slideInterval = setInterval(nextSlide, 5000);
-    });
+    // Initialize the slider
+    async function initializeSlider() {
+        // Load randomized Flickr photos
+        photos = await loadFlickrPhotos();
+        
+        // If no photos are available, hide the photography section
+        if (photos.length === 0) {
+            const photographySection = document.querySelector('.photography');
+            if (photographySection) {
+                photographySection.style.display = 'none';
+            }
+            return;
+        }
+        
+        // Create slides and dots
+        photos.forEach((photo, index) => {
+            // Create slide
+            const slide = document.createElement('div');
+            slide.className = 'photo-slide';
+            slide.style.backgroundImage = `url(${photo.url})`;
+            
+            // Only add description if it exists and is not empty
+            if (photo.description && photo.description.trim() !== '') {
+                const description = document.createElement('div');
+                description.className = 'photo-description';
+                description.innerHTML = `<p>${photo.description}</p>`;
+                slide.appendChild(description);
+            }
+            
+            photoSlider.appendChild(slide);
+            
+            // Create dot
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot';
+            if (index === 0) dot.classList.add('active');
+            
+            dot.addEventListener('click', () => {
+                goToSlide(index);
+            });
+            
+            sliderDots.appendChild(dot);
+        });
+        
+        // Set initial position
+        updateSliderPosition();
+        
+        // Add event listeners for buttons
+        prevButton.addEventListener('click', previousSlide);
+        nextButton.addEventListener('click', nextSlide);
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousSlide();
+            if (e.key === 'ArrowRight') nextSlide();
+        });
+        
+        // Add touch swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        photoSlider.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        photoSlider.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextSlide();
+            if (touchEndX > touchStartX + 50) previousSlide();
+        }
+        
+        // Auto advance slides
+        let slideInterval = setInterval(nextSlide, 5000);
+        
+        // Pause auto-advance on hover
+        photoSlider.addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+        });
+        
+        photoSlider.addEventListener('mouseleave', () => {
+            slideInterval = setInterval(nextSlide, 5000);
+        });
+    }
     
     function previousSlide() {
         currentSlide--;
@@ -313,4 +354,7 @@ function initPhotoSlider() {
             }
         });
     }
+    
+    // Start the initialization
+    initializeSlider();
 }
