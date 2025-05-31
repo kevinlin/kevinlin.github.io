@@ -16,26 +16,51 @@
     <meta name="theme-color" content="#0063a3">
 </head>
 <body>
-    <header>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link" aria-label="Skip to main content">Skip to main content</a>
+    
+    <!-- Navigation Menu -->
+    <nav class="main-nav" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="#home" aria-label="Kevin Lin - Home">Kevin Lin</a>
+            </div>
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            <ul class="nav-menu" role="menubar">
+                <li role="none"><a href="#about" role="menuitem">About</a></li>
+                <li role="none"><a href="#skills" role="menuitem">Skills</a></li>
+                <li role="none"><a href="#projects" role="menuitem">Projects</a></li>
+                <li role="none"><a href="#github-activity" role="menuitem">GitHub</a></li>
+                <li role="none"><a href="#photography" role="menuitem">Photography</a></li>
+                <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header id="home">
         <div class="container">
             <div class="profile-header">
                 <div class="profile-image">
-                    <img src="profile-photo.jpg" alt="Kevin Lin" id="profile-img">
+                    <img src="profile-photo.jpg" alt="Kevin Lin - Professional headshot photo" id="profile-img">
                 </div>
                 <div class="profile-info">
                     <h1>Kevin Lin</h1>
                     <p class="tagline">Software Developer</p>
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Singapore</p>
+                    <p class="location"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Singapore</p>
                     <div class="social-links">
-                        <a href="https://github.com/kevinlin" target="_blank" title="GitHub Profile">
-                            <i class="fab fa-github"></i>
+                        <a href="https://github.com/kevinlin" target="_blank" title="GitHub Profile" aria-label="Visit Kevin's GitHub profile">
+                            <i class="fab fa-github" aria-hidden="true"></i>
                         </a>
-                        <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" title="LinkedIn Profile">
-                            <i class="fab fa-linkedin"></i>
+                        <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" title="LinkedIn Profile" aria-label="Visit Kevin's LinkedIn profile">
+                            <i class="fab fa-linkedin" aria-hidden="true"></i>
                         </a>
-                        <button id="theme-toggle" title="Toggle dark/light mode">
-                            <i class="fas fa-moon" id="dark-icon"></i>
-                            <i class="fas fa-sun" id="light-icon"></i>
+                        <button id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle between dark and light theme">
+                            <i class="fas fa-moon" id="dark-icon" aria-hidden="true"></i>
+                            <i class="fas fa-sun" id="light-icon" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -43,325 +68,355 @@
         </div>
     </header>
 
-    <section class="about">
-        <div class="container">
-            <h2>About Me</h2>
-            <p>
-                I'm a passionate software developer with expertise in web technologies and application development.
-                Based in Singapore, I focus on creating efficient, scalable, and user-friendly applications that solve real-world problems.
-            </p>
-            <p>
-                With a strong foundation in both frontend and backend technologies, I enjoy building comprehensive solutions
-                that deliver exceptional user experiences while maintaining robust and maintainable codebases.
-            </p>
-            <div class="resume-btn-container">
-                <a href="resume.pdf" class="resume-btn" download>
-                    <i class="fas fa-download"></i> Download Resume
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section class="skills">
-        <div class="container">
-            <h2>Technical Skills</h2>
-            <div class="skill-categories">
-                <div class="skill-category">
-                    <h3>Frontend Development</h3>
-                    <div class="skill-bars">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Angular Framework</span>
-                                <span class="skill-percentage">90%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">TypeScript/JavaScript</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Responsive Design</span>
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 80%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">HTML5/CSS3/SASS</span>
-                                <span class="skill-percentage">95%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 95%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">UI/UX Implementation</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="skill-category">
-                    <h3>Backend Development</h3>
-                    <div class="skill-bars">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Spring Boot</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Node.js</span>
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 80%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">RESTful API Design</span>
-                                <span class="skill-percentage">90%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">WebSockets</span>
-                                <span class="skill-percentage">75%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 75%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Database Management</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="skill-category">
-                    <h3>Tools & Practices</h3>
-                    <div class="skill-bars">
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Git Version Control</span>
-                                <span class="skill-percentage">95%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 95%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">CI/CD Pipelines</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Agile Development</span>
-                                <span class="skill-percentage">90%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 90%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Test-Driven Development</span>
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 80%;"></div>
-                            </div>
-                        </div>
-                        <div class="skill-item">
-                            <div class="skill-info">
-                                <span class="skill-name">Performance Optimization</span>
-                                <span class="skill-percentage">85%</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85%;"></div>
-                            </div>
-                        </div>
-                    </div>
+    <main id="main-content">
+        <section class="about" id="about">
+            <div class="container">
+                <h2>About Me</h2>
+                <p>
+                    I'm a passionate software developer with expertise in web technologies and application development.
+                    Based in Singapore, I focus on creating efficient, scalable, and user-friendly applications that solve real-world problems.
+                </p>
+                <p>
+                    With a strong foundation in both frontend and backend technologies, I enjoy building comprehensive solutions
+                    that deliver exceptional user experiences while maintaining robust and maintainable codebases.
+                </p>
+                <div class="resume-btn-container">
+                    <a href="resume.pdf" class="resume-btn" download aria-label="Download Kevin Lin's resume as PDF">
+                        <i class="fas fa-download" aria-hidden="true"></i> Download Resume
+                    </a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="projects">
-        <div class="container">
-            <h2>Featured Projects</h2>
-            <div class="project-grid">
-                <div class="project-card">
-                    <div class="project-card-content">
-                        <h3>Angular Toastr</h3>
-                        <p>Bootstrap styled notification manager for Angular applications. Provides an easy way to display toast notifications in your Angular projects.</p>
-                        <p class="tech-stack">TypeScript</p>
-                        <div class="project-links">
-                            <a href="https://github.com/kevinlin/angular-toastr" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> View Project
-                            </a>
+        <section class="skills" id="skills">
+            <div class="container">
+                <h2>Technical Skills</h2>
+                <div class="skill-categories">
+                    <div class="skill-category">
+                        <h3>Frontend Development</h3>
+                        <div class="skill-bars">
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Angular Framework</span>
+                                    <span class="skill-percentage">90%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">TypeScript/JavaScript</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Responsive Design</span>
+                                    <span class="skill-percentage">80%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">HTML5/CSS3/SASS</span>
+                                    <span class="skill-percentage">95%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 95%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">UI/UX Implementation</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-card-content">
-                        <h3>Handsontable Demo</h3>
-                        <p>A proof of concept implementation using Handsontable for Base Metal order screen. Demonstrates advanced data grid capabilities with Excel-like features.</p>
-                        <p class="tech-stack">TypeScript</p>
-                        <div class="project-links">
-                            <a href="https://github.com/kevinlin/handsontable-demo" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> View Project
-                            </a>
+                    <div class="skill-category">
+                        <h3>Backend Development</h3>
+                        <div class="skill-bars">
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Spring Boot</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Node.js</span>
+                                    <span class="skill-percentage">80%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">RESTful API Design</span>
+                                    <span class="skill-percentage">90%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">WebSockets</span>
+                                    <span class="skill-percentage">75%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Database Management</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-card-content">
-                        <h3>STOMP Chat Application</h3>
-                        <p>A real-time chat application using WebSockets with Spring Boot backend and TypeScript frontend. Features include real-time messaging, user presence, and message history.</p>
-                        <p class="tech-stack">Spring Boot, TypeScript, WebSockets</p>
-                        <div class="project-links">
-                            <a href="https://github.com/kevinlin/springBootStompChatServer" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Backend
-                            </a>
-                            <a href="https://github.com/kevinlin/stompChatUI" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Frontend
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-card-content">
-                        <h3>Twitter Live Wall</h3>
-                        <p>A real-time Twitter feed display application that shows tweets based on hashtags or user accounts. Perfect for events, conferences, and marketing campaigns.</p>
-                        <p class="tech-stack">TypeScript, JavaScript</p>
-                        <div class="project-links">
-                            <a href="https://github.com/kevinlin/twitter-live-wall-client" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Frontend
-                            </a>
-                            <a href="https://github.com/kevinlin/twitter-live-wall-server" target="_blank" class="project-link">
-                                <i class="fab fa-github"></i> Backend
-                            </a>
+                    <div class="skill-category">
+                        <h3>Tools & Practices</h3>
+                        <div class="skill-bars">
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Git Version Control</span>
+                                    <span class="skill-percentage">95%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 95%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">CI/CD Pipelines</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Agile Development</span>
+                                    <span class="skill-percentage">90%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Test-Driven Development</span>
+                                    <span class="skill-percentage">80%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Performance Optimization</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="github-activity">
-        <div class="container">
-            <h2>GitHub Activity</h2>
-            <p>Check out my recent contributions and activity on GitHub.</p>
-            
-            <div class="github-embeds">
-                <!-- GitHub Profile Card -->
-                <div class="github-embed-item profile-card">
-                    <div class="embed-container">
-                        <iframe src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=kevinlin&theme=default" frameborder="0" scrolling="no" width="100%" height="150"></iframe>
+        <section class="projects" id="projects">
+            <div class="container">
+                <h2>Featured Projects</h2>
+                <div class="project-grid">
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>Angular Toastr</h3>
+                            <p>A comprehensive notification library for Angular applications that provides Bootstrap-styled toast notifications. Features include customizable positioning, animation effects, timeout controls, and multiple notification types (success, error, warning, info).</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">TypeScript</span>
+                                <span class="tech-badge">Angular</span>
+                                <span class="tech-badge">Bootstrap</span>
+                                <span class="tech-badge">CSS3</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/angular-toastr" target="_blank" class="project-link" aria-label="View Angular Toastr project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                </a>
+                                <a href="#" class="project-link demo-link" aria-label="View Angular Toastr live demo">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>Handsontable Demo</h3>
+                            <p>A sophisticated proof of concept for a Base Metal order management system using Handsontable. Demonstrates advanced data grid capabilities including Excel-like editing, formula support, data validation, and real-time collaboration features.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">TypeScript</span>
+                                <span class="tech-badge">Handsontable</span>
+                                <span class="tech-badge">JavaScript</span>
+                                <span class="tech-badge">HTML5</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/handsontable-demo" target="_blank" class="project-link" aria-label="View Handsontable Demo project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                </a>
+                                <a href="#" class="project-link demo-link" aria-label="View Handsontable Demo live demo">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Demo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>STOMP Chat Application</h3>
+                            <p>A full-stack real-time chat application built with WebSocket technology. Features include instant messaging, user presence indicators, message history persistence, typing indicators, and room-based conversations. Demonstrates modern real-time communication patterns.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">Spring Boot</span>
+                                <span class="tech-badge">TypeScript</span>
+                                <span class="tech-badge">WebSockets</span>
+                                <span class="tech-badge">STOMP</span>
+                                <span class="tech-badge">Java</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/springBootStompChatServer" target="_blank" class="project-link" aria-label="View STOMP Chat backend project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> Backend
+                                </a>
+                                <a href="https://github.com/kevinlin/stompChatUI" target="_blank" class="project-link" aria-label="View STOMP Chat frontend project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> Frontend
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>Twitter Live Wall</h3>
+                            <p>An interactive social media display application that aggregates and displays real-time Twitter feeds based on hashtags or user accounts. Perfect for events, conferences, and marketing campaigns with features like content moderation, custom styling, and responsive design.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">TypeScript</span>
+                                <span class="tech-badge">JavaScript</span>
+                                <span class="tech-badge">Twitter API</span>
+                                <span class="tech-badge">Node.js</span>
+                                <span class="tech-badge">CSS3</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/twitter-live-wall-client" target="_blank" class="project-link" aria-label="View Twitter Live Wall frontend project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> Frontend
+                                </a>
+                                <a href="https://github.com/kevinlin/twitter-live-wall-server" target="_blank" class="project-link" aria-label="View Twitter Live Wall backend project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> Backend
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="github-activity" id="github-activity">
+            <div class="container">
+                <h2>GitHub Activity</h2>
+                <p>Check out my recent contributions and activity on GitHub.</p>
+                
+                <div class="github-embeds">
+                    <!-- GitHub Profile Card -->
+                    <div class="github-embed-item profile-card">
+                        <div class="embed-container">
+                            <iframe src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=kevinlin&theme=default" frameborder="0" scrolling="no" width="100%" height="150" title="GitHub profile summary for Kevin Lin" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- GitHub Stats -->
+                    <div class="github-embed-item stats-card">
+                        <div class="embed-container">
+                            <iframe src="https://github-readme-stats.vercel.app/api?username=kevinlin&show_icons=true&hide_border=true&count_private=true" frameborder="0" scrolling="no" width="100%" height="160" title="GitHub statistics for Kevin Lin" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Languages -->
+                    <div class="github-embed-item languages-card">
+                        <div class="embed-container">
+                            <iframe src="https://github-readme-stats.vercel.app/api/top-langs/?username=kevinlin&layout=compact&hide_border=true" frameborder="0" scrolling="no" width="100%" height="160" title="Top programming languages for Kevin Lin" loading="lazy"></iframe>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- GitHub Stats -->
-                <div class="github-embed-item stats-card">
-                    <div class="embed-container">
-                        <iframe src="https://github-readme-stats.vercel.app/api?username=kevinlin&show_icons=true&hide_border=true&count_private=true" frameborder="0" scrolling="no" width="100%" height="160"></iframe>
+                <!-- GitHub Contribution Calendar -->
+                <div class="github-calendar">
+                    <h3>Contribution Calendar</h3>
+                    <div class="calendar-container">
+                        <img src="https://ghchart.rshah.org/kevinlin" alt="GitHub contribution graph showing Kevin Lin's coding activity over the past year" class="contribution-graph" loading="lazy">
                     </div>
                 </div>
                 
-                <!-- Top Languages -->
-                <div class="github-embed-item languages-card">
-                    <div class="embed-container">
-                        <iframe src="https://github-readme-stats.vercel.app/api/top-langs/?username=kevinlin&layout=compact&hide_border=true" frameborder="0" scrolling="no" width="100%" height="160"></iframe>
+                <!-- GitHub Activity Link -->
+                <div class="github-profile-link">
+                    <a href="https://github.com/kevinlin" target="_blank" class="contact-button" aria-label="Visit Kevin's complete GitHub profile">
+                        <i class="fab fa-github" aria-hidden="true"></i> View Full GitHub Profile
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Photography Section -->
+        <section class="photography" id="photography">
+            <div class="container">
+                <h2>Photography</h2>
+                <p>A collection of my favorite photographs from my travels</p>
+                <div class="photo-slider-container">
+                    <div class="photo-slider" role="region" aria-label="Photography slideshow">
+                        <!-- Photos will be added here via JavaScript -->
+                    </div>
+                    <button class="slider-nav prev-button" aria-label="View previous photo"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                    <button class="slider-nav next-button" aria-label="View next photo"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                    <div class="slider-dots" role="tablist" aria-label="Photo navigation">
+                        <!-- Dots will be added here via JavaScript -->
                     </div>
                 </div>
-            </div>
-            
-            <!-- GitHub Contribution Calendar -->
-            <div class="github-calendar">
-                <h3>Contribution Calendar</h3>
-                <div class="calendar-container">
-                    <img src="https://ghchart.rshah.org/kevinlin" alt="GitHub Contribution Graph" class="contribution-graph">
+                <div class="photo-source">
+                    <p>View more of my photography on <a href="https://www.flickr.com/photos/angkor" target="_blank" rel="noopener noreferrer" aria-label="Visit Kevin's Flickr photography portfolio">Flickr</a></p>
                 </div>
             </div>
-            
-            <!-- GitHub Activity Link -->
-            <div class="github-profile-link">
-                <a href="https://github.com/kevinlin" target="_blank" class="contact-button">
-                    <i class="fab fa-github"></i> View Full GitHub Profile
-                </a>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Photography Section -->
-    <section class="photography">
-        <div class="container">
-            <h2>Photography</h2>
-            <p>A collection of my favorite photographs from my travels</p>
-            <div class="photo-slider-container">
-                <div class="photo-slider">
-                    <!-- Photos will be added here via JavaScript -->
-                </div>
-                <button class="slider-nav prev-button"><i class="fas fa-chevron-left"></i></button>
-                <button class="slider-nav next-button"><i class="fas fa-chevron-right"></i></button>
-                <div class="slider-dots">
-                    <!-- Dots will be added here via JavaScript -->
+        <section class="contact" id="contact">
+            <div class="container">
+                <h2>Get In Touch</h2>
+                <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out to me through any of the platforms below.</p>
+                <div class="contact-links">
+                    <a href="https://github.com/kevinlin" target="_blank" class="contact-button" aria-label="Connect with Kevin on GitHub">
+                        <i class="fab fa-github" aria-hidden="true"></i> Connect on GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" class="contact-button" aria-label="Connect with Kevin on LinkedIn">
+                        <i class="fab fa-linkedin" aria-hidden="true"></i> Connect on LinkedIn
+                    </a>
                 </div>
             </div>
-            <div class="photo-source">
-                <p>View more of my photography on <a href="https://www.flickr.com/photos/angkor" target="_blank" rel="noopener noreferrer">Flickr</a></p>
-            </div>
-        </div>
-    </section>
-
-    <section class="contact">
-        <div class="container">
-            <h2>Get In Touch</h2>
-            <p>I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Feel free to reach out to me through any of the platforms below.</p>
-            <div class="contact-links">
-                <a href="https://github.com/kevinlin" target="_blank" class="contact-button">
-                    <i class="fab fa-github"></i> Connect on GitHub
-                </a>
-                <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" class="contact-button">
-                    <i class="fab fa-linkedin"></i> Connect on LinkedIn
-                </a>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <footer>
         <div class="container">
