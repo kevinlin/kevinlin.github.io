@@ -316,6 +316,85 @@ header::before {
     margin-right: 10px;
 }
 
+/* Professional Highlights Styles */
+.professional-highlights {
+    margin-top: 40px;
+    padding: 30px;
+    background-color: var(--section-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.professional-highlights h3 {
+    color: var(--primary-color);
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 20px;
+    background-color: var(--background-color);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.highlight-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+.highlight-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.highlight-content h4 {
+    color: var(--text-color);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.highlight-content p {
+    color: var(--light-text);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.highlight-content strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .professional-highlights {
+        padding: 20px;
+        margin-top: 30px;
+    }
+    
+    .highlights-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .highlight-item {
+        padding: 15px;
+    }
+}
+
 /* Skills Section */
 .skills {
     padding: 100px 0;
