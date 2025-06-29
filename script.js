@@ -169,7 +169,215 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize theme toggle
     initThemeToggle();
+    
+    // Load featured projects dynamically
+    loadFeaturedProjects();
 });
+
+// Dynamic project loading functionality
+async function loadFeaturedProjects() {
+    const projectGrid = document.querySelector('.project-grid');
+    
+    if (!projectGrid) {
+        console.warn('Project grid not found');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        projectGrid.innerHTML = '<div class="loading-projects">Loading featured projects...</div>';
+        
+        // Fetch featured repositories from GitHub API
+        const response = await fetch('https://api.github.com/search/repositories?q=user:kevinlin+topic:featured');
+        
+        if (!response.ok) {
+            throw new Error(`GitHub API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.items || data.items.length === 0) {
+            projectGrid.innerHTML = '<div class="no-projects">No featured projects found.</div>';
+            return;
+        }
+        
+        // Sort repositories alphabetically by name
+        const sortedRepos = data.items.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Generate project cards HTML
+        const projectCardsHTML = sortedRepos.map(repo => generateProjectCard(repo)).join('');
+        
+        // Update the project grid
+        projectGrid.innerHTML = projectCardsHTML;
+        
+        // Re-run animations for new elements
+        setTimeout(() => {
+            const newElements = document.querySelectorAll('.project-card');
+            newElements.forEach(element => {
+                element.classList.add('visible');
+            });
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error loading featured projects:', error);
+        projectGrid.innerHTML = '<div class="error-projects">Failed to load projects. Please try again later.</div>';
+    }
+}
+
+function generateProjectCard(repo) {
+    // Generate project description based on repository data
+    const description = getProjectDescription(repo);
+    
+    // Generate tech badges based on repository language and topics
+    const techBadges = generateTechBadges(repo);
+    
+    // Generate project links (Live Site if homepage exists, GitHub link)
+    const projectLinks = generateProjectLinks(repo);
+    
+    return `
+        <div class="project-card">
+            <div class="project-card-content">
+                <h3><a href="${repo.html_url}" target="_blank" class="project-title-link" aria-label="View ${formatProjectName(repo.name)} project on GitHub">${formatProjectName(repo.name)}</a></h3>
+                <p>${description}</p>
+                <div class="tech-badges">
+                    ${techBadges}
+                </div>
+                <div class="project-links">
+                    ${projectLinks}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function formatProjectName(name) {
+    // Convert repository name to a more readable format
+    let formattedName = name
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    
+    // Apply all CAPS for specific terms
+    formattedName = formattedName.replace(/\bUi\b/g, 'UI');
+    formattedName = formattedName.replace(/\bAi Sdlc\b/g, 'AI SDLC');
+    
+    return formattedName;
+}
+
+function getProjectDescription(repo) {
+    // Use repository description if available, otherwise generate based on name/language
+    if (repo.description && repo.description.trim()) {
+        return repo.description;
+    }
+    
+    // Generate description based on repository characteristics
+    const name = repo.name.toLowerCase();
+    const language = repo.language || 'Code';
+    
+    if (name.includes('ai') || name.includes('agent')) {
+        return `An AI-powered application built with ${language}, showcasing advanced artificial intelligence integration and automation capabilities.`;
+    } else if (name.includes('ui') || name.includes('frontend')) {
+        return `A modern ${language}-based user interface application providing an intuitive and responsive user experience.`;
+    } else if (name.includes('api') || name.includes('backend')) {
+        return `A robust ${language} backend application providing scalable API services and data management capabilities.`;
+    } else if (name.includes('workshop') || name.includes('demo')) {
+        return `An educational ${language} project designed for learning and demonstration purposes, showcasing best practices and implementation patterns.`;
+    } else if (name.includes('toolkit') || name.includes('tool')) {
+        return `A comprehensive ${language} toolkit providing practical utilities and resources for developers and technical professionals.`;
+    } else if (name.includes('extension')) {
+        return `A browser extension built with ${language}, enhancing web browsing experience with additional functionality and features.`;
+    } else if (name.includes('map') || name.includes('visualization')) {
+        return `An interactive ${language} application featuring data visualization and mapping capabilities for enhanced user insights.`;
+    } else {
+        return `A ${language} project demonstrating modern development practices and innovative solutions for technical challenges.`;
+    }
+}
+
+function generateTechBadges(repo) {
+    const badges = [];
+    
+    // Add primary language
+    if (repo.language) {
+        badges.push(repo.language);
+    }
+    
+    // Add badges based on repository name and characteristics
+    const name = repo.name.toLowerCase();
+    
+    if (name.includes('ai') || name.includes('rag') || name.includes('llm')) {
+        badges.push('AI/ML');
+    }
+    if (name.includes('agent')) {
+        badges.push('AI Agent');
+    }
+    if (name.includes('ui') || name.includes('frontend')) {
+        badges.push('Frontend');
+    }
+    if (name.includes('api') || name.includes('backend')) {
+        badges.push('Backend');
+    }
+    if (name.includes('extension')) {
+        badges.push('Browser Extension');
+    }
+    if (name.includes('terraform') || name.includes('infrastructure')) {
+        badges.push('Infrastructure as Code');
+    }
+    if (name.includes('auth')) {
+        badges.push('Authentication');
+    }
+    if (name.includes('workshop') || name.includes('demo')) {
+        badges.push('Educational');
+    }
+    if (name.includes('toolkit') || name.includes('tool')) {
+        badges.push('Developer Tools');
+    }
+    if (name.includes('presentation')) {
+        badges.push('Presentations');
+    }
+    if (name.includes('map') || name.includes('earthquake')) {
+        badges.push('Data Visualization');
+    }
+    if (name.includes('wiki') || name.includes('documentation')) {
+        badges.push('Documentation');
+    }
+    
+    // Add additional badges based on topics if available
+    if (repo.topics && repo.topics.length > 0) {
+        repo.topics.forEach(topic => {
+            if (topic !== 'featured' && !badges.some(badge => badge.toLowerCase().includes(topic.toLowerCase()))) {
+                badges.push(topic.charAt(0).toUpperCase() + topic.slice(1));
+            }
+        });
+    }
+    
+    // Limit to 4 badges for clean display
+    const displayBadges = badges.slice(0, 4);
+    
+    return displayBadges.map(badge => `<span class="tech-badge">${badge}</span>`).join('');
+}
+
+function generateProjectLinks(repo) {
+    const links = [];
+    
+    // Add Live Site link if homepage exists
+    if (repo.homepage && repo.homepage.trim()) {
+        links.push(`
+            <a href="${repo.homepage}" target="_blank" class="project-link" aria-label="View ${formatProjectName(repo.name)} live site">
+                <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
+            </a>
+        `);
+    }
+    
+    // Add GitHub link
+    const linkText = repo.homepage && repo.homepage.trim() ? 'View Code' : 'View Project';
+    links.push(`
+        <a href="${repo.html_url}" target="_blank" class="project-link" aria-label="View ${formatProjectName(repo.name)} project on GitHub">
+            <i class="fab fa-github" aria-hidden="true"></i> ${linkText}
+        </a>
+    `);
+    
+    return links.join('');
+}
 
 function initPhotoSlider() {
     const photoSlider = document.querySelector('.photo-slider');

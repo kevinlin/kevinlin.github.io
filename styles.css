@@ -633,6 +633,16 @@ header::before {
     font-size: 1.5rem;
 }
 
+.project-title-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.project-title-link:hover {
+    color: var(--accent-color);
+}
+
 .project-card p {
     color: var(--light-text);
     line-height: 1.6;
@@ -686,6 +696,41 @@ header::before {
     display: flex;
     gap: 20px;
     margin-top: auto;
+}
+
+/* Dynamic loading states */
+.loading-projects, .no-projects, .error-projects {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    grid-column: 1 / -1;
+}
+
+.loading-projects {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.loading-projects::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.error-projects {
+    color: #e74c3c;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* GitHub Activity Section */
