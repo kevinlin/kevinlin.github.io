@@ -32,7 +32,7 @@
             </button>
             <ul class="nav-menu" role="menubar">
                 <li role="none"><a href="#about" role="menuitem">About</a></li>
-                <li role="none"><a href="#skills" role="menuitem">Skills</a></li>
+                <li role="none"><a href="#skills" role="menuitem">Skills & Certifications</a></li>
                 <li role="none"><a href="#projects" role="menuitem">Projects</a></li>
                 <li role="none"><a href="#github-activity" role="menuitem">GitHub</a></li>
                 <li role="none"><a href="#photography" role="menuitem">Photography</a></li>
@@ -57,6 +57,9 @@
                         </a>
                         <a href="https://www.linkedin.com/in/kevinlinyun/" target="_blank" title="LinkedIn Profile" aria-label="Visit Kevin's LinkedIn profile">
                             <i class="fab fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://www.credly.com/users/kevin-lin.d2060ed2/badges#credly" target="_blank" title="Credly Profile" aria-label="Visit Kevin's Credly certifications profile">
+                            <i class="fas fa-certificate" aria-hidden="true"></i>
                         </a>
                         <button id="theme-toggle" title="Toggle dark/light mode" aria-label="Toggle between dark and light theme">
                             <i class="fas fa-moon" id="dark-icon" aria-hidden="true"></i>
@@ -91,7 +94,7 @@
 
         <section class="skills" id="skills">
             <div class="container">
-                <h2>Technical Skills</h2>
+                <h2>Skills & Certifications</h2>
                 <div class="skill-categories">
                     <div class="skill-category">
                         <h3>AI & Machine Learning</h3>
@@ -234,6 +237,100 @@
                             </div>
                         </div>
                     </div>
+                    <div class="skill-category">
+                        <h3>Cloud & DevOps</h3>
+                        <div class="skill-bars">
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Terraform (IaC)</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Auth0 Management</span>
+                                    <span class="skill-percentage">80%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">CI/CD Pipelines</span>
+                                    <span class="skill-percentage">88%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 88%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Cloud Security</span>
+                                    <span class="skill-percentage">85%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">AWS Cloud Platform</span>
+                                    <span class="skill-percentage">83%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 83%;"></div>
+                                </div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-info">
+                                    <span class="skill-name">Configuration Management</span>
+                                    <span class="skill-percentage">90%</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="certifications-section">
+                    <h3>Professional Certifications</h3>
+                    <p>Digital badges and certifications demonstrating expertise across cloud platforms, development practices, and emerging technologies.</p>
+                    
+                    <div class="certification-showcase">
+                        <div class="credly-profile-link">
+                            <a href="https://www.credly.com/users/kevin-lin.d2060ed2/badges#credly" target="_blank" class="certification-button" aria-label="View Kevin's complete Credly certification profile">
+                                <i class="fas fa-certificate" aria-hidden="true"></i> View All Certifications on Credly
+                            </a>
+                        </div>
+                        
+                        <div class="certification-highlights">
+                            <h4>Key Certification Areas</h4>
+                            <div class="cert-categories">
+                                <div class="cert-category">
+                                    <i class="fas fa-cloud" aria-hidden="true"></i>
+                                    <span>Cloud Platforms</span>
+                                </div>
+                                <div class="cert-category">
+                                    <i class="fas fa-code" aria-hidden="true"></i>
+                                    <span>Software Development</span>
+                                </div>
+                                <div class="cert-category">
+                                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                    <span>Security & Compliance</span>
+                                </div>
+                                <div class="cert-category">
+                                    <i class="fas fa-cogs" aria-hidden="true"></i>
+                                    <span>DevOps & Automation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -242,43 +339,6 @@
             <div class="container">
                 <h2>Featured Projects</h2>
                 <div class="project-grid">
-                    <div class="project-card">
-                        <div class="project-card-content">
-                            <h3>AI-SDLC Playbook</h3>
-                            <p>A comprehensive playbook providing guidance on best practices for integrating AI into the Software Development Lifecycle (SDLC), specifically tailored to enterprise needs and challenges. This resource helps teams adopt AI technologies effectively while maintaining quality and security standards.</p>
-                            <div class="tech-badges">
-                                <span class="tech-badge">AI Integration</span>
-                                <span class="tech-badge">SDLC</span>
-                                <span class="tech-badge">Best Practices</span>
-                                <span class="tech-badge">Enterprise</span>
-                            </div>
-                            <div class="project-links">
-                                <a href="https://kevinlin.github.io/ai-sdlc-playbook" target="_blank" class="project-link" aria-label="View AI-SDLC Playbook live site">
-                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
-                                </a>
-                                <a href="https://github.com/kevinlin/ai-sdlc-playbook" target="_blank" class="project-link" aria-label="View AI-SDLC Playbook project on GitHub">
-                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="project-card">
-                        <div class="project-card-content">
-                            <h3>DeepWiki Open</h3>
-                            <p>An AI-powered wiki generator for GitHub and GitLab repositories. This tool automatically creates comprehensive documentation by analyzing codebases and generating intelligent, contextual wiki content that helps teams maintain up-to-date project documentation.</p>
-                            <div class="tech-badges">
-                                <span class="tech-badge">TypeScript</span>
-                                <span class="tech-badge">AI Documentation</span>
-                                <span class="tech-badge">GitHub Integration</span>
-                                <span class="tech-badge">Wiki Generation</span>
-                            </div>
-                            <div class="project-links">
-                                <a href="https://github.com/kevinlin/deepwiki-open" target="_blank" class="project-link" aria-label="View DeepWiki Open project on GitHub">
-                                    <i class="fab fa-github" aria-hidden="true"></i> View Project
-                                </a>
-                            </div>
-                        </div>
-                    </div>
                     <div class="project-card">
                         <div class="project-card-content">
                             <h3>Agno Agent</h3>
@@ -315,16 +375,73 @@
                     </div>
                     <div class="project-card">
                         <div class="project-card-content">
-                            <h3>RAG Workshop</h3>
-                            <p>A template Retrieval-Augmented Generation (RAG) application designed for educational workshops. This project demonstrates how to build AI-powered applications that combine large language models with custom knowledge bases for enhanced, context-aware responses.</p>
+                            <h3>AI-SDLC Playbook</h3>
+                            <p>A comprehensive playbook providing guidance on best practices for integrating AI into the Software Development Lifecycle (SDLC), specifically tailored to enterprise needs and challenges. This resource helps teams adopt AI technologies effectively while maintaining quality and security standards.</p>
                             <div class="tech-badges">
-                                <span class="tech-badge">Python</span>
-                                <span class="tech-badge">RAG</span>
-                                <span class="tech-badge">LLM</span>
-                                <span class="tech-badge">AI Workshop</span>
+                                <span class="tech-badge">AI Integration</span>
+                                <span class="tech-badge">SDLC</span>
+                                <span class="tech-badge">Best Practices</span>
+                                <span class="tech-badge">Enterprise</span>
                             </div>
                             <div class="project-links">
-                                <a href="https://github.com/kevinlin/rag-workshop" target="_blank" class="project-link" aria-label="View RAG Workshop project on GitHub">
+                                <a href="https://kevinlin.github.io/ai-sdlc-playbook" target="_blank" class="project-link" aria-label="View AI-SDLC Playbook live site">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
+                                </a>
+                                <a href="https://github.com/kevinlin/ai-sdlc-playbook" target="_blank" class="project-link" aria-label="View AI-SDLC Playbook project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>Asia Pacific Earthquake Map</h3>
+                            <p>An interactive visualization tool displaying major earthquakes in the Asia Pacific region over the last 200 years, with earthquake belt overlays and filtering capabilities. Built using USGS Earthquake Catalog and ISC-GEM Global Instrumental Earthquake Catalogue data.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">JavaScript</span>
+                                <span class="tech-badge">Data Visualization</span>
+                                <span class="tech-badge">Interactive Maps</span>
+                                <span class="tech-badge">USGS API</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://kevinlin.github.io/earthquake-map/" target="_blank" class="project-link" aria-label="View Asia Pacific Earthquake Map live site">
+                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
+                                </a>
+                                <a href="https://github.com/kevinlin/earthquake-map" target="_blank" class="project-link" aria-label="View Asia Pacific Earthquake Map project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>Auth0 Configuration Demo</h3>
+                            <p>A comprehensive demonstration of managing Auth0 identity and access management configuration using Terraform Infrastructure as Code. Features multi-environment workspace management, encrypted secrets handling, and complete Auth0 resource provisioning including clients, connections, roles, and email templates.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">Terraform</span>
+                                <span class="tech-badge">Auth0</span>
+                                <span class="tech-badge">Infrastructure as Code</span>
+                                <span class="tech-badge">DevOps</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/auth0-configuration-demo" target="_blank" class="project-link" aria-label="View Auth0 Configuration Demo project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-card-content">
+                            <h3>DeepWiki Open</h3>
+                            <p>An AI-powered wiki generator for GitHub and GitLab repositories. This tool automatically creates comprehensive documentation by analyzing codebases and generating intelligent, contextual wiki content that helps teams maintain up-to-date project documentation.</p>
+                            <div class="tech-badges">
+                                <span class="tech-badge">TypeScript</span>
+                                <span class="tech-badge">AI Documentation</span>
+                                <span class="tech-badge">GitHub Integration</span>
+                                <span class="tech-badge">Wiki Generation</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="https://github.com/kevinlin/deepwiki-open" target="_blank" class="project-link" aria-label="View DeepWiki Open project on GitHub">
                                     <i class="fab fa-github" aria-hidden="true"></i> View Project
                                 </a>
                             </div>
@@ -352,20 +469,17 @@
                     </div>
                     <div class="project-card">
                         <div class="project-card-content">
-                            <h3>Asia Pacific Earthquake Map</h3>
-                            <p>An interactive visualization tool displaying major earthquakes in the Asia Pacific region over the last 200 years, with earthquake belt overlays and filtering capabilities. Built using USGS Earthquake Catalog and ISC-GEM Global Instrumental Earthquake Catalogue data.</p>
+                            <h3>RAG Workshop</h3>
+                            <p>A template Retrieval-Augmented Generation (RAG) application designed for educational workshops. This project demonstrates how to build AI-powered applications that combine large language models with custom knowledge bases for enhanced, context-aware responses.</p>
                             <div class="tech-badges">
-                                <span class="tech-badge">JavaScript</span>
-                                <span class="tech-badge">Data Visualization</span>
-                                <span class="tech-badge">Interactive Maps</span>
-                                <span class="tech-badge">USGS API</span>
+                                <span class="tech-badge">Python</span>
+                                <span class="tech-badge">RAG</span>
+                                <span class="tech-badge">LLM</span>
+                                <span class="tech-badge">AI Workshop</span>
                             </div>
                             <div class="project-links">
-                                <a href="https://kevinlin.github.io/earthquake-map/" target="_blank" class="project-link" aria-label="View Asia Pacific Earthquake Map live site">
-                                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> Live Site
-                                </a>
-                                <a href="https://github.com/kevinlin/earthquake-map" target="_blank" class="project-link" aria-label="View Asia Pacific Earthquake Map project on GitHub">
-                                    <i class="fab fa-github" aria-hidden="true"></i> View Code
+                                <a href="https://github.com/kevinlin/rag-workshop" target="_blank" class="project-link" aria-label="View RAG Workshop project on GitHub">
+                                    <i class="fab fa-github" aria-hidden="true"></i> View Project
                                 </a>
                             </div>
                         </div>
