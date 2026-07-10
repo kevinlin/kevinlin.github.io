@@ -139,39 +139,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Function to animate progress bars
-    const animateProgressBars = function() {
-        const progressBars = document.querySelectorAll('.progress-bar');
-        
-        progressBars.forEach(bar => {
-            const parent = bar.closest('.skill-item');
-            const percentage = parent.querySelector('.skill-percentage').innerText;
-            const valueWidth = percentage.replace('%', '');
-            const barPosition = bar.getBoundingClientRect().top;
-            const windowHeight = window.innerHeight;
-            
-            if (barPosition < windowHeight - 50) {
-                // Set width based on percentage value
-                bar.style.width = percentage;
-            }
-        });
-    };
-    
     // Add animation to elements when they come into view
     const animateOnScroll = function() {
-        const elements = document.querySelectorAll('.project-card, .skill-category, .github-embed-item, .photo-slide');
-        
+        const elements = document.querySelectorAll('.project-card, .github-embed-item, .photo-slide');
+
         elements.forEach(element => {
             const elementPosition = element.getBoundingClientRect().top;
             const windowHeight = window.innerHeight;
-            
+
             if (elementPosition < windowHeight - 100) {
                 element.classList.add('visible');
             }
         });
-        
-        // Also animate progress bars
-        animateProgressBars();
     };
     
     // Run animation check on scroll
@@ -182,9 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize the photo slider
     initPhotoSlider();
-    
+
     // Initialize theme toggle
     initThemeToggle();
+
+    // Build the interactive skills knowledge graph
+    initSkillsGraph();
 
     // Load featured projects dynamically
     loadFeaturedProjects();
@@ -193,6 +175,381 @@ document.addEventListener('DOMContentLoaded', function() {
     initResumeNudge();
     greetInConsole();
 });
+
+/* ============================================================
+   Skills knowledge graph (overdrive)
+   Progressive enhancement: reads the semantic domain list, then
+   builds an interactive SVG constellation on top. Five pinned
+   domain hubs; skill leaves settle around them via a tiny
+   dependency-free force solver. Hover/focus a hub to trace its
+   stack (coral on contact); drag any node to explore. Falls back
+   to the plain list on mobile, no-JS, and reduced-motion.
+   ============================================================ */
+function initSkillsGraph() {
+    const mount = document.querySelector('[data-skills-graph]');
+    if (!mount) return;
+
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isDesktop = () => window.matchMedia('(min-width: 768px)').matches;
+
+    // --- Read data from the semantic list (single source of truth) ---
+    const domainEls = Array.from(mount.querySelectorAll('.skills-domain'));
+    if (domainEls.length === 0) return;
+
+    const W = 1200;
+    const H = 640;
+    const cx = W / 2;
+    const cy = H / 2;
+    const rx = 350;
+    const ry = 198;
+
+    // Simulation constants (tuned for ~30 nodes; tight, legible clusters)
+    const CHARGE = 340;      // node repulsion
+    const LINK = 0.05;       // pull of a skill toward its hub
+    const DAMP = 0.82;       // velocity decay
+    const COLLIDE_PAD = 14;  // extra breathing room between pills
+    const EDGE_PAD = 34;     // keep nodes off the frame edge
+
+    let dragNode = null;     // set while a node is being dragged (referenced in tick)
+
+    const el = (tag, attrs) => {
+        const node = document.createElementNS(SVG_NS, tag);
+        if (attrs) for (const k in attrs) node.setAttribute(k, attrs[k]);
+        return node;
+    };
+    // Estimated pill dimensions before we can measure real text
+    const estWidth = (label, perChar, pad) => label.length * perChar + pad;
+
+    // --- Build node + edge model ---
+    const nodes = [];
+    const skills = [];
+    const edges = [];
+
+    domainEls.forEach((dEl, i) => {
+        const angle = -Math.PI / 2 + (i * 2 * Math.PI) / domainEls.length;
+        const key = dEl.getAttribute('data-domain') || String(i);
+        const hubLabel = dEl.getAttribute('data-label') ||
+            (dEl.querySelector('h3') ? dEl.querySelector('h3').textContent.trim() : key);
+        const hub = {
+            type: 'domain', key, label: hubLabel,
+            x: cx + rx * Math.cos(angle),
+            y: cy + ry * Math.sin(angle),
+            vx: 0, vy: 0, pinned: true,
+            hw: estWidth(hubLabel, 8.6, 40) / 2, hh: 21
+        };
+        hub.homeX = hub.x;
+        hub.homeY = hub.y;
+        nodes.push(hub);
+
+        const items = Array.from(dEl.querySelectorAll('li'));
+        const n = items.length;
+        items.forEach((li, j) => {
+            const label = li.textContent.trim();
+            const a = angle + ((j - (n - 1) / 2) * 0.55);
+            const skill = {
+                type: 'skill', key, label, hub,
+                x: hub.x + Math.cos(a) * 72,
+                y: hub.y + Math.sin(a) * 72,
+                vx: 0, vy: 0, pinned: false,
+                hw: estWidth(label, 7.1, 26) / 2, hh: 16
+            };
+            nodes.push(skill);
+            skills.push(skill);
+            edges.push({ skill, hub, key });
+        });
+    });
+
+    // Collision radius approximates a pill by its half-width (pills are wide)
+    const radius = (node) => node.hw;
+
+    // --- Force solver: one tick ---
+    function tick(alpha) {
+        for (let i = 0; i < nodes.length; i++) {
+            const a = nodes[i];
+            for (let k = i + 1; k < nodes.length; k++) {
+                const b = nodes[k];
+                let dx = a.x - b.x;
+                let dy = a.y - b.y;
+                let d2 = dx * dx + dy * dy;
+                if (d2 < 0.01) { dx = (i - k) * 0.5 + 0.3; dy = 0.4; d2 = dx * dx + dy * dy; }
+                const d = Math.sqrt(d2);
+                let f = CHARGE / d2;
+                const minDist = radius(a) + radius(b) + COLLIDE_PAD;
+                if (d < minDist) f += ((minDist - d) * 0.5) / d; // firm anti-overlap
+                const fx = dx * f;
+                const fy = dy * f;
+                if (!a.pinned) { a.vx += fx; a.vy += fy; }
+                if (!b.pinned) { b.vx -= fx; b.vy -= fy; }
+            }
+        }
+        for (let s = 0; s < skills.length; s++) {
+            const node = skills[s];
+            if (node === dragNode) continue;
+            node.vx += (node.hub.x - node.x) * LINK * alpha;
+            node.vy += (node.hub.y - node.y) * LINK * alpha;
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            if (node.pinned || node === dragNode) continue;
+            node.vx *= DAMP;
+            node.vy *= DAMP;
+            node.x += node.vx;
+            node.y += node.vy;
+            node.x = Math.max(node.hw + EDGE_PAD, Math.min(W - node.hw - EDGE_PAD, node.x));
+            node.y = Math.max(node.hh + EDGE_PAD, Math.min(H - node.hh - EDGE_PAD, node.y));
+        }
+    }
+
+    // Settle synchronously (no paint), then remember the resting layout
+    for (let t = 0; t < 520; t++) tick(1);
+    nodes.forEach(node => { node.sx = node.x; node.sy = node.y; });
+
+    // --- Render the SVG ---
+    const svg = el('svg', {
+        class: 'skills-canvas',
+        viewBox: `0 0 ${W} ${H}`,
+        role: 'group',
+        'aria-label': 'Interactive map of Kevin’s skills across five domains'
+    });
+
+    // Faint blueprint dot-grid
+    const defs = el('defs');
+    const pattern = el('pattern', {
+        id: 'sg-dots', width: 34, height: 34, patternUnits: 'userSpaceOnUse'
+    });
+    pattern.appendChild(el('circle', { cx: 2, cy: 2, r: 1.4, class: 'sg-grid' }));
+    defs.appendChild(pattern);
+    svg.appendChild(defs);
+    svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#sg-dots)' }));
+
+    const edgeLayer = el('g', { class: 'sg-edge-layer' });
+    const nodeLayer = el('g', { class: 'sg-node-layer' });
+    svg.appendChild(edgeLayer);
+    svg.appendChild(nodeLayer);
+
+    edges.forEach(edge => {
+        edge.line = el('line', { class: 'sg-edge' });
+        edgeLayer.appendChild(edge.line);
+    });
+
+    // Build a pill node; measure real text width when possible
+    function buildNode(node) {
+        const isDomain = node.type === 'domain';
+        const g = el('g', {
+            class: `gnode gnode--${node.type}`,
+            'data-domain': node.key
+        });
+
+        const label = el('text', { class: 'gnode__label', x: 0, y: 0 });
+        label.textContent = node.label;
+
+        const rect = el('rect', { class: 'gnode__pill' });
+        const ring = el('rect', { class: 'gnode__focus-ring' });
+
+        g.appendChild(rect);
+        g.appendChild(ring);
+        g.appendChild(label);
+        nodeLayer.appendChild(g);
+
+        node.g = g;
+        node.rect = rect;
+        node.ring = ring;
+        node.label_el = label;
+        return { g, rect, ring, label, isDomain, node };
+    }
+
+    const built = nodes.map(buildNode);
+
+    // Size each pill from measured text (falls back to estimate if hidden)
+    function sizePills() {
+        built.forEach(({ rect, ring, label, isDomain, node }) => {
+            let w;
+            try {
+                const bb = label.getBBox();
+                w = (bb.width || node.hw * 2) + (isDomain ? 40 : 28);
+            } catch (e) {
+                w = node.hw * 2;
+            }
+            const h = isDomain ? 42 : 32;
+            node.hw = w / 2;
+            node.hh = h / 2;
+            rect.setAttribute('x', -w / 2);
+            rect.setAttribute('y', -h / 2);
+            rect.setAttribute('width', w);
+            rect.setAttribute('height', h);
+            rect.setAttribute('rx', h / 2);
+            ring.setAttribute('x', -w / 2 - 4);
+            ring.setAttribute('y', -h / 2 - 4);
+            ring.setAttribute('width', w + 8);
+            ring.setAttribute('height', h + 8);
+            ring.setAttribute('rx', (h + 8) / 2);
+        });
+    }
+
+    function render() {
+        nodes.forEach(node => {
+            node.g.setAttribute('transform', `translate(${node.x.toFixed(2)}, ${node.y.toFixed(2)})`);
+        });
+        edges.forEach(edge => {
+            edge.line.setAttribute('x1', edge.skill.x.toFixed(2));
+            edge.line.setAttribute('y1', edge.skill.y.toFixed(2));
+            edge.line.setAttribute('x2', edge.hub.x.toFixed(2));
+            edge.line.setAttribute('y2', edge.hub.y.toFixed(2));
+        });
+    }
+
+    // Place at rest, then attach to the page
+    nodes.forEach(node => { node.x = node.sx; node.y = node.sy; });
+    render();
+    mount.insertBefore(svg, mount.querySelector('.skills-hint'));
+    mount.classList.add('is-interactive');
+    if (prefersReduced) {
+        const hint = mount.querySelector('.skills-hint');
+        if (hint) hint.textContent = 'Hover a domain to trace its stack';
+    }
+    // Real measurements now that the SVG is laid out
+    sizePills();
+    if (isDesktop()) { for (let t = 0; t < 260; t++) tick(1); nodes.forEach(n => { n.sx = n.x; n.sy = n.y; n.x = n.sx; n.y = n.sy; }); }
+    render();
+
+    // --- Highlight a cluster (hover / focus) ---
+    let activeKey = null;
+    function highlight(key) {
+        activeKey = key;
+        built.forEach(({ g, node }) => {
+            g.classList.toggle('is-hot', !!key && node.key === key);
+            g.classList.toggle('is-dim', !!key && node.key !== key);
+        });
+        edges.forEach(edge => {
+            edge.line.classList.toggle('is-hot', !!key && edge.key === key);
+            edge.line.classList.toggle('is-dim', !!key && edge.key !== key);
+        });
+    }
+
+    built.forEach(({ g, node }) => {
+        g.addEventListener('mouseenter', () => { if (!dragNode) highlight(node.key); });
+        g.addEventListener('mouseleave', () => { if (!dragNode) highlight(null); });
+        if (node.type === 'domain') {
+            g.setAttribute('tabindex', '0');
+            g.setAttribute('role', 'button');
+            const skillNames = skills.filter(s => s.key === node.key).map(s => s.label).join(', ');
+            g.setAttribute('aria-label', `${node.label}: ${skillNames}`);
+            g.addEventListener('focus', () => highlight(node.key));
+            g.addEventListener('blur', () => highlight(null));
+        } else {
+            g.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    // --- Drag to explore (pointer) — skipped for reduced motion ---
+    let raf = null;
+    let pointer = { x: 0, y: 0 };
+
+    function toSvgPoint(evt) {
+        const pt = svg.createSVGPoint();
+        pt.x = evt.clientX;
+        pt.y = evt.clientY;
+        const ctm = svg.getScreenCTM();
+        if (!ctm) return { x: 0, y: 0 };
+        const p = pt.matrixTransform(ctm.inverse());
+        return { x: p.x, y: p.y };
+    }
+
+    function loop() {
+        tick(0.5);
+        if (dragNode) {
+            dragNode.x = pointer.x;
+            dragNode.y = pointer.y;
+            dragNode.vx = 0;
+            dragNode.vy = 0;
+        }
+        render();
+        let ke = 0;
+        for (let i = 0; i < skills.length; i++) ke += skills[i].vx * skills[i].vx + skills[i].vy * skills[i].vy;
+        if (dragNode || ke > 0.15) {
+            raf = requestAnimationFrame(loop);
+        } else {
+            raf = null;
+            render();
+        }
+    }
+    function startLoop() { if (!raf) raf = requestAnimationFrame(loop); }
+
+    if (!prefersReduced) {
+        built.forEach(({ g, node }) => {
+            g.addEventListener('pointerdown', (evt) => {
+                if (!isDesktop()) return;
+                evt.preventDefault();
+                dragNode = node;
+                node.pinned = false;
+                pointer = toSvgPoint(evt);
+                node.x = pointer.x;
+                node.y = pointer.y;
+                highlight(node.key);
+                g.setPointerCapture(evt.pointerId);
+                startLoop();
+            });
+            g.addEventListener('pointermove', (evt) => {
+                if (dragNode !== node) return;
+                pointer = toSvgPoint(evt);
+            });
+            const end = (evt) => {
+                if (dragNode !== node) return;
+                dragNode = null;
+                if (node.type === 'domain') { node.pinned = true; }
+                highlight(null);
+                try { g.releasePointerCapture(evt.pointerId); } catch (e) { /* no-op */ }
+                startLoop();
+            };
+            g.addEventListener('pointerup', end);
+            g.addEventListener('pointercancel', end);
+        });
+    }
+
+    // --- Entrance: unfold each stack from its hub when scrolled into view ---
+    const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
+    let entranceDone = false;
+
+    function runEntrance() {
+        if (entranceDone) return;
+        entranceDone = true;
+        if (prefersReduced || !isDesktop()) {
+            nodes.forEach(node => { node.x = node.sx; node.y = node.sy; });
+            render();
+            return;
+        }
+        const start = nodes.map(node => ({
+            x: node.pinned ? node.sx : node.hub.x,
+            y: node.pinned ? node.sy : node.hub.y
+        }));
+        const duration = 1000;
+        let startTs = null;
+        function step(ts) {
+            if (startTs === null) startTs = ts;
+            const p = Math.min(1, (ts - startTs) / duration);
+            const e = easeOutQuint(p);
+            nodes.forEach((node, i) => {
+                node.x = start[i].x + (node.sx - start[i].x) * e;
+                node.y = start[i].y + (node.sy - start[i].y) * e;
+            });
+            render();
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { runEntrance(); io.disconnect(); }
+            });
+        }, { threshold: 0.25 });
+        io.observe(mount);
+    } else {
+        runEntrance();
+    }
+}
 
 // Dynamic project loading functionality
 async function loadFeaturedProjects() {

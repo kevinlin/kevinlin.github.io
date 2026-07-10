@@ -418,107 +418,195 @@ header::before {
     z-index: 1;
 }
 
-.skill-categories {
+.skills-intro {
+    max-width: 720px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--light-text);
+}
+
+/* ============================================================
+   Skills knowledge graph (overdrive)
+   One blue constellation: five domain hubs, skills orbiting,
+   edges tracing the stack. Blue carries structure; coral only
+   on contact. Falls back to a clean grouped list (no-JS / mobile
+   / screen readers) — the list is the single source of truth.
+   ============================================================ */
+.skills-graph {
+    margin-top: 40px;
+}
+
+/* --- Fallback / mobile / no-JS / assistive-tech list --- */
+.skills-domains {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 40px;
-    margin-top: 50px;
+    gap: 40px 36px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
-.skill-category {
-    background-color: white;
-    border-radius: 8px;
-    padding: 40px 30px;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition);
-    border-top: 4px solid var(--primary-color);
-}
-
-.skill-category:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-}
-
-.skill-category h3 {
-    margin-bottom: 25px;
+.skills-domain > h3 {
+    font-size: 1.15rem;
     color: var(--primary-color);
-    font-size: 1.5rem;
-    position: relative;
+    margin-bottom: 16px;
 }
 
-/* Skill Bars */
-.skill-bars {
-    margin-top: 20px;
-}
-
-.skill-item {
-    margin-bottom: 20px;
-}
-
-.skill-info {
+.skills-domain ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.skill-name {
+.skills-domain ul li {
+    font-size: 0.9rem;
     font-weight: 500;
-    color: var(--text-color);
-}
-
-.skill-percentage {
-    font-weight: 600;
     color: var(--primary-color);
+    background-color: rgba(0, 99, 163, 0.08);
+    border: 1px solid rgba(0, 99, 163, 0.18);
+    padding: 6px 14px;
+    border-radius: 9999px;
 }
 
-.progress-bar-container {
-    background-color: var(--section-bg);
-    border-radius: 10px;
-    height: 10px;
+[data-theme="dark"] .skills-domain ul li {
+    background-color: rgba(67, 137, 185, 0.14);
+    border-color: rgba(67, 137, 185, 0.3);
+}
+
+/* --- Interactive SVG graph (built by JS, desktop only) --- */
+.skills-canvas {
+    display: none;
     width: 100%;
-    overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: auto;
+    overflow: visible;
+    touch-action: none;
+    cursor: default;
 }
 
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(to right, #ff6b6b, #ff8e53);
-    border-radius: 10px;
-    transition: width 1.5s cubic-bezier(0.1, 0.5, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+.skills-hint {
+    display: none;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--light-text);
+    letter-spacing: 0.01em;
 }
 
-/* AI & Machine Learning category - Purple to Pink gradient */
-.skill-category:nth-child(1) .progress-bar {
-    background: linear-gradient(to right, #8b5cf6, #ec4899);
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+@media (min-width: 768px) {
+    .skills-graph.is-interactive .skills-domains {
+        display: none;
+    }
+    .skills-graph.is-interactive .skills-canvas {
+        display: block;
+    }
+    .skills-graph.is-interactive .skills-hint {
+        display: block;
+    }
 }
 
-/* Frontend Development category - Blue to Cyan gradient */
-.skill-category:nth-child(2) .progress-bar {
-    background: linear-gradient(to right, #3b82f6, #06b6d4);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+/* Blueprint dot-grid behind the graph — a faint systems-diagram hint */
+.sg-grid {
+    fill: var(--primary-color);
+    opacity: 0.06;
 }
 
-/* Backend & Tools category - Green to Emerald gradient */
-.skill-category:nth-child(3) .progress-bar {
-    background: linear-gradient(to right, #10b981, #059669);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+/* Edges tracing each skill back to its domain hub */
+.sg-edge {
+    stroke: var(--primary-color);
+    stroke-width: 1.5;
+    stroke-opacity: 0.16;
+    stroke-linecap: round;
+    transition: stroke 0.3s ease, stroke-opacity 0.3s ease, stroke-width 0.3s ease;
+}
+.sg-edge.is-hot {
+    stroke: var(--accent-color);
+    stroke-opacity: 0.8;
+    stroke-width: 2;
+}
+.sg-edge.is-dim {
+    stroke-opacity: 0.05;
 }
 
-/* Cloud & DevOps category - Orange to Red gradient */
-.skill-category:nth-child(4) .progress-bar {
-    background: linear-gradient(to right, #f59e0b, #dc2626);
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+/* Nodes */
+.gnode {
+    cursor: grab;
+    transition: opacity 0.3s ease;
+}
+.gnode:active {
+    cursor: grabbing;
+}
+.gnode.is-dim {
+    opacity: 0.2;
+}
+.gnode__pill {
+    transition: fill 0.3s ease, stroke 0.3s ease, stroke-opacity 0.3s ease, filter 0.3s ease;
+}
+.gnode__label {
+    font-family: 'Inter', sans-serif;
+    pointer-events: none;
+    user-select: none;
+    dominant-baseline: central;
+    text-anchor: middle;
 }
 
-.skill-item:hover .progress-bar {
-    filter: brightness(1.2) saturate(1.1);
-    transform: scaleY(1.1);
+/* Domain hubs — solid blue, white label, brand glow */
+.gnode--domain {
+    cursor: pointer;
+}
+.gnode--domain .gnode__pill {
+    fill: var(--primary-color);
+    filter: drop-shadow(0 6px 16px rgba(0, 99, 163, 0.28));
+}
+.gnode--domain .gnode__label {
+    fill: #ffffff;
+    font-weight: 600;
+    font-size: 15px;
+}
+.gnode--domain.is-hot .gnode__pill {
+    filter: drop-shadow(0 8px 22px rgba(0, 99, 163, 0.45));
 }
 
-.skill-item:last-child {
-    margin-bottom: 0;
+/* Skill leaves — surface fill, blue hairline, ink label */
+.gnode--skill .gnode__pill {
+    fill: var(--background-color);
+    stroke: var(--primary-color);
+    stroke-opacity: 0.4;
+    stroke-width: 1.5;
+}
+.gnode--skill .gnode__label {
+    fill: var(--text-color);
+    font-weight: 500;
+    font-size: 13px;
+}
+/* Coral on contact — the one sanctioned warm accent */
+.gnode--skill.is-hot .gnode__pill {
+    stroke: var(--accent-color);
+    stroke-opacity: 1;
+}
+.gnode__focus-ring {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 2.5;
+    opacity: 0;
+}
+.gnode:focus-visible {
+    outline: none;
+}
+.gnode:focus-visible .gnode__focus-ring {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gnode,
+    .gnode__pill,
+    .sg-edge {
+        transition: none;
+    }
 }
 
 /* Certifications within Skills Section */
@@ -1019,31 +1107,31 @@ footer p {
 }
 
 /* Animation Styles */
-.project-card, .skill-category {
+.project-card {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.project-card.visible, .skill-category.visible {
+.project-card.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Stagger the animations */
-.project-card:nth-child(1), .skill-category:nth-child(1) {
+.project-card:nth-child(1) {
     transition-delay: 0.1s;
 }
 
-.project-card:nth-child(2), .skill-category:nth-child(2) {
+.project-card:nth-child(2) {
     transition-delay: 0.2s;
 }
 
-.project-card:nth-child(3), .skill-category:nth-child(3) {
+.project-card:nth-child(3) {
     transition-delay: 0.3s;
 }
 
-.project-card:nth-child(4), .skill-category:nth-child(4) {
+.project-card:nth-child(4) {
     transition-delay: 0.4s;
 }
 
@@ -1239,10 +1327,6 @@ footer p {
     
     section, .about, .skills, .projects, .contact, .github-activity {
         padding: 70px 0;
-    }
-    
-    .skill-categories {
-        grid-template-columns: 1fr;
     }
     
     .project-grid {
@@ -1542,7 +1626,6 @@ header::before {
 
     /* Never let a scroll-reveal leave content hidden for these users */
     .project-card,
-    .skill-category,
     .github-embed-item,
     .photo-slide {
         opacity: 1 !important;
