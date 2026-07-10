@@ -36,5 +36,5 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
-# Cursor IDE
-.history/
+# Impeccable Live
+.impeccable/live/

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-10T00:00:00Z",
+  "title": "Design System: Kevin Lin — Professional Profile",
+  "extensions": {
+    "colorMeta": {
+      "architects-blue": {
+        "role": "primary",
+        "displayName": "Architect's Blue",
+        "canonical": "oklch(0.46 0.12 245)",
+        "tonalRamp": [
+          "oklch(0.20 0.06 245)",
+          "oklch(0.30 0.09 245)",
+          "oklch(0.40 0.11 245)",
+          "oklch(0.46 0.12 245)",
+          "oklch(0.58 0.11 245)",
+          "oklch(0.70 0.09 245)",
+          "oklch(0.84 0.05 245)",
+          "oklch(0.95 0.02 245)"
+        ]
+      },
+      "signal-coral": {
+        "role": "secondary",
+        "displayName": "Signal Coral",
+        "canonical": "oklch(0.68 0.19 20)",
+        "tonalRamp": [
+          "oklch(0.30 0.10 20)",
+          "oklch(0.42 0.14 20)",
+          "oklch(0.54 0.17 20)",
+          "oklch(0.68 0.19 20)",
+          "oklch(0.76 0.15 20)",
+          "oklch(0.84 0.10 20)",
+          "oklch(0.91 0.05 20)",
+          "oklch(0.97 0.02 20)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.33 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.33 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.60 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.88 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "section-mist": {
+        "role": "neutral",
+        "displayName": "Section Mist",
+        "canonical": "oklch(0.98 0.002 250)",
+        "tonalRamp": [
+          "oklch(0.85 0.003 250)",
+          "oklch(0.88 0.003 250)",
+          "oklch(0.91 0.003 250)",
+          "oklch(0.94 0.003 250)",
+          "oklch(0.96 0.002 250)",
+          "oklch(0.98 0.002 250)",
+          "oklch(0.99 0.001 250)",
+          "oklch(1.00 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Profile name in the header only; the single largest voice." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles (h2), each with the blue underline accent." },
+      "title": { "displayName": "Title", "purpose": "Subsection and card headings (h3), usually in Architect's Blue." },
+      "body": { "displayName": "Body", "purpose": "Paragraph copy; lead paragraphs run 1.2rem, measure ~65–75ch." },
+      "label": { "displayName": "Label", "purpose": "Uppercase tech badges/chips only — the one sanctioned use of caps + tracking." }
+    },
+    "shadows": [
+      { "name": "ambient-rest", "value": "0 10px 30px rgba(0,0,0,0.05)", "purpose": "Default resting shadow on cards (--card-shadow). Dark theme uses 0.2 alpha." },
+      { "name": "lifted-hover", "value": "0 15px 40px rgba(0,0,0,0.1)", "purpose": "Card hover, paired with translateY(-5px to -10px)." },
+      { "name": "brand-glow", "value": "0 5px 15px rgba(0,99,163,0.2)", "purpose": "Blue-tinted shadow under primary/resume buttons, tying them to the brand color." },
+      { "name": "inset-track", "value": "inset 0 1px 3px rgba(0,0,0,0.1)", "purpose": "Recessed skill-bar track." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "all 0.3s ease", "purpose": "Default transition for state changes and hover lifts (--transition)." },
+      { "name": "ease-bar-fill", "value": "width 1.5s cubic-bezier(0.1, 0.5, 0.2, 1)", "purpose": "Skill progress-bar fill animation." },
+      { "name": "ease-slide", "value": "transform 0.5s ease", "purpose": "Photo slider horizontal transition." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "480px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main contact/CTA button; blue fill, fills to Ink and lifts on hover.",
+      "html": "<a href=\"#contact\" class=\"ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11 11 0 0 1 6 0C17 4.9 18 5.2 18 5.2c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z\"/></svg>Connect on GitHub</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 12px; background: #0063a3; color: #fff; padding: 16px 32px; border-radius: 4px; font-weight: 600; font-size: 1.1rem; text-decoration: none; box-shadow: 0 5px 15px rgba(0,99,163,0.2); transition: all 0.3s ease; } .ds-btn-primary:hover { background: #333333; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); } .ds-btn-primary:focus-visible { outline: 2px solid #0063a3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Resume Button",
+      "kind": "button",
+      "refersTo": "button-resume",
+      "description": "Capsule download button; fills to Signal Coral on hover — a sanctioned coral appearance.",
+      "html": "<a href=\"resume.pdf\" class=\"ds-btn-resume\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v10m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2\"/></svg>Download Resume</a>",
+      "css": ".ds-btn-resume { display: inline-flex; align-items: center; gap: 10px; background: #0063a3; color: #fff; padding: 12px 24px; border-radius: 30px; font-weight: 600; text-decoration: none; box-shadow: 0 5px 15px rgba(0,99,163,0.2); transition: all 0.3s ease; } .ds-btn-resume:hover { background: #ff5a5f; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,99,163,0.3); } .ds-btn-resume:focus-visible { outline: 2px solid #0063a3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Social Icon Button",
+      "kind": "button",
+      "refersTo": "social-icon",
+      "description": "Circular icon button; tinted-blue at rest, fills to solid blue and lifts on hover.",
+      "html": "<a href=\"#\" class=\"ds-social-icon\" aria-label=\"GitHub\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11 11 0 0 1 6 0C17 4.9 18 5.2 18 5.2c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z\"/></svg></a>",
+      "css": ".ds-social-icon { display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,99,163,0.1); color: #0063a3; text-decoration: none; transition: all 0.3s ease; } .ds-social-icon:hover { background: #0063a3; color: #fff; transform: translateY(-5px); } .ds-social-icon:focus-visible { outline: 2px solid #0063a3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Tech Badge",
+      "kind": "chip",
+      "refersTo": "tech-badge",
+      "description": "Solid-blue uppercase pill labeling a technology or stack.",
+      "html": "<span class=\"ds-tech-badge\">TypeScript</span>",
+      "css": ".ds-tech-badge { display: inline-block; background: #0063a3; color: #fff; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }"
+    },
+    {
+      "name": "Project Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Featured-project card; hairline border, ambient shadow, rises on hover.",
+      "html": "<article class=\"ds-project-card\"><div class=\"ds-project-card__body\"><h3><a href=\"#\" class=\"ds-project-card__title\">Project Name</a></h3><p>A one-line description of what the project does and why it matters.</p><div class=\"ds-project-card__badges\"><span class=\"ds-tech-badge\">Python</span><span class=\"ds-tech-badge\">FastAPI</span></div></div></article>",
+      "css": ".ds-project-card { display: flex; flex-direction: column; background: #fff; border: 1px solid #e6e6e6; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: all 0.3s ease; } .ds-project-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); } .ds-project-card__body { padding: 30px; } .ds-project-card__title { color: #0063a3; text-decoration: none; font-size: 1.5rem; font-weight: 700; transition: color 0.3s ease; } .ds-project-card__title:hover { color: #ff5a5f; } .ds-project-card p { color: #666; line-height: 1.6; margin: 15px 0 20px; } .ds-project-card__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-project-card .ds-tech-badge { display: inline-block; background: #0063a3; color: #fff; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }"
+    },
+    {
+      "name": "Skill Progress Bar",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Labeled proficiency bar with a recessed track and animated fill. Documented as legacy; prefer solid brand fills over decorative gradients for new work.",
+      "html": "<div class=\"ds-skill\"><div class=\"ds-skill__info\"><span class=\"ds-skill__name\">RAG Applications</span><span class=\"ds-skill__pct\">92%</span></div><div class=\"ds-skill__track\"><div class=\"ds-skill__fill\" style=\"width:92%\"></div></div></div>",
+      "css": ".ds-skill { max-width: 360px; } .ds-skill__info { display: flex; justify-content: space-between; margin-bottom: 8px; } .ds-skill__name { font-weight: 500; color: #333; } .ds-skill__pct { font-weight: 600; color: #0063a3; } .ds-skill__track { height: 10px; width: 100%; background: #f8f9fa; border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); } .ds-skill__fill { height: 100%; background: #0063a3; border-radius: 10px; transition: width 1.5s cubic-bezier(0.1,0.5,0.2,1); }"
+    },
+    {
+      "name": "Section Heading",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The canonical section opener: h2 with the signature 60x4px Architect's Blue underline.",
+      "html": "<h2 class=\"ds-section-heading\">Featured Projects</h2>",
+      "css": ".ds-section-heading { color: #333; font-family: Inter, sans-serif; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 30px; } .ds-section-heading::after { content: ''; display: block; width: 60px; height: 4px; background: #0063a3; margin-top: 15px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trusted Architect",
+    "overview": "This is the site of someone who designs systems for a living, so the site behaves like one: a clear grid, a load-bearing color, and structure you can read at a glance. Blue does the structural work; type does the talking; warmth comes from generous spacing and the way surfaces respond to a hand, not from decoration. The register is confident and senior with nothing to prove, and human enough that a recruiter feels talked to rather than sold at. Restraint here is deliberate, not timid. Every section earns its place against one job: move the right visitor toward a conversation. Substance carries the page — real credentials, real work, real numbers — so effects stay quiet. The single warm accent (coral) is held in reserve for the moment of interaction.",
+    "keyCharacteristics": [
+      "One load-bearing brand blue; one rare warm accent reserved for interaction.",
+      "Single type family (Inter), hierarchy built from weight and size, not font-switching.",
+      "Soft-lifted surfaces: flat-ish at rest, they rise gently toward the reader on hover.",
+      "Light and dark themes as first-class equals, toggled by the reader.",
+      "Structure over ornament: the design gets out of the way of the credentials."
+    ],
+    "rules": [
+      { "name": "The Blue-Carries-Structure Rule", "body": "One brand blue does all the structural and interactive work — links, buttons, icons, accents, the heading underline. Do not introduce a second primary; emphasize with weight, size, or the blue you already have.", "section": "colors" },
+      { "name": "The Coral-On-Contact Rule", "body": "Signal Coral appears only in response to interaction, never at rest. A resting coral fill breaks the calm the system depends on.", "section": "colors" },
+      { "name": "The One-Family Rule", "body": "Inter carries the whole system. Hierarchy is built from weight (400/500/600/700) and size, never a second display face.", "section": "typography" },
+      { "name": "The Underline Rule", "body": "Every h2 gets a 60px x 4px Architect's Blue bar beneath it (h2::after). It is the signature section marker — use it instead of an uppercase eyebrow above the heading.", "section": "typography" },
+      { "name": "The Rise-On-Hover Rule", "body": "Interactive surfaces lift with translateY and deepen their shadow on hover; movement is up and toward the reader, easing out over ~0.3s. No bounce, no scale-only.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do route every action and link through Architect's Blue (#0063a3); let one color carry structure.",
+      "Do reserve Signal Coral for interaction states only (hover), never a resting fill.",
+      "Do build hierarchy from Inter weights (400/500/600/700) and size, keeping to the one family.",
+      "Do open every section with an h2 and its 60x4px blue underline instead of an uppercase eyebrow.",
+      "Do keep surfaces soft-lifted: ambient shadow at rest, translateY up + deeper shadow on hover, easing out ~0.3s.",
+      "Do use repeat(auto-fit/auto-fill, minmax(280-350px, 1fr)) grids so layouts reflow without hand-tuned breakpoints.",
+      "Do support both themes equally and keep body copy toward the Ink end for contrast."
+    ],
+    "donts": [
+      "Don't let it read as a generic AI/template dev portfolio — no gradient hero, no identical icon-heading-text card grids repeated endlessly, no uppercase tracked eyebrow over every section.",
+      "Don't make it a flashy startup landing (salesy tone, motion on everything), a terminal/hacker costume (dark mono, neon green), or a stiff corporate brochure with no personality.",
+      "Don't use a colored border-left/border-right greater than 1px as a side stripe on cards or callouts (the privacy-page .contact-info does this today — use a full border or top accent instead).",
+      "Don't multiply decorative multi-hue gradients (per-category skill bars and orange-to-red buttons drift toward templated rainbow and undercut 'substance over polish'); prefer solid brand color.",
+      "Don't state skill proficiency as invented percentages; numbers that read as made-up weaken a credibility-first page.",
+      "Don't gate content visibility on a JS .visible class with opacity:0 as the default — reveals never fire on reduced-motion or headless renders and the section ships blank. Animate from an already-visible state.",
+      "Don't ship motion without a @media (prefers-reduced-motion: reduce) alternative (none exists in the current CSS — add one)."
+    ]
+  }
+}
