@@ -166,6 +166,68 @@ header::before {
     z-index: 0;
 }
 
+/* ============================================================
+   Generative architecture hero (overdrive)
+   The first fold reads as a live systems diagram: edge → app →
+   data tiers with an AI cluster, force-settled and drifting,
+   waking under the cursor. Monochrome blue; content sits clean
+   on top. Canvas is decorative (aria-hidden, pointer-events off)
+   — no-JS leaves the clean gradient hero untouched.
+   ============================================================ */
+.hero-net {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;            /* above the ::before wash, below content */
+    display: block;
+    pointer-events: none;  /* never intercept clicks on the links above */
+}
+
+/* Soft breathing room so drifting nodes never fight the copy.
+   Shields the portrait + headline on the left/centre; the open
+   right half keeps the diagram at full presence. */
+.hero-net-scrim {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(100deg,
+            var(--background-color) 0%,
+            var(--background-color) 34%,
+            rgba(255, 255, 255, 0) 60%);
+    opacity: 0.62;
+}
+
+[data-theme="dark"] .hero-net-scrim {
+    background:
+        linear-gradient(100deg,
+            var(--background-color) 0%,
+            var(--background-color) 34%,
+            rgba(18, 18, 18, 0) 60%);
+    opacity: 0.66;
+}
+
+@media (max-width: 768px) {
+    /* Stacked layout: keep the net as a faint full-width texture */
+    .hero-net-scrim {
+        background:
+            radial-gradient(130% 80% at 50% 42%,
+                var(--background-color) 0%,
+                rgba(255, 255, 255, 0) 70%);
+        opacity: 0.5;
+    }
+    [data-theme="dark"] .hero-net-scrim {
+        background:
+            radial-gradient(130% 80% at 50% 42%,
+                var(--background-color) 0%,
+                rgba(18, 18, 18, 0) 70%);
+        opacity: 0.55;
+    }
+}
+
 .profile-header {
     display: flex;
     align-items: center;

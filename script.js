@@ -165,6 +165,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize theme toggle
     initThemeToggle();
 
+    // Paint the generative architecture hero
+    initHeroNet();
+
     // Build the interactive skills knowledge graph
     initSkillsGraph();
 
@@ -175,6 +178,256 @@ document.addEventListener('DOMContentLoaded', function() {
     initResumeNudge();
     greetInConsole();
 });
+
+/* ============================================================
+   Generative architecture hero (overdrive)
+   The first fold becomes a live systems diagram: edge → app →
+   data tiers with an AI cluster, force-settled into place and
+   drifting slowly, waking under the cursor. One monochrome blue
+   carries it; content sits clean on top.
+
+   Progressive enhancement: decorative canvas only. No-JS keeps
+   the plain gradient hero. Reduced-motion renders one composed,
+   static frame (no loop, no cursor). Off-screen and hidden tabs
+   pause the loop; DPR is capped for mid-range devices.
+   ============================================================ */
+function initHeroNet() {
+    const canvas = document.querySelector('.hero-net');
+    const header = document.getElementById('home');
+    if (!canvas || !header || !canvas.getContext) return;
+
+    const ctx = canvas.getContext('2d');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // --- Topology: a small, legible AI system, laid out left→right ---
+    // tier x-fractions read as edge → gateway → app → AI → data.
+    // id lets edges reference nodes; r is a relative size unit.
+    const NODES = [
+        // Edge / clients (mostly behind the portrait — kept lean)
+        { id: 'c1', tier: 'edge', x: 0.075, y: 0.22, r: 1.0 },
+        { id: 'c2', tier: 'edge', x: 0.055, y: 0.48, r: 1.2 },
+        { id: 'c3', tier: 'edge', x: 0.085, y: 0.75, r: 1.0 },
+        // Gateway
+        { id: 'gw', tier: 'gateway', x: 0.25, y: 0.40, r: 1.7 },
+        { id: 'cdn', tier: 'gateway', x: 0.22, y: 0.68, r: 1.0 },
+        { id: 'auth', tier: 'gateway', x: 0.27, y: 0.16, r: 1.1 },
+        // App / services
+        { id: 'app', tier: 'app', x: 0.44, y: 0.34, r: 2.0 },
+        { id: 'svc1', tier: 'app', x: 0.47, y: 0.60, r: 1.3 },
+        { id: 'svc2', tier: 'app', x: 0.41, y: 0.84, r: 1.0 },
+        { id: 'svc3', tier: 'app', x: 0.50, y: 0.16, r: 1.1 },
+        // AI cluster (the AI-system shape) — in the open, visible band
+        { id: 'orch', tier: 'ai', x: 0.635, y: 0.36, r: 2.0 },
+        { id: 'llm', tier: 'ai', x: 0.72, y: 0.15, r: 1.6 },
+        { id: 'agent', tier: 'ai', x: 0.71, y: 0.56, r: 1.5 },
+        { id: 'guard', tier: 'ai', x: 0.585, y: 0.60, r: 1.1 },
+        { id: 'embed', tier: 'ai', x: 0.665, y: 0.80, r: 1.2 },
+        // Data
+        { id: 'pg', tier: 'data', x: 0.885, y: 0.28, r: 1.5 },
+        { id: 'redis', tier: 'data', x: 0.915, y: 0.50, r: 1.2 },
+        { id: 'vec', tier: 'data', x: 0.855, y: 0.68, r: 1.4 },
+        { id: 's3', tier: 'data', x: 0.905, y: 0.86, r: 1.1 },
+        { id: 'queue', tier: 'data', x: 0.955, y: 0.70, r: 1.0 }
+    ];
+    const EDGES = [
+        ['c1', 'gw'], ['c2', 'gw'], ['c3', 'gw'], ['c3', 'cdn'], ['c1', 'auth'],
+        ['gw', 'app'], ['cdn', 'app'], ['auth', 'app'], ['gw', 'svc3'],
+        ['app', 'svc1'], ['app', 'svc2'], ['app', 'svc3'],
+        ['app', 'orch'], ['svc1', 'orch'], ['svc3', 'orch'],
+        ['orch', 'llm'], ['orch', 'agent'], ['orch', 'guard'], ['orch', 'embed'],
+        ['agent', 'svc1'],           // agent tools loop back to a service
+        ['llm', 'guard'], ['agent', 'llm'],
+        ['orch', 'vec'], ['agent', 'vec'], ['embed', 'vec'],
+        ['app', 'pg'], ['svc1', 'redis'], ['app', 'redis'],
+        ['svc2', 's3'], ['agent', 'queue'], ['queue', 'svc2']
+    ];
+    const byId = {};
+    NODES.forEach(n => { byId[n.id] = n; });
+    const edges = EDGES.map(([a, b]) => ({ a: byId[a], b: byId[b] })).filter(e => e.a && e.b);
+
+    // --- Theme-aware colour: one blue, read from the design tokens ---
+    let rgb = [0, 99, 163];
+    function readColor() {
+        const raw = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-color').trim();
+        const m = raw.match(/^#([0-9a-f]{6})$/i);
+        if (m) {
+            rgb = [
+                parseInt(m[1].slice(0, 2), 16),
+                parseInt(m[1].slice(2, 4), 16),
+                parseInt(m[1].slice(4, 6), 16)
+            ];
+        }
+    }
+    readColor();
+    const stroke = (a) => `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${a})`;
+
+    // --- Geometry / sizing ---
+    let W = 0, H = 0, dpr = 1, unit = 4;
+    function layout() {
+        const cssW = canvas.clientWidth || header.clientWidth;
+        const cssH = canvas.clientHeight || header.clientHeight;
+        if (!cssW || !cssH) return;
+        W = cssW; H = cssH;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // Node radius scales gently with width; the diagram fills a middle band.
+        unit = Math.max(2.4, Math.min(4.2, W / 340));
+        NODES.forEach(n => {
+            n.hx = n.x * W;
+            n.hy = 0.14 * H + n.y * 0.72 * H;
+            n.rr = n.r * unit;
+            if (n.px === undefined) { n.px = n.hx; n.py = n.hy; n.vx = 0; n.vy = 0; }
+        });
+    }
+
+    // --- Per-node drift signature (slow, organic breathing, ~10–18s periods) ---
+    NODES.forEach((n, i) => {
+        n.ph = i * 1.7;
+        n.f1 = 0.38 + (i % 5) * 0.05;
+        n.f2 = 0.30 + (i % 3) * 0.06;
+    });
+
+    // --- Pointer (cursor wake) ---
+    const WAKE_R = 170;      // reach of the wake, in css px
+    const PUSH = 16;         // how far a node leans from the cursor
+    let pointer = { x: -9999, y: -9999, on: false };
+    if (!prefersReduced) {
+        const rectOf = () => canvas.getBoundingClientRect();
+        header.addEventListener('pointermove', (e) => {
+            const r = rectOf();
+            pointer.x = e.clientX - r.left;
+            pointer.y = e.clientY - r.top;
+            pointer.on = true;
+        }, { passive: true });
+        header.addEventListener('pointerleave', () => { pointer.on = false; });
+    }
+
+    // --- One simulation + draw frame ---
+    let t = 0;
+    function frame(dt) {
+        t += dt;
+        ctx.clearRect(0, 0, W, H);
+
+        // Update node positions: drift target + spring + cursor push
+        for (let i = 0; i < NODES.length; i++) {
+            const n = NODES[i];
+            let tx = n.hx, ty = n.hy;
+            if (!prefersReduced) {
+                tx += Math.sin(t * n.f1 + n.ph) * (7 + n.r * 2);
+                ty += Math.cos(t * n.f2 + n.ph) * (5 + n.r * 1.6);
+            }
+            let wake = 0;
+            if (pointer.on) {
+                const dx = n.px - pointer.x;
+                const dy = n.py - pointer.y;
+                const d = Math.hypot(dx, dy);
+                if (d < WAKE_R) {
+                    wake = 1 - d / WAKE_R;
+                    const push = (wake * PUSH) / (d || 1);
+                    tx += dx * push;
+                    ty += dy * push;
+                }
+            }
+            n.wake = wake;
+            // Displayed brightness eases toward the target so the wake fades
+            // out gently when the cursor moves away or leaves.
+            n.wd = (n.wd || 0) + (wake - (n.wd || 0)) * 0.15;
+            if (prefersReduced) {
+                n.px = tx; n.py = ty; n.wd = wake;
+            } else {
+                n.vx = (n.vx + (tx - n.px) * 0.06) * 0.86;
+                n.vy = (n.vy + (ty - n.py) * 0.06) * 0.86;
+                n.px += n.vx;
+                n.py += n.vy;
+            }
+        }
+
+        // Edges first — hairline, brightening where the cursor wakes them
+        for (let i = 0; i < edges.length; i++) {
+            const e = edges[i];
+            const hot = Math.max(e.a.wd || 0, e.b.wd || 0);
+            ctx.strokeStyle = stroke(0.14 + hot * 0.44);
+            ctx.lineWidth = 1 + hot * 1.0;
+            ctx.beginPath();
+            ctx.moveTo(e.a.px, e.a.py);
+            ctx.lineTo(e.b.px, e.b.py);
+            ctx.stroke();
+        }
+
+        // Nodes on top — filled discs; hubs carry a faint halo, wake adds light
+        for (let i = 0; i < NODES.length; i++) {
+            const n = NODES[i];
+            const w = n.wd || 0;
+            const isHub = n.r >= 1.7;
+            const base = isHub ? 0.42 : 0.28;
+            if (isHub || w > 0.12) {
+                ctx.fillStyle = stroke((0.06 + w * 0.16) * (isHub ? 1.4 : 1));
+                ctx.beginPath();
+                ctx.arc(n.px, n.py, n.rr + 5 + w * 7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = stroke(Math.min(0.92, base + w * 0.5));
+            ctx.beginPath();
+            ctx.arc(n.px, n.py, n.rr, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // --- Loop with off-screen / hidden-tab pausing ---
+    let raf = null, last = 0, visible = true;
+    function loop(now) {
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+        last = now;
+        frame(dt);
+        raf = requestAnimationFrame(loop);
+    }
+    function start() {
+        if (raf || prefersReduced || !visible) return;
+        last = 0;
+        raf = requestAnimationFrame(loop);
+    }
+    function stop() {
+        if (raf) { cancelAnimationFrame(raf); raf = null; }
+    }
+
+    // --- Boot ---
+    layout();
+    frame(0); // paint a composed frame immediately (also the reduced-motion still)
+
+    if (!prefersReduced) {
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                visible = entries[0].isIntersecting;
+                if (visible) start(); else stop();
+            }, { threshold: 0.01 });
+            io.observe(header);
+        } else {
+            start();
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stop(); else start();
+        });
+    }
+
+    // Resize (debounced) — relayout and repaint
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+            layout();
+            frame(0);
+        }, 150);
+    });
+
+    // Repaint colour when the theme flips
+    if (window.MutationObserver) {
+        const mo = new MutationObserver(() => { readColor(); frame(0); });
+        mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+}
 
 /* ============================================================
    Skills knowledge graph (overdrive)
