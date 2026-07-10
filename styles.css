@@ -1523,3 +1523,156 @@ header::before {
     background-image: linear-gradient(135deg, rgba(0, 99, 163, 0.03) 0%, rgba(0, 99, 163, 0.08) 100%);
     z-index: 0;
 }
+
+/* ============================================================
+   Delight — subtle, on-brand micro-interactions.
+   Strategy: subtle sophistication (warm & senior), never noise.
+   ============================================================ */
+
+/* Reduced-motion foundation: respect the setting everywhere */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Never let a scroll-reveal leave content hidden for these users */
+    .project-card,
+    .skill-category,
+    .github-embed-item,
+    .photo-slide {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* Tactile press: buttons acknowledge the click (warm & structural) */
+.contact-button:active,
+.certification-button:active,
+.resume-btn:active {
+    transform: translateY(-1px);
+}
+
+.social-links a:active,
+.social-links button:active,
+.slider-nav:active {
+    transform: translateY(-2px) scale(0.96);
+}
+
+.project-title-link:active,
+.project-link:active {
+    transform: translateY(1px);
+}
+
+/* Theme toggle: the icon turns over as day and night swap */
+#theme-toggle i {
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#theme-toggle:hover i {
+    transform: rotate(20deg);
+}
+
+#theme-toggle.switching i {
+    animation: icon-turn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes icon-turn {
+    from { transform: rotate(-160deg) scale(0.4); opacity: 0; }
+    to   { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+/* Brief whole-page color crossfade, applied only during a theme switch */
+.theme-transition,
+.theme-transition *:not(.progress-bar) {
+    transition: background-color 0.45s ease,
+                color 0.45s ease,
+                border-color 0.45s ease !important;
+}
+
+/* Resume nudge: a quiet, dismissible pointer toward a conversation */
+.nudge-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1100;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    max-width: 340px;
+    padding: 16px 40px 16px 18px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(24px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+.nudge-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.nudge-toast__icon {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.nudge-toast__body p {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--light-text);
+}
+
+.nudge-toast__body a {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.nudge-toast__body a:hover {
+    color: var(--accent-color);
+}
+
+.nudge-toast__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    padding: 4px;
+    background: none;
+    border: none;
+    line-height: 1;
+    font-size: 1.1rem;
+    color: var(--light-text);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.nudge-toast__close:hover {
+    color: var(--text-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nudge-toast {
+        transform: none !important;
+        transition: opacity 0.2s ease !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .nudge-toast {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        max-width: none;
+    }
+}

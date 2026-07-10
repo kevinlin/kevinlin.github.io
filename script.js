@@ -74,19 +74,34 @@ function initThemeToggle() {
         document.documentElement.removeAttribute('data-theme');
     }
     
+    let themeTransitionTimer;
+
     // Toggle theme when button is clicked
     themeToggle.addEventListener('click', function() {
         let theme;
-        
+        const root = document.documentElement;
+
+        // Delight: brief whole-page color crossfade + a turn of the icon
+        root.classList.add('theme-transition');
+        window.clearTimeout(themeTransitionTimer);
+        themeTransitionTimer = window.setTimeout(function() {
+            root.classList.remove('theme-transition');
+        }, 500);
+
+        themeToggle.classList.add('switching');
+        window.setTimeout(function() {
+            themeToggle.classList.remove('switching');
+        }, 500);
+
         // If the current theme is dark, switch to light
-        if (document.documentElement.getAttribute('data-theme') === 'dark') {
-            document.documentElement.removeAttribute('data-theme');
+        if (root.getAttribute('data-theme') === 'dark') {
+            root.removeAttribute('data-theme');
             theme = 'light';
         } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
+            root.setAttribute('data-theme', 'dark');
             theme = 'dark';
         }
-        
+
         // Save the preference
         localStorage.setItem('theme', theme);
     });
@@ -108,9 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const navHeight = document.querySelector('.main-nav').offsetHeight;
                 const targetPosition = targetElement.offsetTop - navHeight - 20;
                 
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 window.scrollTo({
                     top: targetPosition,
-                    behavior: 'smooth'
+                    behavior: prefersReducedMotion ? 'auto' : 'smooth'
                 });
                 
                 // Close mobile menu if open
@@ -169,9 +185,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize theme toggle
     initThemeToggle();
-    
+
     // Load featured projects dynamically
     loadFeaturedProjects();
+
+    // Delight: a quiet nudge after a resume download, and a hello for the curious
+    initResumeNudge();
+    greetInConsole();
 });
 
 // Dynamic project loading functionality
@@ -516,16 +536,17 @@ function initPhotoSlider() {
             if (touchEndX > touchStartX + 50) previousSlide();
         }
         
-        // Auto advance slides
-        let slideInterval = setInterval(nextSlide, 5000);
-        
+        // Auto advance slides (respect reduced-motion: no autoplay)
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let slideInterval = prefersReducedMotion ? null : setInterval(nextSlide, 5000);
+
         // Pause auto-advance on hover
         photoSlider.addEventListener('mouseenter', () => {
-            clearInterval(slideInterval);
+            if (slideInterval) clearInterval(slideInterval);
         });
-        
+
         photoSlider.addEventListener('mouseleave', () => {
-            slideInterval = setInterval(nextSlide, 5000);
+            if (!prefersReducedMotion) slideInterval = setInterval(nextSlide, 5000);
         });
     }
     
@@ -565,4 +586,69 @@ function initPhotoSlider() {
     
     // Start the initialization
     initializeSlider();
+}
+
+// Delight: after downloading the resume, a quiet pointer toward a conversation
+function initResumeNudge() {
+    const resumeBtn = document.querySelector('.resume-btn');
+    if (!resumeBtn) return;
+
+    resumeBtn.addEventListener('click', function () {
+        // Once per session, and only after a real download click
+        if (sessionStorage.getItem('resume-nudged')) return;
+        sessionStorage.setItem('resume-nudged', '1');
+        window.setTimeout(showResumeNudge, 900);
+    });
+}
+
+function showResumeNudge() {
+    if (document.querySelector('.nudge-toast')) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'nudge-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.innerHTML =
+        '<i class="fas fa-paper-plane nudge-toast__icon" aria-hidden="true"></i>' +
+        '<div class="nudge-toast__body">' +
+            '<p>Thanks for grabbing my resume. If something looks like a fit, I\'d genuinely enjoy the conversation.</p>' +
+            '<a href="#contact">Let’s connect &rarr;</a>' +
+        '</div>' +
+        '<button class="nudge-toast__close" aria-label="Dismiss">&times;</button>';
+
+    document.body.appendChild(toast);
+
+    // Animate in on the next frame so the transition runs
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            toast.classList.add('visible');
+        });
+    });
+
+    const dismiss = function () {
+        toast.classList.remove('visible');
+        window.setTimeout(function () {
+            toast.remove();
+        }, 500);
+    };
+
+    toast.querySelector('.nudge-toast__close').addEventListener('click', dismiss);
+    toast.querySelector('a').addEventListener('click', dismiss);
+    window.setTimeout(dismiss, 9000);
+}
+
+// Delight: a warm hello for anyone who opens the console
+function greetInConsole() {
+    try {
+        console.log(
+            '%cThanks for looking under the hood.',
+            'color:#0063a3;font-size:14px;font-weight:600'
+        );
+        console.log(
+            '%cIf you\'re hiring or building something with AI, I\'d love to talk — https://www.linkedin.com/in/kevinlinyun/',
+            'color:#666;font-size:12px'
+        );
+    } catch (e) {
+        /* no-op */
+    }
 }
