@@ -1041,17 +1041,13 @@ header::before {
     }
     
     .profile-card {
-        grid-column: 1 / -1;
+        grid-column: span 2;
     }
 }
 
 @media (min-width: 1200px) {
     .github-embeds {
         grid-template-columns: 1fr 1fr 1fr;
-    }
-    
-    .profile-card {
-        grid-column: 1 / -1;
     }
 }
 
