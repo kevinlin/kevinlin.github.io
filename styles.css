@@ -1024,7 +1024,8 @@ header::before {
     justify-content: center;
 }
 
-.embed-container iframe {
+.embed-container iframe,
+.embed-container img {
     max-width: 100%;
     overflow: hidden;
 }
