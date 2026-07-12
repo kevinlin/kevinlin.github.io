@@ -1072,18 +1072,6 @@ header::before {
     overflow-x: auto;
 }
 
-.contribution-graph {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-}
-
-.contribution-graph {
-    max-width: 100%;
-    height: auto;
-}
-
 /* Contact Section */
 .contact {
     padding: 100px 0;
