@@ -457,10 +457,11 @@ header::before {
     }
 }
 
-/* Skills Section */
+/* Skills Section
+   Background comes from the section:nth-child(even/odd) alternation
+   so inserting/removing sections keeps the page rhythm intact. */
 .skills {
     padding: 100px 0;
-    background-color: var(--section-bg);
     position: relative;
 }
 
@@ -965,7 +966,6 @@ header::before {
 /* GitHub Activity Section */
 .github-activity {
     padding: 100px 0;
-    background-color: #f8f9fa;
     position: relative;
 }
 
@@ -1087,7 +1087,6 @@ header::before {
 /* Contact Section */
 .contact {
     padding: 100px 0;
-    background-color: var(--section-bg);
     position: relative;
 }
 
@@ -1200,7 +1199,6 @@ footer p {
 /* Photography Section */
 .photography {
     padding: 100px 0;
-    background-color: #f8f9fa;
     position: relative;
 }
 
@@ -1457,6 +1455,17 @@ footer p {
     .contact-links {
         flex-direction: column;
         gap: 15px;
+    }
+}
+
+/* Tighten the menu before the hamburger takes over, so seven links fit */
+@media (max-width: 1100px) {
+    .nav-menu {
+        gap: 0.75rem;
+    }
+
+    .nav-menu a {
+        padding: 0.5rem 0.75rem;
     }
 }
 
@@ -1819,5 +1828,331 @@ header::before {
         right: 16px;
         bottom: 16px;
         max-width: none;
+    }
+}
+
+/* ============================================================
+   Career — structural elevation (craft)
+   The career reads like an architect's section drawing: one
+   load-bearing spine, each role a floor plate hung off it,
+   current work on the top floor, education as the foundation.
+   Blue draws the structure; coral answers the cursor. All
+   linework lives in pseudo-elements so the markup stays a
+   plain reverse-chronological list.
+   ============================================================ */
+.career {
+    padding: 100px 0;
+}
+
+.career-intro {
+    font-size: 1.2rem;
+    max-width: 800px;
+    line-height: 1.8;
+    color: var(--light-text);
+    margin-bottom: 70px;
+}
+
+.career-elevation {
+    list-style: none;
+    position: relative;
+    max-width: 920px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+}
+
+/* Early, shorter roles cluster tighter — one chapter, three stops */
+.career-era--minor + .career-era--minor {
+    margin-top: -14px;
+}
+
+/* The load-bearing spine */
+.career-elevation::before {
+    content: '';
+    position: absolute;
+    left: 127px;
+    top: 30px;
+    bottom: 26px;
+    width: 2px;
+    background-color: var(--primary-color);
+}
+
+/* Still building: dashed continuation above the top floor */
+.career-elevation::after {
+    content: '';
+    position: absolute;
+    left: 127px;
+    top: -44px;
+    height: 70px;
+    width: 2px;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        var(--primary-color) 0 5px,
+        transparent 5px 11px);
+    opacity: 0.45;
+}
+
+.career-era {
+    position: relative;
+    display: grid;
+    grid-template-columns: 96px 64px 1fr;
+    align-items: start;
+}
+
+/* Level node: the column cross-section at each floor */
+.career-era::before {
+    content: '';
+    position: absolute;
+    left: 122px;
+    top: var(--node-y, 6px);
+    width: 12px;
+    height: 12px;
+    background-color: var(--primary-color);
+    z-index: 1;
+    transition: background-color 0.3s ease;
+}
+
+/* Beam: the slab line carrying the floor off the spine */
+.career-era::after {
+    content: '';
+    position: absolute;
+    left: 128px;
+    top: calc(var(--node-y, 6px) + 5px);
+    width: 32px;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: background-color 0.3s ease;
+}
+
+/* Coral on contact, per the system: structure warms under the hand */
+.career-era:hover::before,
+.career-era:hover::after {
+    background-color: var(--accent-color);
+}
+
+.career-era--major {
+    --node-y: 40px;
+}
+
+.career-era--minor {
+    --node-y: 5px;
+}
+
+.career-years {
+    grid-column: 1;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    padding-top: calc(var(--node-y, 6px) - 4px);
+}
+
+.career-plate {
+    grid-column: 3;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 32px 36px;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.3s ease;
+}
+
+.career-era:hover .career-plate {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .career-era:hover .career-plate {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.career-line {
+    grid-column: 3;
+    padding-left: 18px;
+}
+
+.career-plate h3,
+.career-line h3,
+.career-footing h3 {
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.career-plate h3 {
+    font-size: 1.35rem;
+}
+
+.career-line h3,
+.career-footing h3 {
+    font-size: 1.05rem;
+}
+
+.career-company {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--light-text);
+    margin-bottom: 14px;
+}
+
+.career-line .career-company,
+.career-footing .career-company {
+    margin-bottom: 6px;
+}
+
+.career-note {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--light-text);
+    max-width: 62ch;
+}
+
+.career-line .career-note,
+.career-footing .career-note {
+    font-size: 0.95rem;
+}
+
+/* What got built on this floor */
+.career-builds {
+    list-style: none;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: grid;
+    gap: 12px;
+}
+
+.career-builds li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--light-text);
+    max-width: 68ch;
+}
+
+/* Beam-shaped marker, echoing the structure */
+.career-builds li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 10px;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+.career-builds strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* Foundation: the degree everything above rests on */
+.career-foundation {
+    position: relative;
+    display: grid;
+    grid-template-columns: 96px 64px 1fr;
+}
+
+.career-footing {
+    grid-column: 2 / -1;
+    border-top: 3px solid var(--primary-color);
+    /* text sits clear of the column buried in the footing */
+    padding: 20px 28px 22px 64px;
+    background-color: transparent;
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(0, 99, 163, 0.08) 0 1.5px,
+        transparent 1.5px 10px);
+}
+
+[data-theme="dark"] .career-footing {
+    background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(67, 137, 185, 0.14) 0 1.5px,
+        transparent 1.5px 10px);
+}
+
+/* Entrance: floors rise into place, bottom-up state is never hidden —
+   without JS (or when the observer never fires) everything stays visible */
+@media (prefers-reduced-motion: no-preference) {
+    .career-era.reveal,
+    .career-foundation.reveal {
+        animation: career-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        animation-delay: calc(var(--reveal-i, 0) * 90ms);
+    }
+
+    @keyframes career-rise {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .career {
+        padding: 70px 0;
+    }
+
+    .career-intro {
+        margin-bottom: 50px;
+    }
+
+    .career-era,
+    .career-foundation {
+        grid-template-columns: 44px 1fr;
+    }
+
+    .career-elevation::before,
+    .career-elevation::after {
+        left: 20px;
+    }
+
+    .career-elevation::before {
+        top: 10px;
+    }
+
+    .career-era::before {
+        left: 15px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+    }
+
+    .career-era::after {
+        left: 21px;
+        top: 10px;
+        width: 23px;
+    }
+
+    /* Years become the level label above each floor */
+    .career-years {
+        grid-column: 2;
+        grid-row: 1;
+        text-align: left;
+        padding-top: 0;
+        padding-left: 8px;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+    }
+
+    .career-plate,
+    .career-line {
+        grid-column: 2;
+    }
+
+    .career-plate {
+        padding: 24px 22px;
+    }
+
+    .career-footing {
+        grid-column: 1 / -1;
+        padding: 18px 20px 20px 48px;
+    }
+
+    .career-era--minor + .career-era--minor {
+        margin-top: -6px;
     }
 }

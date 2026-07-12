@@ -155,9 +155,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Run animation check on scroll
     window.addEventListener('scroll', animateOnScroll);
-    
+
     // Run once on page load
     animateOnScroll();
+
+    // Career elevation: floors rise into place when the section scrolls in.
+    // Content is visible by default; the observer only adds the animation,
+    // so no-JS, reduced-motion, and headless renders all see the full section.
+    initCareerReveal();
     
     // Initialize the photo slider
     initPhotoSlider();
@@ -178,6 +183,30 @@ document.addEventListener('DOMContentLoaded', function() {
     initResumeNudge();
     greetInConsole();
 });
+
+/* ============================================================
+   Career elevation reveal
+   Floors rise into place, staggered top-down, the first time the
+   section scrolls into view. Progressive enhancement only: the
+   rows are fully visible without JS, and the CSS animation lives
+   behind prefers-reduced-motion: no-preference.
+   ============================================================ */
+function initCareerReveal() {
+    const elevation = document.querySelector('.career-elevation');
+    if (!elevation || !('IntersectionObserver' in window)) return;
+
+    const rows = elevation.querySelectorAll(':scope > li');
+    const io = new IntersectionObserver((entries) => {
+        if (!entries.some(entry => entry.isIntersecting)) return;
+        rows.forEach((row, i) => {
+            row.style.setProperty('--reveal-i', i);
+            row.classList.add('reveal');
+        });
+        io.disconnect();
+    }, { rootMargin: '0px 0px -12% 0px' });
+
+    io.observe(elevation);
+}
 
 /* ============================================================
    Generative architecture hero (overdrive)
