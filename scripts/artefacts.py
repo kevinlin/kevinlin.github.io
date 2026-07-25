@@ -651,8 +651,13 @@ def create_sync_plan(
             for entry in previous_manifest.entries
             if entry.destination not in next_destinations
         )
-    changed_destinations = {change.destination for change in changes}
-    for destination in sorted(deletion_candidates - changed_destinations, key=str):
+    retained_destinations = {
+        *next_manifest.protected_files,
+        PurePosixPath("index.html"),
+        PurePosixPath("manifest.json"),
+        *(change.destination for change in changes),
+    }
+    for destination in sorted(deletion_candidates - retained_destinations, key=str):
         destination_path = artefacts_root / destination.as_posix()
         if destination_path.exists():
             changes.append(Change("delete", destination))

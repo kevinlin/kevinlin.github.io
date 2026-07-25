@@ -602,6 +602,24 @@ class ApplyTests(unittest.TestCase):
         changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
         self.assertIn(("delete", "charts/removed.png"), changes)
 
+    def test_reclassified_protected_path_is_not_deleted(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["protected_files"].append("charts/existing.png")
+        payload["entries"][0]["destination"] = "charts/renamed.png"
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        self.assertNotIn(("delete", "charts/existing.png"), changes)
+
+        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+
+        self.assertEqual((repo / "artefacts/charts/existing.png").read_bytes(), b"old")
+
     def test_broken_desired_reference_fails_without_mutating_repository(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
