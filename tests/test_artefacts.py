@@ -346,5 +346,106 @@ class DesiredTreeTests(unittest.TestCase):
         self.assertEqual(desired, {})
 
 
+class CatalogueTests(unittest.TestCase):
+    def catalogue_manifest(self):
+        payload = {
+            "version": 1,
+            "protected_files": ["vendor/chart.umd.min.js"],
+            "collections": [
+                {
+                    "id": "images",
+                    "title": "Images & icons",
+                    "description": "Image <references>.",
+                    "section": "Collections",
+                    "section_order": 20,
+                    "order": 10,
+                },
+                {
+                    "id": "charts",
+                    "title": "Charts",
+                    "description": "Data charts.",
+                    "section": "Analysis",
+                    "section_order": 10,
+                    "order": 10,
+                },
+            ],
+            "entries": [
+                {
+                    "id": "image",
+                    "source": "Images/Card.png",
+                    "destination": "images/card.png",
+                    "title": "Card <image>",
+                    "collection": "images",
+                    "order": 10,
+                    "replacements": {},
+                },
+                {
+                    "id": "chart",
+                    "source": "Charts/Chart.html",
+                    "destination": "charts/chart/index.html",
+                    "title": "Chart",
+                    "collection": "charts",
+                    "order": 10,
+                    "replacements": {},
+                },
+            ],
+        }
+        return artefacts_cli.manifest_from_dict(payload)
+
+    def test_render_catalogue_orders_sections_and_escapes_text(self):
+        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
+
+        self.assertLess(rendered.index("Analysis"), rendered.index("Collections"))
+        self.assertIn("Images &amp; icons", rendered)
+        self.assertIn("Image &lt;references&gt;.", rendered)
+        self.assertIn("Card &lt;image&gt;", rendered)
+
+    def test_render_catalogue_links_html_directories_and_images_once(self):
+        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
+
+        self.assertEqual(rendered.count('href="charts/chart/"'), 1)
+        self.assertEqual(rendered.count('href="images/card.png"'), 1)
+        self.assertNotIn("vendor/chart.umd.min.js", rendered)
+
+    def test_replace_generated_catalogue_changes_only_marker_region(self):
+        document = "before\n<!-- ARTEFACTS:START -->\nold\n<!-- ARTEFACTS:END -->\nafter\n"
+
+        updated = artefacts_cli.replace_generated_catalogue(document, "new")
+
+        self.assertEqual(
+            updated,
+            "before\n<!-- ARTEFACTS:START -->\nnew\n<!-- ARTEFACTS:END -->\nafter\n",
+        )
+
+    def test_replace_generated_catalogue_rejects_missing_markers(self):
+        with self.assertRaisesRegex(artefacts_cli.CatalogueError, "exactly one"):
+            artefacts_cli.replace_generated_catalogue("no markers", "new")
+
+    def test_replace_generated_catalogue_preserves_end_marker_indentation(self):
+        document = (
+            "    <!-- ARTEFACTS:START -->\n"
+            "    old\n"
+            "    <!-- ARTEFACTS:END -->\n"
+        )
+
+        updated = artefacts_cli.replace_generated_catalogue(document, "    new")
+
+        self.assertEqual(
+            updated,
+            "    <!-- ARTEFACTS:START -->\n"
+            "    new\n"
+            "    <!-- ARTEFACTS:END -->\n",
+        )
+
+    def test_replace_generated_catalogue_rejects_duplicate_markers(self):
+        document = (
+            "<!-- ARTEFACTS:START --><!-- ARTEFACTS:START -->"
+            "<!-- ARTEFACTS:END -->"
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.CatalogueError, "exactly one"):
+            artefacts_cli.replace_generated_catalogue(document, "new")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 import hashlib
+import html
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -29,6 +30,14 @@ class InventoryError(ArtefactError):
 
 class TransformationError(ArtefactError):
     pass
+
+
+class CatalogueError(ArtefactError):
+    pass
+
+
+CATALOGUE_START = "<!-- ARTEFACTS:START -->"
+CATALOGUE_END = "<!-- ARTEFACTS:END -->"
 
 
 @dataclass(frozen=True)
@@ -354,3 +363,70 @@ def build_desired_files(
                 raise TransformationError(f"binary hash mismatch for {entry.id}")
         desired[entry.destination] = output
     return desired
+
+
+def public_href(destination: PurePosixPath) -> str:
+    if destination.name == "index.html":
+        return destination.parent.as_posix().rstrip("/") + "/"
+    return destination.as_posix()
+
+
+def render_catalogue(manifest: Manifest) -> str:
+    entries_by_collection: dict[str, list[Entry]] = {}
+    for entry in manifest.entries:
+        entries_by_collection.setdefault(entry.collection, []).append(entry)
+
+    sections: dict[tuple[int, str], list[Collection]] = {}
+    for collection in manifest.collections:
+        if entries_by_collection.get(collection.id):
+            sections.setdefault(
+                (collection.section_order, collection.section), []
+            ).append(collection)
+
+    lines: list[str] = []
+    for (_, section_title), collections in sorted(sections.items()):
+        heading_id = f"{_slug(section_title)}-heading"
+        lines.extend(
+            [
+                f'        <section aria-labelledby="{heading_id}">',
+                f'            <h2 id="{heading_id}">{html.escape(section_title)}</h2>',
+                '            <div class="card-grid">',
+            ]
+        )
+        for collection in sorted(collections, key=lambda item: item.order):
+            lines.extend(
+                [
+                    '                <article class="card">',
+                    f"                    <h3>{html.escape(collection.title)}</h3>",
+                    f"                    <p>{html.escape(collection.description)}</p>",
+                    "                    <ul>",
+                ]
+            )
+            for entry in sorted(
+                entries_by_collection[collection.id], key=lambda item: item.order
+            ):
+                href = html.escape(public_href(entry.destination), quote=True)
+                title = html.escape(entry.title)
+                lines.append(f'                        <li><a href="{href}">{title}</a></li>')
+            lines.extend(
+                [
+                    "                    </ul>",
+                    "                </article>",
+                ]
+            )
+        lines.extend(["            </div>", "        </section>"])
+    return "\n".join(lines)
+
+
+def replace_generated_catalogue(document: str, generated: str) -> str:
+    if document.count(CATALOGUE_START) != 1 or document.count(CATALOGUE_END) != 1:
+        raise CatalogueError("catalogue must contain exactly one marker pair")
+    start = document.index(CATALOGUE_START) + len(CATALOGUE_START)
+    end = document.index(CATALOGUE_END)
+    if start > end:
+        raise CatalogueError("catalogue markers are out of order")
+    end_line_start = document.rfind("\n", 0, end) + 1
+    indentation = document[end_line_start:end]
+    if indentation.strip():
+        raise CatalogueError("end marker must start on its own line")
+    return document[:start] + "\n" + generated + "\n" + indentation + document[end:]
