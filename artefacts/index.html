@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A catalogue of presentations, charts, illustrations, and visual references by Kevin Lin.">
+    <title>Artefacts | Kevin Lin</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary: #0063a3;
+            --accent: #ff5a5f;
+            --text: #2f3438;
+            --muted: #667078;
+            --surface: #ffffff;
+            --surface-subtle: #f5f7f8;
+            --border: #dde3e7;
+            --shadow: 0 8px 24px rgba(35, 48, 58, 0.08);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--surface-subtle);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--primary);
+            text-underline-offset: 0.2em;
+            transition: color 160ms ease;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        a:focus-visible {
+            border-radius: 3px;
+            outline: 3px solid rgba(0, 99, 163, 0.35);
+            outline-offset: 3px;
+        }
+
+        header,
+        main,
+        footer {
+            width: min(1120px, calc(100% - 40px));
+            margin-inline: auto;
+        }
+
+        header {
+            padding: 56px 0 30px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 28px;
+            font-weight: 600;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 12px;
+            color: #17232b;
+            font-size: clamp(2.4rem, 7vw, 4.75rem);
+            line-height: 1;
+            letter-spacing: -0.045em;
+        }
+
+        header p {
+            max-width: 680px;
+            margin-bottom: 0;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+
+        section {
+            margin-top: 34px;
+        }
+
+        section > h2 {
+            margin-bottom: 14px;
+            color: #17232b;
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            min-width: 0;
+            padding: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h3 {
+            margin-bottom: 8px;
+            color: #17232b;
+            font-size: 1.2rem;
+        }
+
+        .card p {
+            margin-bottom: 16px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .card ul {
+            display: grid;
+            gap: 9px;
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+
+        .card li::marker {
+            color: var(--primary);
+        }
+
+        footer {
+            padding: 48px 0 36px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 520px) {
+            header,
+            main,
+            footer {
+                width: min(100% - 28px, 1120px);
+            }
+
+            header {
+                padding-top: 36px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="/">Back to Kevin Lin</a>
+        <h1>Artefacts</h1>
+        <p>Presentations, charts, illustrations, and visual references collected by topic.</p>
+    </header>
+
+    <main>
+        <section aria-labelledby="presentations-heading">
+            <h2 id="presentations-heading">Presentations and analysis</h2>
+            <div class="card-grid">
+                <article class="card">
+                    <h3>Snapdragon product line</h3>
+                    <p>A visual timeline of the Snapdragon 7 Series.</p>
+                    <ul>
+                        <li><a href="snapdragon-product-line/">Snapdragon 7 Series timeline</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>LLM effort level vs. performance</h3>
+                    <p>Interactive comparisons and supporting charts for model intelligence, cost, tokens, and effort.</p>
+                    <ul>
+                        <li><a href="llm-effort-level-vs-performance/intelligence-index/">Intelligence index</a></li>
+                        <li><a href="llm-effort-level-vs-performance/swe-bench-pro-by-lab/">SWE-bench Pro by lab</a></li>
+                        <li><a href="llm-effort-level-vs-performance/intelligence-index-chart.png">Intelligence index chart</a></li>
+                        <li><a href="llm-effort-level-vs-performance/gpt-5-6-average-cost-per-task.png">GPT-5.6 average cost per task</a></li>
+                        <li><a href="llm-effort-level-vs-performance/gpt-5-6-average-output-tokens-per-task.png">GPT-5.6 average output tokens per task</a></li>
+                        <li><a href="llm-effort-level-vs-performance/sonnet-5-effort-dial-truth.png">Sonnet 5 effort dial</a></li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section aria-labelledby="collections-heading">
+            <h2 id="collections-heading">Image collections</h2>
+            <div class="card-grid">
+                <article class="card">
+                    <h3>GPT-5.6</h3>
+                    <p>A visual recap of its first five days.</p>
+                    <ul>
+                        <li><a href="gpt-5-6/first-five-days.png">The first five days</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>Claude Code</h3>
+                    <p>Visual explainers and a keyboard shortcuts reference.</p>
+                    <ul>
+                        <li><a href="claude-code/the-claude-code-leak.jpeg">The Claude Code leak</a></li>
+                        <li><a href="claude-code/how-claude-code-leaked.jpeg">How Claude Code leaked</a></li>
+                        <li><a href="claude-code/shortcuts-cheatsheet.jpeg">Shortcuts cheatsheet</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>Peter Steinberger: human taste</h3>
+                    <p>Two excerpts on the role of human judgment.</p>
+                    <ul>
+                        <li><a href="peter-steinberger-human-taste/human-taste-1.png">Human taste, part 1</a></li>
+                        <li><a href="peter-steinberger-human-taste/human-taste-2.png">Human taste, part 2</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>People Lead lifecycle</h3>
+                    <p>Activities across the People Lead lifecycle.</p>
+                    <ul>
+                        <li><a href="people-lead-lifecycle/activities.png">Lifecycle activities</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>AI trend slop</h3>
+                    <p>A visual note on vague AI trend language.</p>
+                    <ul>
+                        <li><a href="ai-trend-slop/when-ai-gives-you-buzzwords.png">When AI gives you buzzwords</a></li>
+                    </ul>
+                </article>
+
+                <article class="card">
+                    <h3>Flow Fabric</h3>
+                    <p>Application icons in browser, mobile, and high-resolution sizes.</p>
+                    <ul>
+                        <li><a href="flow-fabric/icons/apple-touch-icon.png">Apple touch icon</a></li>
+                        <li><a href="flow-fabric/icons/favicon-16.png">16 px favicon</a></li>
+                        <li><a href="flow-fabric/icons/favicon-32.png">32 px favicon</a></li>
+                        <li><a href="flow-fabric/icons/favicon-64.png">64 px favicon</a></li>
+                        <li><a href="flow-fabric/icons/favicon.ico">ICO favicon</a></li>
+                        <li><a href="flow-fabric/icons/flow-fabric-icon-192.png">192 px icon</a></li>
+                        <li><a href="flow-fabric/icons/flow-fabric-icon-256.png">256 px icon</a></li>
+                        <li><a href="flow-fabric/icons/flow-fabric-icon-512.png">512 px icon</a></li>
+                        <li><a href="flow-fabric/icons/flow-fabric-icon-1024.png">1024 px icon</a></li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>All files listed here are public and downloadable.</p>
+    </footer>
+</body>
+</html>
