@@ -1,0 +1,102 @@
+<div style="background: #fcfcfb; border: 0.5px solid rgba(11,11,11,0.10); border-radius: 12px; padding: 1.25rem 1.25rem 0.5rem;">
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 12px; color: #52514e;">
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #eb6834;"></span>Claude</span>
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #1baf7a;"></span>GPT</span>
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #2a78d6;"></span>Gemini</span>
+  </div>
+  <div style="position: relative; width: 100%; height: 380px;">
+    <canvas id="sweBenchBarChart4" role="img" aria-label="Bar chart of SWE-Bench Pro scores across nine AI models ordered by release date, newest on the left to oldest on the right, color-coded by lab: orange for Claude, teal for GPT, blue for Gemini. Claude Sonnet 5, June 30 2026, 63.2 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. GPT-5.6 Terra, June 26 2026, 63.4 percent. GPT-5.6 Luna, June 26 2026, 62.7 percent. Claude Fable 5, June 9 2026, 80 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. GPT-5.5, April 23 2026, 59.4 percent. Claude Mythos Preview, April 7 2026, 77.8 percent. Gemini 3.1 Pro Preview, February 19 2026, 54.2 percent.">SWE-Bench Pro by model with release dates: Sonnet 5 (Jun 30) 63.2%, Sol (Jun 26) 64.6%, Terra (Jun 26) 63.4%, Luna (Jun 26) 62.7%, Fable 5 (Jun 9) 80%, Opus 4.8 (May 28) 69.2%, GPT-5.5 (Apr 23) 59.4%, Mythos Preview (Apr 7) 77.8%, Gemini 3.1 Pro Preview (Feb 19) 54.2%. All dates 2026.</canvas>
+  </div>
+</div>
+<script src="../../vendor/chart.umd.min.js"></script>
+<script>
+var labels = [
+  ['Sonnet 5', 'Jun 30'],
+  ['Sol', 'Jun 26'],
+  ['Terra', 'Jun 26'],
+  ['Luna', 'Jun 26'],
+  ['Fable 5', 'Jun 9'],
+  ['Opus 4.8', 'May 28'],
+  ['GPT-5.5', 'Apr 23'],
+  ['Mythos', 'Preview', 'Apr 7'],
+  ['Gemini', '3.1 Pro', 'Feb 19']
+];
+var fullNames = [
+  'Claude Sonnet 5',
+  'GPT-5.6 Sol',
+  'GPT-5.6 Terra',
+  'GPT-5.6 Luna',
+  'Claude Fable 5',
+  'Claude Opus 4.8',
+  'GPT-5.5',
+  'Claude Mythos Preview',
+  'Gemini 3.1 Pro Preview'
+];
+var scores = [63.2, 64.6, 63.4, 62.7, 80, 69.2, 59.4, 77.8, 54.2];
+var colors = ['#eb6834', '#1baf7a', '#1baf7a', '#1baf7a', '#eb6834', '#eb6834', '#1baf7a', '#eb6834', '#2a78d6'];
+
+var valueLabelsPlugin = {
+  id: 'valueLabels',
+  afterDatasetsDraw: function(chart) {
+    var ctx = chart.ctx;
+    var meta = chart.getDatasetMeta(0);
+    meta.data.forEach(function(bar, index) {
+      var value = scores[index];
+      if (value === null || value === undefined) return;
+      ctx.save();
+      ctx.fillStyle = '#0b0b0b';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(value + '%', bar.x, bar.y - 4);
+      ctx.restore();
+    });
+  }
+};
+
+new Chart(document.getElementById('sweBenchBarChart4'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: scores,
+      backgroundColor: colors,
+      borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+      maxBarThickness: 24
+    }]
+  },
+  plugins: [valueLabelsPlugin],
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: function(items) {
+            return fullNames[items[0].dataIndex];
+          },
+          label: function(item) {
+            return item.parsed.y === null ? 'No data reported' : item.parsed.y + '% SWE-Bench Pro';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, color: '#898781', font: { size: 11 } },
+        grid: { display: false },
+        border: { color: '#c3c2b7' }
+      },
+      y: {
+        min: 0,
+        max: 95,
+        ticks: { stepSize: 10, color: '#898781', font: { size: 11 }, callback: function(value) { return value + '%'; } },
+        grid: { color: '#e1e0d9' },
+        border: { display: false }
+      }
+    }
+  }
+});
+</script>

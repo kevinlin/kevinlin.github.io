@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+window.contextInfo = {};
+// 处理锚点链接跳转（srcDoc iframe 中锚点链接默认行为不正确）
+document.addEventListener('click', function(e) {
+  var anchor = e.target.closest('a');
+  if (anchor) {
+    var href = anchor.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      var targetId = href.slice(1);
+      var target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+});
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualcomm Snapdragon 7 Series Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.95;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .timeline-container {
+            position: relative;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 20px 0;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            min-width: 3600px;
+            padding-left: 220px;
+            padding-right: 40px;
+        }
+
+        .branch-labels {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 220px;
+            z-index: 10;
+            background: white;
+        }
+
+        .branch-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .branch-label.main-gen {
+            height: 160px;
+            background: rgba(156, 39, 176, 0.03);
+        }
+
+        .branch-label.variants {
+            height: 550px;
+        }
+
+        .branch-label.plus {
+            height: 140px;
+        }
+
+        .branch-label .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        svg {
+            display: block;
+        }
+
+        .chip-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chip-card:hover .chip-rect {
+            filter: brightness(1.2);
+            stroke: #333;
+            stroke-width: 2;
+        }
+
+        .chip-card:hover .chip-name {
+            font-weight: 700;
+        }
+
+        .legend {
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-line {
+            width: 40px;
+            height: 2px;
+            background: #666;
+        }
+
+        .legend-arrow {
+            width: 40px;
+            height: 2px;
+            background: transparent;
+            border-top: 2px dashed #666;
+            position: relative;
+        }
+
+        .legend-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -8px;
+            top: -9px;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .legend-arrow.cross-lane {
+            border-top: 2px dashed rgba(156, 39, 176, 0.5);
+        }
+
+        .legend-arrow.cross-lane::after {
+            color: rgba(156, 39, 176, 0.5);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔷 Qualcomm Snapdragon 7 Series Timeline</h1>
+            <p>All dates are announcement dates. Lifespan ends at the launch of the next clear successor in the same branch. Present = as of May 1, 2026.</p>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-wrapper">
+                <div class="branch-labels">
+                    <div class="branch-label main-gen" style="color: #9C27B0;">
+                        <span class="emoji">💎</span>
+                        <span>Main Gen<br><small style="font-size: 0.75em; font-weight: 400; opacity: 0.8;">(Primary Lineage)</small></span>
+                    </div>
+                    <div class="branch-label variants" style="color: #333;">
+                        <span class="emoji">🔀</span>
+                        <span>Family Variants<br><small style="font-size: 0.75em; font-weight: 400; opacity: 0.8;">(Incremental Upgrades)</small></span>
+                    </div>
+                    <div class="branch-label plus" style="color: #00BCD4;">
+                        <span class="emoji">⭐</span>
+                        <span>Plus Branch<br><small style="font-size: 0.75em; font-weight: 400; opacity: 0.8;">(High Performance)</small></span>
+                    </div>
+                </div>
+
+                <svg id="timeline-svg" width="3400" height="950"></svg>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9C27B0;"></div>
+                    <span>Main Gen (Primary Lineage)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196F3;"></div>
+                    <span>710 Variants</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>730 Variants</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF9800;"></div>
+                    <span>765 Variants</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #E91E63;"></div>
+                    <span>778/780 Variants</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #795548;"></div>
+                    <span>S Series (Budget)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00BCD4;"></div>
+                    <span>Plus Branch</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line"></div>
+                    <span>Lifespan window</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-arrow"></div>
+                    <span>Within-lane inheritance</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-arrow cross-lane"></div>
+                    <span>Cross-lane derivation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Configuration
+        const SVG_WIDTH = 3400;
+        const SVG_HEIGHT = 950;
+        const LANE_HEIGHTS = [160, 550, 140]; // Main Gen, Family Variants, Plus
+        const SUB_LANE_HEIGHT = 110; // Height of each sub-lane in Family Variants
+        const MARGIN_TOP = 80;
+        const MARGIN_BOTTOM = 20;
+        const MARGIN_LEFT = 0;
+        const MARGIN_RIGHT = 40;
+
+        // Time scale configuration
+        const START_DATE = new Date('2018-01-01');
+        const END_DATE = new Date('2026-12-31');
+        const PRESENT_DATE = new Date('2026-05-01');
+        const TIMELINE_WIDTH = SVG_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
+
+        // Calculate pixels per day
+        const TOTAL_DAYS = (END_DATE - START_DATE) / (1000 * 60 * 60 * 24);
+        const PIXELS_PER_DAY = TIMELINE_WIDTH / TOTAL_DAYS;
+
+        // Convert date to X position
+        function dateToX(dateString) {
+            const date = new Date(dateString);
+            const days = (date - START_DATE) / (1000 * 60 * 60 * 24);
+            return MARGIN_LEFT + (days * PIXELS_PER_DAY);
+        }
+
+        // Branch colors
+        const BRANCH_COLORS = {
+            'main': '#9C27B0',      // Main Gen - purple
+            '710': '#2196F3',       // 710 variants - blue
+            '730': '#4CAF50',       // 730 variants - green
+            '765': '#FF9800',       // 765 variants - orange
+            '778': '#E91E63',       // 778/780 variants - pink
+            's': '#795548',         // S series - brown
+            'plus': '#00BCD4'       // Plus branch - cyan
+        };
+
+        // Helper function to get Y position for a chip
+        function getChipY(lane, subLane, offset = 0) {
+            let baseY = MARGIN_TOP;
+
+            // Add heights of previous lanes
+            for (let i = 0; i < lane; i++) {
+                baseY += LANE_HEIGHTS[i];
+            }
+
+            // For Family Variants lane (lane 1), add sub-lane offset
+            if (lane === 1) {
+                baseY += (subLane * SUB_LANE_HEIGHT) + (SUB_LANE_HEIGHT / 2);
+            } else {
+                baseY += (LANE_HEIGHTS[lane] / 2);
+            }
+
+            return baseY + offset;
+        }
+
+        // SoC Data
+        // lane: 0 = Main Gen, 1 = Family Variants, 2 = Plus
+        // subLane (for Family Variants only): 0 = 710, 1 = 730, 2 = 765, 3 = 778, 4 = S
+        const socs = [
+            // Lane 0: Main Gen (Primary Lineage)
+            { name: 'Snapdragon 710', model: 'SDM710', date: '2018-05-23', branch: 'main', lane: 0, specs: '10nm | 2×A75+6×A55 | Adreno 616 | X15 LTE' },
+            { name: 'Snapdragon 730/730G', model: 'SM7150', date: '2019-04-09', branch: 'main', lane: 0, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+            { name: 'Snapdragon 765/765G', model: 'SM7250', date: '2019-12-04', branch: 'main', lane: 0, specs: '7nm | 1+1+6 A76/A55 | Adreno 620 | X52 5G' },
+            { name: 'Snapdragon 780G', model: 'SM7350', date: '2021-03-25', branch: 'main', lane: 0, specs: '5nm | 1+3+4 A78/A55 | Adreno 642 | X53 5G' },
+            { name: 'Snapdragon 7 Gen 1', model: 'SM7450', date: '2022-05-20', branch: 'main', lane: 0, specs: '4nm | 1+3+4 A710/A510 | Adreno 644 | X62 5G' },
+            { name: 'Snapdragon 7 Gen 3', model: 'SM7550', date: '2023-11-17', branch: 'main', lane: 0, specs: '4nm | 1+3+4 A715/A510 | Adreno 720 | X63 5G' },
+            { name: 'Snapdragon 7 Gen 4', model: 'SM7750-AB', date: '2025-05-15', branch: 'main', lane: 0, specs: '4nm | 1+4+3 A720/A520 | Adreno 722 | 5G' },
+
+            // Lane 1: Family Variants - Sub-lane A: 710 variants (subLane 0)
+            { name: 'Snapdragon 712', model: 'SDM712', date: '2019-02-06', branch: '710', lane: 1, subLane: 0, specs: '10nm | 2×A75+6×A55 | Adreno 616 | X15 LTE' },
+            { name: 'Snapdragon 720G', model: 'SM7125', date: '2020-01-20', branch: '710', lane: 1, subLane: 0, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+
+            // Lane 1: Family Variants - Sub-lane B: 730 variants (subLane 1)
+            { name: 'Snapdragon 732G', model: 'SM7150-AC', date: '2020-08-31', branch: '730', lane: 1, subLane: 1, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+            { name: 'Snapdragon 750G', model: 'SM7225', date: '2020-09-22', branch: '730', lane: 1, subLane: 1, specs: '8nm | 2×A77+6×A55 | Adreno 619 | X52 5G' },
+
+            // Lane 1: Family Variants - Sub-lane C: 765 variants (subLane 2)
+            { name: 'Snapdragon 768G', model: 'SM7250-AC', date: '2020-05-10', branch: '765', lane: 1, subLane: 2, specs: '7nm | 1+1+6 A76/A55 | Adreno 620 | X52 5G' },
+
+            // Lane 1: Family Variants - Sub-lane D: 778/780 variants (subLane 3)
+            { name: 'Snapdragon 778G/778G+', model: 'SM7325', date: '2021-05-19', branch: '778', lane: 1, subLane: 3, specs: '6nm | 1+3+4 A78/A55 | Adreno 642L | X53 5G' },
+            { name: 'Snapdragon 782G', model: 'SM7325-AF', date: '2022-11-23', branch: '778', lane: 1, subLane: 3, specs: '6nm | 1+3+4 A78/A55 | Adreno 642L | X53 5G' },
+
+            // Lane 1: Family Variants - Sub-lane E: S series (subLane 4)
+            { name: 'Snapdragon 6 Gen 1', model: 'SM6450', date: '2022-09-06', branch: 's', lane: 1, subLane: 4, specs: '4nm | 4×A78+4×A55 | Adreno 710 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 2', model: 'SM7435', date: '2023-09-15', branch: 's', lane: 1, subLane: 4, specs: '4nm | 4×A78+4×A55 | Adreno 710 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 3', model: 'SM7635', date: '2024-08-20', branch: 's', lane: 1, subLane: 4, specs: '4nm | 1+3+4 A720/A520 | Adreno 810 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 4', model: 'SM7635-AC', date: '2025-08-19', branch: 's', lane: 1, subLane: 4, specs: '4nm | 1+3+4 A720/A520 | Adreno 810 | X62 5G' },
+
+            // Lane 2: Plus Branch
+            { name: 'Snapdragon 7+ Gen 2', model: 'SM7475', date: '2023-03-17', branch: 'plus', lane: 2, specs: '4nm | 1+3+4 X2/A710/A510 | Adreno 725 | 5G' },
+            { name: 'Snapdragon 7+ Gen 3', model: 'SM7675', date: '2024-03-21', branch: 'plus', lane: 2, specs: '4nm | 1+4+3 X4/A720/A520 | Adreno 732 | 5G' }
+        ];
+
+        // Within-lane inheritance arrows
+        const inheritances = [
+            // Main Gen (lane 0)
+            { from: 'Snapdragon 710', to: 'Snapdragon 730/730G', type: 'within' },
+            { from: 'Snapdragon 730/730G', to: 'Snapdragon 765/765G', type: 'within' },
+            { from: 'Snapdragon 765/765G', to: 'Snapdragon 780G', type: 'within' },
+            { from: 'Snapdragon 780G', to: 'Snapdragon 7 Gen 1', type: 'within' },
+            { from: 'Snapdragon 7 Gen 1', to: 'Snapdragon 7 Gen 3', type: 'within' },
+            { from: 'Snapdragon 7 Gen 3', to: 'Snapdragon 7 Gen 4', type: 'within' },
+
+            // 710 variants (lane 1, subLane 0)
+            { from: 'Snapdragon 712', to: 'Snapdragon 720G', type: 'within' },
+
+            // 730 variants (lane 1, subLane 1)
+            // No inheritance - 732G and 750G are standalone variants
+
+            // 765 variants (lane 1, subLane 2)
+            // 768G is standalone
+
+            // 778/780 variants (lane 1, subLane 3)
+            { from: 'Snapdragon 778G/778G+', to: 'Snapdragon 782G', type: 'within' },
+
+            // S series (lane 1, subLane 4)
+            { from: 'Snapdragon 6 Gen 1', to: 'Snapdragon 7s Gen 2', type: 'within' },
+            { from: 'Snapdragon 7s Gen 2', to: 'Snapdragon 7s Gen 3', type: 'within' },
+            { from: 'Snapdragon 7s Gen 3', to: 'Snapdragon 7s Gen 4', type: 'within' },
+
+            // Plus branch (lane 2)
+            { from: 'Snapdragon 7+ Gen 2', to: 'Snapdragon 7+ Gen 3', type: 'within' }
+        ];
+
+        // Cross-lane derivation arrows (main gen to variants)
+        const crossLaneArrows = [
+            { from: 'Snapdragon 710', to: 'Snapdragon 712' },
+            { from: 'Snapdragon 730/730G', to: 'Snapdragon 732G' },
+            { from: 'Snapdragon 765/765G', to: 'Snapdragon 768G' },
+            { from: 'Snapdragon 780G', to: 'Snapdragon 778G/778G+' },
+            { from: 'Snapdragon 6 Gen 1', to: 'Snapdragon 7s Gen 2' }
+        ];
+
+        // Create SVG
+        const svg = document.getElementById('timeline-svg');
+        const NS = 'http://www.w3.org/2000/svg';
+
+        // Create defs for arrowheads
+        const defs = document.createElementNS(NS, 'defs');
+
+        // Within-lane arrowhead
+        const marker = document.createElementNS(NS, 'marker');
+        marker.setAttribute('id', 'arrowhead');
+        marker.setAttribute('markerWidth', '10');
+        marker.setAttribute('markerHeight', '10');
+        marker.setAttribute('refX', '9');
+        marker.setAttribute('refY', '3');
+        marker.setAttribute('orient', 'auto');
+        const polygon = document.createElementNS(NS, 'polygon');
+        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+        polygon.setAttribute('fill', '#666');
+        marker.appendChild(polygon);
+        defs.appendChild(marker);
+
+        // Cross-lane arrowhead (more visible)
+        const markerCross = document.createElementNS(NS, 'marker');
+        markerCross.setAttribute('id', 'arrowhead-cross');
+        markerCross.setAttribute('markerWidth', '10');
+        markerCross.setAttribute('markerHeight', '10');
+        markerCross.setAttribute('refX', '9');
+        markerCross.setAttribute('refY', '3');
+        markerCross.setAttribute('orient', 'auto');
+        const polygonCross = document.createElementNS(NS, 'polygon');
+        polygonCross.setAttribute('points', '0 0, 10 3, 0 6');
+        polygonCross.setAttribute('fill', 'rgba(156, 39, 176, 0.5)');
+        markerCross.appendChild(polygonCross);
+        defs.appendChild(markerCross);
+
+        svg.appendChild(defs);
+
+        // Draw grid lines and axis
+        function drawGrid() {
+            const g = document.createElementNS(NS, 'g');
+            g.setAttribute('id', 'grid');
+
+            // Draw vertical grid lines for quarters
+            for (let year = 2018; year <= 2026; year++) {
+                for (let quarter = 1; quarter <= 4; quarter++) {
+                    let month, day;
+                    if (quarter === 1) { month = 3; day = 31; }
+                    else if (quarter === 2) { month = 6; day = 30; }
+                    else if (quarter === 3) { month = 9; day = 30; }
+                    else { month = 12; day = 31; }
+
+                    const date = `${year}-${String(month).padStart(2, '0')}-${day}`;
+                    const x = dateToX(date);
+
+                    // Grid line
+                    const line = document.createElementNS(NS, 'line');
+                    line.setAttribute('x1', x);
+                    line.setAttribute('y1', MARGIN_TOP - 20);
+                    line.setAttribute('x2', x);
+                    line.setAttribute('y2', SVG_HEIGHT - MARGIN_BOTTOM);
+                    line.setAttribute('stroke', '#e0e0e0');
+                    line.setAttribute('stroke-width', '1');
+                    g.appendChild(line);
+
+                    // Quarter tick mark
+                    const tick = document.createElementNS(NS, 'line');
+                    tick.setAttribute('x1', x);
+                    tick.setAttribute('y1', MARGIN_TOP - 20);
+                    tick.setAttribute('x2', x);
+                    tick.setAttribute('y2', MARGIN_TOP - 10);
+                    tick.setAttribute('stroke', '#666');
+                    tick.setAttribute('stroke-width', '2');
+                    g.appendChild(tick);
+
+                    // Quarter label
+                    const label = document.createElementNS(NS, 'text');
+                    label.setAttribute('x', x);
+                    label.setAttribute('y', MARGIN_TOP - 25);
+                    label.setAttribute('text-anchor', 'middle');
+                    label.setAttribute('font-size', '10');
+                    label.setAttribute('fill', '#999');
+                    label.textContent = `Q${quarter}`;
+                    g.appendChild(label);
+                }
+            }
+
+            // Draw year labels
+            for (let year = 2018; year <= 2026; year++) {
+                const date = `${year}-01-01`;
+                const x = dateToX(date);
+
+                // Year label
+                const label = document.createElementNS(NS, 'text');
+                label.setAttribute('x', x);
+                label.setAttribute('y', MARGIN_TOP - 40);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('font-size', '16');
+                label.setAttribute('font-weight', 'bold');
+                label.setAttribute('fill', '#333');
+                label.textContent = year;
+                g.appendChild(label);
+
+                // Year tick mark
+                const tick = document.createElementNS(NS, 'line');
+                tick.setAttribute('x1', x);
+                tick.setAttribute('y1', MARGIN_TOP - 20);
+                tick.setAttribute('x2', x);
+                tick.setAttribute('y2', MARGIN_TOP - 5);
+                tick.setAttribute('stroke', '#333');
+                tick.setAttribute('stroke-width', '3');
+                g.appendChild(tick);
+            }
+
+            // Draw horizontal lane separators and background
+            let currentY = MARGIN_TOP;
+
+            // Main Gen lane background (light purple tint)
+            const mainGenBg = document.createElementNS(NS, 'rect');
+            mainGenBg.setAttribute('x', MARGIN_LEFT);
+            mainGenBg.setAttribute('y', currentY);
+            mainGenBg.setAttribute('width', SVG_WIDTH - MARGIN_RIGHT);
+            mainGenBg.setAttribute('height', LANE_HEIGHTS[0]);
+            mainGenBg.setAttribute('fill', 'rgba(156, 39, 176, 0.03)');
+            g.appendChild(mainGenBg);
+
+            // Top of Main Gen lane
+            let line = document.createElementNS(NS, 'line');
+            line.setAttribute('x1', MARGIN_LEFT);
+            line.setAttribute('y1', currentY);
+            line.setAttribute('x2', SVG_WIDTH - MARGIN_RIGHT);
+            line.setAttribute('y2', currentY);
+            line.setAttribute('stroke', '#e0e0e0');
+            line.setAttribute('stroke-width', '2');
+            g.appendChild(line);
+
+            // Bottom of Main Gen / Top of Family Variants
+            currentY += LANE_HEIGHTS[0];
+            line = document.createElementNS(NS, 'line');
+            line.setAttribute('x1', MARGIN_LEFT);
+            line.setAttribute('y1', currentY);
+            line.setAttribute('x2', SVG_WIDTH - MARGIN_RIGHT);
+            line.setAttribute('y2', currentY);
+            line.setAttribute('stroke', '#9C27B0');
+            line.setAttribute('stroke-width', '3');
+            g.appendChild(line);
+
+            // Sub-lanes within Family Variants
+            for (let i = 1; i <= 4; i++) {
+                currentY += SUB_LANE_HEIGHT;
+                line = document.createElementNS(NS, 'line');
+                line.setAttribute('x1', MARGIN_LEFT);
+                line.setAttribute('y1', currentY);
+                line.setAttribute('x2', SVG_WIDTH - MARGIN_RIGHT);
+                line.setAttribute('y2', currentY);
+                line.setAttribute('stroke', '#e0e0e0');
+                line.setAttribute('stroke-width', '1');
+                line.setAttribute('stroke-dasharray', '5,5');
+                line.setAttribute('opacity', '0.5');
+                g.appendChild(line);
+            }
+
+            // Bottom of Family Variants / Top of Plus
+            currentY += SUB_LANE_HEIGHT;
+            line = document.createElementNS(NS, 'line');
+            line.setAttribute('x1', MARGIN_LEFT);
+            line.setAttribute('y1', currentY);
+            line.setAttribute('x2', SVG_WIDTH - MARGIN_RIGHT);
+            line.setAttribute('y2', currentY);
+            line.setAttribute('stroke', '#e0e0e0');
+            line.setAttribute('stroke-width', '2');
+            g.appendChild(line);
+
+            // Bottom of Plus
+            currentY += LANE_HEIGHTS[2];
+            line = document.createElementNS(NS, 'line');
+            line.setAttribute('x1', MARGIN_LEFT);
+            line.setAttribute('y1', currentY);
+            line.setAttribute('x2', SVG_WIDTH - MARGIN_RIGHT);
+            line.setAttribute('y2', currentY);
+            line.setAttribute('stroke', '#e0e0e0');
+            line.setAttribute('stroke-width', '1');
+            g.appendChild(line);
+
+            svg.appendChild(g);
+        }
+
+        // Draw lifespan bars
+        function drawLifespanBars() {
+            const g = document.createElementNS(NS, 'g');
+            g.setAttribute('id', 'lifespan-bars');
+
+            // Group SOCs by branch and subLane
+            const branchGroups = {};
+            socs.forEach(soc => {
+                const key = soc.lane === 1 ? `${soc.branch}-${soc.subLane}` : soc.branch;
+                if (!branchGroups[key]) branchGroups[key] = [];
+                branchGroups[key].push(soc);
+            });
+
+            // For each branch group, draw lifespan bars
+            Object.values(branchGroups).forEach(group => {
+                group.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                group.forEach((soc, index) => {
+                    const startX = dateToX(soc.date);
+                    let endX;
+
+                    // If there's a next SOC in the same branch, end at its date
+                    if (index < group.length - 1) {
+                        endX = dateToX(group[index + 1].date);
+                    } else {
+                        // Otherwise, end at present date
+                        endX = dateToX(PRESENT_DATE.toISOString().split('T')[0]);
+                    }
+
+                    const y = getChipY(soc.lane, soc.subLane || 0, soc.offset || 0);
+                    const color = BRANCH_COLORS[soc.branch];
+
+                    // Draw lifespan bar
+                    const line = document.createElementNS(NS, 'line');
+                    line.setAttribute('x1', startX);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', endX);
+                    line.setAttribute('y2', y);
+                    line.setAttribute('stroke', color);
+                    line.setAttribute('stroke-width', '4');
+                    line.setAttribute('opacity', '0.3');
+                    g.appendChild(line);
+                });
+            });
+
+            svg.appendChild(g);
+        }
+
+        // Draw inheritance arrows
+        function drawInheritanceArrows() {
+            const g = document.createElementNS(NS, 'g');
+            g.setAttribute('id', 'inheritance-arrows');
+
+            // Within-lane arrows
+            inheritances.forEach(inheritance => {
+                const fromSoc = socs.find(s => s.name === inheritance.from);
+                const toSoc = socs.find(s => s.name === inheritance.to);
+
+                if (fromSoc && toSoc) {
+                    const x1 = dateToX(fromSoc.date);
+                    const x2 = dateToX(toSoc.date);
+                    const y1 = getChipY(fromSoc.lane, fromSoc.subLane || 0, fromSoc.offset || 0);
+                    const y2 = getChipY(toSoc.lane, toSoc.subLane || 0, toSoc.offset || 0);
+
+                    const path = document.createElementNS(NS, 'path');
+                    const midX = (x1 + x2) / 2;
+                    const d = `M ${x1} ${y1} Q ${midX} ${y1}, ${midX} ${(y1 + y2) / 2} T ${x2} ${y2}`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('stroke', '#666');
+                    path.setAttribute('stroke-width', '2');
+                    path.setAttribute('stroke-dasharray', '5,5');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('marker-end', 'url(#arrowhead)');
+                    path.setAttribute('opacity', '0.5');
+                    g.appendChild(path);
+                }
+            });
+
+            // Cross-lane arrows (more visible with purple color)
+            crossLaneArrows.forEach(arrow => {
+                const fromSoc = socs.find(s => s.name === arrow.from);
+                const toSoc = socs.find(s => s.name === arrow.to);
+
+                if (fromSoc && toSoc) {
+                    const x1 = dateToX(fromSoc.date);
+                    const x2 = dateToX(toSoc.date);
+                    const y1 = getChipY(fromSoc.lane, fromSoc.subLane || 0, fromSoc.offset || 0);
+                    const y2 = getChipY(toSoc.lane, toSoc.subLane || 0, toSoc.offset || 0);
+
+                    const path = document.createElementNS(NS, 'path');
+                    const midX = (x1 + x2) / 2;
+                    const d = `M ${x1} ${y1} Q ${midX} ${y1}, ${midX} ${(y1 + y2) / 2} T ${x2} ${y2}`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('stroke', 'rgba(156, 39, 176, 0.5)');
+                    path.setAttribute('stroke-width', '2');
+                    path.setAttribute('stroke-dasharray', '4,4');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('marker-end', 'url(#arrowhead-cross)');
+                    path.setAttribute('opacity', '0.5');
+                    g.appendChild(path);
+                }
+            });
+
+            svg.appendChild(g);
+        }
+
+        // Draw SOC chips
+        function drawChips() {
+            const g = document.createElementNS(NS, 'g');
+            g.setAttribute('id', 'chips');
+
+            socs.forEach(soc => {
+                const x = dateToX(soc.date);
+                const y = getChipY(soc.lane, soc.subLane || 0, soc.offset || 0);
+                const color = BRANCH_COLORS[soc.branch];
+
+                const chipGroup = document.createElementNS(NS, 'g');
+                chipGroup.setAttribute('class', 'chip-card');
+
+                // Chip rectangle (pill) - increased height to accommodate model number
+                const rect = document.createElementNS(NS, 'rect');
+                rect.setAttribute('x', x - 90);
+                rect.setAttribute('y', y - 30);
+                rect.setAttribute('width', '180');
+                rect.setAttribute('height', '70');
+                rect.setAttribute('rx', '8');
+                rect.setAttribute('ry', '8');
+                rect.setAttribute('fill', color);
+                rect.setAttribute('class', 'chip-rect');
+                chipGroup.appendChild(rect);
+
+                // Chip name
+                const nameText = document.createElementNS(NS, 'text');
+                nameText.setAttribute('x', x);
+                nameText.setAttribute('y', y - 13);
+                nameText.setAttribute('text-anchor', 'middle');
+                nameText.setAttribute('font-size', '13');
+                nameText.setAttribute('font-weight', '600');
+                nameText.setAttribute('fill', 'white');
+                nameText.setAttribute('class', 'chip-name');
+                nameText.textContent = soc.name;
+                chipGroup.appendChild(nameText);
+
+                // Model number (platform ID)
+                const modelText = document.createElementNS(NS, 'text');
+                modelText.setAttribute('x', x);
+                modelText.setAttribute('y', y - 1);
+                modelText.setAttribute('text-anchor', 'middle');
+                modelText.setAttribute('font-size', '9');
+                modelText.setAttribute('fill', 'white');
+                modelText.setAttribute('opacity', '0.75');
+                modelText.textContent = soc.model;
+                chipGroup.appendChild(modelText);
+
+                // Chip specs
+                const specsText = document.createElementNS(NS, 'text');
+                specsText.setAttribute('x', x);
+                specsText.setAttribute('y', y + 13);
+                specsText.setAttribute('text-anchor', 'middle');
+                specsText.setAttribute('font-size', '9');
+                specsText.setAttribute('fill', 'white');
+                specsText.setAttribute('opacity', '0.9');
+                specsText.textContent = soc.specs;
+                chipGroup.appendChild(specsText);
+
+                // Launch date below
+                const dateText = document.createElementNS(NS, 'text');
+                dateText.setAttribute('x', x);
+                dateText.setAttribute('y', y + 45);
+                dateText.setAttribute('text-anchor', 'middle');
+                dateText.setAttribute('font-size', '10');
+                dateText.setAttribute('fill', '#666');
+                dateText.textContent = soc.date;
+                chipGroup.appendChild(dateText);
+
+                // Add hover effect
+                chipGroup.addEventListener('mouseenter', (e) => {
+                    const tooltip = document.getElementById('tooltip');
+                    let tooltipText = `${soc.name} - ${soc.date}`;
+                    // Add special note for 7s Gen 2
+                    if (soc.name === 'Snapdragon 7s Gen 2') {
+                        tooltipText += ' | Same die as SD 6 Gen 1 (TechInsights)';
+                    }
+                    tooltip.textContent = tooltipText;
+                    tooltip.style.display = 'block';
+                });
+
+                chipGroup.addEventListener('mousemove', (e) => {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+
+                chipGroup.addEventListener('mouseleave', () => {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.style.display = 'none';
+                });
+
+                g.appendChild(chipGroup);
+            });
+
+            svg.appendChild(g);
+        }
+
+        // Initialize timeline
+        function initTimeline() {
+            drawGrid();
+            drawLifespanBars();
+            drawInheritanceArrows();
+            drawChips();
+        }
+
+        // Run on load
+        initTimeline();
+    </script>
+</body>
+</html>
