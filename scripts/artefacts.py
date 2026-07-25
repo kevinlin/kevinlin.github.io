@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 import re
 from typing import Any
@@ -18,6 +20,14 @@ class ArtefactError(Exception):
 
 
 class ManifestError(ArtefactError):
+    pass
+
+
+class InventoryError(ArtefactError):
+    pass
+
+
+class TransformationError(ArtefactError):
     pass
 
 
@@ -48,6 +58,19 @@ class Manifest:
     protected_files: tuple[PurePosixPath, ...]
     collections: tuple[Collection, ...]
     entries: tuple[Entry, ...]
+
+
+@dataclass(frozen=True)
+class SourceInventory:
+    approved: tuple[PurePosixPath, ...]
+    excluded_suffixes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class SourceReconciliation:
+    next_manifest: Manifest
+    missing_entries: tuple[Entry, ...]
+    excluded_suffixes: tuple[str, ...]
 
 
 def _safe_relative_path(value: str, field_name: str) -> PurePosixPath:
@@ -210,3 +233,124 @@ def load_manifest(path: Path) -> Manifest:
     manifest = manifest_from_dict(payload)
     validate_manifest(manifest)
     return manifest
+
+
+def scan_source(source_root: Path) -> SourceInventory:
+    if not source_root.is_dir():
+        raise InventoryError(f"source directory does not exist: {source_root}")
+    resolved_root = source_root.resolve()
+    approved: list[PurePosixPath] = []
+    excluded_suffixes: set[str] = set()
+
+    for current_root, directory_names, file_names in os.walk(source_root):
+        current_path = Path(current_root)
+        for name in (*directory_names, *file_names):
+            candidate = current_path / name
+            if candidate.is_symlink():
+                raise InventoryError(f"symbolic link is not allowed: {candidate}")
+        directory_names[:] = [
+            name
+            for name in directory_names
+            if not name.startswith(".") and name != "kevinlin.github.io"
+        ]
+        for name in file_names:
+            if name == ".DS_Store":
+                continue
+            candidate = current_path / name
+            suffix = candidate.suffix.lower()
+            if suffix not in APPROVED_EXTENSIONS:
+                if suffix:
+                    excluded_suffixes.add(suffix)
+                continue
+            resolved = candidate.resolve()
+            if not resolved.is_relative_to(resolved_root):
+                raise InventoryError(f"source path escapes source directory: {candidate}")
+            approved.append(PurePosixPath(candidate.relative_to(source_root).as_posix()))
+
+    return SourceInventory(
+        approved=tuple(sorted(approved, key=str)),
+        excluded_suffixes=tuple(sorted(excluded_suffixes)),
+    )
+
+
+def _slug(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    if not slug:
+        raise InventoryError(f"cannot normalize path component: {value}")
+    return slug
+
+
+def suggest_destination(source: PurePosixPath) -> PurePosixPath:
+    parent_parts = tuple(_slug(part) for part in source.parent.parts if part != ".")
+    stem = _slug(source.stem)
+    suffix = source.suffix.lower()
+    if suffix == ".html":
+        return PurePosixPath(*parent_parts, stem, "index.html")
+    return PurePosixPath(*parent_parts, f"{stem}{suffix}")
+
+
+def reconcile_inventory(
+    manifest: Manifest, inventory: SourceInventory
+) -> SourceReconciliation:
+    approved = set(inventory.approved)
+    manifest_sources = {entry.source for entry in manifest.entries}
+    unlisted = sorted(approved - manifest_sources, key=str)
+    if unlisted:
+        suggestions = "\n".join(
+            f"  {source.as_posix()} -> {suggest_destination(source).as_posix()}"
+            for source in unlisted
+        )
+        raise InventoryError(f"unlisted approved source files:\n{suggestions}")
+    missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
+    next_manifest = replace(
+        manifest,
+        entries=tuple(entry for entry in manifest.entries if entry.source in approved),
+    )
+    return SourceReconciliation(
+        next_manifest=next_manifest,
+        missing_entries=missing,
+        excluded_suffixes=inventory.excluded_suffixes,
+    )
+
+
+def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
+    try:
+        text = source_bytes.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise TransformationError(f"HTML source is not UTF-8: {entry.source}") from error
+    for old, new in entry.replacements.items():
+        if old not in text:
+            raise TransformationError(
+                f"expected replacement not found for {entry.id}: {old}"
+            )
+        text = text.replace(old, new)
+    text = re.sub(r"[ \t]+(?=\r?$)", "", text, flags=re.MULTILINE)
+    if "cdnjs.cloudflare.com" in text or "https://cdnjs" in text:
+        raise TransformationError(f"forbidden cdnjs reference remains in {entry.id}")
+    if text and not text.endswith(("\n", "\r")):
+        text += "\n"
+    return text.encode("utf-8")
+
+
+def build_desired_files(
+    manifest: Manifest, source_root: Path
+) -> dict[PurePosixPath, bytes]:
+    resolved_root = source_root.resolve()
+    desired: dict[PurePosixPath, bytes] = {}
+    for entry in manifest.entries:
+        source_path = source_root / entry.source.as_posix()
+        if not source_path.exists():
+            continue
+        if source_path.is_symlink():
+            raise InventoryError(f"symbolic link is not allowed: {source_path}")
+        if not source_path.resolve().is_relative_to(resolved_root):
+            raise InventoryError(f"source path escapes source directory: {source_path}")
+        source_bytes = source_path.read_bytes()
+        if entry.source.suffix.lower() == ".html":
+            output = transform_html(entry, source_bytes)
+        else:
+            output = source_bytes
+            if hashlib.sha256(output).digest() != hashlib.sha256(source_bytes).digest():
+                raise TransformationError(f"binary hash mismatch for {entry.id}")
+        desired[entry.destination] = output
+    return desired
