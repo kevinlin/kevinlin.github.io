@@ -103,6 +103,28 @@ class ManifestTests(unittest.TestCase):
 
         self.assert_manifest_error(payload, "duplicate destination")
 
+    def test_rejects_duplicate_sources(self):
+        payload = valid_payload()
+        duplicate = second_entry()
+        duplicate["source"] = "Charts/Cost.png"
+        payload["entries"].append(duplicate)
+
+        self.assert_manifest_error(payload, "duplicate source")
+
+    def test_rejects_protected_managed_path_overlap(self):
+        payload = valid_payload()
+        payload["protected_files"] = ["charts/cost.png"]
+
+        self.assert_manifest_error(payload, "protected.*managed")
+
+    def test_rejects_reserved_destination(self):
+        payload = valid_payload()
+        payload["entries"][0].update(
+            {"source": "Charts/Index.html", "destination": "index.html"}
+        )
+
+        self.assert_manifest_error(payload, "reserved")
+
     def test_rejects_unknown_collection(self):
         payload = valid_payload()
         payload["entries"][0]["collection"] = "missing"
@@ -546,6 +568,63 @@ class ApplyTests(unittest.TestCase):
 
         self.assertEqual(self.snapshot(repo), before)
 
+    def test_destination_change_deletes_previous_public_path(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"][0]["destination"] = "charts/renamed.png"
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        self.assertIn(("add", "charts/renamed.png"), changes)
+        self.assertIn(("delete", "charts/existing.png"), changes)
+
+        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+
+        self.assertFalse((repo / "artefacts/charts/existing.png").exists())
+        self.assertEqual((repo / "artefacts/charts/renamed.png").read_bytes(), b"updated")
+
+    def test_removed_manifest_entry_deletes_previous_public_path(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"] = [
+            entry for entry in payload["entries"] if entry["id"] != "removed"
+        ]
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        self.assertIn(("delete", "charts/removed.png"), changes)
+
+    def test_broken_desired_reference_fails_without_mutating_repository(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"][0].update(
+            {
+                "source": "Charts/Existing.html",
+                "destination": "charts/existing/index.html",
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (source / "Charts" / "Existing.png").unlink()
+        (source / "Charts" / "Existing.html").write_text(
+            '<script src="../../vendor/missing.js"></script>\n', encoding="utf-8"
+        )
+        before = self.snapshot(repo)
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "broken local reference"):
+            artefacts_cli.create_sync_plan(
+                manifest_path, source, repo / "artefacts", head_manifest
+            )
+
+        self.assertEqual(self.snapshot(repo), before)
+
     def test_complete_add_update_delete_cycle(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         plan = artefacts_cli.create_sync_plan(
@@ -772,12 +851,14 @@ class RecordingRunner:
         pages: list[dict] | None = None,
         bad_url: str | None = None,
         failures: dict[tuple[str, ...], str] | None = None,
+        check_responses: list[list[dict]] | None = None,
     ):
         self.head_manifest = head_manifest.decode("utf-8")
         self.status = status
         self.branch = branch
         self.divergence = divergence
         self.checks = checks if checks is not None else [{"name": "validate", "bucket": "pass"}]
+        self.check_responses = list(check_responses or [self.checks])
         self.watch_returncode = watch_returncode
         self.pages = list(pages or [{"status": "built", "commit": "merge123", "error": {"message": None}}])
         self.bad_url = bad_url
@@ -808,7 +889,11 @@ class RecordingRunner:
         elif args[:3] == ["gh", "pr", "checks"] and "--watch" in args:
             returncode = self.watch_returncode
         elif args[:3] == ["gh", "pr", "checks"] and "--json" in args:
-            stdout = json.dumps(self.checks)
+            stdout = json.dumps(
+                self.check_responses.pop(0)
+                if len(self.check_responses) > 1
+                else self.check_responses[0]
+            )
         elif args[:3] == ["gh", "pr", "view"]:
             stdout = json.dumps(
                 {
@@ -984,6 +1069,23 @@ class PublishingTests(unittest.TestCase):
 
         self.assertFalse(runner.called(["gh", "pr", "merge"]))
 
+    def test_publish_waits_for_expected_check_to_appear(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head,
+            check_responses=[[], [{"name": "validate", "bucket": "pass"}]],
+        )
+
+        result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.merge_commit, "merge123")
+        json_checks = [
+            command
+            for command in runner.commands
+            if command[:3] == ["gh", "pr", "checks"] and "--json" in command
+        ]
+        self.assertGreaterEqual(len(json_checks), 3)
+
     def test_publish_never_merges_when_check_fails(self):
         repo, source, head = self.make_repository()
         runner = RecordingRunner(head, watch_returncode=1)
@@ -1002,6 +1104,28 @@ class PublishingTests(unittest.TestCase):
 
         with self.assertRaisesRegex(artefacts_cli.PublishError, "build failed"):
             self.publish(repo, source, runner)
+
+    def test_publish_ignores_pages_error_for_older_commit(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head,
+            pages=[
+                {
+                    "status": "errored",
+                    "commit": "older",
+                    "error": {"message": "old failure"},
+                },
+                {
+                    "status": "built",
+                    "commit": "merge123",
+                    "error": {"message": None},
+                },
+            ],
+        )
+
+        result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.merge_commit, "merge123")
 
     def test_publish_rejects_non_200_public_url(self):
         repo, source, head = self.make_repository()

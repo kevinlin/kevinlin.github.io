@@ -270,6 +270,7 @@ def validate_manifest(manifest: Manifest) -> None:
         "duplicate collection id",
     )
     _require_unique([entry.id for entry in manifest.entries], "duplicate entry id")
+    _require_unique([entry.source for entry in manifest.entries], "duplicate source")
     _require_unique(
         [entry.destination for entry in manifest.entries], "duplicate destination"
     )
@@ -287,6 +288,15 @@ def validate_manifest(manifest: Manifest) -> None:
     )
 
     collection_ids = {collection.id for collection in manifest.collections}
+    reserved_destinations = {PurePosixPath("index.html"), PurePosixPath("manifest.json")}
+    managed_destinations = {entry.destination for entry in manifest.entries}
+    protected_destinations = set(manifest.protected_files)
+    if managed_destinations & reserved_destinations:
+        raise ManifestError("entry destination is reserved")
+    if protected_destinations & reserved_destinations:
+        raise ManifestError("protected file destination is reserved")
+    if protected_destinations & managed_destinations:
+        raise ManifestError("protected and managed destinations must be disjoint")
     for entry in manifest.entries:
         if entry.collection not in collection_ids:
             raise ManifestError(f"unknown collection for entry {entry.id}")
@@ -551,6 +561,44 @@ def read_head_manifest(repo_root: Path) -> bytes | None:
     return result.stdout
 
 
+def manifest_from_bytes(content: bytes, description: str) -> Manifest:
+    try:
+        payload = json.loads(content.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ManifestError(f"cannot read {description} manifest: {error}") from error
+    manifest = manifest_from_dict(payload)
+    validate_manifest(manifest)
+    return manifest
+
+
+def _validate_desired_tree(
+    repo_root: Path,
+    artefacts_root: Path,
+    manifest: Manifest,
+    desired_files: dict[PurePosixPath, bytes],
+) -> None:
+    with tempfile.TemporaryDirectory(prefix="artefact-plan-") as directory:
+        planned_repo = Path(directory)
+        for name in ("index.html", "styles.css", "script.js"):
+            source = repo_root / name
+            if source.is_file():
+                (planned_repo / name).write_bytes(source.read_bytes())
+        planned_artefacts = planned_repo / "artefacts"
+        planned_artefacts.mkdir()
+        for destination in manifest.protected_files:
+            source = artefacts_root / destination.as_posix()
+            if not source.is_file() or source.is_symlink():
+                raise ValidationError(f"missing protected file: {destination}")
+            target = planned_artefacts / destination.as_posix()
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
+        for destination, content in desired_files.items():
+            target = planned_artefacts / destination.as_posix()
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        validate_repository(planned_repo, None)
+
+
 def create_sync_plan(
     manifest_path: Path,
     source_root: Path,
@@ -573,6 +621,9 @@ def create_sync_plan(
     ).encode("utf-8")
     desired_files[PurePosixPath("index.html")] = generated_catalogue
     desired_files[PurePosixPath("manifest.json")] = manifest_to_json(next_manifest)
+    _validate_desired_tree(
+        artefacts_root.parent.resolve(), artefacts_root, next_manifest, desired_files
+    )
 
     changes: list[Change] = []
     unchanged: list[PurePosixPath] = []
@@ -591,10 +642,20 @@ def create_sync_plan(
         else:
             unchanged.append(destination)
 
-    for entry in reconciliation.missing_entries:
-        destination_path = artefacts_root / entry.destination.as_posix()
+    deletion_candidates = {entry.destination for entry in reconciliation.missing_entries}
+    if head_manifest is not None:
+        previous_manifest = manifest_from_bytes(head_manifest, "HEAD")
+        next_destinations = {entry.destination for entry in next_manifest.entries}
+        deletion_candidates.update(
+            entry.destination
+            for entry in previous_manifest.entries
+            if entry.destination not in next_destinations
+        )
+    changed_destinations = {change.destination for change in changes}
+    for destination in sorted(deletion_candidates - changed_destinations, key=str):
+        destination_path = artefacts_root / destination.as_posix()
         if destination_path.exists():
-            changes.append(Change("delete", entry.destination))
+            changes.append(Change("delete", destination))
 
     return SyncPlan(
         manifest=manifest,
@@ -864,8 +925,31 @@ def _head_manifest_with_runner(repo_root: Path, runner: CommandRunner) -> bytes 
 
 
 def _require_successful_checks(
-    repo_root: Path, pull_request_url: str, runner: CommandRunner
+    repo_root: Path,
+    pull_request_url: str,
+    runner: CommandRunner,
+    sleeper: Callable[[float], None],
 ) -> None:
+    checks: list[dict[str, Any]] | None = None
+    for _ in range(60):
+        result = runner(
+            ["gh", "pr", "checks", pull_request_url, "--json", "name,bucket"],
+            repo_root,
+        )
+        if result.returncode == 0:
+            try:
+                parsed = json.loads(result.stdout)
+            except json.JSONDecodeError as error:
+                raise PublishError("cannot parse GitHub checks") from error
+            if not isinstance(parsed, list):
+                raise PublishError("cannot parse GitHub checks")
+            checks = parsed
+            if any(check.get("name") == "validate" for check in checks):
+                break
+        sleeper(2)
+    else:
+        raise PublishError("required validate check is missing; pull request remains open")
+
     watch = runner(
         ["gh", "pr", "checks", pull_request_url, "--watch", "--fail-fast"],
         repo_root,
@@ -908,7 +992,7 @@ def _wait_for_pages(
         except json.JSONDecodeError as error:
             raise PublishError("cannot parse GitHub Pages build") from error
         status = build.get("status")
-        if status == "errored":
+        if status == "errored" and build.get("commit") == merge_commit:
             message = (build.get("error") or {}).get("message") or "unknown Pages error"
             raise PublishError(f"GitHub Pages build failed: {message}")
         if status == "built" and build.get("commit") == merge_commit:
@@ -1063,7 +1147,7 @@ def publish(
     if not pull_request_url:
         raise PublishError("GitHub did not return a pull request URL")
 
-    _require_successful_checks(repo_root, pull_request_url, runner)
+    _require_successful_checks(repo_root, pull_request_url, runner, sleeper)
     _run_checked(
         runner,
         ["gh", "pr", "merge", pull_request_url, "--squash"],
