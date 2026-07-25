@@ -447,5 +447,153 @@ class CatalogueTests(unittest.TestCase):
             artefacts_cli.replace_generated_catalogue(document, "new")
 
 
+class ApplyTests(unittest.TestCase):
+    def make_fixture(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        repo = root / "repo"
+        source = root / "source"
+        artefacts = repo / "artefacts"
+        source.mkdir(parents=True)
+        artefacts.mkdir(parents=True)
+
+        payload = valid_payload()
+        payload["protected_files"] = ["vendor/chart.js"]
+        payload["entries"] = [
+            {
+                "id": "existing",
+                "source": "Charts/Existing.png",
+                "destination": "charts/existing.png",
+                "title": "Existing",
+                "collection": "charts",
+                "order": 10,
+                "replacements": {},
+            },
+            {
+                "id": "new",
+                "source": "Charts/New.png",
+                "destination": "charts/new.png",
+                "title": "New",
+                "collection": "charts",
+                "order": 20,
+                "replacements": {},
+            },
+            {
+                "id": "removed",
+                "source": "Charts/Removed.png",
+                "destination": "charts/removed.png",
+                "title": "Removed",
+                "collection": "charts",
+                "order": 30,
+                "replacements": {},
+            },
+        ]
+        manifest_path = artefacts / "manifest.json"
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (artefacts / "index.html").write_text(
+            "<main>\n<!-- ARTEFACTS:START -->\nold\n<!-- ARTEFACTS:END -->\n</main>\n",
+            encoding="utf-8",
+        )
+        (artefacts / "vendor").mkdir()
+        (artefacts / "vendor" / "chart.js").write_bytes(b"vendor")
+        (artefacts / "notes.txt").write_text("keep", encoding="utf-8")
+        (artefacts / "charts").mkdir()
+        (artefacts / "charts" / "existing.png").write_bytes(b"old")
+        (artefacts / "charts" / "removed.png").write_bytes(b"remove")
+        (source / "Charts").mkdir()
+        (source / "Charts" / "Existing.png").write_bytes(b"updated")
+        (source / "Charts" / "New.png").write_bytes(b"new")
+        head_manifest = manifest_path.read_bytes()
+        return repo, source, manifest_path, head_manifest
+
+    def snapshot(self, root: Path) -> dict[str, bytes]:
+        return {
+            path.relative_to(root).as_posix(): path.read_bytes()
+            for path in root.rglob("*")
+            if path.is_file()
+        }
+
+    def test_create_sync_plan_classifies_generated_and_source_changes(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        self.assertEqual(
+            changes,
+            {
+                ("update", "charts/existing.png"),
+                ("add", "charts/new.png"),
+                ("delete", "charts/removed.png"),
+                ("update", "index.html"),
+                ("update", "manifest.json"),
+            },
+        )
+
+    def test_plan_calculation_does_not_mutate_repository(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        before = self.snapshot(repo)
+
+        artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        self.assertEqual(self.snapshot(repo), before)
+
+    def test_complete_add_update_delete_cycle(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+
+        self.assertEqual((repo / "artefacts/charts/existing.png").read_bytes(), b"updated")
+        self.assertEqual((repo / "artefacts/charts/new.png").read_bytes(), b"new")
+        self.assertFalse((repo / "artefacts/charts/removed.png").exists())
+        self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
+        self.assertEqual((repo / "artefacts/notes.txt").read_text(), "keep")
+        applied_manifest = artefacts_cli.load_manifest(manifest_path)
+        self.assertEqual([entry.id for entry in applied_manifest.entries], ["existing", "new"])
+        catalogue = (repo / "artefacts/index.html").read_text()
+        self.assertIn('href="charts/new.png"', catalogue)
+        self.assertNotIn("Removed", catalogue)
+        self.assertFalse(any(repo.rglob("*.tmp")))
+
+    def test_confirmation_other_than_yes_does_not_apply(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+        before = self.snapshot(repo)
+
+        applied = artefacts_cli.confirm_and_apply(
+            plan,
+            manifest_path,
+            repo / "artefacts",
+            lambda _: "no",
+        )
+
+        self.assertFalse(applied)
+        self.assertEqual(self.snapshot(repo), before)
+
+    def test_format_plan_lists_each_change_kind_and_excluded_types(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        (source / "notes.md").write_text("private", encoding="utf-8")
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        output = artefacts_cli.format_plan(plan)
+
+        self.assertIn("Add (1)\n  + charts/new.png", output)
+        self.assertIn("Update (3)", output)
+        self.assertIn("Delete (1)\n  - charts/removed.png", output)
+        self.assertIn("Excluded source types: .md", output)
+
+
 if __name__ == "__main__":
     unittest.main()

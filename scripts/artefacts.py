@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, field, replace
 import hashlib
 import html
@@ -8,6 +9,9 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import subprocess
+import sys
+import tempfile
 from typing import Any
 
 
@@ -79,6 +83,22 @@ class SourceInventory:
 class SourceReconciliation:
     next_manifest: Manifest
     missing_entries: tuple[Entry, ...]
+    excluded_suffixes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class Change:
+    kind: str
+    destination: PurePosixPath
+
+
+@dataclass(frozen=True)
+class SyncPlan:
+    manifest: Manifest
+    next_manifest: Manifest
+    desired_files: dict[PurePosixPath, bytes]
+    changes: tuple[Change, ...]
+    unchanged: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
 
 
@@ -430,3 +450,245 @@ def replace_generated_catalogue(document: str, generated: str) -> str:
     if indentation.strip():
         raise CatalogueError("end marker must start on its own line")
     return document[:start] + "\n" + generated + "\n" + indentation + document[end:]
+
+
+def manifest_to_json(manifest: Manifest) -> bytes:
+    payload = {
+        "version": manifest.version,
+        "protected_files": [path.as_posix() for path in manifest.protected_files],
+        "collections": [
+            {
+                "id": collection.id,
+                "title": collection.title,
+                "description": collection.description,
+                "section": collection.section,
+                "section_order": collection.section_order,
+                "order": collection.order,
+            }
+            for collection in manifest.collections
+        ],
+        "entries": [
+            {
+                "id": entry.id,
+                "source": entry.source.as_posix(),
+                "destination": entry.destination.as_posix(),
+                "title": entry.title,
+                "collection": entry.collection,
+                "order": entry.order,
+                "replacements": entry.replacements,
+            }
+            for entry in manifest.entries
+        ],
+    }
+    return (json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+
+def read_head_manifest(repo_root: Path) -> bytes | None:
+    result = subprocess.run(
+        ["git", "show", "HEAD:artefacts/manifest.json"],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout
+
+
+def create_sync_plan(
+    manifest_path: Path,
+    source_root: Path,
+    artefacts_root: Path,
+    head_manifest: bytes | None,
+) -> SyncPlan:
+    manifest = load_manifest(manifest_path)
+    inventory = scan_source(source_root)
+    reconciliation = reconcile_inventory(manifest, inventory)
+    next_manifest = reconciliation.next_manifest
+    desired_files = build_desired_files(next_manifest, source_root)
+
+    catalogue_path = artefacts_root / "index.html"
+    try:
+        catalogue = catalogue_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise CatalogueError(f"cannot read catalogue: {error}") from error
+    generated_catalogue = replace_generated_catalogue(
+        catalogue, render_catalogue(next_manifest)
+    ).encode("utf-8")
+    desired_files[PurePosixPath("index.html")] = generated_catalogue
+    desired_files[PurePosixPath("manifest.json")] = manifest_to_json(next_manifest)
+
+    changes: list[Change] = []
+    unchanged: list[PurePosixPath] = []
+    for destination, content in sorted(desired_files.items(), key=lambda item: str(item[0])):
+        current_path = artefacts_root / destination.as_posix()
+        if destination == PurePosixPath("manifest.json") and head_manifest is not None:
+            current = head_manifest
+            exists = True
+        else:
+            exists = current_path.is_file()
+            current = current_path.read_bytes() if exists else None
+        if not exists:
+            changes.append(Change("add", destination))
+        elif current != content:
+            changes.append(Change("update", destination))
+        else:
+            unchanged.append(destination)
+
+    for entry in reconciliation.missing_entries:
+        destination_path = artefacts_root / entry.destination.as_posix()
+        if destination_path.exists():
+            changes.append(Change("delete", entry.destination))
+
+    return SyncPlan(
+        manifest=manifest,
+        next_manifest=next_manifest,
+        desired_files=desired_files,
+        changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
+        unchanged=tuple(sorted(unchanged, key=str)),
+        excluded_suffixes=reconciliation.excluded_suffixes,
+    )
+
+
+def format_plan(plan: SyncPlan) -> str:
+    symbols = {"add": "+", "update": "~", "delete": "-"}
+    headings = {"add": "Add", "update": "Update", "delete": "Delete"}
+    lines: list[str] = []
+    for kind in ("add", "update", "delete"):
+        changes = sorted(
+            (change for change in plan.changes if change.kind == kind),
+            key=lambda item: str(item.destination),
+        )
+        lines.append(f"{headings[kind]} ({len(changes)})")
+        lines.extend(
+            f"  {symbols[kind]} {change.destination.as_posix()}" for change in changes
+        )
+    lines.append(f"Unchanged ({len(plan.unchanged)})")
+    excluded = ", ".join(plan.excluded_suffixes) if plan.excluded_suffixes else "none"
+    lines.append(f"Excluded source types: {excluded}")
+    return "\n".join(lines)
+
+
+def _destination_path(artefacts_root: Path, destination: PurePosixPath) -> Path:
+    root = artefacts_root.resolve()
+    target = artefacts_root / destination.as_posix()
+    if not target.resolve(strict=False).is_relative_to(root):
+        raise ArtefactError(f"destination escapes artefacts directory: {destination}")
+    current = artefacts_root
+    for component in destination.parts[:-1]:
+        current /= component
+        if current.is_symlink():
+            raise ArtefactError(f"destination parent is a symbolic link: {destination}")
+    return target
+
+
+def _atomic_write(path: Path, content: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as temporary:
+            temporary_name = temporary.name
+            temporary.write(content)
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_name, path)
+    finally:
+        if temporary_name and os.path.exists(temporary_name):
+            os.unlink(temporary_name)
+
+
+def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> None:
+    for change in plan.changes:
+        if change.kind not in {"add", "update"}:
+            continue
+        target = _destination_path(artefacts_root, change.destination)
+        _atomic_write(target, plan.desired_files[change.destination])
+
+    for change in plan.changes:
+        if change.kind != "delete":
+            continue
+        target = _destination_path(artefacts_root, change.destination)
+        if target.exists():
+            if not target.is_file() or target.is_symlink():
+                raise ArtefactError(f"refusing to delete non-file destination: {change.destination}")
+            target.unlink()
+        parent = target.parent
+        while parent != artefacts_root:
+            try:
+                parent.rmdir()
+            except OSError:
+                break
+            parent = parent.parent
+
+    for destination, expected in plan.desired_files.items():
+        target = _destination_path(artefacts_root, destination)
+        if not target.is_file() or target.read_bytes() != expected:
+            raise ArtefactError(f"applied file differs from plan: {destination}")
+    for change in plan.changes:
+        if change.kind == "delete" and _destination_path(
+            artefacts_root, change.destination
+        ).exists():
+            raise ArtefactError(f"deleted file remains after apply: {change.destination}")
+    if manifest_path.read_bytes() != plan.desired_files[PurePosixPath("manifest.json")]:
+        raise ArtefactError("applied manifest differs from plan")
+
+
+def confirm_and_apply(
+    plan: SyncPlan,
+    manifest_path: Path,
+    artefacts_root: Path,
+    confirm,
+) -> bool:
+    answer = confirm("Apply these changes? Type yes to continue: ")
+    if answer != "yes":
+        return False
+    apply_plan(plan, manifest_path, artefacts_root)
+    return True
+
+
+def default_repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def default_source_root() -> Path:
+    return Path.home() / "Downloads" / "Artefacts"
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Synchronize published artefacts")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for command in ("plan", "apply"):
+        subparser = subparsers.add_parser(command)
+        subparser.add_argument("--repo", type=Path, default=default_repo_root())
+        subparser.add_argument("--source", type=Path, default=default_source_root())
+    return parser
+
+
+def main(argv: list[str] | None = None, input_fn=input) -> int:
+    args = _parser().parse_args(argv)
+    repo_root = args.repo.resolve()
+    manifest_path = repo_root / "artefacts" / "manifest.json"
+    artefacts_root = repo_root / "artefacts"
+    try:
+        plan = create_sync_plan(
+            manifest_path,
+            args.source.expanduser(),
+            artefacts_root,
+            read_head_manifest(repo_root),
+        )
+        print(format_plan(plan))
+        if args.command == "plan":
+            return 0
+        if not confirm_and_apply(plan, manifest_path, artefacts_root, input_fn):
+            print("Cancelled.")
+            return 2
+        return 0
+    except ArtefactError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
