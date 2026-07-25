@@ -1,9 +1,11 @@
 import importlib.util
 import hashlib
+from datetime import datetime
 import json
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 from pathlib import Path, PurePosixPath
 
@@ -755,6 +757,307 @@ class RepositoryValidationTests(unittest.TestCase):
 
         with self.assertRaisesRegex(artefacts_cli.ValidationError, "homepage files changed"):
             artefacts_cli.validate_repository(repo, base)
+
+
+class RecordingRunner:
+    def __init__(
+        self,
+        head_manifest: bytes,
+        *,
+        status: str = "",
+        branch: str = "main",
+        divergence: str = "0\t0\n",
+        checks: list[dict] | None = None,
+        watch_returncode: int = 0,
+        pages: list[dict] | None = None,
+        bad_url: str | None = None,
+        failures: dict[tuple[str, ...], str] | None = None,
+    ):
+        self.head_manifest = head_manifest.decode("utf-8")
+        self.status = status
+        self.branch = branch
+        self.divergence = divergence
+        self.checks = checks if checks is not None else [{"name": "validate", "bucket": "pass"}]
+        self.watch_returncode = watch_returncode
+        self.pages = list(pages or [{"status": "built", "commit": "merge123", "error": {"message": None}}])
+        self.bad_url = bad_url
+        self.failures = failures or {}
+        self.commands: list[list[str]] = []
+        self.pr_body = ""
+
+    def __call__(self, args: list[str], cwd: Path):
+        self.commands.append(list(args))
+        stdout = ""
+        stderr = ""
+        returncode = 0
+        for prefix, message in self.failures.items():
+            if args[: len(prefix)] == list(prefix):
+                return SimpleNamespace(stdout="", stderr=message, returncode=1)
+        if args[:3] == ["git", "status", "--porcelain"]:
+            stdout = self.status
+        elif args[:2] == ["git", "branch"]:
+            stdout = self.branch + "\n"
+        elif args[:2] == ["git", "rev-list"]:
+            stdout = self.divergence
+        elif args[:3] == ["git", "show", "HEAD:artefacts/manifest.json"]:
+            stdout = self.head_manifest
+        elif args[:3] == ["gh", "pr", "create"]:
+            body_path = Path(args[args.index("--body-file") + 1])
+            self.pr_body = body_path.read_text(encoding="utf-8")
+            stdout = "https://github.com/example/site/pull/7\n"
+        elif args[:3] == ["gh", "pr", "checks"] and "--watch" in args:
+            returncode = self.watch_returncode
+        elif args[:3] == ["gh", "pr", "checks"] and "--json" in args:
+            stdout = json.dumps(self.checks)
+        elif args[:3] == ["gh", "pr", "view"]:
+            stdout = json.dumps(
+                {
+                    "state": "MERGED",
+                    "mergeCommit": {"oid": "merge123"},
+                    "url": "https://github.com/example/site/pull/7",
+                }
+            )
+        elif args[:3] == ["gh", "repo", "view"]:
+            stdout = json.dumps({"nameWithOwner": "example/site"})
+        elif args[:3] == ["gh", "api", "repos/example/site/pages"]:
+            stdout = json.dumps({"html_url": "https://kevinlin.github.io/"})
+        elif args[:3] == ["gh", "api", "repos/example/site/pages/builds/latest"]:
+            stdout = json.dumps(self.pages.pop(0) if len(self.pages) > 1 else self.pages[0])
+        elif args and args[0] == "curl":
+            target = args[-1]
+            stdout = "404" if target == self.bad_url else "200"
+        return SimpleNamespace(stdout=stdout, stderr=stderr, returncode=returncode)
+
+    def called(self, prefix: list[str]) -> bool:
+        return any(command[: len(prefix)] == prefix for command in self.commands)
+
+
+class PublishingTests(unittest.TestCase):
+    def make_repository(self, changed: bool = True):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        repo = Path(directory.name) / "repo"
+        source = Path(directory.name) / "source"
+        (repo / "artefacts" / "images").mkdir(parents=True)
+        (source / "Images").mkdir(parents=True)
+        payload = valid_payload()
+        payload["protected_files"] = []
+        payload["entries"][0].update(
+            {
+                "source": "Images/Card.png",
+                "destination": "images/card.png",
+                "title": "Card",
+            }
+        )
+        manifest_path = repo / "artefacts" / "manifest.json"
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        manifest = artefacts_cli.load_manifest(manifest_path)
+        catalogue_shell = (
+            '<a href="/">Home</a>\n'
+            "<!-- ARTEFACTS:START -->\n"
+            "old\n"
+            "<!-- ARTEFACTS:END -->\n"
+        )
+        (repo / "artefacts" / "index.html").write_text(
+            artefacts_cli.replace_generated_catalogue(
+                catalogue_shell, artefacts_cli.render_catalogue(manifest)
+            ),
+            encoding="utf-8",
+        )
+        current = b"old"
+        (repo / "artefacts" / "images" / "card.png").write_bytes(current)
+        (source / "Images" / "Card.png").write_bytes(b"new" if changed else current)
+        (repo / "index.html").write_text("home\n", encoding="utf-8")
+        (repo / "styles.css").write_text("body {}\n", encoding="utf-8")
+        (repo / "script.js").write_text("// home\n", encoding="utf-8")
+        return repo, source, manifest_path.read_bytes()
+
+    def fixed_now(self):
+        return datetime(2026, 7, 26, 14, 30, 0)
+
+    def test_parser_accepts_publish_with_repo_and_source(self):
+        args = artefacts_cli._parser().parse_args(
+            ["publish", "--repo", "/tmp/site", "--source", "/tmp/source"]
+        )
+
+        self.assertEqual(args.command, "publish")
+        self.assertEqual(args.repo, Path("/tmp/site"))
+        self.assertEqual(args.source, Path("/tmp/source"))
+
+    def publish(self, repo: Path, source: Path, runner: RecordingRunner, confirm=lambda _: "yes"):
+        return artefacts_cli.publish(
+            repo,
+            source,
+            runner,
+            confirm,
+            self.fixed_now,
+            lambda _: None,
+        )
+
+    def test_publish_allows_one_unstaged_manifest_edit(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, status=" M artefacts/manifest.json\n")
+
+        result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.merge_commit, "merge123")
+
+    def test_publish_rejects_missing_required_command(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, failures={("curl", "--version"): "not found"})
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "curl.*not found"):
+            self.publish(repo, source, runner)
+
+        self.assertFalse(runner.called(["git", "switch"]))
+
+    def test_publish_rejects_unauthenticated_github_cli(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head, failures={("gh", "auth", "status"): "not logged in"}
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "not authenticated"):
+            self.publish(repo, source, runner)
+
+        self.assertFalse(runner.called(["git", "switch"]))
+
+    def test_publish_rejects_staged_changes(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, status="M  artefacts/manifest.json\n")
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "working tree"):
+            self.publish(repo, source, runner)
+
+        self.assertFalse(runner.called(["git", "switch"]))
+
+    def test_publish_rejects_unrelated_worktree_changes(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, status=" M README.md\n")
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "working tree"):
+            self.publish(repo, source, runner)
+
+    def test_publish_rejects_non_main_branch(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, branch="feature")
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "branch main"):
+            self.publish(repo, source, runner)
+
+    def test_publish_rejects_diverged_main(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, divergence="0\t1\n")
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "up to date"):
+            self.publish(repo, source, runner)
+
+    def test_publish_no_change_exits_before_confirmation_or_branch(self):
+        repo, source, head = self.make_repository(changed=False)
+        runner = RecordingRunner(head)
+
+        result = self.publish(
+            repo,
+            source,
+            runner,
+            lambda _: self.fail("confirmation should not be requested"),
+        )
+
+        self.assertIsNone(result)
+        self.assertFalse(runner.called(["git", "switch"]))
+
+    def test_publish_cancellation_does_not_create_branch(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head)
+
+        result = self.publish(repo, source, runner, lambda _: "no")
+
+        self.assertIsNone(result)
+        self.assertFalse(runner.called(["git", "switch"]))
+
+    def test_publish_never_merges_when_expected_check_is_missing(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, checks=[])
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "validate check is missing"):
+            self.publish(repo, source, runner)
+
+        self.assertFalse(runner.called(["gh", "pr", "merge"]))
+
+    def test_publish_never_merges_when_check_fails(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head, watch_returncode=1)
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "checks failed"):
+            self.publish(repo, source, runner)
+
+        self.assertFalse(runner.called(["gh", "pr", "merge"]))
+
+    def test_publish_rejects_pages_error(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head,
+            pages=[{"status": "errored", "commit": "merge123", "error": {"message": "build failed"}}],
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "build failed"):
+            self.publish(repo, source, runner)
+
+    def test_publish_rejects_non_200_public_url(self):
+        repo, source, head = self.make_repository()
+        bad_url = "https://kevinlin.github.io/artefacts/images/card.png"
+        runner = RecordingRunner(head, bad_url=bad_url)
+
+        with self.assertRaisesRegex(artefacts_cli.PublishError, "HTTP 404"):
+            self.publish(repo, source, runner)
+
+    def test_publish_success_returns_urls_and_waits_for_merge_commit(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head,
+            pages=[
+                {"status": "built", "commit": "older", "error": {"message": None}},
+                {"status": "built", "commit": "merge123", "error": {"message": None}},
+            ],
+        )
+
+        result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.pull_request_url, "https://github.com/example/site/pull/7")
+        self.assertEqual(result.merge_commit, "merge123")
+        self.assertEqual(result.catalogue_url, "https://kevinlin.github.io/artefacts/")
+        self.assertEqual(result.verified_url_count, 3)
+        self.assertIn("Update (1)", runner.pr_body)
+        self.assertTrue(runner.called(["git", "switch", "-c", "agent/sync-artefacts-20260726-143000"]))
+        self.assertTrue(
+            runner.called(
+                [
+                    "git",
+                    "add",
+                    "--",
+                    "artefacts/images/card.png",
+                    "artefacts/index.html",
+                    "artefacts/manifest.json",
+                ]
+            )
+        )
+        self.assertTrue(
+            runner.called(
+                [
+                    "gh",
+                    "pr",
+                    "create",
+                    "--base",
+                    "main",
+                    "--head",
+                    "agent/sync-artefacts-20260726-143000",
+                    "--title",
+                    "Sync published artefacts",
+                    "--body-file",
+                ]
+            )
+        )
+        self.assertTrue(runner.called(["gh", "pr", "merge"]))
 
 
 if __name__ == "__main__":

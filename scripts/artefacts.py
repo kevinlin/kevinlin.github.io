@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, field, replace
+from datetime import datetime
 import hashlib
 import html
 from html.parser import HTMLParser
@@ -13,8 +14,9 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Any
-from urllib.parse import unquote, urlsplit
+import time
+from typing import Any, Callable
+from urllib.parse import unquote, urljoin, urlsplit
 
 
 APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
@@ -43,6 +45,10 @@ class CatalogueError(ArtefactError):
 
 
 class ValidationError(ArtefactError):
+    pass
+
+
+class PublishError(ArtefactError):
     pass
 
 
@@ -114,6 +120,25 @@ class ValidationReport:
     local_link_count: int
     ignored_metadata_count: int
     homepage_unchanged: bool
+
+
+@dataclass(frozen=True)
+class CommandResult:
+    stdout: str
+    stderr: str
+    returncode: int
+
+
+CommandRunner = Callable[[list[str], Path], CommandResult]
+
+
+@dataclass(frozen=True)
+class PublishResult:
+    pull_request_url: str
+    merge_commit: str
+    catalogue_url: str
+    verified_url_count: int
+    excluded_suffixes: tuple[str, ...]
 
 
 class _ReferenceParser(HTMLParser):
@@ -780,6 +805,317 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
     )
 
 
+def subprocess_runner(args: list[str], cwd: Path) -> CommandResult:
+    result = subprocess.run(
+        args,
+        cwd=cwd,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return CommandResult(result.stdout, result.stderr, result.returncode)
+
+
+def _run_checked(
+    runner: CommandRunner, args: list[str], cwd: Path, failure: str
+) -> str:
+    result = runner(args, cwd)
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        suffix = f": {detail}" if detail else ""
+        raise PublishError(f"{failure}{suffix}")
+    return result.stdout
+
+
+def _publish_preflight(repo_root: Path, runner: CommandRunner) -> None:
+    for command in (["git", "--version"], ["gh", "--version"], ["curl", "--version"]):
+        _run_checked(runner, command, repo_root, f"required command unavailable: {command[0]}")
+    _run_checked(runner, ["gh", "auth", "status"], repo_root, "GitHub CLI is not authenticated")
+
+    status = _run_checked(
+        runner, ["git", "status", "--porcelain"], repo_root, "cannot read working tree"
+    )
+    status_lines = [line for line in status.splitlines() if line]
+    if status_lines not in ([], [" M artefacts/manifest.json"]):
+        raise PublishError(
+            "working tree must be clean or contain only one unstaged artefacts/manifest.json edit"
+        )
+    branch = _run_checked(
+        runner, ["git", "branch", "--show-current"], repo_root, "cannot read branch"
+    ).strip()
+    if branch != "main":
+        raise PublishError("publish must start on branch main")
+    _run_checked(runner, ["git", "fetch", "origin", "main"], repo_root, "cannot fetch origin/main")
+    divergence = _run_checked(
+        runner,
+        ["git", "rev-list", "--left-right", "--count", "main...origin/main"],
+        repo_root,
+        "cannot compare main with origin/main",
+    ).split()
+    if divergence != ["0", "0"]:
+        raise PublishError("local main must be up to date with origin/main")
+
+
+def _head_manifest_with_runner(repo_root: Path, runner: CommandRunner) -> bytes | None:
+    result = runner(["git", "show", "HEAD:artefacts/manifest.json"], repo_root)
+    if result.returncode != 0:
+        return None
+    return result.stdout.encode("utf-8")
+
+
+def _require_successful_checks(
+    repo_root: Path, pull_request_url: str, runner: CommandRunner
+) -> None:
+    watch = runner(
+        ["gh", "pr", "checks", pull_request_url, "--watch", "--fail-fast"],
+        repo_root,
+    )
+    if watch.returncode != 0:
+        raise PublishError("GitHub checks failed; pull request remains open")
+    output = _run_checked(
+        runner,
+        ["gh", "pr", "checks", pull_request_url, "--json", "name,bucket"],
+        repo_root,
+        "cannot read GitHub checks",
+    )
+    try:
+        checks = json.loads(output)
+    except json.JSONDecodeError as error:
+        raise PublishError("cannot parse GitHub checks") from error
+    validate_checks = [check for check in checks if check.get("name") == "validate"]
+    if not validate_checks:
+        raise PublishError("required validate check is missing; pull request remains open")
+    if not checks or any(check.get("bucket") != "pass" for check in checks):
+        raise PublishError("not all GitHub checks passed; pull request remains open")
+
+
+def _wait_for_pages(
+    repo_root: Path,
+    repository: str,
+    merge_commit: str,
+    runner: CommandRunner,
+    sleeper: Callable[[float], None],
+) -> None:
+    for _ in range(60):
+        output = _run_checked(
+            runner,
+            ["gh", "api", f"repos/{repository}/pages/builds/latest"],
+            repo_root,
+            "cannot read GitHub Pages build",
+        )
+        try:
+            build = json.loads(output)
+        except json.JSONDecodeError as error:
+            raise PublishError("cannot parse GitHub Pages build") from error
+        status = build.get("status")
+        if status == "errored":
+            message = (build.get("error") or {}).get("message") or "unknown Pages error"
+            raise PublishError(f"GitHub Pages build failed: {message}")
+        if status == "built" and build.get("commit") == merge_commit:
+            return
+        sleeper(5)
+    raise PublishError("GitHub Pages did not deploy the merge commit within five minutes")
+
+
+def _public_urls(base_url: str, manifest: Manifest) -> tuple[str, ...]:
+    base = base_url.rstrip("/") + "/"
+    urls = [base, urljoin(base, "artefacts/")]
+    urls.extend(
+        urljoin(base, "artefacts/" + public_href(entry.destination))
+        for entry in manifest.entries
+    )
+    return tuple(dict.fromkeys(urls))
+
+
+def _verify_public_urls(
+    repo_root: Path,
+    urls: tuple[str, ...],
+    runner: CommandRunner,
+) -> None:
+    for url in urls:
+        code = _run_checked(
+            runner,
+            [
+                "curl",
+                "--silent",
+                "--show-error",
+                "--location",
+                "--output",
+                "/dev/null",
+                "--write-out",
+                "%{http_code}",
+                url,
+            ],
+            repo_root,
+            f"cannot request public URL {url}",
+        ).strip()
+        if code != "200":
+            raise PublishError(f"public URL returned HTTP {code}: {url}")
+
+
+def publish(
+    repo_root: Path,
+    source_root: Path,
+    runner: CommandRunner = subprocess_runner,
+    confirm: Callable[[str], str] = input,
+    now: Callable[[], datetime] = datetime.now,
+    sleeper: Callable[[float], None] = time.sleep,
+) -> PublishResult | None:
+    repo_root = repo_root.resolve()
+    source_root = source_root.expanduser().resolve()
+    _publish_preflight(repo_root, runner)
+    manifest_path = repo_root / "artefacts" / "manifest.json"
+    artefacts_root = repo_root / "artefacts"
+    plan = create_sync_plan(
+        manifest_path,
+        source_root,
+        artefacts_root,
+        _head_manifest_with_runner(repo_root, runner),
+    )
+    print(format_plan(plan))
+    if not plan.changes:
+        print("No artefact changes to publish.")
+        return None
+    if confirm("Apply these changes and publish them? Type yes to continue: ") != "yes":
+        print("Cancelled.")
+        return None
+
+    branch = f"agent/sync-artefacts-{now().strftime('%Y%m%d-%H%M%S')}"
+    _run_checked(runner, ["git", "switch", "-c", branch], repo_root, "cannot create branch")
+    apply_plan(plan, manifest_path, artefacts_root)
+    _run_checked(
+        runner,
+        [sys.executable, "-B", "-m", "unittest", "tests/test_artefacts.py", "-v"],
+        repo_root,
+        "local unit tests failed",
+    )
+    _run_checked(
+        runner,
+        [sys.executable, "scripts/artefacts.py", "validate", "--base-ref", "origin/main"],
+        repo_root,
+        "local artefact validation failed",
+    )
+
+    staged_paths = {
+        "artefacts/manifest.json",
+        "artefacts/index.html",
+        *(f"artefacts/{change.destination.as_posix()}" for change in plan.changes),
+    }
+    _run_checked(
+        runner,
+        ["git", "add", "--", *sorted(staged_paths)],
+        repo_root,
+        "cannot stage artefact changes",
+    )
+    _run_checked(
+        runner,
+        ["git", "commit", "-m", "chore: sync artefacts"],
+        repo_root,
+        "cannot commit artefact changes",
+    )
+    _run_checked(
+        runner,
+        ["git", "push", "-u", "origin", branch],
+        repo_root,
+        "cannot push artefact branch",
+    )
+
+    body = (
+        "## Summary\n\n"
+        "Synchronize the public artefact tree from the approved local source.\n\n"
+        "## Preview\n\n```text\n"
+        + format_plan(plan)
+        + "\n```\n\n"
+        "## Privacy boundary\n\n"
+        "Only manifest-listed HTML, PNG, JPEG, JPG, and ICO files are published. "
+        "Excluded document types and local metadata remain private.\n\n"
+        "## Verification\n\n"
+        "Local unit tests and repository validation passed before push.\n"
+    )
+    body_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", prefix="artefact-pr-", suffix=".md", delete=False
+        ) as body_file:
+            body_file.write(body)
+            body_path = body_file.name
+        pull_request_url = _run_checked(
+            runner,
+            [
+                "gh",
+                "pr",
+                "create",
+                "--base",
+                "main",
+                "--head",
+                branch,
+                "--title",
+                "Sync published artefacts",
+                "--body-file",
+                body_path,
+            ],
+            repo_root,
+            "cannot create pull request",
+        ).strip()
+    finally:
+        if body_path and os.path.exists(body_path):
+            os.unlink(body_path)
+    if not pull_request_url:
+        raise PublishError("GitHub did not return a pull request URL")
+
+    _require_successful_checks(repo_root, pull_request_url, runner)
+    _run_checked(
+        runner,
+        ["gh", "pr", "merge", pull_request_url, "--squash"],
+        repo_root,
+        "cannot merge pull request",
+    )
+    pr_output = _run_checked(
+        runner,
+        ["gh", "pr", "view", pull_request_url, "--json", "state,mergeCommit,url"],
+        repo_root,
+        "cannot read merged pull request",
+    )
+    try:
+        pr = json.loads(pr_output)
+        merge_commit = pr["mergeCommit"]["oid"]
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        raise PublishError("cannot parse merged pull request") from error
+    if pr.get("state") != "MERGED" or not merge_commit:
+        raise PublishError("pull request was not merged")
+
+    repository_output = _run_checked(
+        runner,
+        ["gh", "repo", "view", "--json", "nameWithOwner"],
+        repo_root,
+        "cannot identify GitHub repository",
+    )
+    try:
+        repository = json.loads(repository_output)["nameWithOwner"]
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        raise PublishError("cannot parse GitHub repository") from error
+    _wait_for_pages(repo_root, repository, merge_commit, runner, sleeper)
+    pages_output = _run_checked(
+        runner,
+        ["gh", "api", f"repos/{repository}/pages"],
+        repo_root,
+        "cannot read GitHub Pages configuration",
+    )
+    try:
+        base_url = json.loads(pages_output)["html_url"]
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        raise PublishError("cannot parse GitHub Pages URL") from error
+    urls = _public_urls(base_url, plan.next_manifest)
+    _verify_public_urls(repo_root, urls, runner)
+    return PublishResult(
+        pull_request_url=pull_request_url,
+        merge_commit=merge_commit,
+        catalogue_url=urljoin(base_url.rstrip("/") + "/", "artefacts/"),
+        verified_url_count=len(urls),
+        excluded_suffixes=plan.excluded_suffixes,
+    )
+
+
 def confirm_and_apply(
     plan: SyncPlan,
     manifest_path: Path,
@@ -804,7 +1140,7 @@ def default_source_root() -> Path:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Synchronize published artefacts")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for command in ("plan", "apply"):
+    for command in ("plan", "apply", "publish"):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", type=Path, default=default_repo_root())
         subparser.add_argument("--source", type=Path, default=default_source_root())
@@ -827,6 +1163,17 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
             if args.base_ref:
                 print("Homepage files are unchanged.")
             return 0
+        if args.command == "publish":
+            result = publish(repo_root, args.source, confirm=input_fn)
+            if result is None:
+                return 0
+            excluded = ", ".join(result.excluded_suffixes) or "none"
+            print(f"Pull request: {result.pull_request_url}")
+            print(f"Merge commit: {result.merge_commit}")
+            print(f"Catalogue: {result.catalogue_url}")
+            print(f"Verified URLs: {result.verified_url_count}")
+            print(f"Excluded source types: {excluded}")
+            return 0
         manifest_path = repo_root / "artefacts" / "manifest.json"
         artefacts_root = repo_root / "artefacts"
         plan = create_sync_plan(
@@ -845,6 +1192,9 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
     except ArtefactError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
+    except KeyboardInterrupt:
+        print("Cancelled.", file=sys.stderr)
+        return 130
 
 
 if __name__ == "__main__":
