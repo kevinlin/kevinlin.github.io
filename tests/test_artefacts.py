@@ -1,6 +1,7 @@
 import importlib.util
 import hashlib
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -593,6 +594,167 @@ class ApplyTests(unittest.TestCase):
         self.assertIn("Update (3)", output)
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
         self.assertIn("Excluded source types: .md", output)
+
+
+class RepositoryValidationTests(unittest.TestCase):
+    def valid_repository(self) -> Path:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        repo = Path(directory.name)
+        artefacts = repo / "artefacts"
+        (artefacts / "charts" / "chart").mkdir(parents=True)
+        (artefacts / "images").mkdir()
+        (artefacts / "vendor").mkdir()
+        payload = {
+            "version": 1,
+            "protected_files": ["vendor/chart.umd.min.js"],
+            "collections": [
+                {
+                    "id": "charts",
+                    "title": "Charts",
+                    "description": "Published charts.",
+                    "section": "Analysis",
+                    "section_order": 10,
+                    "order": 10,
+                }
+            ],
+            "entries": [
+                {
+                    "id": "chart",
+                    "source": "Charts/Chart.html",
+                    "destination": "charts/chart/index.html",
+                    "title": "Chart",
+                    "collection": "charts",
+                    "order": 10,
+                    "replacements": {},
+                },
+                {
+                    "id": "image",
+                    "source": "Charts/Image.png",
+                    "destination": "images/image.png",
+                    "title": "Image",
+                    "collection": "charts",
+                    "order": 20,
+                    "replacements": {},
+                },
+            ],
+        }
+        manifest_path = artefacts / "manifest.json"
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        manifest = artefacts_cli.load_manifest(manifest_path)
+        catalogue = (
+            '<a href="/">Home</a>\n'
+            "<!-- ARTEFACTS:START -->\n"
+            "old\n"
+            "<!-- ARTEFACTS:END -->\n"
+        )
+        (artefacts / "index.html").write_text(
+            artefacts_cli.replace_generated_catalogue(
+                catalogue, artefacts_cli.render_catalogue(manifest)
+            ),
+            encoding="utf-8",
+        )
+        (artefacts / "charts" / "chart" / "index.html").write_text(
+            '<script src="../../vendor/chart.umd.min.js"></script>\n',
+            encoding="utf-8",
+        )
+        (artefacts / "images" / "image.png").write_bytes(b"png")
+        (artefacts / "vendor" / "chart.umd.min.js").write_bytes(b"chart")
+        (repo / "index.html").write_text("home\n", encoding="utf-8")
+        (repo / "styles.css").write_text("body {}\n", encoding="utf-8")
+        (repo / "script.js").write_text("// home\n", encoding="utf-8")
+        return repo
+
+    def test_validate_accepts_complete_repository(self):
+        report = artefacts_cli.validate_repository(self.valid_repository(), None)
+
+        self.assertEqual(report.entry_count, 2)
+        self.assertEqual(report.local_link_count, 4)
+
+    def test_validate_rejects_unexpected_published_file(self):
+        repo = self.valid_repository()
+        (repo / "artefacts" / "unlisted.png").write_bytes(b"png")
+
+        with self.assertRaisesRegex(
+            artefacts_cli.ValidationError, "unexpected published file"
+        ):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_rejects_missing_destination(self):
+        repo = self.valid_repository()
+        (repo / "artefacts" / "images" / "image.png").unlink()
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "missing published file"):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_ignores_ds_store(self):
+        repo = self.valid_repository()
+        (repo / "artefacts" / ".DS_Store").write_bytes(b"metadata")
+
+        report = artefacts_cli.validate_repository(repo, None)
+
+        self.assertEqual(report.ignored_metadata_count, 1)
+
+    def test_validate_rejects_missing_catalogue_link(self):
+        repo = self.valid_repository()
+        catalogue = repo / "artefacts" / "index.html"
+        catalogue.write_text(
+            catalogue.read_text().replace('href="images/image.png"', 'href="images/missing.png"'),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "catalogue link"):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_rejects_duplicate_catalogue_link(self):
+        repo = self.valid_repository()
+        catalogue = repo / "artefacts" / "index.html"
+        catalogue.write_text(
+            catalogue.read_text().replace(
+                "<!-- ARTEFACTS:END -->",
+                '<a href="images/image.png">Duplicate</a>\n<!-- ARTEFACTS:END -->',
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "catalogue link"):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_rejects_broken_relative_script(self):
+        repo = self.valid_repository()
+        page = repo / "artefacts" / "charts" / "chart" / "index.html"
+        page.write_text('<script src="../../vendor/missing.js"></script>\n', encoding="utf-8")
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "broken local reference"):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_rejects_cdnjs_reference(self):
+        repo = self.valid_repository()
+        page = repo / "artefacts" / "charts" / "chart" / "index.html"
+        page.write_text(
+            '<script src="https://cdnjs.cloudflare.com/chart.js"></script>\n',
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "forbidden cdnjs"):
+            artefacts_cli.validate_repository(repo, None)
+
+    def test_validate_rejects_homepage_commit_diff(self):
+        repo = self.valid_repository()
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
+        subprocess.run(["git", "add", "."], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "base"], cwd=repo, check=True)
+        base = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=repo, check=True, text=True, capture_output=True
+        ).stdout.strip()
+        (repo / "index.html").write_text("changed\n", encoding="utf-8")
+        subprocess.run(["git", "add", "index.html"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "change home"], cwd=repo, check=True)
+
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "homepage files changed"):
+            artefacts_cli.validate_repository(repo, base)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,25 @@
+name: Validate artefacts
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-artefacts.yml"
+      - "artefacts/**"
+      - "scripts/artefacts.py"
+      - "tests/test_artefacts.py"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest tests/test_artefacts.py -v
+      - run: python3 scripts/artefacts.py validate --base-ref "origin/${{ github.base_ref }}"

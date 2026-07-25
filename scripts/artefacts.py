@@ -5,6 +5,7 @@ import argparse
 from dataclasses import dataclass, field, replace
 import hashlib
 import html
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -13,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 
 APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
@@ -37,6 +39,10 @@ class TransformationError(ArtefactError):
 
 
 class CatalogueError(ArtefactError):
+    pass
+
+
+class ValidationError(ArtefactError):
     pass
 
 
@@ -100,6 +106,31 @@ class SyncPlan:
     changes: tuple[Change, ...]
     unchanged: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ValidationReport:
+    entry_count: int
+    local_link_count: int
+    ignored_metadata_count: int
+    homepage_unchanged: bool
+
+
+class _ReferenceParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.hrefs: list[str] = []
+        self.references: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if value is None:
+                continue
+            if name == "href":
+                self.hrefs.append(value)
+                self.references.append(value)
+            elif name == "src":
+                self.references.append(value)
 
 
 def _safe_relative_path(value: str, field_name: str) -> PurePosixPath:
@@ -635,6 +666,120 @@ def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> Non
         raise ArtefactError("applied manifest differs from plan")
 
 
+def _parse_references(path: Path) -> _ReferenceParser:
+    parser = _ReferenceParser()
+    try:
+        parser.feed(path.read_text(encoding="utf-8"))
+        parser.close()
+    except (OSError, UnicodeError) as error:
+        raise ValidationError(f"cannot parse HTML file {path}: {error}") from error
+    return parser
+
+
+def _resolve_local_reference(repo_root: Path, page: Path, reference: str) -> Path | None:
+    parsed = urlsplit(reference)
+    if parsed.scheme or parsed.netloc or not parsed.path:
+        return None
+    reference_path = unquote(parsed.path)
+    if reference_path.startswith("/"):
+        target = repo_root / reference_path.lstrip("/")
+    else:
+        target = page.parent / reference_path
+    if reference_path.endswith("/") or target.is_dir():
+        target /= "index.html"
+    resolved = target.resolve(strict=False)
+    if not resolved.is_relative_to(repo_root.resolve()):
+        raise ValidationError(f"local reference escapes repository: {reference}")
+    return resolved
+
+
+def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationReport:
+    repo_root = repo_root.resolve()
+    artefacts_root = repo_root / "artefacts"
+    manifest = load_manifest(artefacts_root / "manifest.json")
+    expected = {
+        PurePosixPath("index.html"),
+        PurePosixPath("manifest.json"),
+        *manifest.protected_files,
+        *(entry.destination for entry in manifest.entries),
+    }
+    actual: set[PurePosixPath] = set()
+    ignored_metadata = 0
+    for path in artefacts_root.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.name == ".DS_Store":
+            ignored_metadata += 1
+            continue
+        actual.add(PurePosixPath(path.relative_to(artefacts_root).as_posix()))
+    missing = sorted(expected - actual, key=str)
+    unexpected = sorted(actual - expected, key=str)
+    if missing:
+        raise ValidationError(
+            "missing published file: " + ", ".join(path.as_posix() for path in missing)
+        )
+    if unexpected:
+        raise ValidationError(
+            "unexpected published file: "
+            + ", ".join(path.as_posix() for path in unexpected)
+        )
+
+    catalogue_parser = _parse_references(artefacts_root / "index.html")
+    for entry in manifest.entries:
+        href = public_href(entry.destination)
+        count = catalogue_parser.hrefs.count(href)
+        if count != 1:
+            raise ValidationError(
+                f"catalogue link for {entry.id} must appear exactly once, found {count}"
+            )
+
+    local_targets: set[Path] = set()
+    for relative_path in sorted(actual, key=str):
+        if relative_path.suffix != ".html":
+            continue
+        page = artefacts_root / relative_path.as_posix()
+        text = page.read_text(encoding="utf-8")
+        if "cdnjs.cloudflare.com" in text or "https://cdnjs" in text:
+            raise ValidationError(f"forbidden cdnjs reference in {relative_path}")
+        parser = _parse_references(page)
+        for reference in parser.references:
+            target = _resolve_local_reference(repo_root, page, reference)
+            if target is None:
+                continue
+            if not target.is_file():
+                raise ValidationError(
+                    f"broken local reference in {relative_path}: {reference}"
+                )
+            local_targets.add(target)
+
+    homepage_unchanged = True
+    if base_ref is not None:
+        result = subprocess.run(
+            [
+                "git",
+                "diff",
+                "--exit-code",
+                f"{base_ref}...HEAD",
+                "--",
+                "index.html",
+                "styles.css",
+                "script.js",
+            ],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            raise ValidationError("homepage files changed relative to base ref")
+    return ValidationReport(
+        entry_count=len(manifest.entries),
+        local_link_count=len(local_targets),
+        ignored_metadata_count=ignored_metadata,
+        homepage_unchanged=homepage_unchanged,
+    )
+
+
 def confirm_and_apply(
     plan: SyncPlan,
     manifest_path: Path,
@@ -663,15 +808,27 @@ def _parser() -> argparse.ArgumentParser:
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--repo", type=Path, default=default_repo_root())
         subparser.add_argument("--source", type=Path, default=default_source_root())
+    validate_parser = subparsers.add_parser("validate")
+    validate_parser.add_argument("--repo", type=Path, default=default_repo_root())
+    validate_parser.add_argument("--base-ref")
     return parser
 
 
 def main(argv: list[str] | None = None, input_fn=input) -> int:
     args = _parser().parse_args(argv)
     repo_root = args.repo.resolve()
-    manifest_path = repo_root / "artefacts" / "manifest.json"
-    artefacts_root = repo_root / "artefacts"
     try:
+        if args.command == "validate":
+            report = validate_repository(repo_root, args.base_ref)
+            print(
+                f"Validated {report.entry_count} manifest entries and "
+                f"{report.local_link_count} local links."
+            )
+            if args.base_ref:
+                print("Homepage files are unchanged.")
+            return 0
+        manifest_path = repo_root / "artefacts" / "manifest.json"
+        artefacts_root = repo_root / "artefacts"
         plan = create_sync_plan(
             manifest_path,
             args.source.expanduser(),
