@@ -89,6 +89,7 @@ The following rules apply:
 - HTML presentations use a directory `index.html`; images retain an approved image extension.
 - Binary files are copied byte-for-byte and verified with SHA-256.
 - HTML replacements are exact manifest declarations. An expected replacement that is absent is an error.
+- HTML lines have trailing spaces and tabs removed deterministically so generated commits pass Git whitespace checks.
 - Published HTML must not contain forbidden cdnjs runtime references after transformation.
 - Vendor files and the catalogue shell are protected and are never deleted by source mirroring.
 - Files outside the allowlist are never copied.
@@ -103,7 +104,7 @@ The generated catalogue must link every manifest entry exactly once. Vendor file
 
 ## Sync Flow
 
-`plan` performs no repository writes:
+`plan` performs no repository writes. It compares the working manifest with the version in `HEAD` so metadata-only changes appear in the preview:
 
 1. Resolve and validate the repository and source roots.
 2. Parse and validate the manifest.
@@ -119,7 +120,7 @@ The generated catalogue must link every manifest entry exactly once. Vendor file
 
 ## Publishing Flow
 
-`publish` requires `git`, `gh`, `curl`, an authenticated GitHub CLI session, a clean worktree, and an up-to-date local `main` branch. It performs this sequence:
+`publish` requires `git`, `gh`, `curl`, an authenticated GitHub CLI session, and an up-to-date local `main` branch. The worktree may be clean or contain one unstaged change to `artefacts/manifest.json`; staged changes and every other working-tree change are rejected. It performs this sequence:
 
 1. Run `plan` and show the complete change set.
 2. Ask for one explicit confirmation.
@@ -133,6 +134,8 @@ The generated catalogue must link every manifest entry exactly once. Vendor file
 10. Request the homepage, catalogue, and every manifest URL over HTTPS and require HTTP 200.
 
 The command prints the pull request URL, merge commit, catalogue URL, verified public URL count, and excluded file types.
+
+If the plan contains no additions, updates, or deletions, `publish` reports that the site is already synchronized and exits without creating a branch or pull request.
 
 ## Continuous Integration
 
@@ -172,5 +175,5 @@ The pull-request workflow runs the complete test suite and repository validation
 - Background folder watchers or scheduled synchronization.
 - Publishing without an explicit local confirmation.
 - Uploading Markdown, Word, PDF, or other unapproved file types.
-- Editing artefact content beyond declared HTML dependency replacements.
+- Editing artefact content beyond declared HTML dependency replacements and deterministic trailing-whitespace removal.
 - Automatically changing existing public paths when source files are renamed.
