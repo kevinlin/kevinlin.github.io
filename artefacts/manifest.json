@@ -104,15 +104,6 @@
       }
     },
     {
-      "id": "intelligence-index-chart",
-      "source": "llm-effort-level-vs-performance/intelligence_index_chart.png",
-      "destination": "llm-effort-level-vs-performance/intelligence-index-chart.png",
-      "title": "Intelligence index chart",
-      "collection": "llm-performance",
-      "order": 30,
-      "replacements": {}
-    },
-    {
       "id": "gpt-5-6-average-cost-per-task",
       "source": "llm-effort-level-vs-performance/GPT-5.6-Avg cost per task.png",
       "destination": "llm-effort-level-vs-performance/gpt-5-6-average-cost-per-task.png",
@@ -209,87 +200,6 @@
       "title": "When AI gives you buzzwords",
       "collection": "ai-trend-slop",
       "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-apple-touch-icon",
-      "source": "flow-fabric/icons/apple-touch-icon.png",
-      "destination": "flow-fabric/icons/apple-touch-icon.png",
-      "title": "Apple touch icon",
-      "collection": "flow-fabric",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-favicon-16",
-      "source": "flow-fabric/icons/favicon-16.png",
-      "destination": "flow-fabric/icons/favicon-16.png",
-      "title": "16 px favicon",
-      "collection": "flow-fabric",
-      "order": 20,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-favicon-32",
-      "source": "flow-fabric/icons/favicon-32.png",
-      "destination": "flow-fabric/icons/favicon-32.png",
-      "title": "32 px favicon",
-      "collection": "flow-fabric",
-      "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-favicon-64",
-      "source": "flow-fabric/icons/favicon-64.png",
-      "destination": "flow-fabric/icons/favicon-64.png",
-      "title": "64 px favicon",
-      "collection": "flow-fabric",
-      "order": 40,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-favicon-ico",
-      "source": "flow-fabric/icons/favicon.ico",
-      "destination": "flow-fabric/icons/favicon.ico",
-      "title": "ICO favicon",
-      "collection": "flow-fabric",
-      "order": 50,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-icon-192",
-      "source": "flow-fabric/icons/flow-fabric-icon-192.png",
-      "destination": "flow-fabric/icons/flow-fabric-icon-192.png",
-      "title": "192 px icon",
-      "collection": "flow-fabric",
-      "order": 60,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-icon-256",
-      "source": "flow-fabric/icons/flow-fabric-icon-256.png",
-      "destination": "flow-fabric/icons/flow-fabric-icon-256.png",
-      "title": "256 px icon",
-      "collection": "flow-fabric",
-      "order": 70,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-icon-512",
-      "source": "flow-fabric/icons/flow-fabric-icon-512.png",
-      "destination": "flow-fabric/icons/flow-fabric-icon-512.png",
-      "title": "512 px icon",
-      "collection": "flow-fabric",
-      "order": 80,
-      "replacements": {}
-    },
-    {
-      "id": "flow-fabric-icon-1024",
-      "source": "flow-fabric/icons/flow-fabric-icon-1024.png",
-      "destination": "flow-fabric/icons/flow-fabric-icon-1024.png",
-      "title": "1024 px icon",
-      "collection": "flow-fabric",
-      "order": 90,
       "replacements": {}
     }
   ]
