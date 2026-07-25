@@ -1,0 +1,296 @@
+{
+  "version": 1,
+  "protected_files": [
+    "vendor/chart.umd.min.js",
+    "vendor/chartjs-plugin-datalabels.min.js"
+  ],
+  "collections": [
+    {
+      "id": "snapdragon-product-line",
+      "title": "Snapdragon product line",
+      "description": "A visual timeline of the Snapdragon 7 Series.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 10
+    },
+    {
+      "id": "llm-performance",
+      "title": "LLM effort level vs. performance",
+      "description": "Interactive comparisons and supporting charts for model intelligence, cost, tokens, and effort.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 20
+    },
+    {
+      "id": "gpt-5-6",
+      "title": "GPT-5.6",
+      "description": "A visual recap of its first five days.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 10
+    },
+    {
+      "id": "claude-code",
+      "title": "Claude Code",
+      "description": "Visual explainers and a keyboard shortcuts reference.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 20
+    },
+    {
+      "id": "peter-steinberger-human-taste",
+      "title": "Peter Steinberger: human taste",
+      "description": "Two excerpts on the role of human judgment.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 30
+    },
+    {
+      "id": "people-lead-lifecycle",
+      "title": "People Lead lifecycle",
+      "description": "Activities across the People Lead lifecycle.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 40
+    },
+    {
+      "id": "ai-trend-slop",
+      "title": "AI trend slop",
+      "description": "A visual note on vague AI trend language.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 50
+    },
+    {
+      "id": "flow-fabric",
+      "title": "Flow Fabric",
+      "description": "Application icons in browser, mobile, and high-resolution sizes.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 60
+    }
+  ],
+  "entries": [
+    {
+      "id": "snapdragon-7-series-timeline",
+      "source": "snapdragon-product-line/Snapdragon 7 Series Timeline.html",
+      "destination": "snapdragon-product-line/index.html",
+      "title": "Snapdragon 7 Series timeline",
+      "collection": "snapdragon-product-line",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "intelligence-index",
+      "source": "llm-effort-level-vs-performance/intelligence_index_chart.html",
+      "destination": "llm-effort-level-vs-performance/intelligence-index/index.html",
+      "title": "Intelligence index",
+      "collection": "llm-performance",
+      "order": 10,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      }
+    },
+    {
+      "id": "swe-bench-pro-by-lab",
+      "source": "llm-effort-level-vs-performance/swe_bench_pro_by_lab_dated_v3.html",
+      "destination": "llm-effort-level-vs-performance/swe-bench-pro-by-lab/index.html",
+      "title": "SWE-bench Pro by lab",
+      "collection": "llm-performance",
+      "order": 20,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
+      }
+    },
+    {
+      "id": "intelligence-index-chart",
+      "source": "llm-effort-level-vs-performance/intelligence_index_chart.png",
+      "destination": "llm-effort-level-vs-performance/intelligence-index-chart.png",
+      "title": "Intelligence index chart",
+      "collection": "llm-performance",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "gpt-5-6-average-cost-per-task",
+      "source": "llm-effort-level-vs-performance/GPT-5.6-Avg cost per task.png",
+      "destination": "llm-effort-level-vs-performance/gpt-5-6-average-cost-per-task.png",
+      "title": "GPT-5.6 average cost per task",
+      "collection": "llm-performance",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "gpt-5-6-average-output-tokens-per-task",
+      "source": "llm-effort-level-vs-performance/GPT-5.6-Avg output tokens per task.png",
+      "destination": "llm-effort-level-vs-performance/gpt-5-6-average-output-tokens-per-task.png",
+      "title": "GPT-5.6 average output tokens per task",
+      "collection": "llm-performance",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "sonnet-5-effort-dial",
+      "source": "llm-effort-level-vs-performance/Sonnet5-Effor-dial-truth.png",
+      "destination": "llm-effort-level-vs-performance/sonnet-5-effort-dial-truth.png",
+      "title": "Sonnet 5 effort dial",
+      "collection": "llm-performance",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "gpt-5-6-first-five-days",
+      "source": "GPT-5.6/GPT-5.6 Sol - The First 5 Days.png",
+      "destination": "gpt-5-6/first-five-days.png",
+      "title": "The first five days",
+      "collection": "gpt-5-6",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "the-claude-code-leak",
+      "source": "claude-code/The Claude Code Leak.jpeg",
+      "destination": "claude-code/the-claude-code-leak.jpeg",
+      "title": "The Claude Code leak",
+      "collection": "claude-code",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "how-claude-code-leaked",
+      "source": "claude-code/How Claude Code Leaked.jpeg",
+      "destination": "claude-code/how-claude-code-leaked.jpeg",
+      "title": "How Claude Code leaked",
+      "collection": "claude-code",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "claude-code-shortcuts-cheatsheet",
+      "source": "claude-code/Claude Code Shortcuts Cheatsheet.jpeg",
+      "destination": "claude-code/shortcuts-cheatsheet.jpeg",
+      "title": "Shortcuts cheatsheet",
+      "collection": "claude-code",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "human-taste-1",
+      "source": "peter-steinberger-human-taste/Peter Steinberger on Human Taste_1.png",
+      "destination": "peter-steinberger-human-taste/human-taste-1.png",
+      "title": "Human taste, part 1",
+      "collection": "peter-steinberger-human-taste",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "human-taste-2",
+      "source": "peter-steinberger-human-taste/Peter Steinberger on Human Taste_2.png",
+      "destination": "peter-steinberger-human-taste/human-taste-2.png",
+      "title": "Human taste, part 2",
+      "collection": "peter-steinberger-human-taste",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "people-lead-lifecycle-activities",
+      "source": "people-lead-lifecycle/People Lead Lifecycle Activities.png",
+      "destination": "people-lead-lifecycle/activities.png",
+      "title": "Lifecycle activities",
+      "collection": "people-lead-lifecycle",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "when-ai-gives-you-buzzwords",
+      "source": "ai-trend-slop/TRENDSLOP_When Al Gives You Buzzwords Instead of.png",
+      "destination": "ai-trend-slop/when-ai-gives-you-buzzwords.png",
+      "title": "When AI gives you buzzwords",
+      "collection": "ai-trend-slop",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-apple-touch-icon",
+      "source": "flow-fabric/icons/apple-touch-icon.png",
+      "destination": "flow-fabric/icons/apple-touch-icon.png",
+      "title": "Apple touch icon",
+      "collection": "flow-fabric",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-favicon-16",
+      "source": "flow-fabric/icons/favicon-16.png",
+      "destination": "flow-fabric/icons/favicon-16.png",
+      "title": "16 px favicon",
+      "collection": "flow-fabric",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-favicon-32",
+      "source": "flow-fabric/icons/favicon-32.png",
+      "destination": "flow-fabric/icons/favicon-32.png",
+      "title": "32 px favicon",
+      "collection": "flow-fabric",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-favicon-64",
+      "source": "flow-fabric/icons/favicon-64.png",
+      "destination": "flow-fabric/icons/favicon-64.png",
+      "title": "64 px favicon",
+      "collection": "flow-fabric",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-favicon-ico",
+      "source": "flow-fabric/icons/favicon.ico",
+      "destination": "flow-fabric/icons/favicon.ico",
+      "title": "ICO favicon",
+      "collection": "flow-fabric",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-icon-192",
+      "source": "flow-fabric/icons/flow-fabric-icon-192.png",
+      "destination": "flow-fabric/icons/flow-fabric-icon-192.png",
+      "title": "192 px icon",
+      "collection": "flow-fabric",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-icon-256",
+      "source": "flow-fabric/icons/flow-fabric-icon-256.png",
+      "destination": "flow-fabric/icons/flow-fabric-icon-256.png",
+      "title": "256 px icon",
+      "collection": "flow-fabric",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-icon-512",
+      "source": "flow-fabric/icons/flow-fabric-icon-512.png",
+      "destination": "flow-fabric/icons/flow-fabric-icon-512.png",
+      "title": "512 px icon",
+      "collection": "flow-fabric",
+      "order": 80,
+      "replacements": {}
+    },
+    {
+      "id": "flow-fabric-icon-1024",
+      "source": "flow-fabric/icons/flow-fabric-icon-1024.png",
+      "destination": "flow-fabric/icons/flow-fabric-icon-1024.png",
+      "title": "1024 px icon",
+      "collection": "flow-fabric",
+      "order": 90,
+      "replacements": {}
+    }
+  ]
+}
