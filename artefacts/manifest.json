@@ -122,15 +122,6 @@
       "replacements": {}
     },
     {
-      "id": "sonnet-5-effort-dial",
-      "source": "llm-effort-level-vs-performance/Sonnet5-Effor-dial-truth.png",
-      "destination": "llm-effort-level-vs-performance/sonnet-5-effort-dial-truth.png",
-      "title": "Sonnet 5 effort dial",
-      "collection": "llm-performance",
-      "order": 60,
-      "replacements": {}
-    },
-    {
       "id": "gpt-5-6-first-five-days",
       "source": "GPT-5.6/GPT-5.6 Sol - The First 5 Days.png",
       "destination": "gpt-5-6/first-five-days.png",
