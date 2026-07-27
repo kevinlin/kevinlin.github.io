@@ -6,9 +6,9 @@
   ],
   "collections": [
     {
-      "id": "snapdragon-product-line",
-      "title": "Snapdragon product line",
-      "description": "A visual timeline of the Snapdragon 7 Series.",
+      "id": "product-timeline",
+      "title": "Product Timeline",
+      "description": "A visual timeline of product release over time.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 10
@@ -97,11 +97,20 @@
   "entries": [
     {
       "id": "snapdragon-7-series-timeline",
-      "source": "snapdragon-product-line/Snapdragon 7 Series Timeline.html",
-      "destination": "snapdragon-product-line/index.html",
+      "source": "product-timeline/Snapdragon 7 Series Timeline.html",
+      "destination": "product-timeline/index.html",
       "title": "Snapdragon 7 Series timeline",
-      "collection": "snapdragon-product-line",
+      "collection": "product-timeline",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "claude-gpt-timeline",
+      "source": "product-timeline/claude-gpt-timeline.html",
+      "destination": "product-timeline/claude-gpt-timeline/index.html",
+      "title": "Claude and GPT timeline",
+      "collection": "product-timeline",
+      "order": 20,
       "replacements": {}
     },
     {
