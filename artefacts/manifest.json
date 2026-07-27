@@ -68,6 +68,30 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 60
+    },
+    {
+      "id": "daily-laughs",
+      "title": "Daily laughs",
+      "description": "Funny finds from daily life.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 70
+    },
+    {
+      "id": "loop-engineering",
+      "title": "Loop Engineering",
+      "description": "A visual reference for Loop Engineering.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 80
+    },
+    {
+      "id": "travel",
+      "title": "Travel",
+      "description": "Maps and visual references from travels.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 90
     }
   ],
   "entries": [
@@ -190,6 +214,33 @@
       "destination": "ai-trend-slop/when-ai-gives-you-buzzwords.png",
       "title": "When AI gives you buzzwords",
       "collection": "ai-trend-slop",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "kloburste-gebrauchsanleitung",
+      "source": "daily-laughs/Klobürste Gebrauchsanleitung.jpg",
+      "destination": "daily-laughs/klobu-rste-gebrauchsanleitung.jpg",
+      "title": "Klobürste Gebrauchsanleitung",
+      "collection": "daily-laughs",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "loop-engineering-image",
+      "source": "loop-engineering/Loop Engineering.jpeg",
+      "destination": "loop-engineering/loop-engineering.jpeg",
+      "title": "Loop Engineering",
+      "collection": "loop-engineering",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "china-fuxing-rail-network-map",
+      "source": "travel/China Fuxing High-Speed Rail Network Map.jpeg",
+      "destination": "travel/china-fuxing-high-speed-rail-network-map.jpeg",
+      "title": "China Fuxing High-Speed Rail Network Map",
+      "collection": "travel",
       "order": 10,
       "replacements": {}
     }
