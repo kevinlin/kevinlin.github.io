@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+window.contextInfo = {};
+// 处理锚点链接跳转（srcDoc iframe 中锚点链接默认行为不正确）
+document.addEventListener('click', function(e) {
+  var anchor = e.target.closest('a');
+  if (anchor) {
+    var href = anchor.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      var targetId = href.slice(1);
+      var target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
+});
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>Qualcomm Snapdragon 7 Series Timeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F6F5F1;
+            --panel: #FFFFFF;
+            --panel-2: #F0EEE8;
+            --grid: #E6E3DB;
+            --grid-strong: #CBC6BA;
+            --ink: #14171B;
+            --ink-soft: #565C64;
+            --ink-dim: #868C94;
+
+            /* Branch hues, darkened for 4.5:1+ against white cards */
+            --main: #7B2FCC;
+            --v710: #1263C2;
+            --v730: #197A45;
+            --v765: #92550A;
+            --v778: #C01A5B;
+            --vs:   #7A5A2E;
+            --plus: #0C7A66;
+
+            --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+            --ease: cubic-bezier(.22, .8, .24, 1);
+
+            --z-sticky: 20;
+            --z-tooltip: 100;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--ink);
+            background-image:
+                radial-gradient(110% 70% at 50% -8%, rgba(123, 47, 204, .07), transparent 60%),
+                radial-gradient(80% 55% at 50% 108%, rgba(12, 122, 102, .05), transparent 58%);
+            background-attachment: fixed;
+            padding: 0 0 48px;
+            min-height: 100vh;
+        }
+
+        /* Decorative paper-grain veil */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 60;
+            background: repeating-linear-gradient(180deg, rgba(20, 23, 27, .018) 0 1px, transparent 1px 3px);
+            mix-blend-mode: multiply;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--ink);
+            outline-offset: 3px;
+            border-radius: 3px;
+        }
+
+        .skip {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            padding: 10px 16px;
+            background: var(--ink);
+            color: var(--bg);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            z-index: 80;
+        }
+        .skip:focus { left: 16px; top: 16px; }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+        }
+
+        /* ---------- Header ---------- */
+
+        .shell { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            padding: 56px 0 28px;
+            border-bottom: 1px solid var(--grid-strong);
+            position: relative;
+        }
+        header::after {
+            content: "";
+            position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+            background: linear-gradient(90deg, var(--main), var(--plus) 58%, transparent);
+            opacity: .6;
+        }
+
+        .eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 20px;
+        }
+        .eyebrow .caret {
+            width: 7px; height: 13px; flex: none;
+            background: var(--plus);
+            animation: blink 1.15s steps(1) infinite;
+        }
+        @keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+
+        h1 {
+            font-size: clamp(26px, 4.6vw, 46px);
+            font-weight: 700;
+            line-height: 1.06;
+            letter-spacing: -.015em;
+            text-transform: uppercase;
+            text-wrap: balance;
+            margin-bottom: 18px;
+        }
+        h1 .accent { color: var(--main); }
+
+        .lede {
+            max-width: 68ch;
+            font-size: 13px;
+            line-height: 1.75;
+            color: var(--ink-soft);
+            text-wrap: pretty;
+        }
+        .lede b { color: var(--ink); font-weight: 500; }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 28px;
+            margin-top: 24px;
+            font-size: 10.5px;
+            font-weight: 500;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+        }
+        .meta .num {
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- Scroll rail ---------- */
+
+        .hint {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 24px;
+            padding: 26px 0 12px;
+            font-size: 10.5px;
+            font-weight: 500;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+        }
+        .hint .arrow { display: inline-block; animation: drift 2.4s var(--ease) infinite; }
+        @keyframes drift { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(6px) } }
+
+        .scroller {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            border-top: 1px solid var(--grid-strong);
+            border-bottom: 1px solid var(--grid-strong);
+            background: var(--panel);
+            scrollbar-color: var(--grid-strong) transparent;
+            scrollbar-width: thin;
+        }
+        .scroller::-webkit-scrollbar { height: 10px; }
+        .scroller::-webkit-scrollbar-track { background: transparent; }
+        .scroller::-webkit-scrollbar-thumb { background: var(--grid-strong); border-radius: 5px; }
+        .scroller:hover::-webkit-scrollbar-thumb { background: #B0AA9C; }
+
+        .rail { display: flex; width: max-content; }
+
+        /* Sticky lane legend column */
+        .lanes {
+            position: sticky;
+            left: 0;
+            z-index: var(--z-sticky);
+            flex: none;
+            width: 224px;
+            padding-top: 80px; /* aligns with SVG MARGIN_TOP */
+            background: var(--panel-2);
+            border-right: 1px solid var(--grid-strong);
+            box-shadow: 12px 0 20px -14px rgba(20, 23, 27, .35);
+        }
+
+        .lane-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--grid);
+        }
+        .lane-label:last-child { border-bottom: 0; }
+        .lane-label.main-gen { height: 160px; background: rgba(123, 47, 204, .05); }
+        .lane-label.variants { height: 550px; }
+        .lane-label.plus     { height: 140px; background: rgba(12, 122, 102, .05); }
+
+        .lane-label .bar {
+            width: 3px;
+            align-self: stretch;
+            margin: 24px 0;
+            border-radius: 2px;
+            flex: none;
+        }
+        .lane-label.main-gen .bar { background: var(--main); }
+        .lane-label.variants .bar { background: linear-gradient(180deg, var(--v710), var(--v730), var(--v765), var(--v778), var(--vs)); }
+        .lane-label.plus .bar     { background: var(--plus); }
+
+        .lane-label .name {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+        .lane-label.main-gen .name { color: var(--main); }
+        .lane-label.variants .name { color: var(--ink); }
+        .lane-label.plus .name     { color: var(--plus); }
+
+        .lane-label .sub {
+            display: block;
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: .1em;
+            color: var(--ink-dim);
+            text-transform: none;
+        }
+
+        svg { display: block; }
+
+        /* ---------- Chips ---------- */
+
+        .chip-card {
+            cursor: pointer;
+            outline: none;
+        }
+        .chip-card .chip-shell {
+            transition: fill 140ms var(--ease), stroke 140ms var(--ease);
+        }
+        .chip-card .chip-lift {
+            transition: transform 140ms var(--ease);
+            filter: drop-shadow(0 1px 1px rgba(20, 23, 27, .06)) drop-shadow(0 2px 4px rgba(20, 23, 27, .05));
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .chip-card:hover .chip-shell { fill: var(--panel-2); }
+            .chip-card:hover .chip-lift  { transform: translateY(-2px); }
+            .chip-card:hover .chip-glow  { opacity: .22; }
+        }
+        .chip-card:focus-visible .chip-shell { stroke-width: 2; }
+        .chip-card:focus-visible .chip-glow  { opacity: .3; }
+        .chip-card:active .chip-lift { transform: translateY(0) scale(.985); }
+
+        .chip-glow {
+            opacity: 0;
+            transition: opacity 160ms var(--ease);
+        }
+
+        .chip-enter {
+            animation: chipIn 320ms var(--ease) both;
+        }
+        @keyframes chipIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- Vertical view (narrow screens) ---------- */
+
+        .vstack { display: none; }
+
+        .vlist {
+            list-style: none;
+            position: relative;
+            padding: 4px 0 8px 30px;
+        }
+        /* The spine */
+        .vlist::before {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 8px;
+            bottom: 26px;
+            width: 2px;
+            border-radius: 1px;
+            background: linear-gradient(180deg, transparent, var(--grid-strong) 4%, var(--grid-strong) 96%, transparent);
+        }
+
+        .vyear {
+            position: relative;
+            margin: 26px 0 14px -30px;
+            padding-left: 30px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .22em;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        .vyear:first-child { margin-top: 0; }
+        .vyear::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 50%;
+            width: 12px; height: 2px;
+            transform: translateY(-50%);
+            background: var(--ink);
+        }
+
+        .vitem { position: relative; margin-bottom: 14px; }
+
+        /* Node on the spine, aligned with the card's first line */
+        .vitem::before {
+            content: "";
+            position: absolute;
+            left: -30px;
+            top: 22px;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 2px solid var(--c);
+        }
+
+        .vcard {
+            position: relative;
+            padding: 15px 16px 16px;
+            background: var(--panel);
+            border: 1px solid var(--grid);
+            border-left: 3px solid var(--c);
+            border-radius: 10px;
+            box-shadow:
+                0 1px 2px rgba(20, 23, 27, .04),
+                0 2px 6px rgba(20, 23, 27, .04);
+        }
+
+        .vlane {
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--c);
+            margin-bottom: 8px;
+        }
+
+        .vname {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -.01em;
+            line-height: 1.3;
+            color: var(--ink);
+            text-wrap: balance;
+        }
+
+        .vmeta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+            margin-top: 6px;
+            font-size: 11px;
+            letter-spacing: .08em;
+            color: var(--ink-soft);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .vspecs {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .vspecs li {
+            padding: 4px 9px;
+            /* Concentric: 10px card radius minus the 16px inset reads best at 6px */
+            border-radius: 6px;
+            background: var(--panel-2);
+            font-size: 10.5px;
+            letter-spacing: .04em;
+            color: var(--ink-soft);
+            white-space: nowrap;
+        }
+
+        .vrel, .vnote {
+            margin-top: 10px;
+            font-size: 10.5px;
+            line-height: 1.6;
+            letter-spacing: .04em;
+            color: var(--ink-dim);
+        }
+        .vrel b { color: var(--ink-soft); font-weight: 500; }
+        .vnote {
+            padding-top: 9px;
+            border-top: 1px solid var(--grid);
+            color: var(--v765);
+        }
+
+        /* ---------- Legend ---------- */
+
+        .legend { padding: 30px 0 0; }
+
+        .legend h2 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 18px;
+        }
+
+        .legend-items {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 12px 24px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11.5px;
+            letter-spacing: .04em;
+            color: var(--ink-soft);
+            min-height: 24px;
+        }
+
+        .legend-color {
+            width: 26px; height: 10px; flex: none;
+            border-radius: 3px;
+        }
+
+        .legend-line {
+            width: 34px; height: 4px; flex: none;
+            border-radius: 2px;
+            background: var(--ink-dim);
+            opacity: .55;
+        }
+
+        .legend-arrow {
+            width: 34px; height: 0; flex: none;
+            border-top: 2px dashed var(--ink-dim);
+            position: relative;
+        }
+        .legend-arrow::after {
+            content: '';
+            position: absolute; right: -2px; top: -4px;
+            border: 3px solid transparent;
+            border-left-color: var(--ink-dim);
+        }
+        .legend-arrow.cross-lane { border-top-color: var(--main); opacity: .7; }
+        .legend-arrow.cross-lane::after { border-left-color: var(--main); }
+
+        /* ---------- Tooltip ---------- */
+
+        .tooltip {
+            position: absolute;
+            max-width: 320px;
+            padding: 10px 13px;
+            background: var(--panel);
+            border: 1px solid var(--grid-strong);
+            border-radius: 6px;
+            box-shadow:
+                0 1px 2px rgba(20, 23, 27, .08),
+                0 4px 10px rgba(20, 23, 27, .09),
+                0 12px 28px rgba(20, 23, 27, .12);
+            color: var(--ink);
+            font-size: 11.5px;
+            line-height: 1.6;
+            letter-spacing: .03em;
+            pointer-events: none;
+            z-index: var(--z-tooltip);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(3px);
+            transition: opacity 130ms var(--ease), transform 130ms var(--ease), visibility 130ms;
+        }
+        .tooltip[data-open="true"] {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .tooltip .t-name { font-weight: 600; letter-spacing: .06em; }
+        .tooltip .t-row {
+            margin-top: 5px;
+            color: var(--ink-soft);
+            font-size: 10.5px;
+            font-variant-numeric: tabular-nums;
+        }
+        .tooltip .t-note {
+            margin-top: 7px;
+            padding-top: 7px;
+            border-top: 1px solid var(--grid);
+            color: var(--v765);
+            font-size: 10.5px;
+        }
+
+        footer {
+            padding: 28px 0 0;
+            margin-top: 30px;
+            border-top: 1px solid var(--grid);
+            font-size: 10.5px;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--ink-dim);
+        }
+
+        /* ---------- Responsive ---------- */
+
+        /* Below this width the 3400px chart stops being usable, so swap to the
+           vertical rendering instead of asking for two-axis scrolling. */
+        @media (max-width: 860px) {
+            .hint, .scroller { display: none; }
+            .vstack { display: block; padding-top: 26px; }
+
+            header { padding: 40px 0 24px; }
+            .lede { font-size: 12.5px; }
+            .legend-items { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+        }
+
+        @media (max-width: 520px) {
+            .shell { padding: 0 16px; }
+            header { padding: 32px 0 22px; }
+            .eyebrow { margin-bottom: 16px; letter-spacing: .18em; }
+            .meta { gap: 6px 18px; letter-spacing: .14em; }
+            .vlist { padding-left: 26px; }
+            .vitem::before { left: -26px; }
+            .vyear { margin-left: -26px; padding-left: 26px; }
+            .legend-items { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip" href="#timeline">Skip to timeline</a>
+
+    <div class="shell">
+        <header>
+            <p class="eyebrow"><span class="caret" aria-hidden="true"></span>Qualcomm / Mobile Platforms</p>
+            <h1>Snapdragon <span class="accent">7 Series</span> Timeline</h1>
+            <p class="lede">
+                All dates are <b>announcement dates</b>. A lifespan window ends at the launch of the next clear
+                successor in the same branch. <b>Present</b> = as of May&nbsp;1,&nbsp;2026.
+            </p>
+            <p class="meta">
+                <span><span class="num">21</span> platforms</span>
+                <span><span class="num">2018</span>&thinsp;&ndash;&thinsp;<span class="num">2026</span></span>
+                <span><span class="num">3</span> lanes</span>
+            </p>
+        </header>
+    </div>
+
+    <div id="timeline">
+    <div class="shell">
+        <p class="hint">
+            <span>Scroll horizontally <span class="arrow" aria-hidden="true">&rarr;</span></span>
+            <span>Hover or focus a platform for detail</span>
+        </p>
+    </div>
+
+    <div class="scroller" tabindex="0" role="region"
+         aria-label="Snapdragon 7 Series timeline chart, scrolls horizontally">
+        <div class="rail">
+            <div class="lanes">
+                <div class="lane-label main-gen">
+                    <span class="bar" aria-hidden="true"></span>
+                    <span class="name">Main Gen<span class="sub">Primary lineage</span></span>
+                </div>
+                <div class="lane-label variants">
+                    <span class="bar" aria-hidden="true"></span>
+                    <span class="name">Family Variants<span class="sub">Incremental upgrades</span></span>
+                </div>
+                <div class="lane-label plus">
+                    <span class="bar" aria-hidden="true"></span>
+                    <span class="name">Plus Branch<span class="sub">High performance</span></span>
+                </div>
+            </div>
+
+            <svg id="timeline-svg" width="3400" height="950" role="img"
+                 aria-label="Timeline of Qualcomm Snapdragon 7 Series platforms from 2018 to 2026, grouped into three lanes."></svg>
+        </div>
+    </div>
+
+    <!-- Narrow screens get a vertical, chronological rendering of the same data -->
+    <section class="vstack shell" aria-label="Snapdragon 7 Series timeline, chronological list">
+        <ol class="vlist" id="vlist"></ol>
+    </section>
+    </div>
+
+    <div class="shell">
+        <section class="legend">
+            <h2>Legend</h2>
+            <ul class="legend-items">
+                <li class="legend-item"><span class="legend-color" style="background: var(--main)"></span><span>Main Gen (primary lineage)</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--v710)"></span><span>710 variants</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--v730)"></span><span>730 variants</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--v765)"></span><span>765 variants</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--v778)"></span><span>778/780 variants</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--vs)"></span><span>S series (budget)</span></li>
+                <li class="legend-item"><span class="legend-color" style="background: var(--plus)"></span><span>Plus branch</span></li>
+                <li class="legend-item"><span class="legend-line"></span><span>Lifespan window</span></li>
+                <li class="legend-item"><span class="legend-arrow"></span><span>Within-lane inheritance</span></li>
+                <li class="legend-item"><span class="legend-arrow cross-lane"></span><span>Cross-lane derivation</span></li>
+            </ul>
+        </section>
+
+        <footer>Sources: Qualcomm announcements, TechInsights die analysis</footer>
+    </div>
+
+    <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
+
+    <script>
+        // Configuration
+        const SVG_WIDTH = 3400;
+        const SVG_HEIGHT = 950;
+        const LANE_HEIGHTS = [160, 550, 140]; // Main Gen, Family Variants, Plus
+        const SUB_LANE_HEIGHT = 110; // Height of each sub-lane in Family Variants
+        const MARGIN_TOP = 80;
+        const MARGIN_BOTTOM = 20;
+        const MARGIN_LEFT = 0;
+        const MARGIN_RIGHT = 40;
+
+        // Time scale configuration
+        const START_DATE = new Date('2018-01-01');
+        const END_DATE = new Date('2026-12-31');
+        const PRESENT_DATE = new Date('2026-05-01');
+        const TIMELINE_WIDTH = SVG_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
+
+        // Calculate pixels per day
+        const TOTAL_DAYS = (END_DATE - START_DATE) / (1000 * 60 * 60 * 24);
+        const PIXELS_PER_DAY = TIMELINE_WIDTH / TOTAL_DAYS;
+
+        // Convert date to X position
+        function dateToX(dateString) {
+            const date = new Date(dateString);
+            const days = (date - START_DATE) / (1000 * 60 * 60 * 24);
+            return MARGIN_LEFT + (days * PIXELS_PER_DAY);
+        }
+
+        // Theme tokens (kept in sync with CSS custom properties)
+        const INK = '#14171B';
+        const INK_SOFT = '#565C64';
+        const INK_DIM = '#868C94';
+        const GRID = '#E6E3DB';
+        const GRID_STRONG = '#CBC6BA';
+        const PANEL = '#FFFFFF';
+
+        // Branch colors
+        const BRANCH_COLORS = {
+            'main': '#7B2FCC',      // Main Gen - violet
+            '710': '#1263C2',       // 710 variants - blue
+            '730': '#197A45',       // 730 variants - green
+            '765': '#92550A',       // 765 variants - amber
+            '778': '#C01A5B',       // 778/780 variants - pink
+            's': '#7A5A2E',         // S series - bronze
+            'plus': '#0C7A66'       // Plus branch - teal
+        };
+
+        // Helper function to get Y position for a chip
+        function getChipY(lane, subLane, offset = 0) {
+            let baseY = MARGIN_TOP;
+
+            // Add heights of previous lanes
+            for (let i = 0; i < lane; i++) {
+                baseY += LANE_HEIGHTS[i];
+            }
+
+            // For Family Variants lane (lane 1), add sub-lane offset
+            if (lane === 1) {
+                baseY += (subLane * SUB_LANE_HEIGHT) + (SUB_LANE_HEIGHT / 2);
+            } else {
+                baseY += (LANE_HEIGHTS[lane] / 2);
+            }
+
+            return baseY + offset;
+        }
+
+        // SoC Data
+        // lane: 0 = Main Gen, 1 = Family Variants, 2 = Plus
+        // subLane (for Family Variants only): 0 = 710, 1 = 730, 2 = 765, 3 = 778, 4 = S
+        const socs = [
+            // Lane 0: Main Gen (Primary Lineage)
+            { name: 'Snapdragon 710', model: 'SDM710', date: '2018-05-23', branch: 'main', lane: 0, specs: '10nm | 2×A75+6×A55 | Adreno 616 | X15 LTE' },
+            { name: 'Snapdragon 730/730G', model: 'SM7150', date: '2019-04-09', branch: 'main', lane: 0, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+            { name: 'Snapdragon 765/765G', model: 'SM7250', date: '2019-12-04', branch: 'main', lane: 0, specs: '7nm | 1+1+6 A76/A55 | Adreno 620 | X52 5G' },
+            { name: 'Snapdragon 780G', model: 'SM7350', date: '2021-03-25', branch: 'main', lane: 0, specs: '5nm | 1+3+4 A78/A55 | Adreno 642 | X53 5G' },
+            { name: 'Snapdragon 7 Gen 1', model: 'SM7450', date: '2022-05-20', branch: 'main', lane: 0, specs: '4nm | 1+3+4 A710/A510 | Adreno 644 | X62 5G' },
+            { name: 'Snapdragon 7 Gen 3', model: 'SM7550', date: '2023-11-17', branch: 'main', lane: 0, specs: '4nm | 1+3+4 A715/A510 | Adreno 720 | X63 5G' },
+            { name: 'Snapdragon 7 Gen 4', model: 'SM7750-AB', date: '2025-05-15', branch: 'main', lane: 0, specs: '4nm | 1+4+3 A720/A520 | Adreno 722 | 5G' },
+
+            // Lane 1: Family Variants - Sub-lane A: 710 variants (subLane 0)
+            { name: 'Snapdragon 712', model: 'SDM712', date: '2019-02-06', branch: '710', lane: 1, subLane: 0, specs: '10nm | 2×A75+6×A55 | Adreno 616 | X15 LTE' },
+            { name: 'Snapdragon 720G', model: 'SM7125', date: '2020-01-20', branch: '710', lane: 1, subLane: 0, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+
+            // Lane 1: Family Variants - Sub-lane B: 730 variants (subLane 1)
+            { name: 'Snapdragon 732G', model: 'SM7150-AC', date: '2020-08-31', branch: '730', lane: 1, subLane: 1, specs: '8nm | 2×A76+6×A55 | Adreno 618 | 4G' },
+            { name: 'Snapdragon 750G', model: 'SM7225', date: '2020-09-22', branch: '730', lane: 1, subLane: 1, specs: '8nm | 2×A77+6×A55 | Adreno 619 | X52 5G' },
+
+            // Lane 1: Family Variants - Sub-lane C: 765 variants (subLane 2)
+            { name: 'Snapdragon 768G', model: 'SM7250-AC', date: '2020-05-10', branch: '765', lane: 1, subLane: 2, specs: '7nm | 1+1+6 A76/A55 | Adreno 620 | X52 5G' },
+
+            // Lane 1: Family Variants - Sub-lane D: 778/780 variants (subLane 3)
+            { name: 'Snapdragon 778G/778G+', model: 'SM7325', date: '2021-05-19', branch: '778', lane: 1, subLane: 3, specs: '6nm | 1+3+4 A78/A55 | Adreno 642L | X53 5G' },
+            { name: 'Snapdragon 782G', model: 'SM7325-AF', date: '2022-11-23', branch: '778', lane: 1, subLane: 3, specs: '6nm | 1+3+4 A78/A55 | Adreno 642L | X53 5G' },
+
+            // Lane 1: Family Variants - Sub-lane E: S series (subLane 4)
+            { name: 'Snapdragon 6 Gen 1', model: 'SM6450', date: '2022-09-06', branch: 's', lane: 1, subLane: 4, specs: '4nm | 4×A78+4×A55 | Adreno 710 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 2', model: 'SM7435', date: '2023-09-15', branch: 's', lane: 1, subLane: 4, specs: '4nm | 4×A78+4×A55 | Adreno 710 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 3', model: 'SM7635', date: '2024-08-20', branch: 's', lane: 1, subLane: 4, specs: '4nm | 1+3+4 A720/A520 | Adreno 810 | X62 5G' },
+            { name: 'Snapdragon 7s Gen 4', model: 'SM7635-AC', date: '2025-08-19', branch: 's', lane: 1, subLane: 4, specs: '4nm | 1+3+4 A720/A520 | Adreno 810 | X62 5G' },
+
+            // Lane 2: Plus Branch
+            { name: 'Snapdragon 7+ Gen 2', model: 'SM7475', date: '2023-03-17', branch: 'plus', lane: 2, specs: '4nm | 1+3+4 X2/A710/A510 | Adreno 725 | 5G' },
+            { name: 'Snapdragon 7+ Gen 3', model: 'SM7675', date: '2024-03-21', branch: 'plus', lane: 2, specs: '4nm | 1+4+3 X4/A720/A520 | Adreno 732 | 5G' }
+        ];
+
+        // Within-lane inheritance arrows
+        const inheritances = [
+            // Main Gen (lane 0)
+            { from: 'Snapdragon 710', to: 'Snapdragon 730/730G', type: 'within' },
+            { from: 'Snapdragon 730/730G', to: 'Snapdragon 765/765G', type: 'within' },
+            { from: 'Snapdragon 765/765G', to: 'Snapdragon 780G', type: 'within' },
+            { from: 'Snapdragon 780G', to: 'Snapdragon 7 Gen 1', type: 'within' },
+            { from: 'Snapdragon 7 Gen 1', to: 'Snapdragon 7 Gen 3', type: 'within' },
+            { from: 'Snapdragon 7 Gen 3', to: 'Snapdragon 7 Gen 4', type: 'within' },
+
+            // 710 variants (lane 1, subLane 0)
+            { from: 'Snapdragon 712', to: 'Snapdragon 720G', type: 'within' },
+
+            // 730 variants (lane 1, subLane 1)
+            // No inheritance - 732G and 750G are standalone variants
+
+            // 765 variants (lane 1, subLane 2)
+            // 768G is standalone
+
+            // 778/780 variants (lane 1, subLane 3)
+            { from: 'Snapdragon 778G/778G+', to: 'Snapdragon 782G', type: 'within' },
+
+            // S series (lane 1, subLane 4)
+            { from: 'Snapdragon 6 Gen 1', to: 'Snapdragon 7s Gen 2', type: 'within' },
+            { from: 'Snapdragon 7s Gen 2', to: 'Snapdragon 7s Gen 3', type: 'within' },
+            { from: 'Snapdragon 7s Gen 3', to: 'Snapdragon 7s Gen 4', type: 'within' },
+
+            // Plus branch (lane 2)
+            { from: 'Snapdragon 7+ Gen 2', to: 'Snapdragon 7+ Gen 3', type: 'within' }
+        ];
+
+        // Cross-lane derivation arrows (main gen to variants)
+        const crossLaneArrows = [
+            { from: 'Snapdragon 710', to: 'Snapdragon 712' },
+            { from: 'Snapdragon 730/730G', to: 'Snapdragon 732G' },
+            { from: 'Snapdragon 765/765G', to: 'Snapdragon 768G' },
+            { from: 'Snapdragon 780G', to: 'Snapdragon 778G/778G+' },
+            { from: 'Snapdragon 6 Gen 1', to: 'Snapdragon 7s Gen 2' }
+        ];
+
+        // Create SVG
+        const svg = document.getElementById('timeline-svg');
+        const NS = 'http://www.w3.org/2000/svg';
+
+        function el(tag, attrs) {
+            const node = document.createElementNS(NS, tag);
+            for (const key in attrs) node.setAttribute(key, attrs[key]);
+            return node;
+        }
+
+        // Create defs for arrowheads
+        const defs = el('defs');
+
+        const marker = el('marker', {
+            id: 'arrowhead', markerWidth: '10', markerHeight: '10',
+            refX: '9', refY: '3', orient: 'auto'
+        });
+        marker.appendChild(el('polygon', { points: '0 0, 10 3, 0 6', fill: INK_DIM }));
+        defs.appendChild(marker);
+
+        const markerCross = el('marker', {
+            id: 'arrowhead-cross', markerWidth: '10', markerHeight: '10',
+            refX: '9', refY: '3', orient: 'auto'
+        });
+        markerCross.appendChild(el('polygon', { points: '0 0, 10 3, 0 6', fill: BRANCH_COLORS.main }));
+        defs.appendChild(markerCross);
+
+        svg.appendChild(defs);
+
+        // Draw grid lines and axis
+        function drawGrid() {
+            const g = el('g', { id: 'grid' });
+
+            // Alternating year bands, so the eye can track columns across 3400px
+            for (let year = 2018; year <= 2026; year++) {
+                if (year % 2 !== 0) continue;
+                const x1 = dateToX(`${year}-01-01`);
+                const x2 = Math.min(dateToX(`${year + 1}-01-01`), SVG_WIDTH - MARGIN_RIGHT);
+                g.appendChild(el('rect', {
+                    x: x1, y: MARGIN_TOP, width: Math.max(0, x2 - x1),
+                    height: SVG_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
+                    fill: 'rgba(20, 23, 27, 0.022)'
+                }));
+            }
+
+            // Quarter grid lines, ticks and labels
+            for (let year = 2018; year <= 2026; year++) {
+                for (let quarter = 1; quarter <= 4; quarter++) {
+                    let month, day;
+                    if (quarter === 1) { month = 3; day = 31; }
+                    else if (quarter === 2) { month = 6; day = 30; }
+                    else if (quarter === 3) { month = 9; day = 30; }
+                    else { month = 12; day = 31; }
+
+                    const date = `${year}-${String(month).padStart(2, '0')}-${day}`;
+                    const x = dateToX(date);
+
+                    g.appendChild(el('line', {
+                        x1: x, y1: MARGIN_TOP - 16, x2: x, y2: SVG_HEIGHT - MARGIN_BOTTOM,
+                        stroke: GRID, 'stroke-width': '1'
+                    }));
+
+                    g.appendChild(el('line', {
+                        x1: x, y1: MARGIN_TOP - 16, x2: x, y2: MARGIN_TOP - 9,
+                        stroke: GRID_STRONG, 'stroke-width': '2'
+                    }));
+
+                    const label = el('text', {
+                        x: x, y: MARGIN_TOP - 23, 'text-anchor': 'middle',
+                        'font-size': '9', 'font-weight': '500', 'letter-spacing': '1.4',
+                        fill: INK_DIM
+                    });
+                    label.textContent = `Q${quarter}`;
+                    g.appendChild(label);
+                }
+            }
+
+            // Year markers
+            for (let year = 2018; year <= 2026; year++) {
+                const x = dateToX(`${year}-01-01`);
+
+                // Clamp the first label so it is not cut off at x = 0
+                const atEdge = x < 24;
+                const label = el('text', {
+                    x: atEdge ? 8 : x, y: MARGIN_TOP - 42,
+                    'text-anchor': atEdge ? 'start' : 'middle',
+                    'font-size': '15', 'font-weight': '700', 'letter-spacing': '2.4',
+                    fill: INK
+                });
+                label.textContent = year;
+                g.appendChild(label);
+
+                g.appendChild(el('line', {
+                    x1: x, y1: MARGIN_TOP - 16, x2: x, y2: SVG_HEIGHT - MARGIN_BOTTOM,
+                    stroke: GRID_STRONG, 'stroke-width': '1'
+                }));
+
+                g.appendChild(el('line', {
+                    x1: x, y1: MARGIN_TOP - 32, x2: x, y2: MARGIN_TOP - 16,
+                    stroke: INK_SOFT, 'stroke-width': '2'
+                }));
+            }
+
+            // Lane backgrounds and separators
+            let currentY = MARGIN_TOP;
+            const laneRight = SVG_WIDTH - MARGIN_RIGHT;
+
+            g.appendChild(el('rect', {
+                x: MARGIN_LEFT, y: currentY, width: laneRight, height: LANE_HEIGHTS[0],
+                fill: 'rgba(123, 47, 204, 0.05)'
+            }));
+
+            g.appendChild(el('line', {
+                x1: MARGIN_LEFT, y1: currentY, x2: laneRight, y2: currentY,
+                stroke: GRID_STRONG, 'stroke-width': '1'
+            }));
+
+            // Bottom of Main Gen / top of Family Variants
+            currentY += LANE_HEIGHTS[0];
+            g.appendChild(el('line', {
+                x1: MARGIN_LEFT, y1: currentY, x2: laneRight, y2: currentY,
+                stroke: BRANCH_COLORS.main, 'stroke-width': '2', opacity: '0.55'
+            }));
+
+            // Sub-lane separators within Family Variants
+            for (let i = 1; i <= 4; i++) {
+                currentY += SUB_LANE_HEIGHT;
+                g.appendChild(el('line', {
+                    x1: MARGIN_LEFT, y1: currentY, x2: laneRight, y2: currentY,
+                    stroke: GRID_STRONG, 'stroke-width': '1', 'stroke-dasharray': '4,6', opacity: '0.8'
+                }));
+            }
+
+            // Bottom of Family Variants / top of Plus
+            currentY += SUB_LANE_HEIGHT;
+            g.appendChild(el('rect', {
+                x: MARGIN_LEFT, y: currentY, width: laneRight, height: LANE_HEIGHTS[2],
+                fill: 'rgba(12, 122, 102, 0.05)'
+            }));
+            g.appendChild(el('line', {
+                x1: MARGIN_LEFT, y1: currentY, x2: laneRight, y2: currentY,
+                stroke: BRANCH_COLORS.plus, 'stroke-width': '2', opacity: '0.45'
+            }));
+
+            // Bottom of Plus
+            currentY += LANE_HEIGHTS[2];
+            g.appendChild(el('line', {
+                x1: MARGIN_LEFT, y1: currentY, x2: laneRight, y2: currentY,
+                stroke: GRID_STRONG, 'stroke-width': '1'
+            }));
+
+            svg.appendChild(g);
+        }
+
+        // Present-day marker
+        function drawPresentMarker() {
+            const g = el('g', { id: 'present' });
+            const x = dateToX(PRESENT_DATE.toISOString().split('T')[0]);
+
+            g.appendChild(el('line', {
+                x1: x, y1: MARGIN_TOP - 16, x2: x, y2: SVG_HEIGHT - MARGIN_BOTTOM,
+                stroke: INK, 'stroke-width': '1', 'stroke-dasharray': '3,5', opacity: '0.45'
+            }));
+
+            const label = el('text', {
+                x: x - 8, y: SVG_HEIGHT - MARGIN_BOTTOM - 6, 'text-anchor': 'end',
+                'font-size': '10', 'font-weight': '600', 'letter-spacing': '2',
+                fill: INK_SOFT
+            });
+            label.textContent = 'PRESENT';
+            g.appendChild(label);
+
+            svg.appendChild(g);
+        }
+
+        // Draw lifespan bars
+        function drawLifespanBars() {
+            const g = el('g', { id: 'lifespan-bars' });
+
+            // Group SOCs by branch and subLane
+            const branchGroups = {};
+            socs.forEach(soc => {
+                const key = soc.lane === 1 ? `${soc.branch}-${soc.subLane}` : soc.branch;
+                if (!branchGroups[key]) branchGroups[key] = [];
+                branchGroups[key].push(soc);
+            });
+
+            Object.values(branchGroups).forEach(group => {
+                group.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                group.forEach((soc, index) => {
+                    const startX = dateToX(soc.date);
+                    const endX = index < group.length - 1
+                        ? dateToX(group[index + 1].date)
+                        : dateToX(PRESENT_DATE.toISOString().split('T')[0]);
+
+                    const y = getChipY(soc.lane, soc.subLane || 0, soc.offset || 0);
+                    const color = BRANCH_COLORS[soc.branch];
+
+                    // Track, then a rounded lifespan bar on top of it
+                    g.appendChild(el('line', {
+                        x1: startX, y1: y, x2: endX, y2: y,
+                        stroke: color, 'stroke-width': '5', 'stroke-linecap': 'round', opacity: '0.3'
+                    }));
+
+                    // Start cap, so the announcement date reads as a hard edge
+                    g.appendChild(el('circle', {
+                        cx: startX, cy: y, r: '3.5', fill: color, opacity: '0.7'
+                    }));
+                });
+            });
+
+            svg.appendChild(g);
+        }
+
+        // Draw inheritance arrows
+        function drawInheritanceArrows() {
+            const g = el('g', { id: 'inheritance-arrows' });
+
+            function arc(fromSoc, toSoc, attrs) {
+                const x1 = dateToX(fromSoc.date);
+                const x2 = dateToX(toSoc.date);
+                const y1 = getChipY(fromSoc.lane, fromSoc.subLane || 0, fromSoc.offset || 0);
+                const y2 = getChipY(toSoc.lane, toSoc.subLane || 0, toSoc.offset || 0);
+                const midX = (x1 + x2) / 2;
+                return el('path', Object.assign({
+                    d: `M ${x1} ${y1} Q ${midX} ${y1}, ${midX} ${(y1 + y2) / 2} T ${x2} ${y2}`,
+                    fill: 'none', 'stroke-width': '1.5'
+                }, attrs));
+            }
+
+            inheritances.forEach(inheritance => {
+                const fromSoc = socs.find(s => s.name === inheritance.from);
+                const toSoc = socs.find(s => s.name === inheritance.to);
+                if (!fromSoc || !toSoc) return;
+                g.appendChild(arc(fromSoc, toSoc, {
+                    stroke: INK_DIM, 'stroke-dasharray': '5,5',
+                    'marker-end': 'url(#arrowhead)', opacity: '0.7'
+                }));
+            });
+
+            crossLaneArrows.forEach(arrow => {
+                const fromSoc = socs.find(s => s.name === arrow.from);
+                const toSoc = socs.find(s => s.name === arrow.to);
+                if (!fromSoc || !toSoc) return;
+                g.appendChild(arc(fromSoc, toSoc, {
+                    stroke: BRANCH_COLORS.main, 'stroke-dasharray': '4,4',
+                    'marker-end': 'url(#arrowhead-cross)', opacity: '0.55'
+                }));
+            });
+
+            svg.appendChild(g);
+        }
+
+        // Tooltip handling
+        const tooltip = document.getElementById('tooltip');
+        const NOTES = {
+            'Snapdragon 7s Gen 2': 'Same die as Snapdragon 6 Gen 1 (TechInsights)'
+        };
+
+        function showTooltip(soc, x, y) {
+            const note = NOTES[soc.name];
+            tooltip.innerHTML =
+                `<div class="t-name">${soc.name}</div>` +
+                `<div class="t-row">${soc.model} &middot; announced ${soc.date}</div>` +
+                `<div class="t-row">${soc.specs}</div>` +
+                (note ? `<div class="t-note">${note}</div>` : '');
+            tooltip.dataset.open = 'true';
+            tooltip.setAttribute('aria-hidden', 'false');
+            positionTooltip(x, y);
+        }
+
+        function positionTooltip(x, y) {
+            const width = tooltip.offsetWidth;
+            const left = Math.min(x + 14, window.scrollX + document.documentElement.clientWidth - width - 12);
+            tooltip.style.left = Math.max(window.scrollX + 12, left) + 'px';
+            tooltip.style.top = (y + 16) + 'px';
+        }
+
+        function hideTooltip() {
+            tooltip.dataset.open = 'false';
+            tooltip.setAttribute('aria-hidden', 'true');
+        }
+
+        // Cards are 180px wide, so closely spaced announcements would overlap and hide
+        // each other. Push the later card right and connect it back to its true date.
+        const CHIP_W = 180;
+        const CHIP_GAP = 10;
+
+        function computeChipPositions() {
+            const rows = {};
+            socs.forEach(soc => {
+                const key = soc.lane === 1 ? `${soc.branch}-${soc.subLane}` : `lane-${soc.lane}`;
+                (rows[key] = rows[key] || []).push(soc);
+            });
+
+            Object.values(rows).forEach(row => {
+                row.sort((a, b) => new Date(a.date) - new Date(b.date));
+                let prevRight = -Infinity;
+                row.forEach(soc => {
+                    let cx = dateToX(soc.date);
+                    if (cx - CHIP_W / 2 < prevRight + CHIP_GAP) {
+                        cx = prevRight + CHIP_GAP + CHIP_W / 2;
+                    }
+                    soc.cx = cx;
+                    prevRight = cx + CHIP_W / 2;
+                });
+            });
+        }
+
+        // Condense any label that would spill past the card edges
+        function fitText(node, maxWidth) {
+            if (node.getComputedTextLength() > maxWidth) {
+                node.setAttribute('textLength', maxWidth);
+                node.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+            }
+        }
+
+        // Draw SOC chips
+        function drawChips() {
+            const g = el('g', { id: 'chips' });
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const fitQueue = [];
+
+            // Stagger by announcement order so the timeline reads left to right
+            const order = socs.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            socs.forEach(soc => {
+                const trueX = dateToX(soc.date);
+                const x = soc.cx;
+                const y = getChipY(soc.lane, soc.subLane || 0, soc.offset || 0);
+                const color = BRANCH_COLORS[soc.branch];
+
+                const chipGroup = el('g', {
+                    class: 'chip-card',
+                    tabindex: '0',
+                    role: 'button',
+                    'aria-label': `${soc.name}, model ${soc.model}, announced ${soc.date}. ${soc.specs}`
+                });
+
+                const lift = el('g', { class: 'chip-lift' });
+
+                // Leader back to the true announcement date when the card was pushed right
+                if (x - trueX > 1) {
+                    lift.appendChild(el('line', {
+                        x1: trueX, y1: y, x2: x - CHIP_W / 2, y2: y,
+                        stroke: color, 'stroke-width': '1', 'stroke-dasharray': '2,3', opacity: '0.7'
+                    }));
+                }
+
+                if (!prefersReducedMotion) {
+                    const index = order.indexOf(soc);
+                    chipGroup.classList.add('chip-enter');
+                    chipGroup.style.animationDelay = Math.min(index * 45, 900) + 'ms';
+                }
+
+                // Glow, revealed on hover/focus only
+                lift.appendChild(el('rect', {
+                    class: 'chip-glow',
+                    x: x - 92, y: y - 32, width: '184', height: '74', rx: '10', ry: '10',
+                    fill: 'none', stroke: color, 'stroke-width': '6', opacity: '0'
+                }));
+
+                // Chip shell: dark panel + branch-colored hairline, so 9px text stays legible
+                lift.appendChild(el('rect', {
+                    class: 'chip-shell',
+                    x: x - 90, y: y - 30, width: '180', height: '70', rx: '8', ry: '8',
+                    fill: PANEL, stroke: color, 'stroke-width': '1', 'stroke-opacity': '0.85'
+                }));
+
+                // Branch accent bar (concentric radius: 8 - 5 padding = 3)
+                lift.appendChild(el('rect', {
+                    x: x - 85, y: y - 25, width: '3', height: '60', rx: '3', ry: '3',
+                    fill: color
+                }));
+
+                const nameText = el('text', {
+                    x: x + 6, y: y - 12, 'text-anchor': 'middle',
+                    'font-size': '12.5', 'font-weight': '600', 'letter-spacing': '0.2',
+                    fill: color, class: 'chip-name'
+                });
+                nameText.textContent = soc.name;
+                lift.appendChild(nameText);
+                fitQueue.push([nameText, 158]);
+
+                const modelText = el('text', {
+                    x: x + 6, y: y + 2, 'text-anchor': 'middle',
+                    'font-size': '9.5', 'font-weight': '500', 'letter-spacing': '0.6',
+                    fill: INK_SOFT
+                });
+                modelText.textContent = soc.model;
+                lift.appendChild(modelText);
+
+                const specsText = el('text', {
+                    x: x + 6, y: y + 17, 'text-anchor': 'middle',
+                    'font-size': '8.5', fill: INK_SOFT
+                });
+                specsText.textContent = soc.specs;
+                lift.appendChild(specsText);
+                fitQueue.push([specsText, 160]);
+
+                const dateText = el('text', {
+                    x: x, y: y + 52, 'text-anchor': 'middle',
+                    'font-size': '9.5', 'font-weight': '500', 'letter-spacing': '0.8',
+                    fill: INK_DIM
+                });
+                dateText.textContent = soc.date;
+                lift.appendChild(dateText);
+
+                chipGroup.appendChild(lift);
+
+                chipGroup.addEventListener('mouseenter', (e) => showTooltip(soc, e.pageX, e.pageY));
+                chipGroup.addEventListener('mousemove', (e) => positionTooltip(e.pageX, e.pageY));
+                chipGroup.addEventListener('mouseleave', hideTooltip);
+
+                chipGroup.addEventListener('focus', () => {
+                    const rect = chipGroup.getBoundingClientRect();
+                    showTooltip(soc, rect.left + window.scrollX, rect.bottom + window.scrollY);
+                });
+                chipGroup.addEventListener('blur', hideTooltip);
+
+                g.appendChild(chipGroup);
+            });
+
+            svg.appendChild(g);
+
+            // Measure only after the tree is live, then condense overflowing labels
+            fitQueue.forEach(([node, max]) => fitText(node, max));
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideTooltip();
+        });
+
+        // ---------- Vertical rendering for narrow screens ----------
+        // Same data, time running top to bottom, so no horizontal scrolling is needed.
+
+        const LANE_NAMES = ['Main Gen', 'Family Variants', 'Plus Branch'];
+        const SUB_LANE_NAMES = ['710 variants', '730 variants', '765 variants', '778/780 variants', 'S series'];
+
+        function laneName(soc) {
+            return soc.lane === 1 ? SUB_LANE_NAMES[soc.subLane] : LANE_NAMES[soc.lane];
+        }
+
+        function monthsBetween(from, to) {
+            return Math.max(1, Math.round((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24 * 30.44)));
+        }
+
+        function node(tag, className, text) {
+            const n = document.createElement(tag);
+            if (className) n.className = className;
+            if (text !== undefined) n.textContent = text;
+            return n;
+        }
+
+        function renderVerticalTimeline() {
+            const list = document.getElementById('vlist');
+            if (!list) return;
+
+            const successorOf = {};
+            const predecessorOf = {};
+            inheritances.forEach(i => {
+                successorOf[i.from] = i.to;
+                predecessorOf[i.to] = i.from;
+            });
+            const derivedFrom = {};
+            crossLaneArrows.forEach(a => { derivedFrom[a.to] = a.from; });
+
+            const presentDate = PRESENT_DATE.toISOString().split('T')[0];
+            const frag = document.createDocumentFragment();
+            const ordered = socs.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+            let currentYear = null;
+
+            ordered.forEach(soc => {
+                const year = soc.date.slice(0, 4);
+                if (year !== currentYear) {
+                    currentYear = year;
+                    const heading = node('li', 'vyear', year);
+                    heading.setAttribute('role', 'presentation');
+                    frag.appendChild(heading);
+                }
+
+                const color = BRANCH_COLORS[soc.branch];
+                const item = node('li', 'vitem');
+                item.style.setProperty('--c', color);
+
+                const card = node('article', 'vcard');
+                card.appendChild(node('p', 'vlane', laneName(soc)));
+                card.appendChild(node('h3', 'vname', soc.name));
+
+                const meta = node('p', 'vmeta');
+                meta.appendChild(node('span', null, soc.model));
+                const time = node('time', null, soc.date);
+                time.setAttribute('datetime', soc.date);
+                meta.appendChild(time);
+                card.appendChild(meta);
+
+                const specs = node('ul', 'vspecs');
+                soc.specs.split('|').forEach(part => specs.appendChild(node('li', null, part.trim())));
+                card.appendChild(specs);
+
+                // Lifespan runs to the next chip in the same row, matching the chart
+                const successor = successorOf[soc.name];
+                const endDate = successor
+                    ? socs.find(s => s.name === successor).date
+                    : presentDate;
+                const span = node('p', 'vrel');
+                span.appendChild(node('b', null, `${monthsBetween(soc.date, endDate)} mo`));
+                span.appendChild(document.createTextNode(
+                    successor ? ` until ${successor}` : ' and current'
+                ));
+                card.appendChild(span);
+
+                const parent = derivedFrom[soc.name] || predecessorOf[soc.name];
+                if (parent) {
+                    const rel = node('p', 'vrel');
+                    rel.appendChild(document.createTextNode(
+                        derivedFrom[soc.name] ? 'Derived from ' : 'Succeeds '
+                    ));
+                    rel.appendChild(node('b', null, parent));
+                    card.appendChild(rel);
+                }
+
+                if (NOTES[soc.name]) card.appendChild(node('p', 'vnote', NOTES[soc.name]));
+
+                item.appendChild(card);
+                frag.appendChild(item);
+            });
+
+            list.appendChild(frag);
+        }
+
+        // Initialize timeline
+        function initTimeline() {
+            computeChipPositions();
+            drawGrid();
+            drawPresentMarker();
+            drawLifespanBars();
+            drawInheritanceArrows();
+            drawChips();
+            renderVerticalTimeline();
+        }
+
+        initTimeline();
+    </script>
+</body>
+</html>

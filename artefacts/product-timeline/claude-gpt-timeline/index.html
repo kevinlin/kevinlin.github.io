@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Claude and GPT release timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F1EA;
+    --panel:#FBFAF5;
+    --grid:#E6E3D9;
+    --grid-strong:#CBC7B9;
+    --ink:#191B18;
+    --ink-soft:#5C6159;
+    --claude:#A8481A;
+    --gpt:#0D6952;
+    --claude-tint:rgba(168,72,26,.14);
+    --gpt-tint:rgba(13,105,82,.13);
+    --focus:#191B18;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.22,.8,.24,1);
+    --shell:1100px;
+    --gutter:24px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--mono);
+    overflow-x:hidden;
+    background-image:
+      radial-gradient(120% 80% at 50% -10%, rgba(13,105,82,.05), transparent 62%),
+      radial-gradient(90% 60% at 50% 110%, rgba(168,72,26,.04), transparent 60%);
+    background-attachment:fixed;
+  }
+  /* faint ruling, gives the paper some tooth */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background:repeating-linear-gradient(180deg, rgba(25,27,24,.022) 0 1px, transparent 1px 3px);
+    mix-blend-mode:multiply;
+  }
+  .wrap{max-width:var(--shell);margin:0 auto;padding:52px var(--gutter) 0}
+
+  :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+  .skip{position:absolute;left:-9999px;top:0;padding:10px 16px;background:var(--ink);color:var(--bg);
+        font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;z-index:80}
+  .skip:focus{left:16px;top:16px}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+           clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+  /* copy that has to change when the timeline turns vertical */
+  .only-v,
+  .stat .side.only-v{display:none}
+
+  header{border-bottom:1px solid var(--grid-strong);padding-bottom:26px;position:relative}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+                background:linear-gradient(90deg,var(--claude),var(--gpt) 62%,transparent);opacity:.8}
+
+  .eyebrow{font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);
+           margin:0 0 22px;display:flex;align-items:center;gap:10px}
+  .eyebrow .caret{width:7px;height:13px;flex:none;background:var(--gpt);animation:blink 1.15s steps(1) infinite}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  h1{font-size:clamp(28px,7vw,52px);font-weight:700;line-height:1.04;letter-spacing:-.012em;
+     margin:0 0 20px;text-transform:uppercase;text-wrap:balance}
+  h1 .a{color:var(--claude)}
+  h1 .b{color:var(--gpt)}
+  h1 .op{color:var(--ink-soft)}
+
+  .lede{max-width:64ch;font-size:13.5px;line-height:1.75;color:var(--ink-soft);margin:0 0 30px;text-wrap:pretty}
+  .lede b{color:var(--ink);font-weight:500}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;max-width:760px}
+  .stat{position:relative;padding:15px 17px;background:var(--panel);border:1px solid var(--grid-strong);border-radius:6px}
+  .stat::before{content:"";position:absolute;left:-1px;top:9px;bottom:9px;width:2px;border-radius:2px}
+  .stat.a::before{background:var(--claude)}
+  .stat.b::before{background:var(--gpt)}
+  .stat .k{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);
+           display:flex;align-items:center;gap:8px}
+  .stat .v{display:block;margin-top:9px;font-size:clamp(18px,5vw,22px);font-weight:600;letter-spacing:-.02em;
+           font-variant-numeric:tabular-nums;line-height:1}
+  .stat .u{font-size:12px;font-weight:400;color:var(--ink-soft);letter-spacing:0}
+  .stat .side{display:block;margin-top:9px;font-size:10px;font-weight:500;letter-spacing:.14em;
+              text-transform:uppercase;color:var(--ink-soft)}
+  .swatch{width:9px;height:9px;flex:none;display:inline-block}
+  .sw-a{background:var(--claude);border-radius:50%}
+  .sw-b{background:var(--gpt)}
+  .stat.a .v{color:var(--claude)} .stat.b .v{color:var(--gpt)}
+
+  .hint{max-width:var(--shell);margin:0 auto;padding:26px var(--gutter) 8px;display:flex;flex-wrap:wrap;gap:8px 24px;
+        font-size:10.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  .hint .arrow{display:inline-block;animation:drift 2.4s var(--ease) infinite}
+  @keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+
+  .scroller{
+    border-top:1px solid var(--grid-strong);border-bottom:1px solid var(--grid-strong);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/100% 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 100%,
+      var(--panel);
+  }
+  /* horizontal mode: the plot is a sideways scroll surface */
+  body.mode-h .scroller{
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
+    scrollbar-color:var(--grid-strong) transparent;scrollbar-width:thin;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);
+  }
+  .scroller::-webkit-scrollbar{height:10px}
+  .scroller::-webkit-scrollbar-track{background:transparent}
+  .scroller::-webkit-scrollbar-thumb{background:var(--grid-strong);border-radius:5px}
+  .scroller:hover::-webkit-scrollbar-thumb{background:var(--ink-soft)}
+  /* vertical mode: the page itself does the scrolling */
+  body.mode-v .scroller{overflow:visible}
+
+  #chart{position:relative}
+
+  .axis{position:absolute;background:var(--ink);opacity:.9}
+  body.mode-h .axis{left:0;height:1px;width:100%;transform-origin:left center;transform:scaleX(0);
+                    transition:transform 1.6s var(--ease)}
+  body.mode-h .axis.in{transform:scaleX(1)}
+  body.mode-v .axis{top:0;width:1px;height:100%;transform-origin:center top;transform:scaleY(0);
+                    transition:transform 1.6s var(--ease)}
+  body.mode-v .axis.in{transform:scaleY(1)}
+
+  .month{position:absolute;background:var(--grid-strong)}
+  body.mode-h .month{width:1px;height:4px}
+  body.mode-h .month.q{height:8px;background:var(--ink-soft);opacity:.7}
+  body.mode-v .month{height:1px;width:4px}
+  body.mode-v .month.q{width:8px;background:var(--ink-soft);opacity:.7}
+
+  .yearline{position:absolute}
+  body.mode-h .yearline{top:0;bottom:0;width:1px;
+    background:linear-gradient(180deg,transparent,var(--grid-strong) 12%,var(--grid-strong) 88%,transparent)}
+  body.mode-v .yearline{left:0;right:0;height:1px;
+    background:linear-gradient(90deg,var(--grid-strong),transparent 82%)}
+  .yearlab{position:absolute;font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--ink-soft)}
+  body.mode-h .yearlab{transform:translateX(-50%)}
+
+  .now{position:absolute;background:var(--ink);opacity:.28}
+  body.mode-h .now{top:0;bottom:0;width:1px;
+       mask-image:repeating-linear-gradient(180deg,#000 0 4px,transparent 4px 10px);
+       -webkit-mask-image:repeating-linear-gradient(180deg,#000 0 4px,transparent 4px 10px)}
+  body.mode-v .now{left:0;right:0;height:1px;
+       mask-image:repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 10px);
+       -webkit-mask-image:repeating-linear-gradient(90deg,#000 0 4px,transparent 4px 10px)}
+  .nowlab{position:absolute;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+          color:var(--ink-soft);white-space:nowrap}
+  body.mode-h .nowlab{transform:translateX(-50%)}
+
+  .item{position:absolute;width:0;height:0;padding:0;border:0;background:none;color:inherit;font:inherit;
+        text-align:left;cursor:pointer;opacity:0;transition:opacity .55s var(--ease)}
+  .item.in{opacity:1}
+  .item::before{content:"";position:absolute;left:-22px;top:-22px;width:44px;height:44px;z-index:5}
+  .item:focus{outline:none}
+  #chart.focusing .item:not(.active){opacity:.3}
+
+  .dot{position:absolute;left:-4px;top:-4px;width:8px;height:8px;
+       transform:scale(0);transition:transform .5s var(--ease),box-shadow .2s var(--ease);z-index:3}
+  .item.claude .dot{border-radius:50%}
+  .item.in .dot{transform:scale(1)}
+  .item.active .dot{transform:scale(1.6)}
+  .item.active.claude .dot{box-shadow:0 0 0 5px var(--claude-tint)}
+  .item.active.gpt .dot{box-shadow:0 0 0 5px var(--gpt-tint)}
+
+  .stem{position:absolute;opacity:.42;transition:transform .6s var(--ease) .08s,opacity .3s ease;z-index:2}
+  body.mode-h .stem{left:0;width:1px;transform:scaleY(0)}
+  body.mode-h .item.in .stem{transform:scaleY(1)}
+  body.mode-v .stem{top:0;height:1px;transform:scaleX(0);transform-origin:left center}
+  body.mode-v .item.in .stem{transform:scaleX(1)}
+  .item.active .stem{opacity:1}
+
+  .lab{position:absolute;white-space:nowrap;line-height:1.3;z-index:4;
+       padding:3px 6px;margin-left:-6px;border-radius:4px;
+       border:1px solid transparent;transition:border-color .18s var(--ease),background-color .18s var(--ease)}
+  .lab .name{display:block;font-size:12.5px;font-weight:600;letter-spacing:-.005em}
+  .lab .meta{display:block;font-size:10px;font-weight:400;letter-spacing:.1em;color:var(--ink-soft);
+             margin-top:3px;font-variant-numeric:tabular-nums}
+  .item.claude .name{color:var(--claude)}
+  .item.gpt .name{color:var(--gpt)}
+  .item.active .lab{background:var(--panel)}
+  .item.active.claude .lab{border-color:var(--claude);background:#FFF7F0}
+  .item.active.gpt .lab{border-color:var(--gpt);background:#F1FAF5}
+  .item:focus-visible .lab{outline:2px solid var(--focus);outline-offset:2px;background:var(--panel)}
+
+  footer{max-width:var(--shell);margin:0 auto;padding:38px var(--gutter) 80px}
+  .rule{border-top:1px solid var(--grid-strong);padding-top:22px;font-size:12px;line-height:1.85;
+        color:var(--ink-soft);max-width:78ch;text-wrap:pretty}
+  .rule b{color:var(--ink);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:10px}
+
+  @media (max-width:760px){
+    :root{--gutter:18px}
+    .wrap{padding-top:36px}
+    .only-h,
+    .stat .side.only-h{display:none}
+    .only-v{display:inline}
+    .stat .side.only-v{display:block}
+    .eyebrow{letter-spacing:.16em;margin-bottom:18px}
+    .lede{font-size:13px;line-height:1.7}
+    .hint{padding-top:22px;letter-spacing:.14em}
+    footer{padding-bottom:56px}
+    .lab .name{font-size:13px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    body.mode-h .scroller{scroll-behavior:auto}
+    .item{opacity:1} .dot{transform:scale(1)} .axis{transform:none!important}
+    body.mode-h .stem{transform:scaleY(1)} body.mode-v .stem{transform:scaleX(1)}
+  }
+</style>
+</head>
+<body class="mode-h">
+<a class="skip" href="#chart-region">Skip to the timeline</a>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow"><span class="caret" aria-hidden="true"></span>Frontier model releases · Mar 2024 — Jul 2026</p>
+    <h1><span class="a">Claude</span> <span class="op">vs</span> <span class="b">GPT</span><br>release cadence</h1>
+    <p class="lede">Claude at Sonnet tier and above, from Claude 3 onward, plots <b><span class="only-h">above the line</span><span class="only-v">in amber, on round markers</span></b>. Full-size GPT releases, from GPT‑4o onward, plot <b><span class="only-h">below it</span><span class="only-v">in mint, on square ones</span></b>. Position along the axis is the actual date, so the crowding at the <span class="only-h">right</span><span class="only-v">end</span> is the acceleration itself. The figure after each date is the gap in days since that lab's previous release.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+</div>
+
+<p class="hint">
+  <span class="only-h">Scroll sideways <span class="arrow" aria-hidden="true">→</span></span>
+  <span class="only-v">Scroll down <span class="arrow" aria-hidden="true">↓</span></span>
+  <span>Or tab through the releases in date order</span>
+</p>
+
+<section id="chart-region" aria-labelledby="chart-heading" tabindex="-1">
+  <h2 id="chart-heading" class="sr-only">Release timeline</h2>
+  <div class="scroller" id="scroller"><div id="chart"></div></div>
+  <div class="sr-only" id="table-host"></div>
+</section>
+
+<footer>
+  <div class="rule">
+    <b>Scope</b><br>Claude entries start at Claude 3 and exclude the Haiku tier. GPT entries start at GPT‑4o and exclude mini, nano, and the o‑series reasoning models. Dates are announcement dates, which occasionally run ahead of general availability.<br><br>
+    <b>Two asterisks</b><br>GPT‑5.3 shipped only as GPT‑5.3‑Codex on 5 Feb 2026. GPT‑5.6 went to a limited government-approved preview on 26 Jun 2026 and public on 9 Jul 2026; the public date is plotted. Claude Fable 5 and Mythos 5 launched 9 Jun 2026, were suspended 12 Jun under a US export-control directive, and returned 1 Jul.
+  </div>
+</footer>
+
+<script>
+const claude = [
+  ["2024-03-04","Claude 3 Opus & Sonnet"],
+  ["2024-06-20","Claude 3.5 Sonnet"],
+  ["2024-10-22","Claude 3.5 Sonnet (new)"],
+  ["2025-02-24","Claude 3.7 Sonnet"],
+  ["2025-05-22","Claude Opus 4 & Sonnet 4"],
+  ["2025-08-05","Claude Opus 4.1"],
+  ["2025-09-29","Claude Sonnet 4.5"],
+  ["2025-11-24","Claude Opus 4.5"],
+  ["2026-02-05","Claude Opus 4.6"],
+  ["2026-02-17","Claude Sonnet 4.6"],
+  ["2026-04-16","Claude Opus 4.7"],
+  ["2026-05-28","Claude Opus 4.8"],
+  ["2026-06-09","Claude Fable 5 & Mythos 5"],
+  ["2026-06-30","Claude Sonnet 5"],
+  ["2026-07-24","Claude Opus 5"]
+];
+const gpt = [
+  ["2024-05-13","GPT-4o"],
+  ["2025-02-27","GPT-4.5"],
+  ["2025-04-14","GPT-4.1"],
+  ["2025-08-07","GPT-5"],
+  ["2025-11-12","GPT-5.1"],
+  ["2025-12-11","GPT-5.2"],
+  ["2026-02-05","GPT-5.3-Codex"],
+  ["2026-03-05","GPT-5.4"],
+  ["2026-04-23","GPT-5.5"],
+  ["2026-07-09","GPT-5.6"]
+];
+
+const START = new Date("2024-01-15"), END = new Date("2026-09-20");
+const dayOf = d => (new Date(d) - START) / 86400000;
+const SPAN = dayOf(END);
+
+// horizontal layout constants
+const H_PPD = 3.0, H_PAD_L = 46, H_PAD_R = 210, H_MID = 240, H_HEIGHT = 480, H_ROW = 40, H_LIFT = 28, H_LABEL_W = 176;
+// vertical layout constants
+const V_PPD = 1.05, V_PAD_T = 56, V_PAD_B = 64, V_RAIL = 46, V_MIN_GAP = 58, V_STEM = 16;
+
+const fmt = s => new Date(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"2-digit"}).toUpperCase();
+const fmtLong = s => new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+
+const prep = list => list.map((r,i) => ({
+  date:r[0], name:r[1], day: dayOf(r[0]),
+  gap: i ? Math.round((new Date(r[0]) - new Date(list[i-1][0]))/86400000) : null
+}));
+// horizontal label stacking: push a label up a row when it would overlap its neighbour
+const stackRows = list => { const ends=[]; return list.map(it=>{
+  let r=0; while(ends[r]!==undefined && it.x<ends[r]) r++;
+  ends[r]=it.x+H_LABEL_W; return {...it,row:r};
+});};
+
+const claudeRows = prep(claude), gptRows = prep(gpt);
+const allRows = [...claudeRows.map(r => ({...r, lane:"claude"})),
+                 ...gptRows.map(r => ({...r, lane:"gpt"}))]
+                .sort((a,b) => a.day - b.day);
+
+const body = document.body;
+const chart = document.getElementById("chart");
+const scroller = document.getElementById("scroller");
+const mobile = window.matchMedia("(max-width:760px)");
+const fine = window.matchMedia("(hover:hover) and (pointer:fine)");
+
+let mode = null, io = null, nodes = [], active = null;
+
+function setActive(el){
+  if (active === el) return;
+  if (active) active.classList.remove("active");
+  active = el;
+  if (el) el.classList.add("active");
+  chart.classList.toggle("focusing", !!el);
+}
+
+function makeItem(row, opts){
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "item " + row.lane;
+  el.setAttribute("aria-label",
+    `${row.name}, ${row.lane === "claude" ? "Anthropic" : "OpenAI"}, released ${fmtLong(row.date)}` +
+    (row.gap !== null ? `, ${row.gap} days after the previous release` : `, first release in this set`));
+
+  const colour = row.lane === "claude" ? "var(--claude)" : "var(--gpt)";
+  const dot = document.createElement("span");
+  dot.className = "dot";
+  dot.style.background = colour;
+
+  const stem = document.createElement("span");
+  stem.className = "stem";
+  stem.style.background = colour;
+
+  const lab = document.createElement("span");
+  lab.className = "lab";
+  lab.setAttribute("aria-hidden","true");
+  lab.innerHTML = `<span class="name">${row.name}</span><span class="meta">${opts.meta}</span>`;
+
+  el.append(dot, stem, lab);
+  return {el, lab, stem};
+}
+
+function renderHorizontal(){
+  const W = SPAN * H_PPD + H_PAD_L + H_PAD_R;
+  chart.style.width = W + "px";
+  chart.style.height = H_HEIGHT + "px";
+
+  const axis = document.createElement("div");
+  axis.className = "axis"; axis.style.top = H_MID + "px";
+  chart.appendChild(axis);
+
+  let m = new Date(2024,0,1);
+  while (m < END){
+    const x = dayOf(m) * H_PPD + H_PAD_L;
+    if (x > 0){
+      const t = document.createElement("div");
+      t.className = "month" + (m.getMonth() % 3 === 0 ? " q" : "");
+      t.style.left = x + "px"; t.style.top = (H_MID + 3) + "px";
+      chart.appendChild(t);
+    }
+    m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+  }
+  for (let y = 2024; y <= 2026; y++){
+    const x = dayOf(`${y}-01-01`) * H_PPD + H_PAD_L;
+    if (x < 0) continue;
+    const line = document.createElement("div");
+    line.className = "yearline"; line.style.left = x + "px";
+    chart.appendChild(line);
+    const lab = document.createElement("div");
+    lab.className = "yearlab";
+    lab.style.left = Math.max(x, 28) + "px"; // keep the first label off the clipped edge
+    lab.style.top = "14px";
+    lab.textContent = y;
+    chart.appendChild(lab);
+  }
+
+  const today = new Date();
+  if (today > START && today < END){
+    const x = dayOf(today) * H_PPD + H_PAD_L;
+    const nl = document.createElement("div");
+    nl.className = "now"; nl.style.left = x + "px";
+    const nlab = document.createElement("div");
+    nlab.className = "nowlab"; nlab.style.left = x + "px"; nlab.style.top = (H_HEIGHT - 24) + "px";
+    nlab.textContent = "Today";
+    chart.append(nl, nlab);
+  }
+
+  const built = [];
+  [[claudeRows,"claude",true],[gptRows,"gpt",false]].forEach(([rows, lane, up]) => {
+    stackRows(rows.map(r => ({...r, lane, x: r.day * H_PPD + H_PAD_L}))).forEach(it => {
+      const dist = H_LIFT + it.row * H_ROW;
+      const {el, lab, stem} = makeItem(it, {
+        meta: `${fmt(it.date)}${it.gap !== null ? " · +" + it.gap + "d" : " · first"}`
+      });
+      el.style.left = it.x + "px";
+      el.style.top = H_MID + "px";
+      stem.style.height = dist + "px";
+      stem.style.top = up ? -dist + "px" : "0px";
+      stem.style.transformOrigin = up ? "bottom center" : "top center";
+      lab.style.left = "10px";
+      lab.style.top = (up ? -dist : dist) + "px";
+      if (up) lab.style.marginTop = "-2.7em";
+      built.push({el, x: it.x});
+    });
+  });
+  built.sort((a,b) => a.x - b.x); // tab order follows the dates
+  return {axis, nodes: built.map(b => b.el), sortKey: el => el.offsetLeft};
+}
+
+function renderVertical(){
+  // proportional spacing first, then push overlapping entries down so nothing collides
+  const placed = [];
+  let prevY = -Infinity;
+  allRows.forEach(r => {
+    const y = Math.max(r.day * V_PPD + V_PAD_T, prevY + V_MIN_GAP);
+    prevY = y;
+    placed.push({...r, y});
+  });
+  // pushing entries apart moves them off the raw scale, so every other marker reads its
+  // position from the resolved entries: anchors + linear interpolation between them
+  const anchors = [{day:0, y:V_PAD_T}];
+  placed.forEach(p => {
+    const last = anchors[anchors.length - 1];
+    if (p.day === last.day) last.y = p.y; else anchors.push({day:p.day, y:p.y});
+  });
+  anchors.push({day:SPAN, y:prevY + V_PAD_B * 0.6});
+  const height = anchors[anchors.length - 1].y + V_PAD_B * 0.4;
+  const yOfDay = d => {
+    if (d <= anchors[0].day) return anchors[0].y;
+    for (let i = 1; i < anchors.length; i++){
+      const b = anchors[i];
+      if (d <= b.day){
+        const a = anchors[i - 1];
+        const t = b.day === a.day ? 1 : (d - a.day) / (b.day - a.day);
+        return a.y + (b.y - a.y) * t;
+      }
+    }
+    return anchors[anchors.length - 1].y;
+  };
+
+  chart.style.width = "auto";
+  chart.style.height = height + "px";
+
+  const axis = document.createElement("div");
+  axis.className = "axis"; axis.style.left = V_RAIL + "px";
+  chart.appendChild(axis);
+
+  let m = new Date(2024,0,1);
+  while (m < END){
+    const y = yOfDay(dayOf(m));
+    if (y > 0){
+      const t = document.createElement("div");
+      t.className = "month" + (m.getMonth() % 3 === 0 ? " q" : "");
+      t.style.top = y + "px"; t.style.left = (V_RAIL - (m.getMonth() % 3 === 0 ? 9 : 5)) + "px";
+      chart.appendChild(t);
+    }
+    m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+  }
+  for (let yr = 2024; yr <= 2026; yr++){
+    const y = yOfDay(dayOf(`${yr}-01-01`));
+    if (y < 0) continue;
+    const line = document.createElement("div");
+    line.className = "yearline"; line.style.top = y + "px";
+    chart.appendChild(line);
+    const lab = document.createElement("div");
+    lab.className = "yearlab";
+    lab.style.left = "0px"; lab.style.top = Math.max(y - 20, 4) + "px";
+    lab.textContent = yr;
+    chart.appendChild(lab);
+  }
+
+  const today = new Date();
+  if (today > START && today < END){
+    const y = yOfDay(dayOf(today));
+    const nl = document.createElement("div");
+    nl.className = "now"; nl.style.top = y + "px";
+    const nlab = document.createElement("div");
+    nlab.className = "nowlab"; nlab.style.top = (y + 6) + "px"; nlab.style.left = "0px";
+    nlab.textContent = "Today";
+    chart.append(nl, nlab);
+  }
+
+  const built = placed.map(it => {
+    const {el, lab, stem} = makeItem(it, {
+      // no above/below encoding on one rail, so the lab is named outright
+      meta: `${it.lane === "claude" ? "ANTHROPIC" : "OPENAI"} · ${fmt(it.date)}${it.gap !== null ? " · +" + it.gap + "d" : " · first"}`
+    });
+    el.style.left = V_RAIL + "px";
+    el.style.top = it.y + "px";
+    stem.style.width = V_STEM + "px";
+    stem.style.left = "0px";
+    lab.style.left = (V_STEM + 8) + "px";
+    lab.style.top = "0px";
+    lab.style.marginTop = "-1.35em";
+    return el;
+  });
+  return {axis, nodes: built, sortKey: el => el.offsetTop};
+}
+
+function render(){
+  const next = mobile.matches ? "v" : "h";
+  if (next === mode) return;
+  mode = next;
+  body.classList.toggle("mode-v", mode === "v");
+  body.classList.toggle("mode-h", mode === "h");
+
+  if (io) io.disconnect();
+  setActive(null);
+  chart.textContent = "";
+
+  const {axis, nodes: built, sortKey} = mode === "v" ? renderVertical() : renderHorizontal();
+  nodes = built;
+  nodes.forEach(el => chart.appendChild(el));
+
+  requestAnimationFrame(() => axis.classList.add("in"));
+
+  // reveal as each batch scrolls in, staggered by position along the axis
+  io = new IntersectionObserver(entries => {
+    let k = 0;
+    entries.filter(e => e.isIntersecting)
+      .sort((a,b) => sortKey(a.target) - sortKey(b.target))
+      .forEach(e => {
+        e.target.style.transitionDelay = (k * 45) + "ms";
+        e.target.querySelector(".dot").style.transitionDelay = (k * 45) + "ms";
+        e.target.querySelector(".stem").style.transitionDelay = (k * 45 + 90) + "ms";
+        k++;
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      });
+  }, mode === "v"
+      ? { root: null, rootMargin: "0px 0px -8% 0px", threshold: 0 }
+      : { root: scroller, rootMargin: "0px 80px", threshold: 0 });
+  nodes.forEach(n => io.observe(n));
+}
+
+// header stats
+const avgGap = list => {
+  const gaps = list.slice(1).map((r,i) => (new Date(r[0]) - new Date(list[i][0]))/86400000);
+  return Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length);
+};
+document.getElementById("stats").innerHTML = `
+  <div class="stat a"><span class="k"><i class="swatch sw-a"></i>Anthropic</span>
+    <span class="v">${claude.length}<span class="u"> releases</span> · ${avgGap(claude)}<span class="u">d avg gap</span></span>
+    <span class="side only-h">Plotted above the line</span>
+    <span class="side only-v">Round markers</span></div>
+  <div class="stat b"><span class="k"><i class="swatch sw-b"></i>OpenAI</span>
+    <span class="v">${gpt.length}<span class="u"> releases</span> · ${avgGap(gpt)}<span class="u">d avg gap</span></span>
+    <span class="side only-h">Plotted below the line</span>
+    <span class="side only-v">Square markers</span></div>`;
+
+// screen-reader equivalent of the chart
+document.getElementById("table-host").innerHTML = `
+  <table>
+    <caption>Claude and GPT releases in date order</caption>
+    <thead><tr><th scope="col">Release</th><th scope="col">Lab</th><th scope="col">Date</th><th scope="col">Days since that lab's previous release</th></tr></thead>
+    <tbody>${allRows.map(r => `<tr><th scope="row">${r.name}</th><td>${r.lane === "claude" ? "Anthropic" : "OpenAI"}</td><td>${fmtLong(r.date)}</td><td>${r.gap ?? "—"}</td></tr>`).join("")}</tbody>
+  </table>`;
+
+render();
+mobile.addEventListener("change", render);
+
+// one "active" item at a time, reachable by pointer, keyboard or tap
+chart.addEventListener("pointerover", e => {
+  if (!fine.matches) return;
+  const it = e.target.closest(".item");
+  if (it) setActive(it);
+});
+chart.addEventListener("pointerleave", () => { if (fine.matches) setActive(null); });
+chart.addEventListener("focusin", e => setActive(e.target.closest(".item")));
+chart.addEventListener("focusout", e => { if (!chart.contains(e.relatedTarget)) setActive(null); });
+// tap on touch pins an item; tapping it again releases
+chart.addEventListener("click", e => {
+  const it = e.target.closest(".item");
+  if (it) setActive(active === it ? null : it);
+});
+
+// vertical wheel scrolls the horizontal timeline sideways
+scroller.addEventListener("wheel", e => {
+  if (mode !== "h") return;
+  if (e.deltaY === 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  const max = scroller.scrollWidth - scroller.clientWidth;
+  if ((scroller.scrollLeft <= 0 && e.deltaY < 0) || (scroller.scrollLeft >= max && e.deltaY > 0)) return;
+  e.preventDefault();
+  scroller.scrollLeft += e.deltaY;
+}, { passive:false });
+</script>
+</body>
+</html>
