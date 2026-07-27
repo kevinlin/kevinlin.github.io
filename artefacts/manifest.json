@@ -127,7 +127,7 @@
     },
     {
       "id": "swe-bench-pro-by-lab",
-      "source": "llm-effort-level-vs-performance/swe_bench_pro_by_lab_dated_v3.html",
+      "source": "llm-effort-level-vs-performance/swe_bench_pro_by_lab.html",
       "destination": "llm-effort-level-vs-performance/swe-bench-pro-by-lab/index.html",
       "title": "SWE-bench Pro by lab",
       "collection": "llm-performance",
