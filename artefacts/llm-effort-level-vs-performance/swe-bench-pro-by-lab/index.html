@@ -1,102 +1,534 @@
-<div style="background: #fcfcfb; border: 0.5px solid rgba(11,11,11,0.10); border-radius: 12px; padding: 1.25rem 1.25rem 0.5rem;">
-  <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 12px; color: #52514e;">
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #eb6834;"></span>Claude</span>
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #1baf7a;"></span>GPT</span>
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #2a78d6;"></span>Gemini</span>
+<style>
+.swep {
+  /* Light theme tokens */
+  --swep-surface: #fcfcfb;
+  --swep-surface-inset: #f6f5f1;
+  --swep-border: rgba(11, 11, 11, 0.10);
+  --swep-grid: #e5e4dc;
+  --swep-axis: #c3c2b7;
+  --swep-ink: #0b0b0b;
+  --swep-ink-muted: #52514e;
+  --swep-ink-faint: #8a8880;
+
+  --swep-anthropic: #d2622c;
+  --swep-openai: #16997a;
+  --swep-deepseek: #3f5ce0;
+  --swep-kimi: #8b46c9;
+  --swep-glm: #c2255c;
+  --swep-grok: #3f3f46;
+
+  --swep-radius-card: 16px;
+  --swep-radius-chip: 8px;
+  --swep-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Fill the viewport: head, legend and caption take what they need, the plot
+     absorbs the rest. */
+  box-sizing: border-box;
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+
+  background: var(--swep-surface);
+  border: 0.5px solid var(--swep-border);
+  border-radius: var(--swep-radius-card);
+  padding: 20px 20px 12px;
+  box-shadow:
+    0 1px 2px rgba(11, 11, 11, 0.04),
+    0 2px 6px rgba(11, 11, 11, 0.035),
+    0 8px 20px rgba(11, 11, 11, 0.03);
+  color: var(--swep-ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  container-type: inline-size;
+}
+
+@media (prefers-color-scheme: dark) {
+  .swep {
+    --swep-surface: #16161a;
+    --swep-surface-inset: #1e1e23;
+    --swep-border: rgba(255, 255, 255, 0.10);
+    --swep-grid: #2c2c33;
+    --swep-axis: #3d3d45;
+    --swep-ink: #f2f1ee;
+    --swep-ink-muted: #a8a6a0;
+    --swep-ink-faint: #77756f;
+    --swep-anthropic: #ef8b57;
+    --swep-openai: #3ecfa4;
+    --swep-deepseek: #7d92f5;
+    --swep-kimi: #b57ae8;
+    --swep-glm: #f2698f;
+    --swep-grok: #b1b1bb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+}
+
+:root[data-theme="dark"] .swep {
+  --swep-surface: #16161a;
+  --swep-surface-inset: #1e1e23;
+  --swep-border: rgba(255, 255, 255, 0.10);
+  --swep-grid: #2c2c33;
+  --swep-axis: #3d3d45;
+  --swep-ink: #f2f1ee;
+  --swep-ink-muted: #a8a6a0;
+  --swep-ink-faint: #77756f;
+  --swep-anthropic: #ef8b57;
+  --swep-openai: #3ecfa4;
+  --swep-deepseek: #7d92f5;
+  --swep-kimi: #b57ae8;
+  --swep-glm: #f2698f;
+  --swep-grok: #b1b1bb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme="light"] .swep {
+  --swep-surface: #fcfcfb;
+  --swep-surface-inset: #f6f5f1;
+  --swep-border: rgba(11, 11, 11, 0.10);
+  --swep-grid: #e5e4dc;
+  --swep-axis: #c3c2b7;
+  --swep-ink: #0b0b0b;
+  --swep-ink-muted: #52514e;
+  --swep-ink-faint: #8a8880;
+  --swep-anthropic: #d2622c;
+  --swep-openai: #16997a;
+  --swep-deepseek: #3f5ce0;
+  --swep-kimi: #8b46c9;
+  --swep-glm: #c2255c;
+  --swep-grok: #3f3f46;
+  box-shadow:
+    0 1px 2px rgba(11, 11, 11, 0.04),
+    0 2px 6px rgba(11, 11, 11, 0.035),
+    0 8px 20px rgba(11, 11, 11, 0.03);
+}
+
+.swep__head { flex: none; margin-bottom: 16px; }
+
+.swep__title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-wrap: balance;
+  color: var(--swep-ink);
+}
+
+.swep__sub {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--swep-ink-muted);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.swep__legend {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 8px -8px;
+}
+
+.swep__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  min-height: 32px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--swep-radius-chip);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--swep-ink-muted);
+  cursor: pointer;
+  transition: background-color 120ms var(--swep-ease-out),
+              color 120ms var(--swep-ease-out),
+              opacity 120ms var(--swep-ease-out);
+}
+
+/* Extend hit area to 44px without inflating the visual chip */
+.swep__chip::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .swep__chip:hover { background: var(--swep-surface-inset); color: var(--swep-ink); }
+}
+
+.swep__chip:focus-visible {
+  outline: 2px solid var(--swep-ink);
+  outline-offset: 2px;
+}
+
+.swep__chip:active { transform: scale(0.97); }
+
+.swep__chip[aria-pressed="false"] {
+  opacity: 0.42;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.swep__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* Static key, not a filter: explains the outlined bars. */
+.swep__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--swep-ink-faint);
+}
+
+.swep__key .swep__swatch {
+  background: transparent;
+  border: 2px solid currentColor;
+}
+
+.swep__plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 240px;
+  width: 100%;
+}
+
+.swep__foot {
+  flex: none;
+  margin: 10px 0 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--swep-ink-faint);
+  text-wrap: pretty;
+}
+
+.swep__foot a { color: inherit; text-underline-offset: 2px; }
+
+.swep [data-numeric] { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .swep *, .swep *::before, .swep *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+
+<figure class="swep" data-numeric>
+  <div class="swep__head">
+    <h2 class="swep__title">Flagship models on SWE-Bench Pro</h2>
+    <p class="swep__sub">Top-tier model lines from OpenAI, Anthropic, DeepSeek, Moonshot (Kimi), Z.ai (GLM) and xAI (Grok), ordered by release date, oldest to newest. Filled bars are vendor-reported; outlined bars come from Scale&rsquo;s independent leaderboard.</p>
   </div>
-  <div style="position: relative; width: 100%; height: 380px;">
-    <canvas id="sweBenchBarChart4" role="img" aria-label="Bar chart of SWE-Bench Pro scores across nine AI models ordered by release date, newest on the left to oldest on the right, color-coded by lab: orange for Claude, teal for GPT, blue for Gemini. Claude Sonnet 5, June 30 2026, 63.2 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. GPT-5.6 Terra, June 26 2026, 63.4 percent. GPT-5.6 Luna, June 26 2026, 62.7 percent. Claude Fable 5, June 9 2026, 80 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. GPT-5.5, April 23 2026, 59.4 percent. Claude Mythos Preview, April 7 2026, 77.8 percent. Gemini 3.1 Pro Preview, February 19 2026, 54.2 percent.">SWE-Bench Pro by model with release dates: Sonnet 5 (Jun 30) 63.2%, Sol (Jun 26) 64.6%, Terra (Jun 26) 63.4%, Luna (Jun 26) 62.7%, Fable 5 (Jun 9) 80%, Opus 4.8 (May 28) 69.2%, GPT-5.5 (Apr 23) 59.4%, Mythos Preview (Apr 7) 77.8%, Gemini 3.1 Pro Preview (Feb 19) 54.2%. All dates 2026.</canvas>
+
+  <div class="swep__legend" id="swepLegend" role="group" aria-label="Filter models by lab"></div>
+
+  <div class="swep__plot">
+    <canvas id="swepChart" role="img" aria-label="Bar chart of SWE-Bench Pro scores for twenty-five flagship models ordered by release date, oldest on the left to newest on the right, colour-coded by lab: orange for Anthropic, green for OpenAI, blue for DeepSeek, purple for Moonshot Kimi, pink for Z.ai GLM, graphite for xAI Grok. Filled bars are vendor-reported; outlined bars are from Scale's independent leaderboard and are not directly comparable. Claude Sonnet 4, May 23 2025, 42.7 percent, Scale. GPT-5, August 7 2025, 36.3 percent. Kimi K2 0905, September 5 2025, 27.7 percent. Claude Sonnet 4.5, September 30 2025, 43.6 percent, Scale. Claude Opus 4.5, November 1 2025, 45.9 percent, Scale. GPT-5.1, November 12 2025, 50.8 percent. DeepSeek V3.2, December 1 2025, 40.9 percent. GPT-5.2, December 11 2025, 55.6 percent. GLM-4.7, December 22 2025, 40.6 percent. Kimi K2.5, January 27 2026, 50.7 percent. Claude Opus 4.6, February 5 2026, 51.9 percent, Scale. GPT-5.3 Codex, February 5 2026, 56.8 percent. GPT-5.4, March 5 2026, 57.7 percent. GLM-5.1, March 27 2026, 58.4 percent. Claude Opus 4.7, April 16 2026, 64.3 percent. Kimi K2.6, April 20 2026, 58.6 percent. GPT-5.5, April 23 2026, 58.6 percent. DeepSeek V4-Pro, April 24 2026, 55.4 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. Claude Fable 5, June 9 2026, 80.3 percent. GLM-5.2, June 13 2026, 62.1 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. Grok 4.5, July 8 2026, 64.7 percent. Kimi K3, July 2026, 63.4 percent. Claude Opus 5, July 24 2026, 79.2 percent.">Flagship models on SWE-Bench Pro, oldest to newest. Scale independent runs marked: Sonnet 4 (May 2025) 42.7% Scale, GPT-5 (Aug 2025) 36.3%, Kimi K2 0905 (Sep 2025) 27.7%, Sonnet 4.5 (Sep 2025) 43.6% Scale, Opus 4.5 (Nov 2025) 45.9% Scale, GPT-5.1 (Nov 2025) 50.8%, DeepSeek V3.2 (Dec 2025) 40.9%, GPT-5.2 (Dec 2025) 55.6%, GLM-4.7 (Dec 2025) 40.6%, Kimi K2.5 (Jan 2026) 50.7%, Opus 4.6 (Feb 2026) 51.9% Scale, GPT-5.3 Codex (Feb 2026) 56.8%, GPT-5.4 (Mar 2026) 57.7%, GLM-5.1 (Mar 2026) 58.4%, Opus 4.7 (Apr 2026) 64.3%, Kimi K2.6 (Apr 2026) 58.6%, GPT-5.5 (Apr 2026) 58.6%, DeepSeek V4-Pro (Apr 2026) 55.4%, Opus 4.8 (May 2026) 69.2%, Fable 5 (Jun 2026) 80.3%, GLM-5.2 (Jun 2026) 62.1%, GPT-5.6 Sol (Jun 2026) 64.6%, Grok 4.5 (Jul 2026) 64.7%, Kimi K3 (Jul 2026) 63.4%, Opus 5 (Jul 2026) 79.2%.</canvas>
   </div>
-</div>
+
+  <figcaption class="swep__foot">Filled bars are vendor-reported at each model&rsquo;s best published configuration (extended thinking and tools where offered). Outlined bars come from Scale&rsquo;s independently run public leaderboard, which uses its own agent scaffold and reports a confidence interval &mdash; treat them as a separate series, not as like-for-like with the filled bars. Claude Sonnet 4 and 4.5, Opus 4.5 and Opus 4.6 have no vendor-reported SWE-Bench Pro figure, so Scale is the only source for them; Sonnet 5 appears in neither and is omitted. Kimi K3&rsquo;s 63.4 comes from Moonshot&rsquo;s comparison table on the K2.6 blog, not the K3 launch post; their SWE-Bench runs use an in-house framework adapted from SWE-agent, averaged over 10 runs. Models with no published result anywhere are excluded. Preview-only and unreleased models are excluded, as are Haiku, Flash, mini and nano variants.</figcaption>
+</figure>
+
 <script src="../../vendor/chart.umd.min.js"></script>
 <script>
-var labels = [
-  ['Sonnet 5', 'Jun 30'],
-  ['Sol', 'Jun 26'],
-  ['Terra', 'Jun 26'],
-  ['Luna', 'Jun 26'],
-  ['Fable 5', 'Jun 9'],
-  ['Opus 4.8', 'May 28'],
-  ['GPT-5.5', 'Apr 23'],
-  ['Mythos', 'Preview', 'Apr 7'],
-  ['Gemini', '3.1 Pro', 'Feb 19']
-];
-var fullNames = [
-  'Claude Sonnet 5',
-  'GPT-5.6 Sol',
-  'GPT-5.6 Terra',
-  'GPT-5.6 Luna',
-  'Claude Fable 5',
-  'Claude Opus 4.8',
-  'GPT-5.5',
-  'Claude Mythos Preview',
-  'Gemini 3.1 Pro Preview'
-];
-var scores = [63.2, 64.6, 63.4, 62.7, 80, 69.2, 59.4, 77.8, 54.2];
-var colors = ['#eb6834', '#1baf7a', '#1baf7a', '#1baf7a', '#eb6834', '#eb6834', '#1baf7a', '#eb6834', '#2a78d6'];
+(function () {
+  var LABS = {
+    anthropic: { name: 'Anthropic', varName: '--swep-anthropic' },
+    openai:    { name: 'OpenAI',    varName: '--swep-openai' },
+    deepseek:  { name: 'DeepSeek',  varName: '--swep-deepseek' },
+    kimi:      { name: 'Kimi',      varName: '--swep-kimi' },
+    glm:       { name: 'GLM',       varName: '--swep-glm' },
+    grok:      { name: 'Grok',      varName: '--swep-grok' }
+  };
 
-var valueLabelsPlugin = {
-  id: 'valueLabels',
-  afterDatasetsDraw: function(chart) {
-    var ctx = chart.ctx;
-    var meta = chart.getDatasetMeta(0);
-    meta.data.forEach(function(bar, index) {
-      var value = scores[index];
-      if (value === null || value === undefined) return;
+  // Flagship lines only, oldest release first (left to right on the x-axis).
+  // Default source is the vendor-reported aggregate at each model's best
+  // published configuration. Entries marked source:'scale' come from Scale's
+  // independently run public leaderboard, which uses its own agent scaffold and
+  // is NOT directly comparable — they render outlined rather than filled.
+  var MODELS = [
+    { name: 'Claude Sonnet 4',       short: ['Sonnet 4', "May '25"],          score: 42.7, lab: 'anthropic', source: 'scale' },
+    { name: 'GPT-5',                 short: ['GPT-5', "Aug '25"],             score: 36.3, lab: 'openai' },
+    { name: 'Kimi K2 0905',          short: ['Kimi K2', '0905', "Sep '25"],   score: 27.7, lab: 'kimi' },
+    { name: 'Claude Sonnet 4.5',     short: ['Sonnet 4.5', "Sep '25"],        score: 43.6, lab: 'anthropic', source: 'scale' },
+    { name: 'Claude Opus 4.5',       short: ['Opus 4.5', "Nov '25"],          score: 45.9, lab: 'anthropic', source: 'scale' },
+    { name: 'GPT-5.1',               short: ['GPT-5.1', "Nov '25"],           score: 50.8, lab: 'openai' },
+    { name: 'DeepSeek V3.2',         short: ['DeepSeek', 'V3.2', "Dec '25"],  score: 40.9, lab: 'deepseek' },
+    { name: 'GPT-5.2',               short: ['GPT-5.2', "Dec '25"],           score: 55.6, lab: 'openai' },
+    { name: 'GLM-4.7',               short: ['GLM-4.7', "Dec '25"],           score: 40.6, lab: 'glm' },
+    { name: 'Kimi K2.5',             short: ['Kimi K2.5', "Jan '26"],         score: 50.7, lab: 'kimi' },
+    { name: 'Claude Opus 4.6',       short: ['Opus 4.6', "Feb '26"],          score: 51.9, lab: 'anthropic', source: 'scale' },
+    { name: 'GPT-5.3 Codex',         short: ['GPT-5.3', 'Codex', "Feb '26"],  score: 56.8, lab: 'openai' },
+    { name: 'GPT-5.4',               short: ['GPT-5.4', "Mar '26"],           score: 57.7, lab: 'openai' },
+    { name: 'GLM-5.1',               short: ['GLM-5.1', "Mar '26"],           score: 58.4, lab: 'glm' },
+    { name: 'Claude Opus 4.7',       short: ['Opus 4.7', "Apr '26"],          score: 64.3, lab: 'anthropic' },
+    { name: 'Kimi K2.6',             short: ['Kimi K2.6', "Apr '26"],         score: 58.6, lab: 'kimi' },
+    { name: 'GPT-5.5',               short: ['GPT-5.5', "Apr '26"],           score: 58.6, lab: 'openai' },
+    { name: 'DeepSeek V4-Pro',       short: ['DeepSeek', 'V4-Pro', "Apr '26"], score: 55.4, lab: 'deepseek' },
+    { name: 'Claude Opus 4.8',       short: ['Opus 4.8', "May '26"],          score: 69.2, lab: 'anthropic' },
+    { name: 'Claude Fable 5',        short: ['Fable 5', "Jun '26"],           score: 80.3, lab: 'anthropic' },
+    { name: 'GLM-5.2',               short: ['GLM-5.2', "Jun '26"],           score: 62.1, lab: 'glm' },
+    { name: 'GPT-5.6 Sol',           short: ['GPT-5.6', 'Sol', "Jun '26"],    score: 64.6, lab: 'openai' },
+    { name: 'Grok 4.5',              short: ['Grok 4.5', "Jul '26"],          score: 64.7, lab: 'grok' },
+    { name: 'Kimi K3',               short: ['Kimi K3', "Jul '26"],           score: 63.4, lab: 'kimi' },
+    { name: 'Claude Opus 5',         short: ['Opus 5', "Jul '26"],            score: 79.2, lab: 'anthropic' }
+  ];
+
+  var root = document.querySelector('.swep');
+  var plot = root.querySelector('.swep__plot');
+  var canvas = document.getElementById('swepChart');
+  var legendEl = document.getElementById('swepLegend');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var active = {};
+  Object.keys(LABS).forEach(function (key) { active[key] = true; });
+
+  var chart = null;
+  var isHorizontal = null;
+
+  function token(name) {
+    return getComputedStyle(root).getPropertyValue(name).trim();
+  }
+
+  function visible() {
+    return MODELS.filter(function (m) { return active[m.lab]; });
+  }
+
+  // Below ~46px of width per bar the stacked x-labels collide, so the chart
+  // flips to horizontal bars and the model names move to the y-axis.
+  function wantsHorizontal() {
+    return (plot.clientWidth - 60) / (visible().length || 1) < 46;
+  }
+
+  function chartData(horizontal) {
+    var rows = visible();
+    return {
+      labels: rows.map(function (m) { return horizontal ? m.short.join(' · ') : m.short; }),
+      scores: rows.map(function (m) { return m.score; }),
+      // Independently measured bars read as outlines: same hue, hollow fill.
+      colors: rows.map(function (m) {
+        var hex = token(LABS[m.lab].varName);
+        return m.source === 'scale' ? hex + '33' : hex;
+      }),
+      borderColors: rows.map(function (m) { return token(LABS[m.lab].varName); }),
+      borderWidths: rows.map(function (m) { return m.source === 'scale' ? 2 : 0; })
+    };
+  }
+
+  // Draws the score at the growing end of each bar.
+  var valueLabels = {
+    id: 'swepValueLabels',
+    afterDatasetsDraw: function (c) {
+      var ctx = c.ctx;
+      var rows = visible();
+      var horizontal = c.options.indexAxis === 'y';
       ctx.save();
-      ctx.fillStyle = '#0b0b0b';
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(value + '%', bar.x, bar.y - 4);
+      ctx.fillStyle = token('--swep-ink');
+      ctx.font = '600 11px Inter, system-ui, sans-serif';
+      c.getDatasetMeta(0).data.forEach(function (bar, i) {
+        if (!rows[i]) return;
+        var text = rows[i].score.toFixed(1) + '%';
+        if (horizontal) {
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(text, bar.x + 6, bar.y);
+        } else {
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(text, bar.x, bar.y - 6);
+        }
+      });
       ctx.restore();
+    }
+  };
+
+  function categoryScale() {
+    return {
+      ticks: {
+        autoSkip: false, maxRotation: 0, minRotation: 0,
+        color: token('--swep-ink-muted'),
+        font: { family: 'Inter, system-ui, sans-serif', size: 10 }
+      },
+      grid: { display: false },
+      border: { color: token('--swep-axis') }
+    };
+  }
+
+  function valueScale(horizontal) {
+    return {
+      type: 'linear',
+      min: 0,
+      max: 90,
+      ticks: {
+        // Fewer ticks horizontally: the value axis gets far less room there.
+        stepSize: horizontal ? 30 : 10,
+        maxRotation: 0,
+        color: token('--swep-ink-faint'),
+        font: { family: 'Inter, system-ui, sans-serif', size: 11 },
+        callback: function (value) { return value + '%'; }
+      },
+      grid: { color: token('--swep-grid') },
+      border: { display: false }
+    };
+  }
+
+  // indexAxis is fixed at construction, so an orientation flip rebuilds the chart.
+  function build() {
+    var horizontal = wantsHorizontal();
+    isHorizontal = horizontal;
+
+    var d = chartData(horizontal);
+    if (chart) chart.destroy();
+
+    chart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: d.labels,
+        datasets: [{
+          data: d.scores,
+          backgroundColor: d.colors,
+          hoverBackgroundColor: d.colors,
+          borderColor: d.borderColors,
+          borderWidth: d.borderWidths,
+          borderRadius: horizontal
+            ? { topLeft: 0, topRight: 5, bottomLeft: 0, bottomRight: 5 }
+            : { topLeft: 5, topRight: 5, bottomLeft: 0, bottomRight: 0 },
+          borderSkipped: false,
+          maxBarThickness: 34
+        }]
+      },
+      plugins: [valueLabels],
+      options: {
+        indexAxis: horizontal ? 'y' : 'x',
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: horizontal ? { right: 48 } : { top: 8 } },
+        interaction: { mode: 'index', intersect: false },
+        // Occasional-frequency view: a short staggered grow reads as one motion.
+        animation: reduceMotion
+          ? false
+          : { duration: 300, easing: 'easeOutQuart', delay: function (ctx) {
+              return ctx.type === 'data' && ctx.mode === 'default' ? ctx.dataIndex * 16 : 0;
+            } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: token('--swep-ink'),
+            titleColor: token('--swep-surface'),
+            bodyColor: token('--swep-surface'),
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: false,
+            titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '600' },
+            bodyFont: { family: 'Inter, system-ui, sans-serif', size: 12 },
+            callbacks: {
+              title: function (items) {
+                var row = visible()[items[0].dataIndex];
+                return row ? row.name : '';
+              },
+              label: function (item) {
+                var row = visible()[item.dataIndex];
+                if (!row) return '';
+                return [
+                  row.score.toFixed(1) + '% SWE-Bench Pro · ' + LABS[row.lab].name,
+                  row.source === 'scale' ? 'Scale independent run' : 'Vendor-reported'
+                ];
+              }
+            }
+          }
+        },
+        scales: horizontal
+          ? { x: valueScale(true), y: categoryScale() }
+          : { x: categoryScale(), y: valueScale(false) }
+      }
+    });
+
+    // A chart built right after a layout change measures the old container box.
+    // Re-measure on the next frame.
+    var built = chart;
+    requestAnimationFrame(function () {
+      if (chart === built) chart.resize();
     });
   }
-};
 
-new Chart(document.getElementById('sweBenchBarChart4'), {
-  type: 'bar',
-  data: {
-    labels: labels,
-    datasets: [{
-      data: scores,
-      backgroundColor: colors,
-      borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
-      maxBarThickness: 24
-    }]
-  },
-  plugins: [valueLabelsPlugin],
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          title: function(items) {
-            return fullNames[items[0].dataIndex];
-          },
-          label: function(item) {
-            return item.parsed.y === null ? 'No data reported' : item.parsed.y + '% SWE-Bench Pro';
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: { autoSkip: false, maxRotation: 0, minRotation: 0, color: '#898781', font: { size: 11 } },
-        grid: { display: false },
-        border: { color: '#c3c2b7' }
-      },
-      y: {
-        min: 0,
-        max: 95,
-        ticks: { stepSize: 10, color: '#898781', font: { size: 11 }, callback: function(value) { return value + '%'; } },
-        grid: { color: '#e1e0d9' },
-        border: { display: false }
-      }
-    }
+  function refresh(animate) {
+    if (wantsHorizontal() !== isHorizontal) { build(); return; }
+
+    var d = chartData(isHorizontal);
+    chart.data.labels = d.labels;
+    chart.data.datasets[0].data = d.scores;
+    chart.data.datasets[0].backgroundColor = d.colors;
+    chart.data.datasets[0].hoverBackgroundColor = d.colors;
+    chart.data.datasets[0].borderColor = d.borderColors;
+    chart.data.datasets[0].borderWidth = d.borderWidths;
+
+    var o = chart.options;
+    o.plugins.tooltip.backgroundColor = token('--swep-ink');
+    o.plugins.tooltip.titleColor = token('--swep-surface');
+    o.plugins.tooltip.bodyColor = token('--swep-surface');
+    o.scales.x = isHorizontal ? valueScale(true) : categoryScale();
+    o.scales.y = isHorizontal ? categoryScale() : valueScale(false);
+
+    chart.update(animate === false || reduceMotion ? 'none' : undefined);
   }
-});
+
+  build();
+
+  // Legend doubles as a lab filter.
+  Object.keys(LABS).forEach(function (key) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'swep__chip';
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = '<span class="swep__swatch" aria-hidden="true"></span>' + LABS[key].name;
+    btn.querySelector('.swep__swatch').style.background = 'var(' + LABS[key].varName + ')';
+
+    btn.addEventListener('click', function () {
+      var next = !active[key];
+      // Keep at least one lab on screen.
+      if (!next && Object.keys(active).filter(function (k) { return active[k]; }).length === 1) return;
+      active[key] = next;
+      btn.setAttribute('aria-pressed', String(next));
+      refresh();
+    });
+
+    legendEl.appendChild(btn);
+  });
+
+  var key = document.createElement('span');
+  key.className = 'swep__key';
+  key.innerHTML = '<span class="swep__swatch" aria-hidden="true"></span>Outlined = Scale independent run';
+  legendEl.appendChild(key);
+
+  // Follow OS theme and the host page's data-theme toggle.
+  var scheme = window.matchMedia('(prefers-color-scheme: dark)');
+  var onScheme = function () { refresh(false); };
+  scheme.addEventListener ? scheme.addEventListener('change', onScheme) : scheme.addListener(onScheme);
+
+  new MutationObserver(function () { refresh(false); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Re-evaluate the orientation breakpoint as the embed resizes.
+  var resizeTimer;
+  new ResizeObserver(function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (wantsHorizontal() !== isHorizontal) build();
+    }, 120);
+  }).observe(plot);
+})();
 </script>
