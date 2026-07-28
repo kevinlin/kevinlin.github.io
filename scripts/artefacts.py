@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from dataclasses import dataclass, field, replace
-from datetime import datetime
-import hashlib
+from datetime import date, datetime
 import html
 from html.parser import HTMLParser
 import json
@@ -25,6 +25,8 @@ PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
 IGNORED_METADATA_NAME = ".DS_Store"
 DELETION_KINDS = frozenset({"delete", "orphan"})
+WRITE_KINDS = frozenset({"add", "update"})
+HOMEPAGE_FILES = ("index.html", "styles.css", "script.js")
 
 
 def has_cdnjs_reference(text: str) -> bool:
@@ -118,7 +120,6 @@ class ManifestProposal:
 class SourceReconciliation:
     next_manifest: Manifest
     missing_entries: tuple[Entry, ...]
-    excluded_suffixes: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -142,7 +143,6 @@ class ValidationReport:
     entry_count: int
     local_link_count: int
     ignored_metadata_count: int
-    homepage_unchanged: bool
 
 
 @dataclass(frozen=True)
@@ -265,13 +265,12 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
             )
         )
 
-    manifest = Manifest(
+    return Manifest(
         version=payload.get("version"),
         protected_files=protected_files,
         collections=collections,
         entries=tuple(entries),
     )
-    return manifest
 
 
 def _require_unique(values: list[Any], message: str) -> None:
@@ -279,9 +278,11 @@ def _require_unique(values: list[Any], message: str) -> None:
         raise ManifestError(message)
 
 
-def _validate_public_path(path: PurePosixPath, field_name: str) -> None:
-    if not all(PUBLIC_COMPONENT.fullmatch(component) for component in path.parts):
-        raise ManifestError(f"{field_name} must be lowercase kebab-case")
+def _validate_path_components(
+    path: PurePosixPath, pattern: re.Pattern[str], message: str
+) -> None:
+    if not all(pattern.fullmatch(component) for component in path.parts):
+        raise ManifestError(message)
 
 
 def validate_manifest(manifest: Manifest) -> None:
@@ -316,7 +317,9 @@ def validate_manifest(manifest: Manifest) -> None:
         destination_suffix = entry.destination.suffix.lower()
         if source_suffix not in APPROVED_EXTENSIONS:
             raise ManifestError(f"unsupported source extension for entry {entry.id}")
-        _validate_public_path(entry.destination, "destination")
+        _validate_path_components(
+            entry.destination, PUBLIC_COMPONENT, "destination must be lowercase kebab-case"
+        )
         if source_suffix == ".html":
             if entry.destination.name != "index.html":
                 raise ManifestError(
@@ -328,11 +331,14 @@ def validate_manifest(manifest: Manifest) -> None:
             )
 
     for path in manifest.protected_files:
-        if not all(PROTECTED_COMPONENT.fullmatch(component) for component in path.parts):
-            raise ManifestError("protected file must use a lowercase safe path")
+        _validate_path_components(
+            path, PROTECTED_COMPONENT, "protected file must use a lowercase safe path"
+        )
 
 
-def _renumber_colliding_orders(items: tuple[Any, ...], group_of) -> tuple[Any, ...]:
+def _renumber_colliding_orders(
+    items: tuple[Any, ...], group_of: Callable[[Any], Any]
+) -> tuple[Any, ...]:
     """Reassign 10, 20, 30 … inside any group whose declared orders collide.
 
     Order is hand-edited manifest content, so a group that already reads
@@ -376,12 +382,10 @@ def normalize_orders(manifest: Manifest) -> Manifest:
 
 def load_manifest(path: Path) -> Manifest:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        content = path.read_bytes()
+    except OSError as error:
         raise ManifestError(f"cannot read manifest: {error}") from error
-    manifest = manifest_from_dict(payload)
-    validate_manifest(manifest)
-    return manifest
+    return manifest_from_bytes(content, "manifest")
 
 
 def scan_source(source_root: Path) -> SourceInventory:
@@ -422,8 +426,15 @@ def scan_source(source_root: Path) -> SourceInventory:
     )
 
 
+SLUG_SEPARATOR = re.compile(r"[^a-z0-9]+")
+LEADING_NUMBER = re.compile(r"^\d+[-_ ]+")
+WORD_SEPARATOR = re.compile(r"[-_]+")
+REPEATED_SPACE = re.compile(r"\s+")
+TRAILING_SPACE = re.compile(r"[ \t]+(?=\r?$)", re.MULTILINE)
+
+
 def _slug(value: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    slug = SLUG_SEPARATOR.sub("-", value.lower()).strip("-")
     if not slug:
         raise InventoryError(f"cannot normalize path component: {value}")
     return slug
@@ -445,9 +456,9 @@ CDNJS_REFERENCE = re.compile(rf"https://{re.escape(CDNJS_HOST)}/[^\s\"'<>)]+")
 
 
 def _normalize_words(stem: str) -> str:
-    text = re.sub(r"^\d+[-_ ]+", "", stem)
-    text = re.sub(r"[-_]+", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
+    text = LEADING_NUMBER.sub("", stem)
+    text = WORD_SEPARATOR.sub(" ", text)
+    text = REPEATED_SPACE.sub(" ", text).strip()
     if not text:
         raise InventoryError(f"cannot derive a title from: {stem}")
     return text
@@ -479,11 +490,11 @@ def _source_group(source: PurePosixPath) -> str:
     return source.parts[0] if len(source.parts) > 1 else ""
 
 
-def _max_orders(items, group_attr: str) -> dict[str, int]:
+def _max_orders(items, group_of: Callable[[Any], str]) -> dict[str, int]:
     """Highest declared order per group, used to continue existing numbering."""
     result: dict[str, int] = {}
     for item in items:
-        key = getattr(item, group_attr)
+        key = group_of(item)
         result[key] = max(result.get(key, 0), item.order)
     return result
 
@@ -558,8 +569,10 @@ def propose_manifest_additions(
     section_orders = {
         collection.section: collection.section_order for collection in manifest.collections
     }
-    order_in_section = _max_orders(manifest.collections, "section")
-    order_in_collection = _max_orders(manifest.entries, "collection")
+    order_in_section = _max_orders(
+        manifest.collections, lambda collection: collection.section
+    )
+    order_in_collection = _max_orders(manifest.entries, lambda entry: entry.collection)
     taken_ids = {entry.id for entry in manifest.entries}
     collection_ids = {collection.id for collection in manifest.collections}
     vendor_by_name = {_vendor_key(path.name): path for path in manifest.protected_files}
@@ -681,11 +694,7 @@ def reconcile_inventory(
         manifest,
         entries=tuple(entry for entry in manifest.entries if entry.source in approved),
     )
-    return SourceReconciliation(
-        next_manifest=next_manifest,
-        missing_entries=missing,
-        excluded_suffixes=inventory.excluded_suffixes,
-    )
+    return SourceReconciliation(next_manifest=next_manifest, missing_entries=missing)
 
 
 def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
@@ -694,12 +703,13 @@ def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
     except UnicodeDecodeError as error:
         raise TransformationError(f"HTML source is not UTF-8: {entry.source}") from error
     for old, new in entry.replacements.items():
-        if old not in text:
+        parts = text.split(old)
+        if len(parts) == 1:
             raise TransformationError(
                 f"expected replacement not found for {entry.id}: {old}"
             )
-        text = text.replace(old, new)
-    text = re.sub(r"[ \t]+(?=\r?$)", "", text, flags=re.MULTILINE)
+        text = new.join(parts)
+    text = TRAILING_SPACE.sub("", text)
     if has_cdnjs_reference(text):
         remaining = ", ".join(dict.fromkeys(CDNJS_REFERENCE.findall(text))) or CDNJS_HOST
         raise TransformationError(
@@ -728,8 +738,6 @@ def build_desired_files(
             output = transform_html(entry, source_bytes)
         else:
             output = source_bytes
-            if hashlib.sha256(output).digest() != hashlib.sha256(source_bytes).digest():
-                raise TransformationError(f"binary hash mismatch for {entry.id}")
         desired[entry.destination] = output
     return desired
 
@@ -757,13 +765,14 @@ def collect_source_timestamps(
             modified = source_path.stat().st_mtime
         except OSError:
             continue
-        timestamps[entry.id] = datetime.fromtimestamp(modified).strftime("%Y-%m-%d")
+        timestamps[entry.id] = date.fromtimestamp(modified).isoformat()
     return timestamps
 
 
 def render_catalogue(
     manifest: Manifest, timestamps: dict[str, str] | None = None
 ) -> str:
+    timestamps = timestamps or {}
     entries_by_collection: dict[str, list[Entry]] = {}
     for entry in manifest.entries:
         entries_by_collection.setdefault(entry.collection, []).append(entry)
@@ -779,15 +788,11 @@ def render_catalogue(
     # section orders its cards by that string. A collection with no readable source
     # has no date and falls to the bottom on its declared order.
     latest_by_collection = {
-        collection.id: max(
-            (
-                (timestamps or {})[entry.id]
-                for entry in entries_by_collection.get(collection.id, ())
-                if entry.id in (timestamps or {})
-            ),
+        collection_id: max(
+            (timestamps[entry.id] for entry in entries if entry.id in timestamps),
             default="",
         )
-        for collection in manifest.collections
+        for collection_id, entries in entries_by_collection.items()
     }
 
     lines: list[str] = []
@@ -882,23 +887,11 @@ def manifest_to_json(manifest: Manifest) -> bytes:
     return (json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
 
 
-def read_head_manifest(repo_root: Path) -> bytes | None:
-    result = subprocess.run(
-        ["git", "show", "HEAD:artefacts/manifest.json"],
-        cwd=repo_root,
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0:
-        return None
-    return result.stdout
-
-
 def manifest_from_bytes(content: bytes, description: str) -> Manifest:
     try:
         payload = json.loads(content.decode("utf-8"))
     except (UnicodeError, json.JSONDecodeError) as error:
-        raise ManifestError(f"cannot read {description} manifest: {error}") from error
+        raise ManifestError(f"cannot read {description}: {error}") from error
     manifest = manifest_from_dict(payload)
     validate_manifest(manifest)
     return manifest
@@ -912,7 +905,7 @@ def _validate_desired_tree(
 ) -> None:
     with tempfile.TemporaryDirectory(prefix="artefact-plan-") as directory:
         planned_repo = Path(directory)
-        for name in ("index.html", "styles.css", "script.js"):
+        for name in HOMEPAGE_FILES:
             source = repo_root / name
             if source.is_file():
                 (planned_repo / name).write_bytes(source.read_bytes())
@@ -989,7 +982,7 @@ def create_sync_plan(
 
     changes: list[Change] = []
     unchanged: list[PurePosixPath] = []
-    for destination, content in sorted(desired_files.items(), key=lambda item: str(item[0])):
+    for destination, content in desired_files.items():
         current_path = artefacts_root / destination.as_posix()
         if destination == PurePosixPath("manifest.json") and head_manifest is not None:
             current = head_manifest
@@ -1006,7 +999,7 @@ def create_sync_plan(
 
     deletion_candidates = {entry.destination for entry in reconciliation.missing_entries}
     if head_manifest is not None:
-        previous_manifest = manifest_from_bytes(head_manifest, "HEAD")
+        previous_manifest = manifest_from_bytes(head_manifest, "HEAD manifest")
         next_destinations = {entry.destination for entry in next_manifest.entries}
         deletion_candidates.update(
             entry.destination
@@ -1037,7 +1030,7 @@ def create_sync_plan(
         desired_files=desired_files,
         changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
         unchanged=tuple(sorted(unchanged, key=str)),
-        excluded_suffixes=reconciliation.excluded_suffixes,
+        excluded_suffixes=inventory.excluded_suffixes,
     )
 
 
@@ -1050,12 +1043,13 @@ def _renumbered_orders(plan: SyncPlan) -> list[str]:
     labels = [
         f"{collection.id}: {declared_collections[collection.id]} -> {collection.order}"
         for collection in plan.next_manifest.collections
-        if declared_collections.get(collection.id, collection.order) != collection.order
+        if collection.id in declared_collections
+        and declared_collections[collection.id] != collection.order
     ]
     labels.extend(
         f"{entry.id}: {declared_entries[entry.id]} -> {entry.order}"
         for entry in plan.next_manifest.entries
-        if declared_entries.get(entry.id, entry.order) != entry.order
+        if entry.id in declared_entries and declared_entries[entry.id] != entry.order
     )
     return labels
 
@@ -1083,8 +1077,7 @@ def format_plan(plan: SyncPlan) -> str:
         lines.append(f"Renumbered order ({len(renumbered)})")
         lines.extend(f"  ~ {label}" for label in renumbered)
     lines.append(f"Unchanged ({len(plan.unchanged)})")
-    excluded = ", ".join(plan.excluded_suffixes) if plan.excluded_suffixes else "none"
-    lines.append(f"Excluded source types: {excluded}")
+    lines.append(f"Excluded source types: {', '.join(plan.excluded_suffixes) or 'none'}")
     return "\n".join(lines)
 
 
@@ -1120,7 +1113,7 @@ def _atomic_write(path: Path, content: bytes) -> None:
 
 def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> None:
     for change in plan.changes:
-        if change.kind not in {"add", "update"}:
+        if change.kind not in WRITE_KINDS:
             continue
         target = _destination_path(artefacts_root, change.destination)
         _atomic_write(target, plan.desired_files[change.destination])
@@ -1154,13 +1147,17 @@ def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> Non
         raise ArtefactError("applied manifest differs from plan")
 
 
-def _parse_references(path: Path) -> _ReferenceParser:
-    parser = _ReferenceParser()
+def _read_page(path: Path) -> str:
     try:
-        parser.feed(path.read_text(encoding="utf-8"))
-        parser.close()
+        return path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
         raise ValidationError(f"cannot parse HTML file {path}: {error}") from error
+
+
+def _parse_references(text: str) -> _ReferenceParser:
+    parser = _ReferenceParser()
+    parser.feed(text)
+    parser.close()
     return parser
 
 
@@ -1204,10 +1201,11 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
             + ", ".join(path.as_posix() for path in unexpected)
         )
 
-    catalogue_parser = _parse_references(artefacts_root / "index.html")
+    catalogue_parser = _parse_references(_read_page(artefacts_root / "index.html"))
+    href_counts = Counter(catalogue_parser.hrefs)
     for entry in manifest.entries:
         href = public_href(entry.destination)
-        count = catalogue_parser.hrefs.count(href)
+        count = href_counts[href]
         if count != 1:
             raise ValidationError(
                 f"catalogue link for {entry.id} must appear exactly once, found {count}"
@@ -1218,10 +1216,10 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
         if relative_path.suffix != ".html":
             continue
         page = artefacts_root / relative_path.as_posix()
-        text = page.read_text(encoding="utf-8")
+        text = _read_page(page)
         if has_cdnjs_reference(text):
             raise ValidationError(f"forbidden cdnjs reference in {relative_path}")
-        parser = _parse_references(page)
+        parser = _parse_references(text)
         for reference in parser.references:
             target = _resolve_local_reference(repo_root, page, reference)
             if target is None:
@@ -1232,19 +1230,9 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
                 )
             local_targets.add(target)
 
-    homepage_unchanged = True
     if base_ref is not None:
         result = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--exit-code",
-                f"{base_ref}...HEAD",
-                "--",
-                "index.html",
-                "styles.css",
-                "script.js",
-            ],
+            ["git", "diff", "--exit-code", f"{base_ref}...HEAD", "--", *HOMEPAGE_FILES],
             cwd=repo_root,
             text=True,
             capture_output=True,
@@ -1256,7 +1244,6 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
         entry_count=len(manifest.entries),
         local_link_count=len(local_targets),
         ignored_metadata_count=ignored_metadata,
-        homepage_unchanged=homepage_unchanged,
     )
 
 
@@ -1271,15 +1258,26 @@ def subprocess_runner(args: list[str], cwd: Path) -> CommandResult:
     return CommandResult(result.stdout, result.stderr, result.returncode)
 
 
+def _failure_message(result: CommandResult, failure: str) -> str:
+    detail = result.stderr.strip() or result.stdout.strip()
+    return f"{failure}: {detail}" if detail else failure
+
+
 def _run_checked(
     runner: CommandRunner, args: list[str], cwd: Path, failure: str
 ) -> str:
     result = runner(args, cwd)
     if result.returncode != 0:
-        detail = result.stderr.strip() or result.stdout.strip()
-        suffix = f": {detail}" if detail else ""
-        raise PublishError(f"{failure}{suffix}")
+        raise PublishError(_failure_message(result, failure))
     return result.stdout
+
+
+def _parse_json(output: str, description: str) -> Any:
+    """Decode a `gh --json` payload, reporting a parse failure as a `PublishError`."""
+    try:
+        return json.loads(output)
+    except json.JSONDecodeError as error:
+        raise PublishError(f"cannot parse {description}") from error
 
 
 def _publish_preflight(repo_root: Path, runner: CommandRunner) -> None:
@@ -1311,7 +1309,9 @@ def _publish_preflight(repo_root: Path, runner: CommandRunner) -> None:
         raise PublishError("local main must be up to date with origin/main")
 
 
-def _head_manifest_with_runner(repo_root: Path, runner: CommandRunner) -> bytes | None:
+def read_head_manifest(
+    repo_root: Path, runner: CommandRunner = subprocess_runner
+) -> bytes | None:
     result = runner(["git", "show", "HEAD:artefacts/manifest.json"], repo_root)
     if result.returncode != 0:
         return None
@@ -1324,21 +1324,16 @@ def _require_successful_checks(
     runner: CommandRunner,
     sleeper: Callable[[float], None],
 ) -> None:
-    checks: list[dict[str, Any]] | None = None
     for _ in range(60):
         result = runner(
             ["gh", "pr", "checks", pull_request_url, "--json", "name,bucket"],
             repo_root,
         )
         if result.returncode == 0:
-            try:
-                parsed = json.loads(result.stdout)
-            except json.JSONDecodeError as error:
-                raise PublishError("cannot parse GitHub checks") from error
+            parsed = _parse_json(result.stdout, "GitHub checks")
             if not isinstance(parsed, list):
                 raise PublishError("cannot parse GitHub checks")
-            checks = parsed
-            if any(check.get("name") == "validate" for check in checks):
+            if any(check.get("name") == "validate" for check in parsed):
                 break
         sleeper(2)
     else:
@@ -1356,14 +1351,10 @@ def _require_successful_checks(
         repo_root,
         "cannot read GitHub checks",
     )
-    try:
-        checks = json.loads(output)
-    except json.JSONDecodeError as error:
-        raise PublishError("cannot parse GitHub checks") from error
-    validate_checks = [check for check in checks if check.get("name") == "validate"]
-    if not validate_checks:
+    checks = _parse_json(output, "GitHub checks")
+    if not any(check.get("name") == "validate" for check in checks):
         raise PublishError("required validate check is missing; pull request remains open")
-    if not checks or any(check.get("bucket") != "pass" for check in checks):
+    if any(check.get("bucket") != "pass" for check in checks):
         raise PublishError("not all GitHub checks passed; pull request remains open")
 
 
@@ -1381,10 +1372,7 @@ def _wait_for_pages(
             repo_root,
             "cannot read GitHub Pages build",
         )
-        try:
-            build = json.loads(output)
-        except json.JSONDecodeError as error:
-            raise PublishError("cannot parse GitHub Pages build") from error
+        build = _parse_json(output, "GitHub Pages build")
         status = build.get("status")
         if status == "errored" and build.get("commit") == merge_commit:
             message = (build.get("error") or {}).get("message") or "unknown Pages error"
@@ -1413,9 +1401,7 @@ def _restore_main(repo_root: Path, runner: CommandRunner) -> None:
     ):
         result = runner(command, repo_root)
         if result.returncode != 0:
-            detail = result.stderr.strip() or result.stdout.strip()
-            suffix = f": {detail}" if detail else ""
-            print(f"Warning: {failure}{suffix}", file=sys.stderr)
+            print(f"Warning: {_failure_message(result, failure)}", file=sys.stderr)
             return
 
 
@@ -1472,7 +1458,7 @@ def publish(
         manifest_path,
         source_root,
         artefacts_root,
-        _head_manifest_with_runner(repo_root, runner),
+        read_head_manifest(repo_root, runner),
     )
     print(format_plan(plan))
     if not plan.changes:
@@ -1533,13 +1519,9 @@ def publish(
         "## Verification\n\n"
         "Local unit tests and repository validation passed before push.\n"
     )
-    body_path: str | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", prefix="artefact-pr-", suffix=".md", delete=False
-        ) as body_file:
-            body_file.write(body)
-            body_path = body_file.name
+    with tempfile.TemporaryDirectory(prefix="artefact-pr-") as directory:
+        body_path = Path(directory) / "body.md"
+        body_path.write_text(body, encoding="utf-8")
         pull_request_url = _run_checked(
             runner,
             [
@@ -1553,14 +1535,11 @@ def publish(
                 "--title",
                 "Sync published artefacts",
                 "--body-file",
-                body_path,
+                str(body_path),
             ],
             repo_root,
             "cannot create pull request",
         ).strip()
-    finally:
-        if body_path and os.path.exists(body_path):
-            os.unlink(body_path)
     if not pull_request_url:
         raise PublishError("GitHub did not return a pull request URL")
 
@@ -1577,10 +1556,10 @@ def publish(
         repo_root,
         "cannot read merged pull request",
     )
+    pr = _parse_json(pr_output, "merged pull request")
     try:
-        pr = json.loads(pr_output)
         merge_commit = pr["mergeCommit"]["oid"]
-    except (json.JSONDecodeError, KeyError, TypeError) as error:
+    except (KeyError, TypeError) as error:
         raise PublishError("cannot parse merged pull request") from error
     if pr.get("state") != "MERGED" or not merge_commit:
         raise PublishError("pull request was not merged")
@@ -1594,8 +1573,8 @@ def publish(
         "cannot identify GitHub repository",
     )
     try:
-        repository = json.loads(repository_output)["nameWithOwner"]
-    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        repository = _parse_json(repository_output, "GitHub repository")["nameWithOwner"]
+    except (KeyError, TypeError) as error:
         raise PublishError("cannot parse GitHub repository") from error
     _wait_for_pages(repo_root, repository, merge_commit, runner, sleeper)
     pages_output = _run_checked(
@@ -1605,8 +1584,8 @@ def publish(
         "cannot read GitHub Pages configuration",
     )
     try:
-        base_url = json.loads(pages_output)["html_url"]
-    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        base_url = _parse_json(pages_output, "GitHub Pages URL")["html_url"]
+    except (KeyError, TypeError) as error:
         raise PublishError("cannot parse GitHub Pages URL") from error
     urls = _public_urls(base_url, plan.next_manifest)
     _verify_public_urls(repo_root, urls, runner)
@@ -1649,7 +1628,7 @@ def handle_unlisted_sources(
         print("Cancelled.")
         return 2
     payload = manifest_to_json(merge_manifest_proposal(error.manifest, proposal))
-    manifest_from_bytes(payload, "proposed")
+    manifest_from_bytes(payload, "proposed manifest")
     _atomic_write(manifest_path, payload)
     print(
         "Wrote artefacts/manifest.json. Review the derived titles and descriptions, "
@@ -1669,12 +1648,14 @@ def default_source_root() -> Path:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Synchronize published artefacts")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    repo_default = default_repo_root()
+    source_default = default_source_root()
     for command in ("plan", "apply", "publish"):
         subparser = subparsers.add_parser(command)
-        subparser.add_argument("--repo", type=Path, default=default_repo_root())
-        subparser.add_argument("--source", type=Path, default=default_source_root())
+        subparser.add_argument("--repo", type=Path, default=repo_default)
+        subparser.add_argument("--source", type=Path, default=source_default)
     validate_parser = subparsers.add_parser("validate")
-    validate_parser.add_argument("--repo", type=Path, default=default_repo_root())
+    validate_parser.add_argument("--repo", type=Path, default=repo_default)
     validate_parser.add_argument("--base-ref")
     return parser
 

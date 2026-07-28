@@ -90,7 +90,7 @@ The following rules apply:
 - Every published file must be explained by the manifest. A file under `artefacts/` that the desired tree does not contain is shown as an orphan deletion. See [Orphan Cleanup](#orphan-cleanup).
 - Destination paths must be unique, relative, lowercase kebab-case, and contained below `artefacts/`.
 - HTML presentations use a directory `index.html`; images retain an approved image extension.
-- Binary files are copied byte-for-byte and verified with SHA-256.
+- Binary files are copied byte-for-byte. `apply` reads every written file back and compares it to the planned bytes.
 - HTML replacements are exact manifest declarations. An expected replacement that is absent is an error.
 - HTML lines have trailing spaces and tabs removed deterministically so generated commits pass Git whitespace checks.
 - Published HTML must not contain forbidden cdnjs runtime references after transformation.
