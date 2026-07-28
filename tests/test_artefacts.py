@@ -852,6 +852,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
                 ("update", "charts/existing.png"),
                 ("add", "charts/new.png"),
                 ("delete", "charts/removed.png"),
+                ("orphan", "notes.txt"),
                 ("update", "index.html"),
                 ("update", "manifest.json"),
             },
@@ -972,13 +973,98 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertEqual((repo / "artefacts/charts/new.png").read_bytes(), b"new")
         self.assertFalse((repo / "artefacts/charts/removed.png").exists())
         self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
-        self.assertEqual((repo / "artefacts/notes.txt").read_text(), "keep")
+        self.assertFalse((repo / "artefacts/notes.txt").exists())
         applied_manifest = artefacts_cli.load_manifest(manifest_path)
         self.assertEqual([entry.id for entry in applied_manifest.entries], ["existing", "new"])
         catalogue = (repo / "artefacts/index.html").read_text()
         self.assertIn('href="charts/new.png"', catalogue)
         self.assertNotIn("Removed", catalogue)
         self.assertFalse(any(repo.rglob("*.tmp")))
+
+    def test_orphan_sweep_spares_protected_files_and_ignored_metadata(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        (repo / "artefacts" / ".DS_Store").write_bytes(b"metadata")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        orphans = {
+            change.destination.as_posix()
+            for change in plan.changes
+            if change.kind == "orphan"
+        }
+        self.assertEqual(orphans, {"notes.txt"})
+
+        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+
+        self.assertEqual((repo / "artefacts/.DS_Store").read_bytes(), b"metadata")
+        self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
+
+    def test_folder_renamed_without_a_manifest_change_resolves_in_one_apply(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts_root = repo / "artefacts"
+        renamed = artefacts_root / "renamed"
+        (artefacts_root / "charts").rename(renamed)
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts_root, head_manifest
+        )
+
+        changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        self.assertIn(("add", "charts/existing.png"), changes)
+        self.assertIn(("orphan", "renamed/existing.png"), changes)
+        self.assertIn(("orphan", "renamed/removed.png"), changes)
+
+        artefacts_cli.apply_plan(plan, manifest_path, artefacts_root)
+
+        self.assertFalse(renamed.exists())
+        self.assertEqual((artefacts_root / "charts/existing.png").read_bytes(), b"updated")
+
+    def test_orphan_set_matches_repository_validation_rejection(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts_root = repo / "artefacts"
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts_root, head_manifest
+        )
+        published, _ = artefacts_cli.scan_published_tree(artefacts_root)
+        manifest = artefacts_cli.load_manifest(manifest_path)
+        expected = {
+            PurePosixPath("index.html"),
+            PurePosixPath("manifest.json"),
+            *manifest.protected_files,
+            *(entry.destination for entry in manifest.entries),
+        }
+
+        unexpected = artefacts_cli.unexpected_published_files(published, expected)
+
+        self.assertEqual(
+            [change.destination for change in plan.changes if change.kind == "orphan"],
+            unexpected,
+        )
+
+    def test_apply_sweeps_orphan_without_touching_published_files(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts_root = repo / "artefacts"
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts_root, head_manifest
+        )
+
+        artefacts_cli.apply_plan(plan, manifest_path, artefacts_root)
+        report = artefacts_cli.validate_repository(repo, None)
+
+        self.assertEqual(report.entry_count, 2)
+        applied = self.snapshot(artefacts_root)
+        self.assertEqual(
+            set(applied),
+            {
+                "manifest.json",
+                "index.html",
+                "vendor/chart.js",
+                "charts/existing.png",
+                "charts/new.png",
+            },
+        )
 
     def test_confirmation_other_than_yes_does_not_apply(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -1009,6 +1095,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn("Add (1)\n  + charts/new.png", output)
         self.assertIn("Update (3)", output)
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
+        self.assertIn("Delete (orphaned) (1)\n  - notes.txt", output)
         self.assertIn("Excluded source types: .md", output)
 
 
@@ -1447,6 +1534,19 @@ class PublishingTests(unittest.TestCase):
         self.assertIsNone(result)
         self.assertFalse(runner.called(["git", "switch"]))
 
+    def test_publish_treats_an_orphan_alone_as_a_change(self):
+        repo, source, head = self.make_repository(changed=False)
+        (repo / "artefacts" / "images" / "stale.png").write_bytes(b"stale")
+        runner = RecordingRunner(
+            head,
+            pages=[{"status": "built", "commit": "merge123", "error": {"message": None}}],
+        )
+
+        result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.merge_commit, "merge123")
+        self.assertFalse((repo / "artefacts" / "images" / "stale.png").exists())
+
     def test_publish_cancellation_does_not_create_branch(self):
         repo, source, head = self.make_repository()
         runner = RecordingRunner(head)
@@ -1549,18 +1649,7 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(result.verified_url_count, 3)
         self.assertIn("Update (1)", runner.pr_body)
         self.assertTrue(runner.called(["git", "switch", "-c", "agent/sync-artefacts-20260726-143000"]))
-        self.assertTrue(
-            runner.called(
-                [
-                    "git",
-                    "add",
-                    "--",
-                    "artefacts/images/card.png",
-                    "artefacts/index.html",
-                    "artefacts/manifest.json",
-                ]
-            )
-        )
+        self.assertTrue(runner.called(["git", "add", "--all", "--", "artefacts"]))
         self.assertTrue(
             runner.called(
                 [

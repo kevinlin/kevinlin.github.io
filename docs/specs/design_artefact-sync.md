@@ -87,6 +87,7 @@ The following rules apply:
 
 - Every approved source file must have one manifest entry. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [design_artefact-manifest-proposal.md](design_artefact-manifest-proposal.md).
 - Every manifest source must exist. A missing source is shown as a deletion and, after confirmation, removes its entry and destination.
+- Every published file must be explained by the manifest. A file under `artefacts/` that the desired tree does not contain is shown as an orphan deletion. See [design_artefact-orphan-cleanup.md](design_artefact-orphan-cleanup.md).
 - Destination paths must be unique, relative, lowercase kebab-case, and contained below `artefacts/`.
 - HTML presentations use a directory `index.html`; images retain an approved image extension.
 - Binary files are copied byte-for-byte and verified with SHA-256.
@@ -114,7 +115,7 @@ The generated catalogue must link every manifest entry exactly once. Vendor file
 4. Build the complete desired managed tree in a temporary directory.
 5. Apply declared HTML replacements and generate the catalogue region.
 6. Validate paths, hashes, catalogue coverage, and local references.
-7. Print additions, updates, deletions, unchanged files, and excluded file types.
+7. Print additions, updates, deletions, orphan deletions, unchanged files, and excluded file types.
 
 `apply` runs the same plan, asks for confirmation, and then updates only destinations represented by the pre-apply manifest, approved new entries, and the generated catalogue region. Missing managed sources are valid deletion proposals. An invalid manifest blocks application. Unlisted approved source files stop the run after `apply` and `publish` have written the confirmed manifest proposal; `plan` prints the proposal and writes nothing.
 
@@ -148,7 +149,7 @@ The validation check is intentionally independent of `~/Downloads/Artefacts`. Gi
 ## Safety and Failure Handling
 
 - The preview is calculated before mutation and lists every deletion separately.
-- Deletion is limited to destinations represented by the pre-apply manifest. Protected files, the catalogue shell, `.nojekyll`, and unrelated repository files are never deletion targets. The script never recursively clears `artefacts/`.
+- Deletion is limited to files under `artefacts/` that the validated desired tree does not contain. Protected files, the catalogue shell, `.nojekyll`, ignored metadata, and every file outside `artefacts/` are never deletion targets. Each deletion is an individual printed path; the script never recursively clears `artefacts/`.
 - The desired tree is built and validated in a temporary directory before repository files change.
 - A local validation failure stops before commit or push.
 - A push or PR-creation failure leaves the local branch and commit intact.

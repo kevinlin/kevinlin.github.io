@@ -23,6 +23,8 @@ APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
 PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
+IGNORED_METADATA_NAME = ".DS_Store"
+DELETION_KINDS = frozenset({"delete", "orphan"})
 
 
 def has_cdnjs_reference(text: str) -> bool:
@@ -401,7 +403,7 @@ def scan_source(source_root: Path) -> SourceInventory:
             if not name.startswith(".") and name != "kevinlin.github.io"
         ]
         for name in file_names:
-            if name == ".DS_Store":
+            if name == IGNORED_METADATA_NAME:
                 continue
             candidate = current_path / name
             suffix = candidate.suffix.lower()
@@ -880,6 +882,31 @@ def _validate_desired_tree(
         validate_repository(planned_repo, None)
 
 
+def scan_published_tree(artefacts_root: Path) -> tuple[set[PurePosixPath], int]:
+    """Published files under `artefacts/`, plus the count of ignored metadata files."""
+    published: set[PurePosixPath] = set()
+    ignored_metadata = 0
+    for path in artefacts_root.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.name == IGNORED_METADATA_NAME:
+            ignored_metadata += 1
+            continue
+        published.add(PurePosixPath(path.relative_to(artefacts_root).as_posix()))
+    return published, ignored_metadata
+
+
+def unexpected_published_files(
+    published: set[PurePosixPath], expected: set[PurePosixPath]
+) -> list[PurePosixPath]:
+    """Published files the manifest does not explain.
+
+    One formula for `validate`'s rejection and the plan's orphan sweep, so the plan
+    cannot propose a tree that `validate` then refuses.
+    """
+    return sorted(published - expected, key=str)
+
+
 def create_sync_plan(
     manifest_path: Path,
     source_root: Path,
@@ -944,6 +971,13 @@ def create_sync_plan(
         if destination_path.exists():
             changes.append(Change("delete", destination))
 
+    published, _ = scan_published_tree(artefacts_root)
+    planned_deletions = {change.destination for change in changes if change.kind == "delete"}
+    expected = {*desired_files, *next_manifest.protected_files}
+    for destination in unexpected_published_files(published, expected):
+        if destination not in planned_deletions:
+            changes.append(Change("orphan", destination))
+
     return SyncPlan(
         manifest=declared,
         next_manifest=next_manifest,
@@ -974,10 +1008,15 @@ def _renumbered_orders(plan: SyncPlan) -> list[str]:
 
 
 def format_plan(plan: SyncPlan) -> str:
-    symbols = {"add": "+", "update": "~", "delete": "-"}
-    headings = {"add": "Add", "update": "Update", "delete": "Delete"}
+    symbols = {"add": "+", "update": "~", "delete": "-", "orphan": "-"}
+    headings = {
+        "add": "Add",
+        "update": "Update",
+        "delete": "Delete",
+        "orphan": "Delete (orphaned)",
+    }
     lines: list[str] = []
-    for kind in ("add", "update", "delete"):
+    for kind in ("add", "update", "delete", "orphan"):
         changes = sorted(
             (change for change in plan.changes if change.kind == kind),
             key=lambda item: str(item.destination),
@@ -1034,7 +1073,7 @@ def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> Non
         _atomic_write(target, plan.desired_files[change.destination])
 
     for change in plan.changes:
-        if change.kind != "delete":
+        if change.kind not in DELETION_KINDS:
             continue
         target = _destination_path(artefacts_root, change.destination)
         if target.exists():
@@ -1054,7 +1093,7 @@ def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> Non
         if not target.is_file() or target.read_bytes() != expected:
             raise ArtefactError(f"applied file differs from plan: {destination}")
     for change in plan.changes:
-        if change.kind == "delete" and _destination_path(
+        if change.kind in DELETION_KINDS and _destination_path(
             artefacts_root, change.destination
         ).exists():
             raise ArtefactError(f"deleted file remains after apply: {change.destination}")
@@ -1099,17 +1138,9 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
         *manifest.protected_files,
         *(entry.destination for entry in manifest.entries),
     }
-    actual: set[PurePosixPath] = set()
-    ignored_metadata = 0
-    for path in artefacts_root.rglob("*"):
-        if not path.is_file():
-            continue
-        if path.name == ".DS_Store":
-            ignored_metadata += 1
-            continue
-        actual.add(PurePosixPath(path.relative_to(artefacts_root).as_posix()))
+    actual, ignored_metadata = scan_published_tree(artefacts_root)
     missing = sorted(expected - actual, key=str)
-    unexpected = sorted(actual - expected, key=str)
+    unexpected = unexpected_published_files(actual, expected)
     if missing:
         raise ValidationError(
             "missing published file: " + ", ".join(path.as_posix() for path in missing)
@@ -1390,14 +1421,13 @@ def publish(
         "local artefact validation failed",
     )
 
-    staged_paths = {
-        "artefacts/manifest.json",
-        "artefacts/index.html",
-        *(f"artefacts/{change.destination.as_posix()}" for change in plan.changes),
-    }
+    # Stage the directory rather than the planned paths: an orphan deletion may have
+    # removed an untracked file, whose path matches nothing and aborts `git add`.
+    # `validate` has just proved `artefacts/` holds exactly the expected set, and
+    # `.DS_Store` is ignored, so the directory pathspec stages only planned changes.
     _run_checked(
         runner,
-        ["git", "add", "--", *sorted(staged_paths)],
+        ["git", "add", "--all", "--", "artefacts"],
         repo_root,
         "cannot stage artefact changes",
     )
