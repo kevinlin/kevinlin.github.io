@@ -122,47 +122,6 @@
       "replacements": {}
     },
     {
-      "id": "intelligence-index",
-      "source": "llm-effort-level-vs-performance/intelligence_index_chart.html",
-      "destination": "llm-effort-level-vs-performance/intelligence-index/index.html",
-      "title": "Intelligence index",
-      "collection": "llm-performance",
-      "order": 10,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      }
-    },
-    {
-      "id": "swe-bench-pro-by-lab",
-      "source": "llm-effort-level-vs-performance/swe_bench_pro_by_lab.html",
-      "destination": "llm-effort-level-vs-performance/swe-bench-pro-by-lab/index.html",
-      "title": "SWE-bench Pro by lab",
-      "collection": "llm-performance",
-      "order": 20,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
-      }
-    },
-    {
-      "id": "gpt-5-6-average-cost-per-task",
-      "source": "llm-effort-level-vs-performance/GPT-5.6-Avg cost per task.png",
-      "destination": "llm-effort-level-vs-performance/gpt-5-6-average-cost-per-task.png",
-      "title": "GPT-5.6 average cost per task",
-      "collection": "llm-performance",
-      "order": 40,
-      "replacements": {}
-    },
-    {
-      "id": "gpt-5-6-average-output-tokens-per-task",
-      "source": "llm-effort-level-vs-performance/GPT-5.6-Avg output tokens per task.png",
-      "destination": "llm-effort-level-vs-performance/gpt-5-6-average-output-tokens-per-task.png",
-      "title": "GPT-5.6 average output tokens per task",
-      "collection": "llm-performance",
-      "order": 50,
-      "replacements": {}
-    },
-    {
       "id": "gpt-5-6-first-five-days",
       "source": "GPT-5.6/GPT-5.6 Sol - The First 5 Days.png",
       "destination": "gpt-5-6/first-five-days.png",
@@ -262,60 +221,6 @@
       "replacements": {}
     },
     {
-      "id": "forward-deployed-engineer-01-iceberg-bright-dark-line",
-      "source": "forward-deployed-engineer/01-iceberg-bright-dark-line.png",
-      "destination": "forward-deployed-engineer/01-iceberg-bright-dark-line.png",
-      "title": "Iceberg bright dark line",
-      "collection": "fde",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "forward-deployed-engineer-02-four-translation-steps",
-      "source": "forward-deployed-engineer/02-four-translation-steps.png",
-      "destination": "forward-deployed-engineer/02-four-translation-steps.png",
-      "title": "Four translation steps",
-      "collection": "fde",
-      "order": 20,
-      "replacements": {}
-    },
-    {
-      "id": "forward-deployed-engineer-03-bento-whole-frame",
-      "source": "forward-deployed-engineer/03-bento-whole-frame.png",
-      "destination": "forward-deployed-engineer/03-bento-whole-frame.png",
-      "title": "Bento whole frame",
-      "collection": "fde",
-      "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "forward-deployed-engineer-04-iceberg-bright-dark-line-en",
-      "source": "forward-deployed-engineer/04-iceberg-bright-dark-line-en.png",
-      "destination": "forward-deployed-engineer/04-iceberg-bright-dark-line-en.png",
-      "title": "Iceberg bright dark line en",
-      "collection": "fde",
-      "order": 40,
-      "replacements": {}
-    },
-    {
-      "id": "forward-deployed-engineer-05-four-translation-steps-craft",
-      "source": "forward-deployed-engineer/05-four-translation-steps-craft.png",
-      "destination": "forward-deployed-engineer/05-four-translation-steps-craft.png",
-      "title": "Four translation steps craft",
-      "collection": "fde",
-      "order": 50,
-      "replacements": {}
-    },
-    {
-      "id": "forward-deployed-engineer-06-bento-whole-frame-craft",
-      "source": "forward-deployed-engineer/06-bento-whole-frame-craft.png",
-      "destination": "forward-deployed-engineer/06-bento-whole-frame-craft.png",
-      "title": "Bento whole frame craft",
-      "collection": "fde",
-      "order": 60,
-      "replacements": {}
-    },
-    {
       "id": "llm-performance-gpt-5-6-avg-cost-per-task",
       "source": "llm-performance/GPT-5.6-Avg cost per task.png",
       "destination": "llm-performance/gpt-5-6-avg-cost-per-task.png",
@@ -352,7 +257,9 @@
       "title": "Swe bench pro by lab",
       "collection": "llm-performance",
       "order": 90,
-      "replacements": {}
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
+      }
     },
     {
       "id": "fde-01-iceberg-bright-dark-line",
