@@ -108,6 +108,14 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 110
+    },
+    {
+      "id": "product-management",
+      "title": "Product management",
+      "description": "Visual notes on product and design practice.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 120
     }
   ],
   "entries": [
@@ -393,6 +401,15 @@
       "title": "Sonnet 5 effort dial truth",
       "collection": "llm-performance",
       "order": 100,
+      "replacements": {}
+    },
+    {
+      "id": "product-management-jenny-wen-design-process-is-dead",
+      "source": "product-management/jenny-wen-design-process-is-dead.jpeg",
+      "destination": "product-management/jenny-wen-design-process-is-dead.jpeg",
+      "title": "Jenny Wen: the design process is dead",
+      "collection": "product-management",
+      "order": 10,
       "replacements": {}
     }
   ]
