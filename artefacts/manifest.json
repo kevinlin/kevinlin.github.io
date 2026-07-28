@@ -92,6 +92,14 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 90
+    },
+    {
+      "id": "fde",
+      "title": "Forward Deployed Engineer",
+      "description": "Forward Deployed Engineer",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 100
     }
   ],
   "entries": [
@@ -251,6 +259,153 @@
       "title": "China Fuxing High-Speed Rail Network Map",
       "collection": "travel",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-01-iceberg-bright-dark-line",
+      "source": "forward-deployed-engineer/01-iceberg-bright-dark-line.png",
+      "destination": "forward-deployed-engineer/01-iceberg-bright-dark-line.png",
+      "title": "Iceberg bright dark line",
+      "collection": "fde",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-02-four-translation-steps",
+      "source": "forward-deployed-engineer/02-four-translation-steps.png",
+      "destination": "forward-deployed-engineer/02-four-translation-steps.png",
+      "title": "Four translation steps",
+      "collection": "fde",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-03-bento-whole-frame",
+      "source": "forward-deployed-engineer/03-bento-whole-frame.png",
+      "destination": "forward-deployed-engineer/03-bento-whole-frame.png",
+      "title": "Bento whole frame",
+      "collection": "fde",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-04-iceberg-bright-dark-line-en",
+      "source": "forward-deployed-engineer/04-iceberg-bright-dark-line-en.png",
+      "destination": "forward-deployed-engineer/04-iceberg-bright-dark-line-en.png",
+      "title": "Iceberg bright dark line en",
+      "collection": "fde",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-05-four-translation-steps-craft",
+      "source": "forward-deployed-engineer/05-four-translation-steps-craft.png",
+      "destination": "forward-deployed-engineer/05-four-translation-steps-craft.png",
+      "title": "Four translation steps craft",
+      "collection": "fde",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "forward-deployed-engineer-06-bento-whole-frame-craft",
+      "source": "forward-deployed-engineer/06-bento-whole-frame-craft.png",
+      "destination": "forward-deployed-engineer/06-bento-whole-frame-craft.png",
+      "title": "Bento whole frame craft",
+      "collection": "fde",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-gpt-5-6-avg-cost-per-task",
+      "source": "llm-performance/GPT-5.6-Avg cost per task.png",
+      "destination": "llm-performance/gpt-5-6-avg-cost-per-task.png",
+      "title": "GPT 5.6 Avg cost per task",
+      "collection": "llm-performance",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-gpt-5-6-avg-output-tokens-per-task",
+      "source": "llm-performance/GPT-5.6-Avg output tokens per task.png",
+      "destination": "llm-performance/gpt-5-6-avg-output-tokens-per-task.png",
+      "title": "GPT 5.6 Avg output tokens per task",
+      "collection": "llm-performance",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-score-vs-output-tokens-per-task",
+      "source": "llm-performance/score-vs-output-tokens-per-task.html",
+      "destination": "llm-performance/score-vs-output-tokens-per-task/index.html",
+      "title": "Score vs output tokens per task",
+      "collection": "llm-performance",
+      "order": 80,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      }
+    },
+    {
+      "id": "llm-performance-swe-bench-pro-by-lab",
+      "source": "llm-performance/swe_bench_pro_by_lab.html",
+      "destination": "llm-performance/swe-bench-pro-by-lab/index.html",
+      "title": "Swe bench pro by lab",
+      "collection": "llm-performance",
+      "order": 90,
+      "replacements": {}
+    },
+    {
+      "id": "fde-01-iceberg-bright-dark-line",
+      "source": "fde/01-iceberg-bright-dark-line.png",
+      "destination": "fde/01-iceberg-bright-dark-line.png",
+      "title": "Iceberg bright dark line",
+      "collection": "fde",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "fde-02-four-translation-steps",
+      "source": "fde/02-four-translation-steps.png",
+      "destination": "fde/02-four-translation-steps.png",
+      "title": "Four translation steps",
+      "collection": "fde",
+      "order": 80,
+      "replacements": {}
+    },
+    {
+      "id": "fde-03-bento-whole-frame",
+      "source": "fde/03-bento-whole-frame.png",
+      "destination": "fde/03-bento-whole-frame.png",
+      "title": "Bento whole frame",
+      "collection": "fde",
+      "order": 90,
+      "replacements": {}
+    },
+    {
+      "id": "fde-04-iceberg-bright-dark-line-en",
+      "source": "fde/04-iceberg-bright-dark-line-en.png",
+      "destination": "fde/04-iceberg-bright-dark-line-en.png",
+      "title": "Iceberg bright dark line en",
+      "collection": "fde",
+      "order": 100,
+      "replacements": {}
+    },
+    {
+      "id": "fde-05-four-translation-steps-craft",
+      "source": "fde/05-four-translation-steps-craft.png",
+      "destination": "fde/05-four-translation-steps-craft.png",
+      "title": "Four translation steps craft",
+      "collection": "fde",
+      "order": 110,
+      "replacements": {}
+    },
+    {
+      "id": "fde-06-bento-whole-frame-craft",
+      "source": "fde/06-bento-whole-frame-craft.png",
+      "destination": "fde/06-bento-whole-frame-craft.png",
+      "title": "Bento whole frame craft",
+      "collection": "fde",
+      "order": 120,
       "replacements": {}
     }
   ]
