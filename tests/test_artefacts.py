@@ -514,6 +514,30 @@ class ManifestProposalTests(unittest.TestCase):
 
         self.assertEqual(proposal.warnings, {})
 
+    def test_unminified_reference_maps_to_the_vendored_minified_build(self):
+        source_root = self.make_source()
+        (source_root / "Charts").mkdir()
+        (source_root / "Charts" / "Plot.html").write_text(
+            '<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/'
+            'chart.umd.js"></script>\n',
+            encoding="utf-8",
+        )
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()),
+            "Charts/Plot.html",
+            source_root=source_root,
+        )
+
+        self.assertEqual(
+            proposal.entries[0].replacements,
+            {
+                "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js":
+                    "../../vendor/chart.umd.min.js"
+            },
+        )
+        self.assertEqual(proposal.warnings, {})
+
     def test_html_without_vendored_references_gets_no_replacements(self):
         source_root = self.make_source()
         (source_root / "Charts").mkdir()
@@ -627,7 +651,8 @@ class DesiredTreeTests(unittest.TestCase):
         )
 
         with self.assertRaisesRegex(
-            artefacts_cli.TransformationError, "forbidden cdnjs reference"
+            artefacts_cli.TransformationError,
+            "forbidden cdnjs reference remains in .*: https://cdnjs.cloudflare.com/chart.js",
         ):
             artefacts_cli.build_desired_files(manifest, root)
 

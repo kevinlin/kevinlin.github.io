@@ -504,6 +504,17 @@ def _sections_by_media(manifest: Manifest) -> dict[bool, str]:
     return observed
 
 
+def _vendor_key(name: str) -> str:
+    """File name with the `.min` build marker dropped.
+
+    A page can load `chart.umd.js` while the repository vendors
+    `chart.umd.min.js`. Same library, same API, different build, so the vendored
+    copy is the substitute the user would pick by hand; an exact name match
+    misses it and leaves the entry to fail later in `transform_html`.
+    """
+    return name.replace(".min.", ".", 1)
+
+
 def _vendor_replacements(
     vendor_by_name: dict[str, PurePosixPath],
     source_path: Path,
@@ -525,7 +536,7 @@ def _vendor_replacements(
     prefix = "../" * len(destination.parent.parts)
     replacements: dict[str, str] = {}
     for url in CDNJS_REFERENCE.findall(text):
-        vendor = vendor_by_name.get(url.rsplit("/", 1)[-1])
+        vendor = vendor_by_name.get(_vendor_key(url.rsplit("/", 1)[-1]))
         if vendor is not None:
             replacements[url] = prefix + vendor.as_posix()
     for old, new in replacements.items():
@@ -549,7 +560,7 @@ def propose_manifest_additions(
     order_in_collection = _max_orders(manifest.entries, "collection")
     taken_ids = {entry.id for entry in manifest.entries}
     collection_ids = {collection.id for collection in manifest.collections}
-    vendor_by_name = {path.name: path for path in manifest.protected_files}
+    vendor_by_name = {_vendor_key(path.name): path for path in manifest.protected_files}
     sections_by_media = _sections_by_media(manifest)
 
     grouped: dict[str, list[PurePosixPath]] = {}
@@ -688,7 +699,10 @@ def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
         text = text.replace(old, new)
     text = re.sub(r"[ \t]+(?=\r?$)", "", text, flags=re.MULTILINE)
     if has_cdnjs_reference(text):
-        raise TransformationError(f"forbidden cdnjs reference remains in {entry.id}")
+        remaining = ", ".join(dict.fromkeys(CDNJS_REFERENCE.findall(text))) or CDNJS_HOST
+        raise TransformationError(
+            f"forbidden cdnjs reference remains in {entry.id}: {remaining}"
+        )
     if text and not text.endswith(("\n", "\r")):
         text += "\n"
     return text.encode("utf-8")
