@@ -46,6 +46,8 @@ python3 scripts/artefacts.py publish
 - an explicit order;
 - optional exact HTML replacements for local runtime dependencies.
 
+Order values are hand-edited, so a merged or pasted block collides. `plan` renumbers the affected collection or section to 10, 20, 30 … rather than aborting. The new sequence is the one the group already renders in: declared order first, manifest position as the tie-break, so a pasted duplicate lands beside the item it was copied from. A group whose orders already read unambiguously keeps its numbers and its gaps. Every rewrite is listed under `Renumbered order` and reaches the file through the normal `manifest.json` change, so confirmation still gates it.
+
 Example:
 
 ```json

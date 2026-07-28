@@ -163,7 +163,83 @@ class ManifestTests(unittest.TestCase):
 
         self.assert_manifest_error(payload, "must keep source extension")
 
-    def test_rejects_duplicate_collection_order(self):
+    def test_accepts_duplicate_orders(self):
+        payload = valid_payload()
+        duplicate = second_entry()
+        duplicate["order"] = 10
+        payload["entries"].append(duplicate)
+
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+
+        self.assertEqual([entry.order for entry in manifest.entries], [10, 10])
+
+
+class NormalizeOrdersTests(unittest.TestCase):
+    def manifest_from(self, payload: dict):
+        manifest = artefacts_cli.manifest_from_dict(payload)
+        artefacts_cli.validate_manifest(manifest)
+        return manifest
+
+    def test_renumbers_duplicate_entry_orders_beside_their_twin(self):
+        payload = valid_payload()
+        payload["entries"][0]["order"] = 40
+        first = second_entry()
+        first["order"] = 10
+        second = second_entry()
+        second["id"] = "latency"
+        second["source"] = "Charts/Latency.png"
+        second["destination"] = "charts/latency.png"
+        second["order"] = 10
+        payload["entries"].extend([first, second])
+
+        normalized = artefacts_cli.normalize_orders(self.manifest_from(payload))
+
+        self.assertEqual(
+            [(entry.id, entry.order) for entry in normalized.entries],
+            [("cost", 30), ("tokens", 10), ("latency", 20)],
+        )
+
+    def test_leaves_unambiguous_orders_and_their_gaps_alone(self):
+        payload = valid_payload()
+        payload["entries"][0]["order"] = 10
+        gapped = second_entry()
+        gapped["order"] = 50
+        payload["entries"].append(gapped)
+
+        normalized = artefacts_cli.normalize_orders(self.manifest_from(payload))
+
+        self.assertEqual([entry.order for entry in normalized.entries], [10, 50])
+
+    def test_renumbers_only_the_collection_that_collides(self):
+        payload = valid_payload()
+        payload["collections"].append(
+            {
+                "id": "images",
+                "title": "Images",
+                "description": "Image files.",
+                "section": "Analysis",
+                "section_order": 10,
+                "order": 40,
+            }
+        )
+        other = second_entry()
+        other["collection"] = "images"
+        other["order"] = 70
+        colliding = second_entry()
+        colliding["id"] = "latency"
+        colliding["source"] = "Charts/Latency.png"
+        colliding["destination"] = "charts/latency.png"
+        colliding["order"] = 10
+        payload["entries"].extend([other, colliding])
+
+        normalized = artefacts_cli.normalize_orders(self.manifest_from(payload))
+
+        self.assertEqual(
+            [(entry.id, entry.order) for entry in normalized.entries],
+            [("cost", 10), ("tokens", 70), ("latency", 20)],
+        )
+
+    def test_renumbers_duplicate_collection_orders_within_a_section(self):
         payload = valid_payload()
         payload["collections"].append(
             {
@@ -176,15 +252,12 @@ class ManifestTests(unittest.TestCase):
             }
         )
 
-        self.assert_manifest_error(payload, "duplicate collection order")
+        normalized = artefacts_cli.normalize_orders(self.manifest_from(payload))
 
-    def test_rejects_duplicate_entry_order_within_collection(self):
-        payload = valid_payload()
-        duplicate = second_entry()
-        duplicate["order"] = 10
-        payload["entries"].append(duplicate)
-
-        self.assert_manifest_error(payload, "duplicate entry order")
+        self.assertEqual(
+            [(collection.id, collection.order) for collection in normalized.collections],
+            [("charts", 10), ("images", 20)],
+        )
 
 
 class SourceInventoryTests(unittest.TestCase):
@@ -758,6 +831,24 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
                 ("update", "manifest.json"),
             },
         )
+
+    def test_plan_renumbers_duplicate_orders_and_reports_them(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"][1]["order"] = 10
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        self.assertEqual(
+            [(entry.id, entry.order) for entry in plan.next_manifest.entries],
+            [("existing", 10), ("new", 20)],
+        )
+        written = json.loads(plan.desired_files[PurePosixPath("manifest.json")])
+        self.assertEqual([entry["order"] for entry in written["entries"]], [10, 20])
+        self.assertIn("  ~ new: 10 -> 20", artefacts_cli.format_plan(plan))
 
     def test_plan_calculation_does_not_mutate_repository(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()

@@ -296,17 +296,6 @@ def validate_manifest(manifest: Manifest) -> None:
         [entry.destination for entry in manifest.entries], "duplicate destination"
     )
     _require_unique(list(manifest.protected_files), "duplicate protected file")
-    _require_unique(
-        [
-            (collection.section_order, collection.order)
-            for collection in manifest.collections
-        ],
-        "duplicate collection order",
-    )
-    _require_unique(
-        [(entry.collection, entry.order) for entry in manifest.entries],
-        "duplicate entry order",
-    )
 
     collection_ids = {collection.id for collection in manifest.collections}
     reserved_destinations = {PurePosixPath("index.html"), PurePosixPath("manifest.json")}
@@ -339,6 +328,48 @@ def validate_manifest(manifest: Manifest) -> None:
     for path in manifest.protected_files:
         if not all(PROTECTED_COMPONENT.fullmatch(component) for component in path.parts):
             raise ManifestError("protected file must use a lowercase safe path")
+
+
+def _renumber_colliding_orders(items: tuple[Any, ...], group_of) -> tuple[Any, ...]:
+    """Reassign 10, 20, 30 … inside any group whose declared orders collide.
+
+    Order is hand-edited manifest content, so a group that already reads
+    unambiguously keeps its numbers and its gaps. A group with a collision is
+    renumbered in the sequence it already renders in — declared order first,
+    manifest position as the tie-break — so a pasted duplicate lands beside the
+    item it was copied from rather than at the end of the group.
+    """
+    groups: dict[Any, list[int]] = {}
+    for index, item in enumerate(items):
+        groups.setdefault(group_of(item), []).append(index)
+    renumbered = list(items)
+    for indices in groups.values():
+        orders = [items[index].order for index in indices]
+        if len(set(orders)) == len(orders):
+            continue
+        ordered = sorted(indices, key=lambda index: (items[index].order, index))
+        for position, index in enumerate(ordered, start=1):
+            renumbered[index] = replace(items[index], order=position * 10)
+    return tuple(renumbered)
+
+
+def normalize_orders(manifest: Manifest) -> Manifest:
+    """Give the catalogue one definite sequence when declared orders collide.
+
+    Duplicate order values used to abort every command, leaving the user to
+    hand-number a merged or pasted block against a schema the script already
+    knows. Ordering is bookkeeping: `plan` resolves it and shows the rewritten
+    manifest as a normal change.
+    """
+    return replace(
+        manifest,
+        collections=_renumber_colliding_orders(
+            manifest.collections, lambda collection: collection.section
+        ),
+        entries=_renumber_colliding_orders(
+            manifest.entries, lambda entry: entry.collection
+        ),
+    )
 
 
 def load_manifest(path: Path) -> Manifest:
@@ -841,7 +872,8 @@ def create_sync_plan(
     artefacts_root: Path,
     head_manifest: bytes | None,
 ) -> SyncPlan:
-    manifest = load_manifest(manifest_path)
+    declared = load_manifest(manifest_path)
+    manifest = normalize_orders(declared)
     inventory = scan_source(source_root)
     reconciliation = reconcile_inventory(manifest, inventory)
     next_manifest = reconciliation.next_manifest
@@ -899,13 +931,32 @@ def create_sync_plan(
             changes.append(Change("delete", destination))
 
     return SyncPlan(
-        manifest=manifest,
+        manifest=declared,
         next_manifest=next_manifest,
         desired_files=desired_files,
         changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
         unchanged=tuple(sorted(unchanged, key=str)),
         excluded_suffixes=reconciliation.excluded_suffixes,
     )
+
+
+def _renumbered_orders(plan: SyncPlan) -> list[str]:
+    """Order values `normalize_orders` rewrote, so the rewrite is never silent."""
+    declared_collections = {
+        collection.id: collection.order for collection in plan.manifest.collections
+    }
+    declared_entries = {entry.id: entry.order for entry in plan.manifest.entries}
+    labels = [
+        f"{collection.id}: {declared_collections[collection.id]} -> {collection.order}"
+        for collection in plan.next_manifest.collections
+        if declared_collections.get(collection.id, collection.order) != collection.order
+    ]
+    labels.extend(
+        f"{entry.id}: {declared_entries[entry.id]} -> {entry.order}"
+        for entry in plan.next_manifest.entries
+        if declared_entries.get(entry.id, entry.order) != entry.order
+    )
+    return labels
 
 
 def format_plan(plan: SyncPlan) -> str:
@@ -921,6 +972,10 @@ def format_plan(plan: SyncPlan) -> str:
         lines.extend(
             f"  {symbols[kind]} {change.destination.as_posix()}" for change in changes
         )
+    renumbered = _renumbered_orders(plan)
+    if renumbered:
+        lines.append(f"Renumbered order ({len(renumbered)})")
+        lines.extend(f"  ~ {label}" for label in renumbered)
     lines.append(f"Unchanged ({len(plan.unchanged)})")
     excluded = ", ".join(plan.excluded_suffixes) if plan.excluded_suffixes else "none"
     lines.append(f"Excluded source types: {excluded}")
