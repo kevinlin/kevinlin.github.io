@@ -1023,7 +1023,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn(("add", "charts/renamed.png"), changes)
         self.assertIn(("delete", "charts/existing.png"), changes)
 
-        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+        artefacts_cli.apply_plan(plan, repo / "artefacts")
 
         self.assertFalse((repo / "artefacts/charts/existing.png").exists())
         self.assertEqual((repo / "artefacts/charts/renamed.png").read_bytes(), b"updated")
@@ -1057,7 +1057,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
         self.assertNotIn(("delete", "charts/existing.png"), changes)
 
-        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+        artefacts_cli.apply_plan(plan, repo / "artefacts")
 
         self.assertEqual((repo / "artefacts/charts/existing.png").read_bytes(), b"old")
 
@@ -1090,7 +1090,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
             manifest_path, source, repo / "artefacts", head_manifest
         )
 
-        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+        artefacts_cli.apply_plan(plan, repo / "artefacts")
 
         self.assertEqual((repo / "artefacts/charts/existing.png").read_bytes(), b"updated")
         self.assertEqual((repo / "artefacts/charts/new.png").read_bytes(), b"new")
@@ -1119,7 +1119,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         }
         self.assertEqual(orphans, {"notes.txt"})
 
-        artefacts_cli.apply_plan(plan, manifest_path, repo / "artefacts")
+        artefacts_cli.apply_plan(plan, repo / "artefacts")
 
         self.assertEqual((repo / "artefacts/.DS_Store").read_bytes(), b"metadata")
         self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
@@ -1139,7 +1139,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn(("orphan", "renamed/existing.png"), changes)
         self.assertIn(("orphan", "renamed/removed.png"), changes)
 
-        artefacts_cli.apply_plan(plan, manifest_path, artefacts_root)
+        artefacts_cli.apply_plan(plan, artefacts_root)
 
         self.assertFalse(renamed.exists())
         self.assertEqual((artefacts_root / "charts/existing.png").read_bytes(), b"updated")
@@ -1173,7 +1173,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
             manifest_path, source, artefacts_root, head_manifest
         )
 
-        artefacts_cli.apply_plan(plan, manifest_path, artefacts_root)
+        artefacts_cli.apply_plan(plan, artefacts_root)
         report = artefacts_cli.validate_repository(repo, None)
 
         self.assertEqual(report.entry_count, 2)
@@ -1198,7 +1198,6 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
 
         applied = artefacts_cli.confirm_and_apply(
             plan,
-            manifest_path,
             repo / "artefacts",
             lambda _: "no",
         )

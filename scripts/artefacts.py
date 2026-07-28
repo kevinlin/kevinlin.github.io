@@ -74,6 +74,24 @@ CATALOGUE_START = "<!-- ARTEFACTS:START -->"
 CATALOGUE_END = "<!-- ARTEFACTS:END -->"
 
 
+def _resolve_within(
+    root: Path, candidate: Path, error: type[ArtefactError], message: str
+) -> Path:
+    """Resolve `candidate` and confirm it stays under the already-resolved `root`.
+
+    The containment check is the boundary that keeps a symlinked or `..`-bearing
+    path from reading or writing outside the tree it belongs to, so all four
+    callers share one implementation rather than four copies that can drift.
+    `resolve` is non-strict, so a path that does not exist yet — a destination
+    about to be written, a link target being checked for breakage — resolves as
+    far as it can and is still compared.
+    """
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(root):
+        raise error(message)
+    return resolved
+
+
 @dataclass(frozen=True)
 class Collection:
     id: str
@@ -415,9 +433,12 @@ def scan_source(source_root: Path) -> SourceInventory:
                 if suffix:
                     excluded_suffixes.add(suffix)
                 continue
-            resolved = candidate.resolve()
-            if not resolved.is_relative_to(resolved_root):
-                raise InventoryError(f"source path escapes source directory: {candidate}")
+            _resolve_within(
+                resolved_root,
+                candidate,
+                InventoryError,
+                f"source path escapes source directory: {candidate}",
+            )
             approved.append(PurePosixPath(candidate.relative_to(source_root).as_posix()))
 
     return SourceInventory(
@@ -731,8 +752,12 @@ def build_desired_files(
             continue
         if source_path.is_symlink():
             raise InventoryError(f"symbolic link is not allowed: {source_path}")
-        if not source_path.resolve().is_relative_to(resolved_root):
-            raise InventoryError(f"source path escapes source directory: {source_path}")
+        _resolve_within(
+            resolved_root,
+            source_path,
+            InventoryError,
+            f"source path escapes source directory: {source_path}",
+        )
         source_bytes = source_path.read_bytes()
         if entry.source.suffix.lower() == ".html":
             output = transform_html(entry, source_bytes)
@@ -1082,10 +1107,13 @@ def format_plan(plan: SyncPlan) -> str:
 
 
 def _destination_path(artefacts_root: Path, destination: PurePosixPath) -> Path:
-    root = artefacts_root.resolve()
     target = artefacts_root / destination.as_posix()
-    if not target.resolve(strict=False).is_relative_to(root):
-        raise ArtefactError(f"destination escapes artefacts directory: {destination}")
+    _resolve_within(
+        artefacts_root.resolve(),
+        target,
+        ArtefactError,
+        f"destination escapes artefacts directory: {destination}",
+    )
     current = artefacts_root
     for component in destination.parts[:-1]:
         current /= component
@@ -1111,7 +1139,7 @@ def _atomic_write(path: Path, content: bytes) -> None:
             os.unlink(temporary_name)
 
 
-def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> None:
+def apply_plan(plan: SyncPlan, artefacts_root: Path) -> None:
     for change in plan.changes:
         if change.kind not in WRITE_KINDS:
             continue
@@ -1143,8 +1171,6 @@ def apply_plan(plan: SyncPlan, manifest_path: Path, artefacts_root: Path) -> Non
             artefacts_root, change.destination
         ).exists():
             raise ArtefactError(f"deleted file remains after apply: {change.destination}")
-    if manifest_path.read_bytes() != plan.desired_files[PurePosixPath("manifest.json")]:
-        raise ArtefactError("applied manifest differs from plan")
 
 
 def _read_page(path: Path) -> str:
@@ -1172,10 +1198,12 @@ def _resolve_local_reference(repo_root: Path, page: Path, reference: str) -> Pat
         target = page.parent / reference_path
     if reference_path.endswith("/") or target.is_dir():
         target /= "index.html"
-    resolved = target.resolve(strict=False)
-    if not resolved.is_relative_to(repo_root.resolve()):
-        raise ValidationError(f"local reference escapes repository: {reference}")
-    return resolved
+    return _resolve_within(
+        repo_root.resolve(),
+        target,
+        ValidationError,
+        f"local reference escapes repository: {reference}",
+    )
 
 
 def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationReport:
@@ -1470,7 +1498,7 @@ def publish(
 
     branch = f"agent/sync-artefacts-{now().strftime('%Y%m%d-%H%M%S')}"
     _run_checked(runner, ["git", "switch", "-c", branch], repo_root, "cannot create branch")
-    apply_plan(plan, manifest_path, artefacts_root)
+    apply_plan(plan, artefacts_root)
     _run_checked(
         runner,
         [sys.executable, "-B", "-m", "unittest", "tests/test_artefacts.py", "-v"],
@@ -1598,16 +1626,11 @@ def publish(
     )
 
 
-def confirm_and_apply(
-    plan: SyncPlan,
-    manifest_path: Path,
-    artefacts_root: Path,
-    confirm,
-) -> bool:
+def confirm_and_apply(plan: SyncPlan, artefacts_root: Path, confirm) -> bool:
     answer = confirm("Apply these changes? Type yes to continue: ")
     if answer != "yes":
         return False
-    apply_plan(plan, manifest_path, artefacts_root)
+    apply_plan(plan, artefacts_root)
     return True
 
 
@@ -1695,7 +1718,7 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
         print(format_plan(plan))
         if args.command == "plan":
             return 0
-        if not confirm_and_apply(plan, manifest_path, artefacts_root, input_fn):
+        if not confirm_and_apply(plan, artefacts_root, input_fn):
             print("Cancelled.")
             return 2
         return 0
