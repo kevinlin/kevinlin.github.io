@@ -1578,6 +1578,10 @@ class PublishingTests(unittest.TestCase):
             )
         )
         self.assertTrue(runner.called(["gh", "pr", "merge"]))
+        merges = [
+            command for command in runner.commands if command[:3] == ["gh", "pr", "merge"]
+        ]
+        self.assertEqual([command[-1] for command in merges], ["--merge"])
 
 
 if __name__ == "__main__":

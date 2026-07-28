@@ -1460,7 +1460,7 @@ def publish(
     _require_successful_checks(repo_root, pull_request_url, runner, sleeper)
     _run_checked(
         runner,
-        ["gh", "pr", "merge", pull_request_url, "--squash"],
+        ["gh", "pr", "merge", pull_request_url, "--merge"],
         repo_root,
         "cannot merge pull request",
     )
