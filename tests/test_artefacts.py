@@ -269,6 +269,145 @@ class SourceInventoryTests(unittest.TestCase):
         self.assertEqual(result.next_manifest.entries, ())
 
 
+class ManifestProposalTests(unittest.TestCase):
+    def make_source(self) -> Path:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        return Path(directory.name)
+
+    def propose(self, manifest, *sources: str, source_root: Path | None = None):
+        return artefacts_cli.propose_manifest_additions(
+            manifest,
+            tuple(PurePosixPath(source) for source in sources),
+            source_root or self.make_source(),
+        )
+
+    def test_collection_is_matched_through_an_existing_entry_source_folder(self):
+        payload = valid_payload()
+        payload["collections"][0]["id"] = "renamed-charts"
+        payload["entries"][0]["collection"] = "renamed-charts"
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload), "Charts/Extra.png"
+        )
+
+        self.assertEqual(proposal.collections, ())
+        self.assertEqual(proposal.entries[0].collection, "renamed-charts")
+
+    def test_new_image_collection_reuses_the_section_order(self):
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()), "Travel/Map.png"
+        )
+
+        collection = proposal.collections[0]
+        self.assertEqual(collection.id, "travel")
+        self.assertEqual(collection.title, "Travel")
+        self.assertEqual(collection.section, artefacts_cli.IMAGE_SECTION)
+        self.assertEqual(collection.description, artefacts_cli.PLACEHOLDER_DESCRIPTION)
+        self.assertEqual(collection.section_order, 20)
+        self.assertEqual(collection.order, 10)
+
+    def test_new_html_collection_lands_in_the_presentation_section(self):
+        payload = valid_payload()
+        payload["collections"][0]["section"] = artefacts_cli.PRESENTATION_SECTION
+        source_root = self.make_source()
+        (source_root / "Timeline").mkdir()
+        (source_root / "Timeline" / "Story.html").write_text("<p>x</p>", encoding="utf-8")
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload),
+            "Timeline/Story.html",
+            "Timeline/Cover.png",
+            source_root=source_root,
+        )
+
+        collection = proposal.collections[0]
+        self.assertEqual(collection.section, artefacts_cli.PRESENTATION_SECTION)
+        self.assertEqual(collection.section_order, 10)
+        self.assertEqual(collection.order, 20)
+
+    def test_entry_id_collision_is_suffixed(self):
+        payload = valid_payload()
+        payload["entries"][0]["id"] = "charts-extra"
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload), "Charts/Extra.png"
+        )
+
+        self.assertEqual(proposal.entries[0].id, "charts-extra-2")
+
+    def test_titles_drop_ordering_prefixes_and_separators(self):
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()),
+            "Charts/01-iceberg-bright_dark-line.png",
+        )
+
+        self.assertEqual(proposal.entries[0].title, "Iceberg bright dark line")
+
+    def test_orders_continue_from_the_collection_maximum(self):
+        payload = valid_payload()
+        payload["entries"].append(second_entry())
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload),
+            "Charts/Beta.png",
+            "Charts/Alpha.png",
+        )
+
+        self.assertEqual(
+            [(entry.source.name, entry.order) for entry in proposal.entries],
+            [("Alpha.png", 30), ("Beta.png", 40)],
+        )
+
+    def test_vendored_cdnjs_references_are_prefilled(self):
+        source_root = self.make_source()
+        (source_root / "Charts").mkdir()
+        (source_root / "Charts" / "Plot.html").write_text(
+            '<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/'
+            'chart.umd.min.js"></script>\n'
+            '<script src="https://cdnjs.cloudflare.com/ajax/libs/other/1.0/other.js"></script>\n',
+            encoding="utf-8",
+        )
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()),
+            "Charts/Plot.html",
+            source_root=source_root,
+        )
+
+        self.assertEqual(
+            proposal.entries[0].replacements,
+            {
+                "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js":
+                    "../../vendor/chart.umd.min.js"
+            },
+        )
+
+    def test_html_without_vendored_references_gets_no_replacements(self):
+        source_root = self.make_source()
+        (source_root / "Charts").mkdir()
+        (source_root / "Charts" / "Plain.html").write_text("<p>x</p>", encoding="utf-8")
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()),
+            "Charts/Plain.html",
+            source_root=source_root,
+        )
+
+        self.assertEqual(proposal.entries[0].replacements, {})
+
+    def test_merged_proposal_is_a_valid_manifest(self):
+        manifest = artefacts_cli.manifest_from_dict(valid_payload())
+        proposal = self.propose(manifest, "Travel/Map.png")
+
+        merged = artefacts_cli.merge_manifest_proposal(manifest, proposal)
+
+        self.assertEqual(
+            [entry.destination.as_posix() for entry in merged.entries],
+            ["charts/cost.png", "travel/map.png"],
+        )
+
+
 class DesiredTreeTests(unittest.TestCase):
     def make_source_and_manifest(
         self,
@@ -472,7 +611,9 @@ class CatalogueTests(unittest.TestCase):
             artefacts_cli.replace_generated_catalogue(document, "new")
 
 
-class ApplyTests(unittest.TestCase):
+class ArtefactFixture:
+    """Temporary repository and source roots shared by the apply-side tests."""
+
     def make_fixture(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -539,6 +680,8 @@ class ApplyTests(unittest.TestCase):
             if path.is_file()
         }
 
+
+class ApplyTests(ArtefactFixture, unittest.TestCase):
     def test_create_sync_plan_classifies_generated_and_source_changes(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
 
@@ -693,6 +836,67 @@ class ApplyTests(unittest.TestCase):
         self.assertIn("Update (3)", output)
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
         self.assertIn("Excluded source types: .md", output)
+
+
+class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):
+    def make_fixture_with_unlisted(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        (source / "Travel").mkdir()
+        (source / "Travel" / "Map.png").write_bytes(b"map")
+        return repo, source, manifest_path
+
+    def run_command(self, command: str, repo: Path, source: Path, answer: str = "yes"):
+        return artefacts_cli.main(
+            [command, "--repo", str(repo), "--source", str(source)],
+            input_fn=lambda _: answer,
+        )
+
+    def test_plan_reports_the_proposal_without_writing(self):
+        repo, source, _ = self.make_fixture_with_unlisted()
+        before = self.snapshot(repo)
+
+        code = self.run_command("plan", repo, source)
+
+        self.assertEqual(code, 3)
+        self.assertEqual(self.snapshot(repo), before)
+
+    def test_apply_writes_only_the_manifest_and_stops(self):
+        repo, source, manifest_path = self.make_fixture_with_unlisted()
+        before = self.snapshot(repo)
+
+        code = self.run_command("apply", repo, source)
+
+        self.assertEqual(code, 3)
+        after = self.snapshot(repo)
+        self.assertEqual(
+            {path for path, content in after.items() if before.get(path) != content},
+            {"artefacts/manifest.json"},
+        )
+        manifest = artefacts_cli.load_manifest(manifest_path)
+        self.assertIn("travel", [collection.id for collection in manifest.collections])
+        self.assertIn(
+            PurePosixPath("travel/map.png"),
+            [entry.destination for entry in manifest.entries],
+        )
+
+    def test_declining_the_proposal_writes_nothing(self):
+        repo, source, _ = self.make_fixture_with_unlisted()
+        before = self.snapshot(repo)
+
+        code = self.run_command("apply", repo, source, answer="no")
+
+        self.assertEqual(code, 2)
+        self.assertEqual(self.snapshot(repo), before)
+
+    def test_second_apply_run_publishes_the_proposed_entry(self):
+        repo, source, _ = self.make_fixture_with_unlisted()
+        self.run_command("apply", repo, source)
+
+        code = self.run_command("apply", repo, source)
+
+        self.assertEqual(code, 0)
+        self.assertEqual((repo / "artefacts/travel/map.png").read_bytes(), b"map")
+        self.assertIn("travel/map.png", (repo / "artefacts/index.html").read_text())
 
 
 class RepositoryValidationTests(unittest.TestCase):

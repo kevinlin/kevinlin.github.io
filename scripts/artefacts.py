@@ -36,6 +36,12 @@ class InventoryError(ArtefactError):
     pass
 
 
+class UnlistedSourceError(InventoryError):
+    def __init__(self, message: str, unlisted: tuple[PurePosixPath, ...]) -> None:
+        super().__init__(message)
+        self.unlisted = unlisted
+
+
 class TransformationError(ArtefactError):
     pass
 
@@ -89,6 +95,12 @@ class Manifest:
 class SourceInventory:
     approved: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ManifestProposal:
+    collections: tuple[Collection, ...]
+    entries: tuple[Entry, ...]
 
 
 @dataclass(frozen=True)
@@ -384,6 +396,174 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
     return PurePosixPath(*parent_parts, f"{stem}{suffix}")
 
 
+PRESENTATION_SECTION = "Presentations and analysis"
+IMAGE_SECTION = "Image collections"
+PLACEHOLDER_DESCRIPTION = "TODO: describe this collection."
+CDNJS_REFERENCE = re.compile(r"https://cdnjs\.cloudflare\.com/[^\s\"'<>)]+")
+
+
+def _derive_title(stem: str) -> str:
+    text = re.sub(r"^\d+[-_ ]+", "", stem)
+    text = re.sub(r"[-_]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        raise InventoryError(f"cannot derive a title from: {stem}")
+    return text[0].upper() + text[1:]
+
+
+def _derive_entry_id(destination: PurePosixPath, taken: set[str]) -> str:
+    if destination.name == "index.html":
+        parts = destination.parent.parts
+    else:
+        parts = (*destination.parent.parts, destination.stem)
+    base = _slug("-".join(parts))
+    candidate = base
+    suffix = 1
+    while candidate in taken:
+        suffix += 1
+        candidate = f"{base}-{suffix}"
+    return candidate
+
+
+def _source_group(source: PurePosixPath) -> str:
+    return source.parts[0] if len(source.parts) > 1 else ""
+
+
+def _vendor_replacements(
+    manifest: Manifest, source_path: Path, destination: PurePosixPath
+) -> dict[str, str]:
+    try:
+        text = source_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise InventoryError(f"cannot read HTML source {source_path}: {error}") from error
+    prefix = "../" * len(destination.parent.parts)
+    vendor_by_name = {path.name: path for path in manifest.protected_files}
+    replacements: dict[str, str] = {}
+    for url in CDNJS_REFERENCE.findall(text):
+        vendor = vendor_by_name.get(url.rsplit("/", 1)[-1])
+        if vendor is not None:
+            replacements[url] = prefix + vendor.as_posix()
+    return replacements
+
+
+def propose_manifest_additions(
+    manifest: Manifest,
+    unlisted: tuple[PurePosixPath, ...],
+    source_root: Path,
+) -> ManifestProposal:
+    """Derive schema-valid manifest additions for approved sources with no entry."""
+    collection_by_group = {
+        _source_group(entry.source): entry.collection for entry in manifest.entries
+    }
+    section_orders = {
+        collection.section: collection.section_order for collection in manifest.collections
+    }
+    next_section_order = max(section_orders.values(), default=0) + 10
+    order_in_section: dict[str, int] = {}
+    for collection in manifest.collections:
+        order_in_section[collection.section] = max(
+            order_in_section.get(collection.section, 0), collection.order
+        )
+    order_in_collection: dict[str, int] = {}
+    for entry in manifest.entries:
+        order_in_collection[entry.collection] = max(
+            order_in_collection.get(entry.collection, 0), entry.order
+        )
+    taken_ids = {entry.id for entry in manifest.entries}
+    collection_ids = {collection.id for collection in manifest.collections}
+
+    grouped: dict[str, list[PurePosixPath]] = {}
+    for source in sorted(unlisted, key=str):
+        grouped.setdefault(_source_group(source), []).append(source)
+
+    collections: list[Collection] = []
+    entries: list[Entry] = []
+    for group, sources in grouped.items():
+        collection_id = collection_by_group.get(group)
+        if collection_id is None:
+            collection_id = _derive_entry_id(
+                PurePosixPath(group or sources[0].stem), collection_ids
+            )
+            collection_ids.add(collection_id)
+            section = (
+                PRESENTATION_SECTION
+                if any(source.suffix.lower() == ".html" for source in sources)
+                else IMAGE_SECTION
+            )
+            if section not in section_orders:
+                section_orders[section] = next_section_order
+                next_section_order += 10
+            order_in_section[section] = order_in_section.get(section, 0) + 10
+            collections.append(
+                Collection(
+                    id=collection_id,
+                    title=_derive_title(group or sources[0].stem).title(),
+                    description=PLACEHOLDER_DESCRIPTION,
+                    section=section,
+                    section_order=section_orders[section],
+                    order=order_in_section[section],
+                )
+            )
+            collection_by_group[group] = collection_id
+
+        for source in sources:
+            destination = suggest_destination(source)
+            entry_id = _derive_entry_id(destination, taken_ids)
+            taken_ids.add(entry_id)
+            order_in_collection[collection_id] = (
+                order_in_collection.get(collection_id, 0) + 10
+            )
+            if source.suffix.lower() == ".html":
+                replacements = _vendor_replacements(
+                    manifest, source_root / source.as_posix(), destination
+                )
+            else:
+                replacements = {}
+            entries.append(
+                Entry(
+                    id=entry_id,
+                    source=source,
+                    destination=destination,
+                    title=_derive_title(source.stem),
+                    collection=collection_id,
+                    order=order_in_collection[collection_id],
+                    replacements=replacements,
+                )
+            )
+
+    return ManifestProposal(collections=tuple(collections), entries=tuple(entries))
+
+
+def merge_manifest_proposal(manifest: Manifest, proposal: ManifestProposal) -> Manifest:
+    merged = replace(
+        manifest,
+        collections=(*manifest.collections, *proposal.collections),
+        entries=(*manifest.entries, *proposal.entries),
+    )
+    validate_manifest(merged)
+    return merged
+
+
+def format_proposal(proposal: ManifestProposal) -> str:
+    lines = [f"Proposed collections ({len(proposal.collections)})"]
+    for collection in proposal.collections:
+        lines.append(
+            f"  + {collection.id}: {collection.title} "
+            f"[{collection.section} {collection.section_order}/{collection.order}]"
+        )
+        lines.append(f"      description: {collection.description}")
+    lines.append(f"Proposed entries ({len(proposal.entries)})")
+    for entry in proposal.entries:
+        lines.append(f"  + {entry.id}")
+        lines.append(f"      source:      {entry.source.as_posix()}")
+        lines.append(f"      destination: {entry.destination.as_posix()}")
+        lines.append(f"      title:       {entry.title}")
+        lines.append(f"      collection:  {entry.collection} (order {entry.order})")
+        for old, new in entry.replacements.items():
+            lines.append(f"      replace:     {old} -> {new}")
+    return "\n".join(lines)
+
+
 def reconcile_inventory(
     manifest: Manifest, inventory: SourceInventory
 ) -> SourceReconciliation:
@@ -395,7 +575,9 @@ def reconcile_inventory(
             f"  {source.as_posix()} -> {suggest_destination(source).as_posix()}"
             for source in unlisted
         )
-        raise InventoryError(f"unlisted approved source files:\n{suggestions}")
+        raise UnlistedSourceError(
+            f"unlisted approved source files:\n{suggestions}", tuple(unlisted)
+        )
     missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
     next_manifest = replace(
         manifest,
@@ -1218,6 +1400,32 @@ def confirm_and_apply(
     return True
 
 
+def handle_unlisted_sources(
+    error: UnlistedSourceError,
+    manifest_path: Path,
+    source_root: Path,
+    write: bool,
+    confirm: Callable[[str], str],
+) -> int:
+    """Print derived manifest additions and, for apply and publish, write them."""
+    manifest = load_manifest(manifest_path)
+    proposal = propose_manifest_additions(manifest, error.unlisted, source_root)
+    print(format_proposal(proposal))
+    if not write:
+        print("Run apply or publish to write these manifest additions.")
+        return 3
+    if confirm("Write these manifest additions? Type yes to continue: ") != "yes":
+        print("Cancelled.")
+        return 2
+    _atomic_write(manifest_path, manifest_to_json(merge_manifest_proposal(manifest, proposal)))
+    load_manifest(manifest_path)
+    print(
+        "Wrote artefacts/manifest.json. Review the derived titles and descriptions, "
+        "then run the command again to publish."
+    )
+    return 3
+
+
 def default_repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -1278,6 +1486,14 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
             print("Cancelled.")
             return 2
         return 0
+    except UnlistedSourceError as error:
+        return handle_unlisted_sources(
+            error,
+            repo_root / "artefacts" / "manifest.json",
+            args.source.expanduser(),
+            args.command in {"apply", "publish"},
+            input_fn,
+        )
     except ArtefactError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1

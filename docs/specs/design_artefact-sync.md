@@ -83,7 +83,7 @@ The command recursively scans the source directory for `.html`, `.png`, `.jpeg`,
 
 The following rules apply:
 
-- Every approved source file must have one manifest entry. An unlisted source blocks publication and prints a suggested entry with a normalized destination.
+- Every approved source file must have one manifest entry. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [design_artefact-manifest-proposal.md](design_artefact-manifest-proposal.md).
 - Every manifest source must exist. A missing source is shown as a deletion and, after confirmation, removes its entry and destination.
 - Destination paths must be unique, relative, lowercase kebab-case, and contained below `artefacts/`.
 - HTML presentations use a directory `index.html`; images retain an approved image extension.
@@ -108,13 +108,13 @@ The generated catalogue must link every manifest entry exactly once. Vendor file
 
 1. Resolve and validate the repository and source roots.
 2. Parse and validate the manifest.
-3. Scan approved source files and detect unlisted or missing entries.
+3. Scan approved source files and detect unlisted or missing entries. Unlisted sources print a manifest proposal and end the run with exit code 3.
 4. Build the complete desired managed tree in a temporary directory.
 5. Apply declared HTML replacements and generate the catalogue region.
 6. Validate paths, hashes, catalogue coverage, and local references.
 7. Print additions, updates, deletions, unchanged files, and excluded file types.
 
-`apply` runs the same plan, asks for confirmation, and then updates only destinations represented by the pre-apply manifest, approved new entries, and the generated catalogue region. Missing managed sources are valid deletion proposals. Unlisted approved source files or an invalid manifest block application.
+`apply` runs the same plan, asks for confirmation, and then updates only destinations represented by the pre-apply manifest, approved new entries, and the generated catalogue region. Missing managed sources are valid deletion proposals. An invalid manifest blocks application. Unlisted approved source files stop the run after `apply` and `publish` have written the confirmed manifest proposal; `plan` prints the proposal and writes nothing.
 
 `validate` checks the committed repository without requiring the local source directory. It validates the manifest schema, published path set, catalogue coverage, allowed extensions, HTML references, forbidden external runtime references, and homepage isolation.
 
