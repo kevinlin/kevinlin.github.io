@@ -234,6 +234,10 @@ Every collection card carries the date of its newest source file, as `<p class="
 
 The date is not manifest content and is not stored. It is derived from the filesystem on every `plan`, `apply`, and `publish`, so a re-downloaded or re-exported source refreshes its card with no manual edit; the refreshed `index.html` shows up as a normal `Update` in the preview. Persisting it in `manifest.json` would add a field that only the script may write and that goes stale the moment a source is replaced out of band.
 
+The date also orders the cards: inside each section the newest card comes first. A section sorts its cards on `order` and then re-sorts them on the date with `reverse=True`, which keeps `order` as the tie-break because Python's sort is stable and does not reverse equal elements. A card with no date sorts as the empty string and lands at the bottom, in its declared order. `order` therefore now decides only same-day cards; it stays in the manifest because the proposal derivation and the renumbering rules still need a definite position per collection, and because it is the only handle on cards whose sources share a date.
+
+Sections themselves keep sorting on `section_order`. A section is a media-type grouping, not a feed, so letting one recent image move the whole `Image collections` heading above `Presentations and analysis` would reshuffle the page on every sync.
+
 An entry whose source is missing contributes no date, so a card whose deletion is pending falls back to its remaining entries, and a collection with no readable source renders exactly as before. `validate` never sees the source directory and therefore does not check the dates; it continues to check only the link set, which the date markup does not touch.
 
 ## Sync Flow
@@ -308,6 +312,7 @@ Manifest proposals:
 Last updated dates:
 
 - A card shows the newest date among its entries, once, and not the older ones.
+- Cards in a section run newest first; undated cards come last, in declared order.
 - No timestamp mapping renders the catalogue with no date markup.
 - `collect_source_timestamps` reads the source mtime and skips an entry whose source is missing.
 

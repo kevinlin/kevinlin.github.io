@@ -775,6 +775,21 @@ def render_catalogue(
                 (collection.section_order, collection.section), []
             ).append(collection)
 
+    # ISO dates sort chronologically, so the card carries its newest source and the
+    # section orders its cards by that string. A collection with no readable source
+    # has no date and falls to the bottom on its declared order.
+    latest_by_collection = {
+        collection.id: max(
+            (
+                (timestamps or {})[entry.id]
+                for entry in entries_by_collection.get(collection.id, ())
+                if entry.id in (timestamps or {})
+            ),
+            default="",
+        )
+        for collection in manifest.collections
+    }
+
     lines: list[str] = []
     for (_, section_title), collections in sorted(sections.items()):
         heading_id = f"{_slug(section_title)}-heading"
@@ -785,7 +800,13 @@ def render_catalogue(
                 '            <div class="card-grid">',
             ]
         )
-        for collection in sorted(collections, key=lambda item: item.order):
+        # Newest card first. Sorting on `order` first and then re-sorting on the date
+        # keeps `order` as the tie-break: Python's sort is stable, and reverse=True
+        # does not reverse equal elements. An undated card sorts as "", so it lands
+        # last.
+        cards = sorted(collections, key=lambda item: item.order)
+        cards.sort(key=lambda item: latest_by_collection[item.id], reverse=True)
+        for collection in cards:
             lines.extend(
                 [
                     '                <article class="card">',
@@ -793,14 +814,8 @@ def render_catalogue(
                     f"                    <p>{html.escape(collection.description)}</p>",
                 ]
             )
-            dates = [
-                (timestamps or {})[entry.id]
-                for entry in entries_by_collection[collection.id]
-                if entry.id in (timestamps or {})
-            ]
-            if dates:
-                # ISO dates sort chronologically, so the card carries its newest source.
-                latest = max(dates)
+            latest = latest_by_collection[collection.id]
+            if latest:
                 lines.append(
                     '                    <p class="card-updated">Updated '
                     f'<time datetime="{latest}">{latest}</time></p>'

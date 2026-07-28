@@ -774,6 +774,56 @@ class CatalogueTests(unittest.TestCase):
         self.assertIn('<time datetime="2026-03-11">2026-03-11</time>', rendered)
         self.assertNotIn("2026-01-05", rendered)
 
+    def sorting_manifest(self):
+        collections = [
+            {
+                "id": identifier,
+                "title": identifier.title(),
+                "description": "Cards.",
+                "section": "Collections",
+                "section_order": 10,
+                "order": order,
+            }
+            for identifier, order in (("first", 10), ("second", 20), ("third", 30))
+        ]
+        entries = [
+            {
+                "id": identifier,
+                "source": f"Images/{identifier}.png",
+                "destination": f"images/{identifier}.png",
+                "title": identifier.title(),
+                "collection": identifier,
+                "order": 10,
+                "replacements": {},
+            }
+            for identifier, _ in (("first", 10), ("second", 20), ("third", 30))
+        ]
+        return artefacts_cli.manifest_from_dict(
+            {
+                "version": 1,
+                "protected_files": [],
+                "collections": collections,
+                "entries": entries,
+            }
+        )
+
+    def test_render_catalogue_sorts_cards_by_newest_date_first(self):
+        rendered = artefacts_cli.render_catalogue(
+            self.sorting_manifest(),
+            {"first": "2026-01-05", "second": "2026-06-30", "third": "2026-03-11"},
+        )
+
+        self.assertLess(rendered.index("Second"), rendered.index("Third"))
+        self.assertLess(rendered.index("Third"), rendered.index("First"))
+
+    def test_render_catalogue_sorts_undated_cards_last_by_declared_order(self):
+        rendered = artefacts_cli.render_catalogue(
+            self.sorting_manifest(), {"third": "2026-03-11"}
+        )
+
+        self.assertLess(rendered.index("Third"), rendered.index("First"))
+        self.assertLess(rendered.index("First"), rendered.index("Second"))
+
     def test_render_catalogue_omits_the_date_without_timestamps(self):
         rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
 
