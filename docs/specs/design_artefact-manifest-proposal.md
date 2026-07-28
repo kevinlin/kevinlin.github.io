@@ -28,9 +28,11 @@ Turn the block into a proposal. The script derives a complete, schema-valid mani
 
 ## Error carries data
 
-`UnlistedSourceError(InventoryError)` carries `unlisted: tuple[PurePosixPath, ...]` alongside today's message. `reconcile_inventory` raises it instead of the bare `InventoryError`.
+`UnlistedSourceError(InventoryError)` carries the `manifest` it was reconciled against and `unlisted: tuple[PurePosixPath, ...]`. `reconcile_inventory` raises it instead of the bare `InventoryError`, and its message is a bare summary line.
 
-Subclassing keeps existing behaviour: current tests assert `InventoryError` and the message text, and both still hold. Only `main()` is aware of the new type.
+The old message spelled out each source and its suggested destination. That text is gone: `main()` catches `UnlistedSourceError` above the generic `ArtefactError` printer, so nothing would ever render it, and a second formatter for the same condition drifts from `format_proposal` unnoticed. The condition has one representation — data on the error, formatting in `format_proposal`.
+
+Carrying the manifest keeps `handle_unlisted_sources` from re-reading and re-validating the file `create_sync_plan` loaded moments earlier. Subclassing still holds for anything catching `InventoryError`; only `main()` is aware of the new type.
 
 ## Derivation
 
@@ -55,8 +57,10 @@ Unmatched folders produce a new collection:
 - `id` — slugged folder name.
 - `title` — folder name, title-cased.
 - `description` — `TODO: describe this collection.`
-- `section` — `Presentations and analysis` when any of the folder's new sources is `.html`, otherwise `Image collections`.
+- `section` — the section existing collections of the same media type already sit in. A folder with any `.html` source is a presentation collection, otherwise an image collection; existing collections are classified the same way, by the extension of their entries' destinations. Only when the manifest holds no collection of that media type do the `Presentations and analysis` / `Image collections` constants apply.
 - `section_order` — reused from existing collections in that section; `max + 10` when the section itself is new.
+
+Section names are manifest content, so they are learned rather than matched against the constants. Renaming a section in `manifest.json` is a content edit with no reason to touch Python; if the constants were authoritative, the next proposal would create a second section beside the renamed one under the stale name, splitting that media type across two catalogue headings.
 - `order` — `max + 10` among collections in that section.
 
 ### Entry fields
@@ -68,6 +72,8 @@ Unmatched folders produce a new collection:
 - `replacements` — `{}` for images. For `.html`, each `https://cdnjs…/<basename>` whose `<basename>` matches a `protected_files` basename is mapped to that vendor file's path relative to the destination.
 
 The cdnjs pre-fill keeps the second run from failing. `score-vs-output-tokens-per-task.html` references two vendored libraries; without pre-filled replacements the proposal succeeds and the re-run then dies in `transform_html`, moving the dead end rather than removing it.
+
+The match is over raw text, not the `_parse_references` HTML parser, because `transform_html` replaces raw text: parsed attribute values are HTML-unescaped and would not always be found. To keep that match from being trusted blindly, the proposal applies its own replacements exactly as `transform_html` will and puts the result through the shared `has_cdnjs_reference` ban check. Anything still matching is a reference the pre-fill missed or a library that is not vendored at all, and the entry carries a warning in `ManifestProposal.warnings`, printed under the entry. The user learns before editing prose, not on the re-run.
 
 ## Command behaviour
 
@@ -81,18 +87,20 @@ All three exit `3`, meaning a manifest proposal is pending. Nothing is copied, c
 
 `publish` writes after its preflight has passed, and that preflight already accepts one unstaged `artefacts/manifest.json` edit. The edit-and-re-run cycle therefore needs no preflight change.
 
-The manifest is written through the existing `_atomic_write` and re-parsed with `load_manifest` before the command returns, so a proposal that cannot round-trip fails loudly instead of leaving a broken file.
+The serialized bytes are re-parsed with `manifest_from_bytes` before `_atomic_write` touches the file, so a proposal that cannot round-trip fails loudly and leaves the manifest untouched rather than broken.
 
 ## Testing
 
 Unit:
 
 - Collection matched through an existing entry's source folder, not the folder name.
-- New collection: section inferred from extensions, `section_order` reused, `order` continues the section.
+- New collection joins the section existing collections of the same media type use, even when that section has been renamed away from the constants; the constants apply only when the manifest has no example. `section_order` reused, `order` continues the section.
+- `reconcile_inventory` carries the unlisted sources and the manifest on the error.
 - Entry id collision suffixing.
 - Title normalization, including the `NN-` prefix.
 - Order continues from the collection maximum, stable across several new files.
 - cdnjs replacement pre-fill, and no replacements for a `.html` file with no vendored reference.
+- A cdnjs reference left unmapped after the pre-fill warns; a fully vendored file does not.
 
 Integration:
 

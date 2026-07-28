@@ -247,16 +247,17 @@ class SourceInventoryTests(unittest.TestCase):
         with self.assertRaisesRegex(artefacts_cli.InventoryError, "symbolic link"):
             artefacts_cli.scan_source(root)
 
-    def test_reconcile_rejects_unlisted_approved_source_with_suggestion(self):
+    def test_reconcile_rejects_unlisted_approved_source_and_carries_it(self):
         root = self.make_source()
         (root / "topic" / "New Chart.PNG").write_bytes(b"png")
         inventory = artefacts_cli.scan_source(root)
         manifest = self.manifest_for()
 
-        with self.assertRaisesRegex(
-            artefacts_cli.InventoryError, "topic/new-chart.png"
-        ):
+        with self.assertRaises(artefacts_cli.UnlistedSourceError) as caught:
             artefacts_cli.reconcile_inventory(manifest, inventory)
+
+        self.assertEqual(caught.exception.unlisted, (PurePosixPath("topic/New Chart.PNG"),))
+        self.assertIs(caught.exception.manifest, manifest)
 
     def test_reconcile_turns_missing_source_into_deletion_candidate(self):
         root = self.make_source()
@@ -294,7 +295,7 @@ class ManifestProposalTests(unittest.TestCase):
         self.assertEqual(proposal.collections, ())
         self.assertEqual(proposal.entries[0].collection, "renamed-charts")
 
-    def test_new_image_collection_reuses_the_section_order(self):
+    def test_new_image_collection_joins_the_existing_image_section(self):
         proposal = self.propose(
             artefacts_cli.manifest_from_dict(valid_payload()), "Travel/Map.png"
         )
@@ -302,14 +303,34 @@ class ManifestProposalTests(unittest.TestCase):
         collection = proposal.collections[0]
         self.assertEqual(collection.id, "travel")
         self.assertEqual(collection.title, "Travel")
-        self.assertEqual(collection.section, artefacts_cli.IMAGE_SECTION)
+        self.assertEqual(collection.section, "Analysis")
         self.assertEqual(collection.description, artefacts_cli.PLACEHOLDER_DESCRIPTION)
-        self.assertEqual(collection.section_order, 20)
-        self.assertEqual(collection.order, 10)
+        self.assertEqual(collection.section_order, 10)
+        self.assertEqual(collection.order, 20)
 
-    def test_new_html_collection_lands_in_the_presentation_section(self):
+    def test_new_html_collection_joins_the_existing_presentation_section(self):
         payload = valid_payload()
-        payload["collections"][0]["section"] = artefacts_cli.PRESENTATION_SECTION
+        payload["collections"].append(
+            {
+                "id": "decks",
+                "title": "Decks",
+                "description": "Slides.",
+                "section": "Renamed presentations",
+                "section_order": 20,
+                "order": 10,
+            }
+        )
+        payload["entries"].append(
+            {
+                "id": "deck",
+                "source": "Decks/Deck.html",
+                "destination": "decks/deck/index.html",
+                "title": "Deck",
+                "collection": "decks",
+                "order": 10,
+                "replacements": {},
+            }
+        )
         source_root = self.make_source()
         (source_root / "Timeline").mkdir()
         (source_root / "Timeline" / "Story.html").write_text("<p>x</p>", encoding="utf-8")
@@ -322,9 +343,28 @@ class ManifestProposalTests(unittest.TestCase):
         )
 
         collection = proposal.collections[0]
+        self.assertEqual(collection.section, "Renamed presentations")
+        self.assertEqual(collection.section_order, 20)
+        self.assertEqual(collection.order, 20)
+
+    def test_section_constants_are_used_when_the_manifest_has_no_example(self):
+        payload = valid_payload()
+        payload["collections"] = []
+        payload["entries"] = []
+        source_root = self.make_source()
+        (source_root / "Timeline").mkdir()
+        (source_root / "Timeline" / "Story.html").write_text("<p>x</p>", encoding="utf-8")
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload),
+            "Timeline/Story.html",
+            source_root=source_root,
+        )
+
+        collection = proposal.collections[0]
         self.assertEqual(collection.section, artefacts_cli.PRESENTATION_SECTION)
         self.assertEqual(collection.section_order, 10)
-        self.assertEqual(collection.order, 20)
+        self.assertEqual(collection.order, 10)
 
     def test_entry_id_collision_is_suffixed(self):
         payload = valid_payload()
@@ -382,6 +422,24 @@ class ManifestProposalTests(unittest.TestCase):
                     "../../vendor/chart.umd.min.js"
             },
         )
+        self.assertIn("unmapped cdnjs reference", proposal.warnings["charts-plot"])
+
+    def test_fully_vendored_html_is_not_warned_about(self):
+        source_root = self.make_source()
+        (source_root / "Charts").mkdir()
+        (source_root / "Charts" / "Plot.html").write_text(
+            '<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/'
+            'chart.umd.min.js"></script>\n',
+            encoding="utf-8",
+        )
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(valid_payload()),
+            "Charts/Plot.html",
+            source_root=source_root,
+        )
+
+        self.assertEqual(proposal.warnings, {})
 
     def test_html_without_vendored_references_gets_no_replacements(self):
         source_root = self.make_source()

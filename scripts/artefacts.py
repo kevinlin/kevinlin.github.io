@@ -109,6 +109,7 @@ class SourceInventory:
 class ManifestProposal:
     collections: tuple[Collection, ...]
     entries: tuple[Entry, ...]
+    warnings: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -454,11 +455,38 @@ def _max_orders(items, group_attr: str) -> dict[str, int]:
     return result
 
 
+def _sections_by_media(manifest: Manifest) -> dict[bool, str]:
+    """Section each media type already sits in, keyed by "holds a presentation".
+
+    Section names are manifest content, so they are learned from the existing
+    collections rather than matched against the constants below; a renamed
+    section must not make the next proposal invent a second one beside it.
+    """
+    presentation_collections = {
+        entry.collection
+        for entry in manifest.entries
+        if entry.destination.suffix.lower() == ".html"
+    }
+    observed: dict[bool, str] = {}
+    for collection in manifest.collections:
+        observed.setdefault(collection.id in presentation_collections, collection.section)
+    return observed
+
+
 def _vendor_replacements(
     vendor_by_name: dict[str, PurePosixPath],
     source_path: Path,
     destination: PurePosixPath,
-) -> dict[str, str]:
+) -> tuple[dict[str, str], bool]:
+    """Pre-filled replacements, and whether an unmapped cdnjs reference survives them.
+
+    `CDNJS_REFERENCE` matches raw text because `transform_html` replaces raw
+    text; the parsed references from `_parse_references` are HTML-unescaped and
+    would not always be found. Rather than trust the match to be exhaustive, the
+    replacements are applied here exactly as `transform_html` will apply them and
+    the result is put through the same `has_cdnjs_reference` ban check, so a
+    reference this function missed is reported now instead of killing the re-run.
+    """
     try:
         text = source_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
@@ -469,7 +497,9 @@ def _vendor_replacements(
         vendor = vendor_by_name.get(url.rsplit("/", 1)[-1])
         if vendor is not None:
             replacements[url] = prefix + vendor.as_posix()
-    return replacements
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return replacements, has_cdnjs_reference(text)
 
 
 def propose_manifest_additions(
@@ -489,6 +519,7 @@ def propose_manifest_additions(
     taken_ids = {entry.id for entry in manifest.entries}
     collection_ids = {collection.id for collection in manifest.collections}
     vendor_by_name = {path.name: path for path in manifest.protected_files}
+    sections_by_media = _sections_by_media(manifest)
 
     grouped: dict[str, list[PurePosixPath]] = {}
     for source in sorted(unlisted, key=str):
@@ -496,16 +527,17 @@ def propose_manifest_additions(
 
     collections: list[Collection] = []
     entries: list[Entry] = []
+    warnings: dict[str, str] = {}
     for group, sources in grouped.items():
         collection_id = collection_by_group.get(group)
         if collection_id is None:
             label = group or sources[0].stem
             collection_id = _unique_id(_slug(label), collection_ids)
             collection_ids.add(collection_id)
-            section = (
-                PRESENTATION_SECTION
-                if any(source.suffix.lower() == ".html" for source in sources)
-                else IMAGE_SECTION
+            is_presentation = any(source.suffix.lower() == ".html" for source in sources)
+            section = sections_by_media.get(
+                is_presentation,
+                PRESENTATION_SECTION if is_presentation else IMAGE_SECTION,
             )
             section_orders.setdefault(
                 section, max(section_orders.values(), default=0) + 10
@@ -530,9 +562,14 @@ def propose_manifest_additions(
                 order_in_collection.get(collection_id, 0) + 10
             )
             if source.suffix.lower() == ".html":
-                replacements = _vendor_replacements(
+                replacements, unmapped = _vendor_replacements(
                     vendor_by_name, source_root / source.as_posix(), destination
                 )
+                if unmapped:
+                    warnings[entry_id] = (
+                        "an unmapped cdnjs reference remains; vendor it into "
+                        "protected_files or the next run fails in transform_html"
+                    )
             else:
                 replacements = {}
             entries.append(
@@ -547,7 +584,9 @@ def propose_manifest_additions(
                 )
             )
 
-    return ManifestProposal(collections=tuple(collections), entries=tuple(entries))
+    return ManifestProposal(
+        collections=tuple(collections), entries=tuple(entries), warnings=warnings
+    )
 
 
 def merge_manifest_proposal(manifest: Manifest, proposal: ManifestProposal) -> Manifest:
@@ -577,6 +616,9 @@ def format_proposal(proposal: ManifestProposal) -> str:
         lines.append(f"      collection:  {entry.collection} (order {entry.order})")
         for old, new in entry.replacements.items():
             lines.append(f"      replace:     {old} -> {new}")
+        warning = proposal.warnings.get(entry.id)
+        if warning is not None:
+            lines.append(f"      WARNING:     {warning}")
     return "\n".join(lines)
 
 
@@ -587,12 +629,8 @@ def reconcile_inventory(
     manifest_sources = {entry.source for entry in manifest.entries}
     unlisted = sorted(approved - manifest_sources, key=str)
     if unlisted:
-        suggestions = "\n".join(
-            f"  {source.as_posix()} -> {suggest_destination(source).as_posix()}"
-            for source in unlisted
-        )
         raise UnlistedSourceError(
-            f"unlisted approved source files:\n{suggestions}", manifest, tuple(unlisted)
+            "unlisted approved source files", manifest, tuple(unlisted)
         )
     missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
     next_manifest = replace(
