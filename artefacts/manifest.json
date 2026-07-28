@@ -116,6 +116,22 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 120
+    },
+    {
+      "id": "ai-native-organisation",
+      "title": "AI Native Organisation",
+      "description": "Explore AI Native Organisation's org structure and operating model.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 130
+    },
+    {
+      "id": "llm-pricing",
+      "title": "LLM Pricing",
+      "description": "Topic on model pricing.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 140
     }
   ],
   "entries": [
@@ -395,20 +411,65 @@
       "replacements": {}
     },
     {
-      "id": "llm-performance-sonnet-5-effort-dial-truth",
-      "source": "llm-performance/sonnet-5-effort-dial-truth.png",
-      "destination": "llm-performance/sonnet-5-effort-dial-truth.png",
-      "title": "Sonnet 5 effort dial truth",
-      "collection": "llm-performance",
-      "order": 100,
-      "replacements": {}
-    },
-    {
       "id": "product-management-jenny-wen-design-process-is-dead",
       "source": "product-management/jenny-wen-design-process-is-dead.jpeg",
       "destination": "product-management/jenny-wen-design-process-is-dead.jpeg",
       "title": "Jenny Wen: the design process is dead",
       "collection": "product-management",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v1",
+      "source": "AI-Native Organisation/The New Engineering Org & The Human Side_v1.png",
+      "destination": "ai-native-organisation/the-new-engineering-org-the-human-side-v1.png",
+      "title": "The New Engineering Org & The Human Side v1",
+      "collection": "ai-native-organisation",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v2",
+      "source": "AI-Native Organisation/The New Engineering Org & The Human Side_v2.png",
+      "destination": "ai-native-organisation/the-new-engineering-org-the-human-side-v2.png",
+      "title": "The New Engineering Org & The Human Side v2",
+      "collection": "ai-native-organisation",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "claude-code-prong-my-claude-code-buddy",
+      "source": "claude-code/Prong - My Claude Code Buddy.jpg",
+      "destination": "claude-code/prong-my-claude-code-buddy.jpg",
+      "title": "Prong My Claude Code Buddy",
+      "collection": "claude-code",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-4-best-practices-for-claude-opus-4-7",
+      "source": "llm-performance/4 Best Practices for Claude Opus 4.7.jpg",
+      "destination": "llm-performance/4-best-practices-for-claude-opus-4-7.jpg",
+      "title": "Best Practices for Claude Opus 4.7",
+      "collection": "llm-performance",
+      "order": 110,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-sonnet-5-the-effort-dial-truth",
+      "source": "llm-performance/Sonnet 5 — The Effort-Dial Truth.png",
+      "destination": "llm-performance/sonnet-5-the-effort-dial-truth.png",
+      "title": "Sonnet 5 — The Effort Dial Truth",
+      "collection": "llm-performance",
+      "order": 120,
+      "replacements": {}
+    },
+    {
+      "id": "llm-pricing-gpt-5-series-pricing-evolution",
+      "source": "llm-pricing/GPT-5 Series Pricing Evolution.png",
+      "destination": "llm-pricing/gpt-5-series-pricing-evolution.png",
+      "title": "GPT 5 Series Pricing Evolution",
+      "collection": "llm-pricing",
       "order": 10,
       "replacements": {}
     }
