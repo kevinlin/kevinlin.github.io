@@ -268,8 +268,11 @@ An entry whose source is missing contributes no date, so a card whose deletion i
 6. Push the branch and open a ready-for-review pull request to `main`.
 7. Confirm the expected artefact-validation check exists, wait for all checks, and stop if any check fails or disappears.
 8. Squash-merge the pull request only after all checks succeed.
-9. Poll GitHub Pages until the merge commit is reported as built or a concrete failure is returned.
-10. Request the homepage, catalogue, and every manifest URL over HTTPS and require HTTP 200.
+9. Switch back to `main` and fast-forward it from `origin/main`.
+10. Poll GitHub Pages until the merge commit is reported as built or a concrete failure is returned.
+11. Request the homepage, catalogue, and every manifest URL over HTTPS and require HTTP 200.
+
+Step 9 runs because the merge happens on the remote: the local checkout is still on the published branch and behind `origin/main`, so the next `publish` would fail its own preflight on both counts. The pull is `--ff-only`, so a `main` that has moved apart for another reason is reported rather than merged silently. The step is local housekeeping for the next run, so a failure warns and the run continues to verification — the pull request has already merged, and aborting here would withhold the merge commit and the Pages result over a checkout the user can fix by hand.
 
 The command prints the pull request URL, merge commit, catalogue URL, verified public URL count, and excluded file types.
 
@@ -290,6 +293,7 @@ The validation check is intentionally independent of `~/Downloads/Artefacts`. Gi
 - A local validation failure stops before commit or push.
 - A push or PR-creation failure leaves the local branch and commit intact.
 - A failed or missing GitHub check leaves the PR open and unmerged.
+- A failed switch back to `main` or fast-forward after the merge prints a warning and leaves the local checkout on the published branch; the run still verifies Pages and reports the merge commit.
 - A Pages failure reports the deployment error and skips public success claims.
 - Public verification reports every non-200 URL and exits unsuccessfully.
 - The existing root `index.html`, `styles.css`, and `script.js` are read-only boundaries for this workflow.

@@ -1395,6 +1395,30 @@ def _wait_for_pages(
     raise PublishError("GitHub Pages did not deploy the merge commit within five minutes")
 
 
+def _restore_main(repo_root: Path, runner: CommandRunner) -> None:
+    """Return the local checkout to an up-to-date `main` after a remote merge.
+
+    The merge happens on GitHub, so the checkout is left on the published branch
+    and behind `origin/main`, which is exactly what the next publish rejects in
+    its preflight. The pull is `--ff-only`, so a `main` that has moved apart for
+    another reason is reported rather than merged silently.
+
+    A failure here is a warning, not a `PublishError`: the pull request has
+    already merged and the site may already be live, so aborting would hide the
+    merge commit and skip Pages verification over local checkout housekeeping.
+    """
+    for command, failure in (
+        (["git", "switch", "main"], "cannot switch back to main"),
+        (["git", "pull", "--ff-only", "origin", "main"], "cannot fast-forward main from origin"),
+    ):
+        result = runner(command, repo_root)
+        if result.returncode != 0:
+            detail = result.stderr.strip() or result.stdout.strip()
+            suffix = f": {detail}" if detail else ""
+            print(f"Warning: {failure}{suffix}", file=sys.stderr)
+            return
+
+
 def _public_urls(base_url: str, manifest: Manifest) -> tuple[str, ...]:
     base = base_url.rstrip("/") + "/"
     urls = [base, urljoin(base, "artefacts/")]
@@ -1560,6 +1584,8 @@ def publish(
         raise PublishError("cannot parse merged pull request") from error
     if pr.get("state") != "MERGED" or not merge_commit:
         raise PublishError("pull request was not merged")
+
+    _restore_main(repo_root, runner)
 
     repository_output = _run_checked(
         runner,

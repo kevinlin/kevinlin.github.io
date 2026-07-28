@@ -1,6 +1,8 @@
+import contextlib
 import importlib.util
 import hashlib
 from datetime import datetime
+import io
 import json
 import os
 import subprocess
@@ -1795,6 +1797,36 @@ class PublishingTests(unittest.TestCase):
             command for command in runner.commands if command[:3] == ["gh", "pr", "merge"]
         ]
         self.assertEqual([command[-1] for command in merges], ["--merge"])
+
+    def test_publish_returns_to_main_and_fast_forwards_after_merge(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(head)
+
+        self.publish(repo, source, runner)
+
+        expected = (
+            ["gh", "pr", "merge"],
+            ["git", "switch", "main"],
+            ["git", "pull", "--ff-only"],
+        )
+        self.assertEqual(
+            [command[:3] for command in runner.commands if command[:3] in expected],
+            list(expected),
+        )
+
+    def test_publish_warns_but_finishes_when_the_fast_forward_fails(self):
+        repo, source, head = self.make_repository()
+        runner = RecordingRunner(
+            head, failures={("git", "pull"): "diverged from origin/main"}
+        )
+
+        errors = io.StringIO()
+        with contextlib.redirect_stderr(errors):
+            result = self.publish(repo, source, runner)
+
+        self.assertEqual(result.merge_commit, "merge123")
+        self.assertIn("cannot fast-forward main", errors.getvalue())
+        self.assertTrue(runner.called(["curl"]))
 
 
 if __name__ == "__main__":
