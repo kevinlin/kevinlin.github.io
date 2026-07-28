@@ -38,3 +38,6 @@ jspm_packages/
 
 # Impeccable Live
 .impeccable/live/
+
+# Python cache
+**/__pycache__/

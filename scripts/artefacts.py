@@ -22,6 +22,11 @@ from urllib.parse import unquote, urljoin, urlsplit
 APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
 PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
+CDNJS_HOST = "cdnjs.cloudflare.com"
+
+
+def has_cdnjs_reference(text: str) -> bool:
+    return CDNJS_HOST in text or "https://cdnjs" in text
 
 
 class ArtefactError(Exception):
@@ -37,8 +42,11 @@ class InventoryError(ArtefactError):
 
 
 class UnlistedSourceError(InventoryError):
-    def __init__(self, message: str, unlisted: tuple[PurePosixPath, ...]) -> None:
+    def __init__(
+        self, message: str, manifest: Manifest, unlisted: tuple[PurePosixPath, ...]
+    ) -> None:
         super().__init__(message)
+        self.manifest = manifest
         self.unlisted = unlisted
 
 
@@ -399,24 +407,24 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
 PRESENTATION_SECTION = "Presentations and analysis"
 IMAGE_SECTION = "Image collections"
 PLACEHOLDER_DESCRIPTION = "TODO: describe this collection."
-CDNJS_REFERENCE = re.compile(r"https://cdnjs\.cloudflare\.com/[^\s\"'<>)]+")
+CDNJS_REFERENCE = re.compile(rf"https://{re.escape(CDNJS_HOST)}/[^\s\"'<>)]+")
 
 
-def _derive_title(stem: str) -> str:
+def _normalize_words(stem: str) -> str:
     text = re.sub(r"^\d+[-_ ]+", "", stem)
     text = re.sub(r"[-_]+", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     if not text:
         raise InventoryError(f"cannot derive a title from: {stem}")
+    return text
+
+
+def _derive_title(stem: str) -> str:
+    text = _normalize_words(stem)
     return text[0].upper() + text[1:]
 
 
-def _derive_entry_id(destination: PurePosixPath, taken: set[str]) -> str:
-    if destination.name == "index.html":
-        parts = destination.parent.parts
-    else:
-        parts = (*destination.parent.parts, destination.stem)
-    base = _slug("-".join(parts))
+def _unique_id(base: str, taken: set[str]) -> str:
     candidate = base
     suffix = 1
     while candidate in taken:
@@ -425,19 +433,37 @@ def _derive_entry_id(destination: PurePosixPath, taken: set[str]) -> str:
     return candidate
 
 
+def _derive_entry_id(destination: PurePosixPath, taken: set[str]) -> str:
+    if destination.name == "index.html":
+        parts = destination.parent.parts
+    else:
+        parts = (*destination.parent.parts, destination.stem)
+    return _unique_id(_slug("-".join(parts)), taken)
+
+
 def _source_group(source: PurePosixPath) -> str:
     return source.parts[0] if len(source.parts) > 1 else ""
 
 
+def _max_orders(items, group_attr: str) -> dict[str, int]:
+    """Highest declared order per group, used to continue existing numbering."""
+    result: dict[str, int] = {}
+    for item in items:
+        key = getattr(item, group_attr)
+        result[key] = max(result.get(key, 0), item.order)
+    return result
+
+
 def _vendor_replacements(
-    manifest: Manifest, source_path: Path, destination: PurePosixPath
+    vendor_by_name: dict[str, PurePosixPath],
+    source_path: Path,
+    destination: PurePosixPath,
 ) -> dict[str, str]:
     try:
         text = source_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
         raise InventoryError(f"cannot read HTML source {source_path}: {error}") from error
     prefix = "../" * len(destination.parent.parts)
-    vendor_by_name = {path.name: path for path in manifest.protected_files}
     replacements: dict[str, str] = {}
     for url in CDNJS_REFERENCE.findall(text):
         vendor = vendor_by_name.get(url.rsplit("/", 1)[-1])
@@ -458,19 +484,11 @@ def propose_manifest_additions(
     section_orders = {
         collection.section: collection.section_order for collection in manifest.collections
     }
-    next_section_order = max(section_orders.values(), default=0) + 10
-    order_in_section: dict[str, int] = {}
-    for collection in manifest.collections:
-        order_in_section[collection.section] = max(
-            order_in_section.get(collection.section, 0), collection.order
-        )
-    order_in_collection: dict[str, int] = {}
-    for entry in manifest.entries:
-        order_in_collection[entry.collection] = max(
-            order_in_collection.get(entry.collection, 0), entry.order
-        )
+    order_in_section = _max_orders(manifest.collections, "section")
+    order_in_collection = _max_orders(manifest.entries, "collection")
     taken_ids = {entry.id for entry in manifest.entries}
     collection_ids = {collection.id for collection in manifest.collections}
+    vendor_by_name = {path.name: path for path in manifest.protected_files}
 
     grouped: dict[str, list[PurePosixPath]] = {}
     for source in sorted(unlisted, key=str):
@@ -481,30 +499,28 @@ def propose_manifest_additions(
     for group, sources in grouped.items():
         collection_id = collection_by_group.get(group)
         if collection_id is None:
-            collection_id = _derive_entry_id(
-                PurePosixPath(group or sources[0].stem), collection_ids
-            )
+            label = group or sources[0].stem
+            collection_id = _unique_id(_slug(label), collection_ids)
             collection_ids.add(collection_id)
             section = (
                 PRESENTATION_SECTION
                 if any(source.suffix.lower() == ".html" for source in sources)
                 else IMAGE_SECTION
             )
-            if section not in section_orders:
-                section_orders[section] = next_section_order
-                next_section_order += 10
+            section_orders.setdefault(
+                section, max(section_orders.values(), default=0) + 10
+            )
             order_in_section[section] = order_in_section.get(section, 0) + 10
             collections.append(
                 Collection(
                     id=collection_id,
-                    title=_derive_title(group or sources[0].stem).title(),
+                    title=_normalize_words(label).title(),
                     description=PLACEHOLDER_DESCRIPTION,
                     section=section,
                     section_order=section_orders[section],
                     order=order_in_section[section],
                 )
             )
-            collection_by_group[group] = collection_id
 
         for source in sources:
             destination = suggest_destination(source)
@@ -515,7 +531,7 @@ def propose_manifest_additions(
             )
             if source.suffix.lower() == ".html":
                 replacements = _vendor_replacements(
-                    manifest, source_root / source.as_posix(), destination
+                    vendor_by_name, source_root / source.as_posix(), destination
                 )
             else:
                 replacements = {}
@@ -576,7 +592,7 @@ def reconcile_inventory(
             for source in unlisted
         )
         raise UnlistedSourceError(
-            f"unlisted approved source files:\n{suggestions}", tuple(unlisted)
+            f"unlisted approved source files:\n{suggestions}", manifest, tuple(unlisted)
         )
     missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
     next_manifest = replace(
@@ -602,7 +618,7 @@ def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
             )
         text = text.replace(old, new)
     text = re.sub(r"[ \t]+(?=\r?$)", "", text, flags=re.MULTILINE)
-    if "cdnjs.cloudflare.com" in text or "https://cdnjs" in text:
+    if has_cdnjs_reference(text):
         raise TransformationError(f"forbidden cdnjs reference remains in {entry.id}")
     if text and not text.endswith(("\n", "\r")):
         text += "\n"
@@ -1012,7 +1028,7 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
             continue
         page = artefacts_root / relative_path.as_posix()
         text = page.read_text(encoding="utf-8")
-        if "cdnjs.cloudflare.com" in text or "https://cdnjs" in text:
+        if has_cdnjs_reference(text):
             raise ValidationError(f"forbidden cdnjs reference in {relative_path}")
         parser = _parse_references(page)
         for reference in parser.references:
@@ -1408,8 +1424,7 @@ def handle_unlisted_sources(
     confirm: Callable[[str], str],
 ) -> int:
     """Print derived manifest additions and, for apply and publish, write them."""
-    manifest = load_manifest(manifest_path)
-    proposal = propose_manifest_additions(manifest, error.unlisted, source_root)
+    proposal = propose_manifest_additions(error.manifest, error.unlisted, source_root)
     print(format_proposal(proposal))
     if not write:
         print("Run apply or publish to write these manifest additions.")
@@ -1417,8 +1432,9 @@ def handle_unlisted_sources(
     if confirm("Write these manifest additions? Type yes to continue: ") != "yes":
         print("Cancelled.")
         return 2
-    _atomic_write(manifest_path, manifest_to_json(merge_manifest_proposal(manifest, proposal)))
-    load_manifest(manifest_path)
+    payload = manifest_to_json(merge_manifest_proposal(error.manifest, proposal))
+    manifest_from_bytes(payload, "proposed")
+    _atomic_write(manifest_path, payload)
     print(
         "Wrote artefacts/manifest.json. Review the derived titles and descriptions, "
         "then run the command again to publish."
@@ -1450,6 +1466,8 @@ def _parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None, input_fn=input) -> int:
     args = _parser().parse_args(argv)
     repo_root = args.repo.resolve()
+    artefacts_root = repo_root / "artefacts"
+    manifest_path = artefacts_root / "manifest.json"
     try:
         if args.command == "validate":
             report = validate_repository(repo_root, args.base_ref)
@@ -1471,8 +1489,6 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
             print(f"Verified URLs: {result.verified_url_count}")
             print(f"Excluded source types: {excluded}")
             return 0
-        manifest_path = repo_root / "artefacts" / "manifest.json"
-        artefacts_root = repo_root / "artefacts"
         plan = create_sync_plan(
             manifest_path,
             args.source.expanduser(),
@@ -1489,7 +1505,7 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
     except UnlistedSourceError as error:
         return handle_unlisted_sources(
             error,
-            repo_root / "artefacts" / "manifest.json",
+            manifest_path,
             args.source.expanduser(),
             args.command in {"apply", "publish"},
             input_fn,
