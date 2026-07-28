@@ -226,6 +226,16 @@ The existing `artefacts/index.html` remains the owner of its document structure 
 
 The generated catalogue must link every manifest entry exactly once. Vendor files are runtime dependencies and are not catalogue entries. Generation escapes all manifest text before inserting it into HTML.
 
+### Last updated date
+
+Every collection card carries the date of its newest source file, as `<p class="card-updated">Updated <time datetime="YYYY-MM-DD">…</time></p>` between the description and the link list. The card is the unit because it is what a reader scans; a per-link date would repeat the same value down most cards and crowd the list.
+
+`collect_source_timestamps` reads `st_mtime` from each entry's file under the source root when the command runs and formats it as a local-time ISO date. `render_catalogue` takes that mapping, keyed by entry id, as an optional second argument and uses the maximum per collection. ISO dates sort chronologically as strings, so picking the newest needs no date parsing.
+
+The date is not manifest content and is not stored. It is derived from the filesystem on every `plan`, `apply`, and `publish`, so a re-downloaded or re-exported source refreshes its card with no manual edit; the refreshed `index.html` shows up as a normal `Update` in the preview. Persisting it in `manifest.json` would add a field that only the script may write and that goes stale the moment a source is replaced out of band.
+
+An entry whose source is missing contributes no date, so a card whose deletion is pending falls back to its remaining entries, and a collection with no readable source renders exactly as before. `validate` never sees the source directory and therefore does not check the dates; it continues to check only the link set, which the date markup does not touch.
+
 ## Sync Flow
 
 `plan` performs no repository writes. It compares the working manifest with the version in `HEAD` so metadata-only changes appear in the preview:
@@ -294,6 +304,12 @@ Manifest proposals:
 - Order continues from the collection maximum, stable across several new files.
 - cdnjs replacement pre-fill, and no replacements for a `.html` file with no vendored reference.
 - A cdnjs reference left unmapped after the pre-fill warns; a fully vendored file does not.
+
+Last updated dates:
+
+- A card shows the newest date among its entries, once, and not the older ones.
+- No timestamp mapping renders the catalogue with no date markup.
+- `collect_source_timestamps` reads the source mtime and skips an entry whose source is missing.
 
 Orphan cleanup:
 

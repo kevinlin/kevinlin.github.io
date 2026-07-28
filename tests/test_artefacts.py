@@ -2,6 +2,7 @@ import importlib.util
 import hashlib
 from datetime import datetime
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -727,6 +728,76 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(rendered.count('href="images/card.png"'), 1)
         self.assertNotIn("vendor/chart.umd.min.js", rendered)
 
+    def test_render_catalogue_shows_the_newest_source_date_per_card(self):
+        manifest = artefacts_cli.manifest_from_dict(
+            {
+                "version": 1,
+                "protected_files": [],
+                "collections": [
+                    {
+                        "id": "images",
+                        "title": "Images",
+                        "description": "Images.",
+                        "section": "Collections",
+                        "section_order": 10,
+                        "order": 10,
+                    }
+                ],
+                "entries": [
+                    {
+                        "id": "old",
+                        "source": "Images/Old.png",
+                        "destination": "images/old.png",
+                        "title": "Old",
+                        "collection": "images",
+                        "order": 10,
+                        "replacements": {},
+                    },
+                    {
+                        "id": "new",
+                        "source": "Images/New.png",
+                        "destination": "images/new.png",
+                        "title": "New",
+                        "collection": "images",
+                        "order": 20,
+                        "replacements": {},
+                    },
+                ],
+            }
+        )
+
+        rendered = artefacts_cli.render_catalogue(
+            manifest, {"old": "2026-01-05", "new": "2026-03-11"}
+        )
+
+        self.assertEqual(rendered.count('class="card-updated"'), 1)
+        self.assertIn('<time datetime="2026-03-11">2026-03-11</time>', rendered)
+        self.assertNotIn("2026-01-05", rendered)
+
+    def test_render_catalogue_omits_the_date_without_timestamps(self):
+        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
+
+        self.assertNotIn("card-updated", rendered)
+
+    def test_collect_source_timestamps_reads_mtime_and_skips_missing_sources(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        source = Path(directory.name)
+        (source / "Images").mkdir()
+        (source / "Images" / "Card.png").write_bytes(b"png")
+        os.utime(source / "Images" / "Card.png", (1767225600, 1767225600))
+
+        timestamps = artefacts_cli.collect_source_timestamps(
+            self.catalogue_manifest(), source
+        )
+
+        self.assertEqual(
+            timestamps,
+            {
+                "image": datetime.fromtimestamp(1767225600).strftime("%Y-%m-%d"),
+            },
+        )
+
     def test_replace_generated_catalogue_changes_only_marker_region(self):
         document = "before\n<!-- ARTEFACTS:START -->\nold\n<!-- ARTEFACTS:END -->\nafter\n"
 
@@ -1426,15 +1497,18 @@ class PublishingTests(unittest.TestCase):
             "old\n"
             "<!-- ARTEFACTS:END -->\n"
         )
-        (repo / "artefacts" / "index.html").write_text(
-            artefacts_cli.replace_generated_catalogue(
-                catalogue_shell, artefacts_cli.render_catalogue(manifest)
-            ),
-            encoding="utf-8",
-        )
         current = b"old"
         (repo / "artefacts" / "images" / "card.png").write_bytes(current)
         (source / "Images" / "Card.png").write_bytes(b"new" if changed else current)
+        (repo / "artefacts" / "index.html").write_text(
+            artefacts_cli.replace_generated_catalogue(
+                catalogue_shell,
+                artefacts_cli.render_catalogue(
+                    manifest, artefacts_cli.collect_source_timestamps(manifest, source)
+                ),
+            ),
+            encoding="utf-8",
+        )
         (repo / "index.html").write_text("home\n", encoding="utf-8")
         (repo / "styles.css").write_text("body {}\n", encoding="utf-8")
         (repo / "script.js").write_text("// home\n", encoding="utf-8")

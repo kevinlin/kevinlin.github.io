@@ -740,7 +740,30 @@ def public_href(destination: PurePosixPath) -> str:
     return destination.as_posix()
 
 
-def render_catalogue(manifest: Manifest) -> str:
+def collect_source_timestamps(
+    manifest: Manifest, source_root: Path
+) -> dict[str, str]:
+    """Last-modified date per entry id, read from the source file at run time.
+
+    The date is not manifest content: it is whatever the filesystem reports when
+    the command runs, so a re-downloaded source refreshes its card without a
+    manual edit. A source that is missing (a proposed deletion) contributes
+    nothing and its card falls back to the remaining entries.
+    """
+    timestamps: dict[str, str] = {}
+    for entry in manifest.entries:
+        source_path = source_root / entry.source.as_posix()
+        try:
+            modified = source_path.stat().st_mtime
+        except OSError:
+            continue
+        timestamps[entry.id] = datetime.fromtimestamp(modified).strftime("%Y-%m-%d")
+    return timestamps
+
+
+def render_catalogue(
+    manifest: Manifest, timestamps: dict[str, str] | None = None
+) -> str:
     entries_by_collection: dict[str, list[Entry]] = {}
     for entry in manifest.entries:
         entries_by_collection.setdefault(entry.collection, []).append(entry)
@@ -768,9 +791,21 @@ def render_catalogue(manifest: Manifest) -> str:
                     '                <article class="card">',
                     f"                    <h3>{html.escape(collection.title)}</h3>",
                     f"                    <p>{html.escape(collection.description)}</p>",
-                    "                    <ul>",
                 ]
             )
+            dates = [
+                (timestamps or {})[entry.id]
+                for entry in entries_by_collection[collection.id]
+                if entry.id in (timestamps or {})
+            ]
+            if dates:
+                # ISO dates sort chronologically, so the card carries its newest source.
+                latest = max(dates)
+                lines.append(
+                    '                    <p class="card-updated">Updated '
+                    f'<time datetime="{latest}">{latest}</time></p>'
+                )
+            lines.append("                    <ul>")
             for entry in sorted(
                 entries_by_collection[collection.id], key=lambda item: item.order
             ):
@@ -926,7 +961,10 @@ def create_sync_plan(
     except (OSError, UnicodeError) as error:
         raise CatalogueError(f"cannot read catalogue: {error}") from error
     generated_catalogue = replace_generated_catalogue(
-        catalogue, render_catalogue(next_manifest)
+        catalogue,
+        render_catalogue(
+            next_manifest, collect_source_timestamps(next_manifest, source_root)
+        ),
     ).encode("utf-8")
     desired_files[PurePosixPath("index.html")] = generated_catalogue
     desired_files[PurePosixPath("manifest.json")] = manifest_to_json(next_manifest)
