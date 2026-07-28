@@ -100,6 +100,14 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 100
+    },
+    {
+      "id": "fable5-21days",
+      "title": "Fable5 21Days",
+      "description": "TODO: describe this collection.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 110
     }
   ],
   "entries": [
@@ -128,6 +136,24 @@
       "title": "The first five days",
       "collection": "gpt-5-6",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "gpt-5-6-gpt-5-6-avg-cost-per-task",
+      "source": "GPT-5.6/GPT-5.6-Avg cost per task.png",
+      "destination": "gpt-5-6/gpt-5-6-avg-cost-per-task.png",
+      "title": "GPT 5.6 Avg cost per task",
+      "collection": "gpt-5-6",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "gpt-5-6-gpt-5-6-avg-output-tokens-per-task",
+      "source": "GPT-5.6/GPT-5.6-Avg output tokens per task.png",
+      "destination": "gpt-5-6/gpt-5-6-avg-output-tokens-per-task.png",
+      "title": "GPT 5.6 Avg output tokens per task",
+      "collection": "gpt-5-6",
+      "order": 30,
       "replacements": {}
     },
     {
@@ -221,24 +247,6 @@
       "replacements": {}
     },
     {
-      "id": "llm-performance-gpt-5-6-avg-cost-per-task",
-      "source": "llm-performance/GPT-5.6-Avg cost per task.png",
-      "destination": "llm-performance/gpt-5-6-avg-cost-per-task.png",
-      "title": "GPT 5.6 Avg cost per task",
-      "collection": "llm-performance",
-      "order": 60,
-      "replacements": {}
-    },
-    {
-      "id": "llm-performance-gpt-5-6-avg-output-tokens-per-task",
-      "source": "llm-performance/GPT-5.6-Avg output tokens per task.png",
-      "destination": "llm-performance/gpt-5-6-avg-output-tokens-per-task.png",
-      "title": "GPT 5.6 Avg output tokens per task",
-      "collection": "llm-performance",
-      "order": 70,
-      "replacements": {}
-    },
-    {
       "id": "llm-performance-score-vs-output-tokens-per-task",
       "source": "llm-performance/score-vs-output-tokens-per-task.html",
       "destination": "llm-performance/score-vs-output-tokens-per-task/index.html",
@@ -313,6 +321,78 @@
       "title": "Bento whole frame craft",
       "collection": "fde",
       "order": 120,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-chalkboard",
+      "source": "fable5-21days/infographic-chalkboard.png",
+      "destination": "fable5-21days/infographic-chalkboard.png",
+      "title": "Infographic chalkboard",
+      "collection": "fable5-21days",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-craft-handmade",
+      "source": "fable5-21days/infographic-craft-handmade.png",
+      "destination": "fable5-21days/infographic-craft-handmade.png",
+      "title": "Infographic craft handmade",
+      "collection": "fable5-21days",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-cyberpunk",
+      "source": "fable5-21days/infographic-cyberpunk.png",
+      "destination": "fable5-21days/infographic-cyberpunk.png",
+      "title": "Infographic cyberpunk",
+      "collection": "fable5-21days",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-densemodules-morandi",
+      "source": "fable5-21days/infographic-densemodules-morandi.png",
+      "destination": "fable5-21days/infographic-densemodules-morandi.png",
+      "title": "Infographic densemodules morandi",
+      "collection": "fable5-21days",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-hubspoke-edu",
+      "source": "fable5-21days/infographic-hubspoke-edu.png",
+      "destination": "fable5-21days/infographic-hubspoke-edu.png",
+      "title": "Infographic hubspoke edu",
+      "collection": "fable5-21days",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-periodictable-bold",
+      "source": "fable5-21days/infographic-periodictable-bold.png",
+      "destination": "fable5-21days/infographic-periodictable-bold.png",
+      "title": "Infographic periodictable bold",
+      "collection": "fable5-21days",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "fable5-21days-infographic-roadmap-watercolor",
+      "source": "fable5-21days/infographic-roadmap-watercolor.png",
+      "destination": "fable5-21days/infographic-roadmap-watercolor.png",
+      "title": "Infographic roadmap watercolor",
+      "collection": "fable5-21days",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "llm-performance-sonnet-5-effort-dial-truth",
+      "source": "llm-performance/sonnet-5-effort-dial-truth.png",
+      "destination": "llm-performance/sonnet-5-effort-dial-truth.png",
+      "title": "Sonnet 5 effort dial truth",
+      "collection": "llm-performance",
+      "order": 100,
       "replacements": {}
     }
   ]
