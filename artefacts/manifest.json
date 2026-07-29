@@ -132,6 +132,14 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 140
+    },
+    {
+      "id": "product-builder",
+      "title": "Product Builder",
+      "description": "Future of software development and product building.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 150
     }
   ],
   "entries": [
@@ -205,24 +213,6 @@
       "title": "Shortcuts cheatsheet",
       "collection": "claude-code",
       "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "human-taste-1",
-      "source": "peter-steinberger-human-taste/Peter Steinberger on Human Taste_1.png",
-      "destination": "peter-steinberger-human-taste/human-taste-1.png",
-      "title": "Human taste, part 1",
-      "collection": "peter-steinberger-human-taste",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "human-taste-2",
-      "source": "peter-steinberger-human-taste/Peter Steinberger on Human Taste_2.png",
-      "destination": "peter-steinberger-human-taste/human-taste-2.png",
-      "title": "Human taste, part 2",
-      "collection": "peter-steinberger-human-taste",
-      "order": 20,
       "replacements": {}
     },
     {
@@ -348,15 +338,6 @@
       "replacements": {}
     },
     {
-      "id": "fable5-21days-infographic-chalkboard",
-      "source": "fable5-21days/infographic-chalkboard.png",
-      "destination": "fable5-21days/infographic-chalkboard.png",
-      "title": "Infographic chalkboard",
-      "collection": "fable5-21days",
-      "order": 10,
-      "replacements": {}
-    },
-    {
       "id": "fable5-21days-infographic-craft-handmade",
       "source": "fable5-21days/infographic-craft-handmade.png",
       "destination": "fable5-21days/infographic-craft-handmade.png",
@@ -393,30 +374,12 @@
       "replacements": {}
     },
     {
-      "id": "fable5-21days-infographic-periodictable-bold",
-      "source": "fable5-21days/infographic-periodictable-bold.png",
-      "destination": "fable5-21days/infographic-periodictable-bold.png",
-      "title": "Infographic periodictable bold",
-      "collection": "fable5-21days",
-      "order": 60,
-      "replacements": {}
-    },
-    {
       "id": "fable5-21days-infographic-roadmap-watercolor",
       "source": "fable5-21days/infographic-roadmap-watercolor.png",
       "destination": "fable5-21days/infographic-roadmap-watercolor.png",
       "title": "Infographic roadmap watercolor",
       "collection": "fable5-21days",
       "order": 70,
-      "replacements": {}
-    },
-    {
-      "id": "product-management-jenny-wen-design-process-is-dead",
-      "source": "product-management/jenny-wen-design-process-is-dead.jpeg",
-      "destination": "product-management/jenny-wen-design-process-is-dead.jpeg",
-      "title": "Jenny Wen: the design process is dead",
-      "collection": "product-management",
-      "order": 10,
       "replacements": {}
     },
     {
@@ -471,6 +434,33 @@
       "title": "GPT 5 Series Pricing Evolution",
       "collection": "llm-pricing",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "product-builder-peter-steinberger-on-human-taste-1",
+      "source": "product-builder/Peter Steinberger on Human Taste_1.png",
+      "destination": "product-builder/peter-steinberger-on-human-taste-1.png",
+      "title": "Peter Steinberger on Human Taste 1",
+      "collection": "product-builder",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "product-builder-peter-steinberger-on-human-taste-2",
+      "source": "product-builder/Peter Steinberger on Human Taste_2.png",
+      "destination": "product-builder/peter-steinberger-on-human-taste-2.png",
+      "title": "Peter Steinberger on Human Taste 2",
+      "collection": "product-builder",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "product-builder-jenny-wen-design-process-is-dead",
+      "source": "product-builder/jenny-wen-design-process-is-dead.jpeg",
+      "destination": "product-builder/jenny-wen-design-process-is-dead.jpeg",
+      "title": "Jenny wen design process is dead",
+      "collection": "product-builder",
+      "order": 30,
       "replacements": {}
     }
   ]
