@@ -284,33 +284,6 @@
       }
     },
     {
-      "id": "fde-01-iceberg-bright-dark-line",
-      "source": "fde/01-iceberg-bright-dark-line.png",
-      "destination": "fde/01-iceberg-bright-dark-line.png",
-      "title": "Iceberg bright dark line",
-      "collection": "fde",
-      "order": 70,
-      "replacements": {}
-    },
-    {
-      "id": "fde-02-four-translation-steps",
-      "source": "fde/02-four-translation-steps.png",
-      "destination": "fde/02-four-translation-steps.png",
-      "title": "Four translation steps",
-      "collection": "fde",
-      "order": 80,
-      "replacements": {}
-    },
-    {
-      "id": "fde-03-bento-whole-frame",
-      "source": "fde/03-bento-whole-frame.png",
-      "destination": "fde/03-bento-whole-frame.png",
-      "title": "Bento whole frame",
-      "collection": "fde",
-      "order": 90,
-      "replacements": {}
-    },
-    {
       "id": "fde-04-iceberg-bright-dark-line-en",
       "source": "fde/04-iceberg-bright-dark-line-en.png",
       "destination": "fde/04-iceberg-bright-dark-line-en.png",
