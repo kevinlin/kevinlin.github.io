@@ -835,6 +835,25 @@ def _derive_title(stem: str) -> str:
     return text[0].upper() + text[1:]
 
 
+MARKDOWN_HEADING = re.compile(r"^#[ \t]+(\S.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
+
+
+def markdown_title(source_path: Path) -> str | None:
+    """The document's first level-one heading, or None when it has none.
+
+    The stem rule normalizes separators and sentence-cases, which loses whatever
+    casing and punctuation the author chose. The heading they already wrote is the
+    better starting point, and the result is still a proposal the user edits before
+    publishing.
+    """
+    try:
+        text = source_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return None
+    match = MARKDOWN_HEADING.search(text)
+    return match.group(1) if match else None
+
+
 def _unique_id(base: str, taken: set[str]) -> str:
     candidate = base
     suffix = 1
@@ -984,9 +1003,12 @@ def propose_manifest_additions(
             order_in_collection[collection_id] = (
                 order_in_collection.get(collection_id, 0) + 10
             )
-            if source.suffix.lower() == ".html":
+            source_path = source_root / source.as_posix()
+            title = _derive_title(source.stem)
+            suffix = source.suffix.lower()
+            if suffix == ".html":
                 replacements, unmapped = _vendor_replacements(
-                    vendor_by_name, source_root / source.as_posix(), destination
+                    vendor_by_name, source_path, destination
                 )
                 if unmapped:
                     warnings[entry_id] = (
@@ -994,13 +1016,17 @@ def propose_manifest_additions(
                         "protected_files or the next run fails in transform_html"
                     )
             else:
+                # Markdown entries declare no replacements: the generated page owns
+                # its references, and a cdnjs URL in the prose is content.
                 replacements = {}
+                if suffix == ".md":
+                    title = markdown_title(source_path) or title
             entries.append(
                 Entry(
                     id=entry_id,
                     source=source,
                     destination=destination,
-                    title=_derive_title(source.stem),
+                    title=title,
                     collection=collection_id,
                     order=order_in_collection[collection_id],
                     replacements=replacements,

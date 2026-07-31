@@ -596,6 +596,41 @@ class ManifestProposalTests(unittest.TestCase):
             ["charts/cost.png", "travel/map.png"],
         )
 
+    def proposal_for(self, name: str, body: str):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        (root / "Notes").mkdir()
+        (root / "Notes" / name).write_text(body, encoding="utf-8")
+        manifest = artefacts_cli.manifest_from_dict(valid_payload())
+        artefacts_cli.validate_manifest(manifest)
+        return artefacts_cli.propose_manifest_additions(
+            manifest, (PurePosixPath(f"Notes/{name}"),), root
+        )
+
+    def test_markdown_title_comes_from_the_first_heading(self):
+        proposal = self.proposal_for(
+            "AI_Education_Catalogue.md", "# AI Education Catalogue\n\nBody.\n"
+        )
+        self.assertEqual(proposal.entries[0].title, "AI Education Catalogue")
+
+    def test_markdown_title_falls_back_to_the_stem(self):
+        proposal = self.proposal_for("01-my_report.md", "Body with no heading.\n")
+        self.assertEqual(proposal.entries[0].title, "My report")
+
+    def test_markdown_title_ignores_a_deeper_heading(self):
+        proposal = self.proposal_for("my_report.md", "## Section\n\n# Real Title\n")
+        self.assertEqual(proposal.entries[0].title, "Real Title")
+
+    def test_markdown_proposal_gets_no_replacements_or_warning(self):
+        # A cdnjs URL in Markdown prose is content, not a dependency to vendor.
+        proposal = self.proposal_for(
+            "my_report.md",
+            "# Report\n\nhttps://cdnjs.cloudflare.com/ajax/libs/x/x.js\n",
+        )
+        self.assertEqual(proposal.entries[0].replacements, {})
+        self.assertEqual(proposal.warnings, {})
+
 
 class DesiredTreeTests(unittest.TestCase):
     def make_source_and_manifest(
