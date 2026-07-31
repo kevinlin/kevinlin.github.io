@@ -168,6 +168,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 40
+    },
+    {
+      "id": "last30days",
+      "title": "Last30Days",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 50
     }
   ],
   "entries": [
@@ -480,6 +488,78 @@
       "title": "PRD: The Donation Map",
       "collection": "product-idea",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-claude-fable-5-raw-v3",
+      "source": "Last30Days/claude-fable-5-raw-v3.md",
+      "destination": "last30days/claude-fable-5-raw-v3/index.html",
+      "title": "last30days v3.3.2: Claude Fable 5",
+      "collection": "last30days",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-kilo-code-raw-v3",
+      "source": "Last30Days/kilo-code-raw-v3.md",
+      "destination": "last30days/kilo-code-raw-v3/index.html",
+      "title": "last30days v3.3.2: Kilo Code",
+      "collection": "last30days",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-langchain-raw-v3",
+      "source": "Last30Days/langchain-raw-v3.md",
+      "destination": "last30days/langchain-raw-v3/index.html",
+      "title": "last30days v3.3.2: LangChain",
+      "collection": "last30days",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-loop-engineering-raw",
+      "source": "Last30Days/loop-engineering-raw.md",
+      "destination": "last30days/loop-engineering-raw/index.html",
+      "title": "last30days v3.14.0: Loop Engineering",
+      "collection": "last30days",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-ralph-loop-ai-coding-agent-technique-raw-v1",
+      "source": "Last30Days/ralph-loop-ai-coding-agent-technique-raw-v1.md",
+      "destination": "last30days/ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
+      "title": "last30days v3.3.2: ralph loop AI coding agent technique",
+      "collection": "last30days",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
+      "source": "Last30Days/ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
+      "destination": "last30days/ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
+      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code",
+      "collection": "last30days",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-ralph-loop-raw-v3",
+      "source": "Last30Days/ralph-loop-raw-v3.md",
+      "destination": "last30days/ralph-loop-raw-v3/index.html",
+      "title": "last30days v3.3.2: ralph loop",
+      "collection": "last30days",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-skillops-raw",
+      "source": "Last30Days/skillops-raw.md",
+      "destination": "last30days/skillops-raw/index.html",
+      "title": "last30days v3.18.4: SkillOps",
+      "collection": "last30days",
+      "order": 80,
       "replacements": {}
     }
   ]
