@@ -172,7 +172,7 @@ A Markdown collection's destinations are `.html`, so `_sections_by_media` classi
 
 ### Page shell
 
-One template, matching `artefacts/index.html`: the same colour tokens and fonts inline, the same pre-paint theme script, a readable prose column, and a back-link to the catalogue. The CSS is inline rather than a shared `markdown.css`, because every other published page is self-contained and a shared stylesheet adds a cross-file reference for `validate` to resolve on every document.
+One template, matching `artefacts/index.html`: the same colour tokens and fonts inline, the same pre-paint theme script, a content column capped at 72rem (Tailwind's `max-w-6xl`), and a back-link to the catalogue. The CSS is inline rather than a shared `markdown.css`, because every other published page is self-contained and a shared stylesheet adds a cross-file reference for `validate` to resolve on every document.
 
 The `<title>` is the manifest title, escaped. The body holds the Markdown inside `<script type="text/markdown">` and a short inline script that hands the block to `marked` and writes the result into the article element.
 

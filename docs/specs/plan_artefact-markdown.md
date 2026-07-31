@@ -525,7 +525,7 @@ In `scripts/artefacts.py`, add after `extract_markdown`:
 MARKDOWN_VENDOR_NAME = "marked.min.js"
 
 # One self-contained document per Markdown entry, matching artefacts/index.html:
-# same colour tokens and fonts, same pre-paint theme script, a prose column, and a
+# same colour tokens and fonts, same pre-paint theme script, a 72rem content column, and a
 # back-link to the catalogue. The CSS is inline because every other published page
 # is self-contained; a shared stylesheet would add a cross-file reference for
 # `validate` to resolve on every document.
@@ -594,7 +594,7 @@ MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
         }}
 
         header, main, footer {{
-            width: min(760px, calc(100% - 48px));
+            width: min(72rem, calc(100% - 48px));
             margin-inline: auto;
         }}
 
