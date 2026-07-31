@@ -631,6 +631,15 @@ class ManifestProposalTests(unittest.TestCase):
         self.assertEqual(proposal.entries[0].replacements, {})
         self.assertEqual(proposal.warnings, {})
 
+    def test_markdown_only_collection_joins_the_presentation_section(self):
+        # A .md publishes to a directory index.html, so _sections_by_media will read
+        # the collection back as a presentation. The proposal must agree on the way
+        # in, or the collection is filed under images and moves on the next run.
+        proposal = self.proposal_for("my_report.md", "# Report\n")
+        self.assertEqual(
+            proposal.collections[0].section, artefacts_cli.PRESENTATION_SECTION
+        )
+
 
 class DesiredTreeTests(unittest.TestCase):
     def make_source_and_manifest(

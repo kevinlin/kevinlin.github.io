@@ -976,7 +976,15 @@ def propose_manifest_additions(
             label = group or sources[0].stem
             collection_id = _unique_id(_slug(label), collection_ids)
             collection_ids.add(collection_id)
-            is_presentation = any(source.suffix.lower() == ".html" for source in sources)
+            # Classified on the source extensions that produce a directory
+            # index.html, because that is the destination suffix
+            # `_sections_by_media` reads the collection back by. Matching only
+            # ".html" here would file a Markdown-only collection under images and
+            # move it to presentations on the next proposal.
+            is_presentation = any(
+                source.suffix.lower() in DIRECTORY_INDEX_EXTENSIONS
+                for source in sources
+            )
             section = sections_by_media.get(
                 is_presentation,
                 PRESENTATION_SECTION if is_presentation else IMAGE_SECTION,
