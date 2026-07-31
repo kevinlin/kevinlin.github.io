@@ -5,6 +5,7 @@ import argparse
 from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime
+import difflib
 import html
 from html.parser import HTMLParser
 import json
@@ -157,6 +158,7 @@ class SyncPlan:
     changes: tuple[Change, ...]
     unchanged: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
+    markdown_diffs: tuple[tuple[PurePosixPath, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -751,6 +753,50 @@ def render_markdown_page(
             f"forbidden cdnjs reference in generated Markdown page for {entry.id}"
         )
     return document.encode("utf-8")
+
+
+MARKDOWN_DIFF_LINE_LIMIT = 40
+
+
+def markdown_diff(
+    published: bytes | None,
+    source: bytes,
+    limit: int = MARKDOWN_DIFF_LINE_LIMIT,
+) -> str:
+    """Unified diff between the published Markdown and the new source.
+
+    The published page is the same basis the byte comparison uses, so the diff
+    cannot disagree with the change classification. Truncation is stated rather
+    than silent: a cut-off diff that looked complete would be worse than no diff.
+    """
+    if published is None:
+        return ""
+    try:
+        document = published.decode("utf-8")
+    except UnicodeDecodeError:
+        return "diff unavailable: published page is not UTF-8"
+    previous = extract_markdown(document)
+    if previous is None:
+        return "diff unavailable: published page has no embedded Markdown"
+    try:
+        current = source.decode("utf-8")
+    except UnicodeDecodeError:
+        return "diff unavailable: source is not UTF-8"
+    lines = list(
+        difflib.unified_diff(
+            previous.splitlines(),
+            current.splitlines(),
+            fromfile="published",
+            tofile="source",
+            lineterm="",
+        )
+    )
+    if not lines:
+        return ""
+    if len(lines) > limit:
+        remaining = len(lines) - limit
+        lines = lines[:limit] + [f"… truncated, {remaining} more lines"]
+    return "\n".join(lines)
 
 
 def _slug(value: str) -> str:
@@ -1355,6 +1401,25 @@ def create_sync_plan(
         if destination not in planned_deletions:
             changes.append(Change("orphan", destination))
 
+    # Only updates are diffed. An add has nothing to compare against, and a delete
+    # or orphan has no source left to read.
+    markdown_sources = {
+        entry.destination: entry.source
+        for entry in next_manifest.entries
+        if entry.source.suffix.lower() == ".md"
+    }
+    updated = {change.destination for change in changes if change.kind == "update"}
+    markdown_diffs: list[tuple[PurePosixPath, str]] = []
+    for destination in sorted(updated & markdown_sources.keys(), key=str):
+        published_path = artefacts_root / destination.as_posix()
+        source_path = source_root / markdown_sources[destination].as_posix()
+        body = markdown_diff(
+            published_path.read_bytes() if published_path.is_file() else None,
+            source_path.read_bytes(),
+        )
+        if body:
+            markdown_diffs.append((destination, body))
+
     return SyncPlan(
         manifest=declared,
         next_manifest=next_manifest,
@@ -1362,6 +1427,7 @@ def create_sync_plan(
         changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
         unchanged=tuple(sorted(unchanged, key=str)),
         excluded_suffixes=inventory.excluded_suffixes,
+        markdown_diffs=tuple(markdown_diffs),
     )
 
 
@@ -1407,6 +1473,11 @@ def format_plan(plan: SyncPlan) -> str:
     if renumbered:
         lines.append(f"Renumbered order ({len(renumbered)})")
         lines.extend(f"  ~ {label}" for label in renumbered)
+    if plan.markdown_diffs:
+        lines.append(f"Markdown changes ({len(plan.markdown_diffs)})")
+        for destination, body in plan.markdown_diffs:
+            lines.append(f"  ~ {destination.as_posix()}")
+            lines.extend(f"      {line}" for line in body.splitlines())
     lines.append(f"Unchanged ({len(plan.unchanged)})")
     lines.append(f"Excluded source types: {', '.join(plan.excluded_suffixes) or 'none'}")
     return "\n".join(lines)

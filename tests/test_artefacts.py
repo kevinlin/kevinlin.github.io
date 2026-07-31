@@ -869,6 +869,40 @@ class MarkdownRenderTests(unittest.TestCase):
             artefacts_cli.markdown_vendor_path(manifest)
 
 
+class MarkdownDiffTests(unittest.TestCase):
+    def page(self, text: str) -> bytes:
+        return artefacts_cli.render_markdown_page(
+            markdown_entry(), text.encode("utf-8"), PurePosixPath("vendor/marked.min.js")
+        )
+
+    def test_diff_reports_changed_lines_only(self):
+        diff = artefacts_cli.markdown_diff(
+            self.page("# Title\n\nOld body.\n"), b"# Title\n\nNew body.\n"
+        )
+        self.assertIn("-Old body.", diff)
+        self.assertIn("+New body.", diff)
+        self.assertNotIn("-# Title", diff)
+
+    def test_identical_markdown_produces_no_diff(self):
+        text = "# Title\n\nBody.\n"
+        self.assertEqual(artefacts_cli.markdown_diff(self.page(text), text.encode()), "")
+
+    def test_diff_is_truncated_with_the_remaining_count(self):
+        old = "# Title\n\n" + "".join(f"old line {n}\n" for n in range(60))
+        new = "# Title\n\n" + "".join(f"new line {n}\n" for n in range(60))
+        diff = artefacts_cli.markdown_diff(self.page(old), new.encode("utf-8"), limit=10)
+        lines = diff.splitlines()
+        self.assertEqual(len(lines), 11)
+        self.assertRegex(lines[-1], r"^… truncated, \d+ more lines$")
+
+    def test_unextractable_page_reports_the_diff_as_unavailable(self):
+        diff = artefacts_cli.markdown_diff(b"<html>hand written</html>", b"# New\n")
+        self.assertIn("diff unavailable", diff)
+
+    def test_missing_published_page_produces_no_diff(self):
+        self.assertEqual(artefacts_cli.markdown_diff(None, b"# New\n"), "")
+
+
 class CatalogueTests(unittest.TestCase):
     def catalogue_manifest(self):
         payload = {
@@ -1419,6 +1453,65 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
         self.assertIn("Delete (orphaned) (1)\n  - notes.txt", output)
         self.assertIn("Excluded source types: .txt", output)
+
+    def test_plan_diffs_a_changed_markdown_document(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts = repo / "artefacts"
+        (artefacts / "vendor" / "marked.min.js").write_bytes(b"/* parser */")
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["protected_files"].append("vendor/marked.min.js")
+        payload["entries"].append(
+            {
+                "id": "notes",
+                "source": "Notes/Report.md",
+                "destination": "charts/report/index.html",
+                "title": "Report",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (source / "Notes").mkdir()
+        (source / "Notes" / "Report.md").write_text(
+            "# Report\n\nSecond version.\n", encoding="utf-8"
+        )
+        published = artefacts / "charts" / "report"
+        published.mkdir(parents=True)
+        (published / "index.html").write_bytes(
+            artefacts_cli.render_markdown_page(
+                artefacts_cli.Entry(
+                    id="notes",
+                    source=PurePosixPath("Notes/Report.md"),
+                    destination=PurePosixPath("charts/report/index.html"),
+                    title="Report",
+                    collection="charts",
+                    order=40,
+                    replacements={},
+                ),
+                b"# Report\n\nFirst version.\n",
+                PurePosixPath("vendor/marked.min.js"),
+            )
+        )
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts, manifest_path.read_bytes()
+        )
+        diffs = dict(plan.markdown_diffs)
+        self.assertIn(PurePosixPath("charts/report/index.html"), diffs)
+        body = diffs[PurePosixPath("charts/report/index.html")]
+        self.assertIn("-First version.", body)
+        self.assertIn("+Second version.", body)
+        rendered = artefacts_cli.format_plan(plan)
+        self.assertIn("Markdown changes (1)", rendered)
+        self.assertIn("charts/report/index.html", rendered)
+
+    def test_plan_without_markdown_reports_no_markdown_changes(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+        self.assertEqual(plan.markdown_diffs, ())
+        self.assertNotIn("Markdown changes", artefacts_cli.format_plan(plan))
 
 
 class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):
