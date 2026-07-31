@@ -700,6 +700,56 @@ class DesiredTreeTests(unittest.TestCase):
         self.assertEqual(desired, {})
 
 
+class MarkdownEscapingTests(unittest.TestCase):
+    def round_trip(self, text: str) -> str:
+        return artefacts_cli.unescape_markdown_block(
+            artefacts_cli.escape_markdown_block(text)
+        )
+
+    def test_escapes_a_script_terminator(self):
+        escaped = artefacts_cli.escape_markdown_block("text </script> more")
+        self.assertNotIn("</script", escaped)
+        self.assertIn("<\\/script", escaped)
+
+    def test_escapes_a_comment_opener(self):
+        escaped = artefacts_cli.escape_markdown_block("text <!-- hidden --> more")
+        self.assertNotIn("<!--", escaped)
+        self.assertIn("<\\!--", escaped)
+
+    def test_escape_is_case_insensitive_on_the_tag_name(self):
+        escaped = artefacts_cli.escape_markdown_block("</SCRIPT>")
+        self.assertNotIn("</SCRIPT", escaped)
+        self.assertIn("<\\/SCRIPT", escaped)
+
+    def test_round_trip_preserves_plain_markdown_exactly(self):
+        text = "# Title\n\nBody with two trailing spaces  \nnext line\n\n- a\n- b\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_round_trip_preserves_a_preexisting_escaped_marker(self):
+        # A source that already contains the escaped form must not be corrupted:
+        # escaping adds a backslash, unescaping removes exactly one.
+        text = "literal <\\/script and <\\!-- in the source\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_round_trip_preserves_markers_inside_a_code_fence(self):
+        text = "```html\n<script>alert(1)</script>\n<!-- note -->\n```\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_extract_markdown_recovers_the_embedded_source(self):
+        text = "# Title\n\nSee </script> and <!-- this -->.\n"
+        document = (
+            "<body>\n"
+            + artefacts_cli.MARKDOWN_BLOCK_START
+            + artefacts_cli.escape_markdown_block(text)
+            + artefacts_cli.MARKDOWN_BLOCK_END
+            + "\n</body>\n"
+        )
+        self.assertEqual(artefacts_cli.extract_markdown(document), text)
+
+    def test_extract_markdown_returns_none_without_a_block(self):
+        self.assertIsNone(artefacts_cli.extract_markdown("<html>no block</html>"))
+
+
 class CatalogueTests(unittest.TestCase):
     def catalogue_manifest(self):
         payload = {

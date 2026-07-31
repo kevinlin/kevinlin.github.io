@@ -456,6 +456,45 @@ WORD_SEPARATOR = re.compile(r"[-_]+")
 REPEATED_SPACE = re.compile(r"\s+")
 TRAILING_SPACE = re.compile(r"[ \t]+(?=\r?$)", re.MULTILINE)
 
+MARKDOWN_BLOCK_START = '<script type="text/markdown" id="markdown-source">\n'
+MARKDOWN_BLOCK_END = "</script>"
+
+# Raw text in a <script> element ends at a literal `</script`, and `<!--` opens the
+# double-escaped parse state where the terminator rules change. Both are escaped by
+# inserting one backslash after the `<`. The pattern also matches an already-escaped
+# marker, so escaping adds a backslash and unescaping removes exactly one: the round
+# trip is lossless even for a source that contains the escaped form verbatim.
+MARKDOWN_MARKER = re.compile(r"<(\\*)(/script|!--)", re.IGNORECASE)
+
+
+def escape_markdown_block(text: str) -> str:
+    return MARKDOWN_MARKER.sub(
+        lambda match: "<" + "\\" * (len(match.group(1)) + 1) + match.group(2), text
+    )
+
+
+def unescape_markdown_block(text: str) -> str:
+    return MARKDOWN_MARKER.sub(
+        lambda match: "<" + "\\" * max(len(match.group(1)) - 1, 0) + match.group(2), text
+    )
+
+
+def extract_markdown(document: str) -> str | None:
+    """The Markdown embedded in a generated page, or None if there is no block.
+
+    Exact inverse of the embedding in `render_markdown_page`, and the basis of the
+    diff preview. A published page that predates this scheme, or one edited by
+    hand, has no block and yields None rather than an error.
+    """
+    start = document.find(MARKDOWN_BLOCK_START)
+    if start < 0:
+        return None
+    start += len(MARKDOWN_BLOCK_START)
+    end = document.find(MARKDOWN_BLOCK_END, start)
+    if end < 0:
+        return None
+    return unescape_markdown_block(document[start:end])
+
 
 def _slug(value: str) -> str:
     slug = SLUG_SEPARATOR.sub("-", value.lower()).strip("-")
