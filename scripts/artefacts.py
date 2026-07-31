@@ -1058,8 +1058,15 @@ def build_desired_files(
             f"source path escapes source directory: {source_path}",
         )
         source_bytes = source_path.read_bytes()
-        if entry.source.suffix.lower() == ".html":
+        suffix = entry.source.suffix.lower()
+        if suffix == ".html":
             output = transform_html(entry, source_bytes)
+        elif suffix == ".md":
+            # Looked up per entry on purpose: a manifest with no Markdown must not
+            # require the parser to be vendored.
+            output = render_markdown_page(
+                entry, source_bytes, markdown_vendor_path(manifest)
+            )
         else:
             output = source_bytes
         desired[entry.destination] = output

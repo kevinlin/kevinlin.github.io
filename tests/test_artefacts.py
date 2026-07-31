@@ -699,6 +699,40 @@ class DesiredTreeTests(unittest.TestCase):
 
         self.assertEqual(desired, {})
 
+    def test_build_desired_files_renders_markdown_entries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text(
+                "# Report\n\nBody.\n", encoding="utf-8"
+            )
+            manifest = artefacts_cli.Manifest(
+                version=1,
+                protected_files=(PurePosixPath("vendor/marked.min.js"),),
+                collections=(),
+                entries=(markdown_entry(),),
+            )
+            desired = artefacts_cli.build_desired_files(manifest, root)
+        page = desired[PurePosixPath("notes/report/index.html")].decode("utf-8")
+        self.assertEqual(artefacts_cli.extract_markdown(page), "# Report\n\nBody.\n")
+        self.assertIn('src="../../vendor/marked.min.js"', page)
+
+    def test_build_desired_files_requires_the_vendored_parser(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text("# R\n", encoding="utf-8")
+            manifest = artefacts_cli.Manifest(
+                version=1,
+                protected_files=(),
+                collections=(),
+                entries=(markdown_entry(),),
+            )
+            with self.assertRaisesRegex(
+                artefacts_cli.TransformationError, "marked.min.js"
+            ):
+                artefacts_cli.build_desired_files(manifest, root)
+
 
 class MarkdownEscapingTests(unittest.TestCase):
     def round_trip(self, text: str) -> str:
