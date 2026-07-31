@@ -2,7 +2,8 @@
   "version": 1,
   "protected_files": [
     "vendor/chart.umd.min.js",
-    "vendor/chartjs-plugin-datalabels.min.js"
+    "vendor/chartjs-plugin-datalabels.min.js",
+    "vendor/marked.min.js"
   ],
   "collections": [
     {
