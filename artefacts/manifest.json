@@ -6,7 +6,6 @@
     "vendor/marked.min.js"
   ],
   "ignored_sources": [
-    "Last30Days/",
     "fable5-21days/prompts/",
     "fable5-21days/analysis.md",
     "fable5-21days/focus-narrative-21days.md",
