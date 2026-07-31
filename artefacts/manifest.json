@@ -5,6 +5,18 @@
     "vendor/chartjs-plugin-datalabels.min.js",
     "vendor/marked.min.js"
   ],
+  "ignored_sources": [
+    "Last30Days/",
+    "fable5-21days/prompts/",
+    "fable5-21days/analysis.md",
+    "fable5-21days/focus-narrative-21days.md",
+    "fable5-21days/source-agent-focus.md",
+    "fable5-21days/structured-content.md",
+    "fde/prompts/",
+    "fde/analysis.md",
+    "fde/source-swen-fde.md",
+    "fde/structured-content.md"
+  ],
   "collections": [
     {
       "id": "product-timeline",
@@ -141,6 +153,22 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 150
+    },
+    {
+      "id": "hermes-agent",
+      "title": "Hermes agent",
+      "description": "Incident reports and write-ups from the Hermes agent.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 30
+    },
+    {
+      "id": "product-idea",
+      "title": "Product ideas",
+      "description": "Product requirement documents for prototype ideas.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 40
     }
   ],
   "entries": [
@@ -435,6 +463,24 @@
       "title": "Jenny wen design process is dead",
       "collection": "product-builder",
       "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "hermes-agent-hermes-whatsapp-bridge-incident-report",
+      "source": "hermes-agent/hermes-whatsapp-bridge-incident-report.md",
+      "destination": "hermes-agent/hermes-whatsapp-bridge-incident-report/index.html",
+      "title": "Hermes WhatsApp Bridge Phantom Messages — Incident Report",
+      "collection": "hermes-agent",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "product-idea-prd-the-donation-map",
+      "source": "product-idea/PRD_The Donation Map.md",
+      "destination": "product-idea/prd-the-donation-map/index.html",
+      "title": "PRD: The Donation Map",
+      "collection": "product-idea",
+      "order": 10,
       "replacements": {}
     }
   ]

@@ -764,7 +764,18 @@ MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
             var text = raw.replace(/<(\\\\+)(\\/script|!--)/gi, function (match, slashes, marker) {{
                 return '<' + slashes.slice(1) + marker;
             }});
-            document.getElementById('markdown-body').innerHTML = marked.parse(text);
+            var body = document.getElementById('markdown-body');
+            body.innerHTML = marked.parse(text);
+            // Most documents open with their own H1, and the proposal derives the
+            // manifest title from exactly that heading, so the page would print the
+            // title twice. Drop the article's copy when it repeats the header rather
+            // than stripping it from the source, which has to stay byte-exact.
+            var lead = body.firstElementChild;
+            var heading = document.querySelector('header h1');
+            if (lead && lead.tagName === 'H1' && heading &&
+                lead.textContent.trim() === heading.textContent.trim()) {{
+                lead.remove();
+            }}
         }})();
     </script>
 </body>

@@ -984,6 +984,15 @@ class MarkdownRenderTests(unittest.TestCase):
                 markdown_entry(), b"\xff\xfe not utf-8", self.VENDOR
             )
 
+    def test_page_drops_a_lead_heading_that_repeats_the_title(self):
+        # The removal runs in the browser: the embedded Markdown must stay
+        # byte-exact, so the duplicate cannot be stripped from the source.
+        page = self.render("# Report & Analysis\n\nBody.\n")
+        self.assertIn("lead.remove()", page)
+        self.assertEqual(
+            artefacts_cli.extract_markdown(page), "# Report & Analysis\n\nBody.\n"
+        )
+
     def test_page_ends_with_a_newline(self):
         self.assertTrue(self.render("# R\n").endswith("\n"))
 

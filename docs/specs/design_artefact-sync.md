@@ -176,6 +176,8 @@ One template, matching `artefacts/index.html`: the same colour tokens and fonts 
 
 The `<title>` is the manifest title, escaped. The body holds the Markdown inside `<script type="text/markdown">` and a short inline script that hands the block to `marked` and writes the result into the article element.
 
+Most documents open with their own `# ` heading, and the proposal derives the manifest title from that heading, so the rendered page would print the title twice. After parsing, the script drops the article's leading `<h1>` when its text matches the header's. The removal happens in the browser because the embedded Markdown stays byte-exact: stripping the heading from the source would break the round trip that `apply`'s byte check and the diff both rest on. A document whose first heading differs from its manifest title keeps both, which is the case where the two really do say different things.
+
 ### Script-block escaping
 
 Raw text in a `<script>` element ends at a literal `</script`, so the Markdown cannot be embedded unchanged. Two byte sequences are escaped on write and reversed in the page's own JavaScript:
