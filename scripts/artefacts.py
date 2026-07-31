@@ -123,6 +123,10 @@ class Manifest:
     protected_files: tuple[PurePosixPath, ...]
     collections: tuple[Collection, ...]
     entries: tuple[Entry, ...]
+    # Source paths the scan subtracts before reconciliation. A trailing "/" makes a
+    # rule cover a subtree. Kept as written rather than as PurePosixPath, because
+    # PurePosixPath discards the trailing separator the two forms are told apart by.
+    ignored_sources: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -159,6 +163,7 @@ class SyncPlan:
     unchanged: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
     markdown_diffs: tuple[tuple[PurePosixPath, str], ...] = ()
+    ignored_sources: tuple[tuple[str, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -288,12 +293,28 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
             )
         )
 
+    ignored_payload = payload.get("ignored_sources", [])
+    if not isinstance(ignored_payload, list):
+        raise ManifestError("ignored_sources must be an array")
+    ignored_sources = tuple(
+        _safe_ignore_rule(value) for value in ignored_payload
+    )
+
     return Manifest(
         version=payload.get("version"),
         protected_files=protected_files,
         collections=collections,
         entries=tuple(entries),
+        ignored_sources=ignored_sources,
     )
+
+
+def _safe_ignore_rule(value: Any) -> str:
+    """One ignore rule, validated as a relative path with its trailing "/" kept."""
+    if not isinstance(value, str):
+        raise ManifestError("ignored source must be a safe relative path")
+    _safe_relative_path(value.rstrip("/"), "ignored source")
+    return value
 
 
 def _require_unique(values: list[Any], message: str) -> None:
@@ -322,6 +343,15 @@ def validate_manifest(manifest: Manifest) -> None:
         [entry.destination for entry in manifest.entries], "duplicate destination"
     )
     _require_unique(list(manifest.protected_files), "duplicate protected file")
+    _require_unique(list(manifest.ignored_sources), "duplicate ignored source")
+
+    # An entry says publish this and an ignore rule says never look at it. Resolving
+    # the contradiction either way would hide an edit the user made by hand.
+    for entry in manifest.entries:
+        if _is_ignored(entry.source, manifest.ignored_sources):
+            raise ManifestError(
+                f"ignored source is also an entry source: {entry.source.as_posix()}"
+            )
 
     collection_ids = {collection.id for collection in manifest.collections}
     reserved_destinations = {PurePosixPath("index.html"), PurePosixPath("manifest.json")}
@@ -450,6 +480,37 @@ def scan_source(source_root: Path) -> SourceInventory:
         approved=tuple(sorted(approved, key=str)),
         excluded_suffixes=tuple(sorted(excluded_suffixes)),
     )
+
+
+def _is_ignored(source: PurePosixPath, rules: tuple[str, ...]) -> bool:
+    text = source.as_posix()
+    return any(
+        text.startswith(rule) if rule.endswith("/") else text == rule
+        for rule in rules
+    )
+
+
+def apply_source_ignores(
+    inventory: SourceInventory, rules: tuple[str, ...]
+) -> tuple[SourceInventory, tuple[tuple[str, int], ...]]:
+    """The inventory without the ignored sources, and each rule's match count.
+
+    Applied between the scan and the reconciliation so `scan_source` stays
+    manifest-unaware and every rule downstream sees an inventory the ignored files
+    were never in. The counts are returned rather than logged because a silently
+    skipped file is the one way this list can lose work.
+    """
+    approved = tuple(
+        source for source in inventory.approved if not _is_ignored(source, rules)
+    )
+    counts = tuple(
+        (
+            rule,
+            sum(1 for source in inventory.approved if _is_ignored(source, (rule,))),
+        )
+        for rule in rules
+    )
+    return replace(inventory, approved=approved), counts
 
 
 SLUG_SEPARATOR = re.compile(r"[^a-z0-9]+")
@@ -1271,6 +1332,7 @@ def manifest_to_json(manifest: Manifest) -> bytes:
     payload = {
         "version": manifest.version,
         "protected_files": [path.as_posix() for path in manifest.protected_files],
+        "ignored_sources": list(manifest.ignored_sources),
         "collections": [
             {
                 "id": collection.id,
@@ -1369,7 +1431,9 @@ def create_sync_plan(
 ) -> SyncPlan:
     declared = load_manifest(manifest_path)
     manifest = normalize_orders(declared)
-    inventory = scan_source(source_root)
+    inventory, ignored_rules = apply_source_ignores(
+        scan_source(source_root), manifest.ignored_sources
+    )
     reconciliation = reconcile_inventory(manifest, inventory)
     next_manifest = reconciliation.next_manifest
     desired_files = build_desired_files(next_manifest, source_root)
@@ -1462,6 +1526,7 @@ def create_sync_plan(
         unchanged=tuple(sorted(unchanged, key=str)),
         excluded_suffixes=inventory.excluded_suffixes,
         markdown_diffs=tuple(markdown_diffs),
+        ignored_sources=ignored_rules,
     )
 
 
@@ -1512,6 +1577,15 @@ def format_plan(plan: SyncPlan) -> str:
         for destination, body in plan.markdown_diffs:
             lines.append(f"  ~ {destination.as_posix()}")
             lines.extend(f"      {line}" for line in body.splitlines())
+    if plan.ignored_sources:
+        # One line per rule, not per file: a long path list on every run trains the
+        # reader to skip the block, and the rule is what they would edit.
+        total = sum(count for _, count in plan.ignored_sources)
+        lines.append(f"Ignored sources ({total})")
+        lines.extend(
+            f"  - {rule} ({count} file{'' if count == 1 else 's'})"
+            for rule, count in plan.ignored_sources
+        )
     lines.append(f"Unchanged ({len(plan.unchanged)})")
     lines.append(f"Excluded source types: {', '.join(plan.excluded_suffixes) or 'none'}")
     return "\n".join(lines)

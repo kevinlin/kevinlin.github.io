@@ -85,7 +85,7 @@ The command recursively scans the source directory for `.html`, `.md`, `.png`, `
 
 The following rules apply:
 
-- Every approved source file must have one manifest entry. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [Manifest Proposals](#manifest-proposals).
+- Every approved source file must have one manifest entry, unless the manifest ignores it. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [Manifest Proposals](#manifest-proposals) and [Ignored Sources](#ignored-sources).
 - Every manifest source must exist. A missing source is shown as a deletion and, after confirmation, removes its entry and destination.
 - Every published file must be explained by the manifest. A file under `artefacts/` that the desired tree does not contain is shown as an orphan deletion. See [Orphan Cleanup](#orphan-cleanup).
 - Destination paths must be unique, relative, lowercase kebab-case, and contained below `artefacts/`.
@@ -98,6 +98,59 @@ The following rules apply:
 - Files outside the allowlist are never copied.
 
 Renaming a source does not require changing its public URL. Only the manifest's `source` field changes. Changing a `destination` is treated as an explicit public URL migration and appears as one deletion and one addition in the preview.
+
+## Ignored Sources
+
+### Why the list exists
+
+Approving `.md` turned thirty working files under `~/Downloads/Artefacts` into blockers. Raw captures, intermediate analysis, and image-generation prompts sit beside the images they produced. None is a publication, and each one aborts `plan`, `apply`, and `publish` under the rule that every approved source carries an entry.
+
+Publishing them puts working notes on a public site. Moving them out of the source directory separates a prompt from the image it generated, which is why they share a folder. The third option is to say so in the manifest, where every other publication decision already lives.
+
+### What it is
+
+`ignored_sources` is an array of paths relative to the source root. A plain path ignores one file; a path ending in `/` ignores that subtree. No wildcards.
+
+```json
+  "ignored_sources": [
+    "Last30Days/",
+    "fde/prompts/",
+    "fde/analysis.md"
+  ],
+```
+
+The two forms carry different claims. A directory says the folder is a workspace, so whatever lands there next is a working file too. A file path says this one document is a working file, and leaves its folder open. `fde/` holds published images, so a future `.md` there should stop the run and be decided on, which is what a bare `fde/*.md` pattern would take away. Wildcards are excluded because a pattern decides for files nobody has written yet, and the case that motivated the list is folders and named documents, not shapes of filenames.
+
+The field is optional and defaults to empty, so a manifest written before it existed still parses. `manifest_to_json` always emits it.
+
+### Where it applies
+
+Ignoring happens between the scan and the reconciliation. `scan_source` stays manifest-unaware and keeps reporting excluded document types; `apply_source_ignores` then subtracts the ignored paths from the approved set. Everything downstream — the unlisted check, the proposal, the desired tree, the catalogue — sees an inventory the ignored files were never in, so no other rule needs to learn about them.
+
+An ignored path that also appears as an entry `source` is a manifest error. The manifest would be saying publish this and skip this at once, and resolving it silently in either direction would hide a mistake in the file the user edits by hand.
+
+A rule matching nothing is not an error. Deleting a source is normal, and a stale rule publishes nothing.
+
+### Preview
+
+`SyncPlan` carries `ignored_sources: tuple[tuple[str, int], ...]`, one pair per rule with the number of files it matched. `format_plan` prints an `Ignored sources (N)` heading over one line per rule, `N` being the total files suppressed:
+
+```text
+Ignored sources (28)
+  - Last30Days/ (8 files)
+  - fde/prompts/ (6 files)
+  - fde/analysis.md (1 file)
+```
+
+Per rule rather than per file, because twenty-eight paths on every run is noise that trains the user to skip the block, and the rule is what they would edit to change the outcome. A rule matching zero files still prints, so a stale rule is visible rather than silently carried.
+
+The heading is omitted when the list is empty, matching `Renumbered order` and `Markdown changes`.
+
+Silence is the failure mode that matters here. A file the user meant to publish, quietly skipped by a rule they forgot, is the one way this list can lose work, and the count is what catches it.
+
+### Not in scope
+
+Wildcard and regular-expression patterns, and ignoring anything outside the source root. `validate` is untouched: it never reads the source directory, and checks only that the field holds safe relative paths.
 
 ## Markdown Documents
 
@@ -291,11 +344,11 @@ An entry whose source is missing contributes no date, so a card whose deletion i
 
 1. Resolve and validate the repository and source roots.
 2. Parse and validate the manifest.
-3. Scan approved source files and detect unlisted or missing entries. Unlisted sources print a manifest proposal and end the run with exit code 3.
+3. Scan approved source files, subtract the ignored ones, and detect unlisted or missing entries. Unlisted sources print a manifest proposal and end the run with exit code 3.
 4. Build the complete desired managed tree in a temporary directory.
 5. Apply declared HTML replacements, render Markdown pages, and generate the catalogue region.
 6. Validate paths, hashes, catalogue coverage, and local references.
-7. Print additions, updates, deletions, orphan deletions, Markdown diffs, unchanged files, and excluded file types.
+7. Print additions, updates, deletions, orphan deletions, Markdown diffs, ignored sources, unchanged files, and excluded file types.
 
 `apply` runs the same plan, asks for confirmation, and then updates only destinations represented by the pre-apply manifest, approved new entries, and the generated catalogue region. Missing managed sources are valid deletion proposals. An invalid manifest blocks application. Unlisted approved source files stop the run after `apply` and `publish` have written the confirmed manifest proposal; `plan` prints the proposal and writes nothing.
 
@@ -357,6 +410,15 @@ Manifest proposals:
 - Order continues from the collection maximum, stable across several new files.
 - cdnjs replacement pre-fill, and no replacements for a `.html` file with no vendored reference.
 - A cdnjs reference left unmapped after the pre-fill warns; a fully vendored file does not.
+
+Ignored sources:
+
+- A file path ignores exactly that file; a sibling in the same folder stays approved.
+- A path ending in `/` ignores the subtree, including a file added to it later.
+- An ignored file is absent from the unlisted set, so it raises no error and reaches no proposal.
+- A path that is both ignored and an entry `source` is a manifest error.
+- A rule matching no file is accepted and still printed, with a count of zero.
+- `format_plan` reports one line per rule with its match count, and omits the heading when the list is empty.
 
 Last updated dates:
 

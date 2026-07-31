@@ -27,6 +27,7 @@ def valid_payload() -> dict:
     return {
         "version": 1,
         "protected_files": ["vendor/chart.umd.min.js"],
+        "ignored_sources": [],
         "collections": [
             {
                 "id": "charts",
@@ -175,6 +176,47 @@ class ManifestTests(unittest.TestCase):
         manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
 
         self.assertEqual([entry.order for entry in manifest.entries], [10, 10])
+
+    def test_ignored_sources_default_to_empty_when_absent(self):
+        payload = valid_payload()
+        del payload["ignored_sources"]  # a manifest written before the field existed
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(manifest.ignored_sources, ())
+
+    def test_loads_file_and_directory_ignore_rules(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/", "fde/analysis.md"]
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(manifest.ignored_sources, ("Last30Days/", "fde/analysis.md"))
+
+    def test_rejects_an_ignore_rule_that_escapes_the_source_root(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["../secrets.md"]
+        self.assert_manifest_error(payload, "ignored source must be a safe relative path")
+
+    def test_rejects_a_duplicate_ignore_rule(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/", "Last30Days/"]
+        self.assert_manifest_error(payload, "duplicate ignored source")
+
+    def test_rejects_an_ignore_rule_that_is_also_an_entry_source(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = [payload["entries"][0]["source"]]
+        self.assert_manifest_error(payload, "ignored source is also an entry source")
+
+    def test_rejects_a_directory_rule_containing_an_entry_source(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Charts/"]
+        self.assert_manifest_error(payload, "ignored source is also an entry source")
+
+    def test_ignored_sources_survive_a_json_round_trip(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/"]
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        restored = artefacts_cli.manifest_from_bytes(
+            artefacts_cli.manifest_to_json(manifest), "round trip"
+        )
+        self.assertEqual(restored.ignored_sources, ("Last30Days/",))
 
     def test_accepts_markdown_source_with_directory_index_destination(self):
         payload = valid_payload()
@@ -369,6 +411,63 @@ class SourceInventoryTests(unittest.TestCase):
             inventory = artefacts_cli.scan_source(root)
         self.assertEqual(inventory.approved, (PurePosixPath("Notes/Report.md"),))
         self.assertEqual(inventory.excluded_suffixes, (".docx",))
+
+    def inventory_of(self, *paths: str) -> "artefacts_cli.SourceInventory":
+        return artefacts_cli.SourceInventory(
+            approved=tuple(PurePosixPath(path) for path in paths),
+            excluded_suffixes=(),
+        )
+
+    def test_a_file_rule_ignores_only_that_file(self):
+        inventory = self.inventory_of("fde/analysis.md", "fde/report.md")
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("fde/analysis.md",)
+        )
+        self.assertEqual(filtered.approved, (PurePosixPath("fde/report.md"),))
+        self.assertEqual(rules, (("fde/analysis.md", 1),))
+
+    def test_a_directory_rule_ignores_the_whole_subtree(self):
+        inventory = self.inventory_of(
+            "Last30Days/a.md", "Last30Days/nested/b.md", "fde/report.md"
+        )
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("Last30Days/",)
+        )
+        self.assertEqual(filtered.approved, (PurePosixPath("fde/report.md"),))
+        self.assertEqual(rules, (("Last30Days/", 2),))
+
+    def test_a_directory_rule_does_not_match_a_prefix_of_a_sibling_name(self):
+        # "Last30Days/" must not swallow "Last30DaysArchive/notes.md".
+        inventory = self.inventory_of("Last30DaysArchive/notes.md")
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("Last30Days/",)
+        )
+        self.assertEqual(filtered.approved, inventory.approved)
+        self.assertEqual(rules, (("Last30Days/", 0),))
+
+    def test_a_rule_matching_nothing_is_reported_with_a_zero_count(self):
+        inventory = self.inventory_of("fde/report.md")
+        _, rules = artefacts_cli.apply_source_ignores(inventory, ("gone/",))
+        self.assertEqual(rules, (("gone/", 0),))
+
+    def test_excluded_suffixes_are_left_alone(self):
+        inventory = artefacts_cli.SourceInventory(
+            approved=(PurePosixPath("fde/report.md"),), excluded_suffixes=(".docx",)
+        )
+        filtered, _ = artefacts_cli.apply_source_ignores(inventory, ("fde/",))
+        self.assertEqual(filtered.approved, ())
+        self.assertEqual(filtered.excluded_suffixes, (".docx",))
+
+    def test_ignored_sources_never_reach_the_unlisted_set(self):
+        manifest = artefacts_cli.manifest_from_dict(
+            {**valid_payload(), "ignored_sources": ["Notes/"]}
+        )
+        inventory = self.inventory_of("Charts/Cost.png", "Notes/Draft.md")
+        filtered, _ = artefacts_cli.apply_source_ignores(
+            inventory, manifest.ignored_sources
+        )
+        result = artefacts_cli.reconcile_inventory(manifest, filtered)
+        self.assertEqual(result.missing_entries, ())
 
     def test_suggest_destination_maps_markdown_to_a_directory_index(self):
         self.assertEqual(
@@ -1556,6 +1655,40 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         )
         self.assertEqual(plan.markdown_diffs, ())
         self.assertNotIn("Markdown changes", artefacts_cli.format_plan(plan))
+
+    def test_an_ignored_source_neither_blocks_nor_publishes(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        (source / "Notes").mkdir()
+        (source / "Notes" / "Working.md").write_text("# Draft\n", encoding="utf-8")
+
+        # Without a rule the unlisted working file aborts the run.
+        with self.assertRaises(artefacts_cli.UnlistedSourceError):
+            artefacts_cli.create_sync_plan(
+                manifest_path, source, repo / "artefacts", head_manifest
+            )
+
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["ignored_sources"] = ["Notes/"]
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        self.assertEqual(plan.ignored_sources, (("Notes/", 1),))
+        self.assertNotIn(
+            PurePosixPath("notes/working/index.html"), plan.desired_files
+        )
+        rendered = artefacts_cli.format_plan(plan)
+        self.assertIn("Ignored sources (1)\n  - Notes/ (1 file)", rendered)
+
+    def test_a_plan_without_ignore_rules_omits_the_heading(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+        self.assertEqual(plan.ignored_sources, ())
+        self.assertNotIn("Ignored sources", artefacts_cli.format_plan(plan))
 
     def test_markdown_add_then_update_cycle_validates(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
