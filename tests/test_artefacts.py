@@ -750,6 +750,91 @@ class MarkdownEscapingTests(unittest.TestCase):
         self.assertIsNone(artefacts_cli.extract_markdown("<html>no block</html>"))
 
 
+def markdown_entry(destination: str = "notes/report/index.html") -> "artefacts_cli.Entry":
+    return artefacts_cli.Entry(
+        id="report",
+        source=PurePosixPath("Notes/Report.md"),
+        destination=PurePosixPath(destination),
+        title="Report & Analysis",
+        collection="notes",
+        order=10,
+        replacements={},
+    )
+
+
+class MarkdownRenderTests(unittest.TestCase):
+    VENDOR = PurePosixPath("vendor/marked.min.js")
+
+    def render(self, text: str, destination: str = "notes/report/index.html") -> str:
+        return artefacts_cli.render_markdown_page(
+            markdown_entry(destination), text.encode("utf-8"), self.VENDOR
+        ).decode("utf-8")
+
+    def test_page_embeds_the_source_and_extraction_recovers_it(self):
+        text = "# Report\n\nBody with </script> and <!-- note -->.\n"
+        page = self.render(text)
+        self.assertEqual(artefacts_cli.extract_markdown(page), text)
+
+    def test_page_escapes_the_title_and_uses_it_verbatim(self):
+        page = self.render("# Report\n")
+        self.assertIn("<title>Report &amp; Analysis | Artefacts</title>", page)
+        self.assertIn("<h1>Report &amp; Analysis</h1>", page)
+
+    def test_vendor_reference_depth_follows_the_destination(self):
+        two_deep = self.render("# R\n", "notes/report/index.html")
+        self.assertIn('src="../../vendor/marked.min.js"', two_deep)
+        three_deep = self.render("# R\n", "notes/prompts/report/index.html")
+        self.assertIn('src="../../../vendor/marked.min.js"', three_deep)
+
+    def test_back_link_points_at_the_catalogue(self):
+        page = self.render("# R\n", "notes/report/index.html")
+        self.assertIn('href="../../"', page)
+
+    def test_page_has_no_cdnjs_reference(self):
+        self.assertFalse(
+            artefacts_cli.has_cdnjs_reference(self.render("# R\n"))
+        )
+
+    def test_render_is_deterministic(self):
+        text = "# Report\n\nBody.\n"
+        self.assertEqual(self.render(text), self.render(text))
+
+    def test_render_rejects_a_non_utf8_source(self):
+        with self.assertRaisesRegex(
+            artefacts_cli.TransformationError, "not UTF-8"
+        ):
+            artefacts_cli.render_markdown_page(
+                markdown_entry(), b"\xff\xfe not utf-8", self.VENDOR
+            )
+
+    def test_page_ends_with_a_newline(self):
+        self.assertTrue(self.render("# R\n").endswith("\n"))
+
+    def test_vendor_lookup_finds_the_registered_parser(self):
+        manifest = artefacts_cli.Manifest(
+            version=1,
+            protected_files=(
+                PurePosixPath("vendor/chart.umd.min.js"),
+                PurePosixPath("vendor/marked.min.js"),
+            ),
+            collections=(),
+            entries=(),
+        )
+        self.assertEqual(artefacts_cli.markdown_vendor_path(manifest), self.VENDOR)
+
+    def test_vendor_lookup_reports_an_unregistered_parser(self):
+        manifest = artefacts_cli.Manifest(
+            version=1,
+            protected_files=(PurePosixPath("vendor/chart.umd.min.js"),),
+            collections=(),
+            entries=(),
+        )
+        with self.assertRaisesRegex(
+            artefacts_cli.TransformationError, "marked.min.js"
+        ):
+            artefacts_cli.markdown_vendor_path(manifest)
+
+
 class CatalogueTests(unittest.TestCase):
     def catalogue_manifest(self):
         payload = {

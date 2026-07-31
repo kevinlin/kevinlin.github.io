@@ -496,6 +496,263 @@ def extract_markdown(document: str) -> str | None:
     return unescape_markdown_block(document[start:end])
 
 
+MARKDOWN_VENDOR_NAME = "marked.min.js"
+
+# One self-contained document per Markdown entry, matching artefacts/index.html:
+# same colour tokens and fonts, same pre-paint theme script, a prose column, and a
+# back-link to the catalogue. The CSS is inline because every other published page
+# is self-contained; a shared stylesheet would add a cross-file reference for
+# `validate` to resolve on every document.
+MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} | Artefacts</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {{
+            try {{
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            }} catch (e) {{}}
+        }})();
+    </script>
+    <style>
+        :root {{
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --tint: rgba(0, 99, 163, 0.1);
+        }}
+
+        [data-theme="dark"] {{
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --tint: rgba(67, 137, 185, 0.16);
+        }}
+
+        *, *::before, *::after {{ box-sizing: border-box; }}
+
+        html {{
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }}
+
+        body {{
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }}
+
+        header, main, footer {{
+            width: min(760px, calc(100% - 48px));
+            margin-inline: auto;
+        }}
+
+        header {{ padding: 56px 0 8px; }}
+
+        a {{ color: var(--primary-color); text-underline-offset: 0.2em; }}
+        a:hover {{ color: var(--accent-color); }}
+
+        .back-link {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }}
+
+        .back-link:hover span {{ text-decoration: underline; }}
+
+        h1 {{
+            margin: 24px 0 8px;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            text-wrap: balance;
+        }}
+
+        main {{ padding-bottom: 72px; }}
+
+        article {{
+            padding: 32px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }}
+
+        article > :first-child {{ margin-top: 0; }}
+        article > :last-child {{ margin-bottom: 0; }}
+
+        article h1, article h2, article h3, article h4 {{
+            margin: 2em 0 0.6em;
+            line-height: 1.3;
+            text-wrap: balance;
+        }}
+
+        article h2 {{
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+        }}
+
+        article h3 {{ font-size: 1.2rem; }}
+
+        article img {{ max-width: 100%; height: auto; }}
+
+        article blockquote {{
+            margin: 1.5em 0;
+            padding: 0.2em 1.2em;
+            border-left: 3px solid var(--primary-color);
+            color: var(--light-text);
+        }}
+
+        article code {{
+            padding: 0.15em 0.4em;
+            background: var(--tint);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }}
+
+        article pre {{
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }}
+
+        article pre code {{ padding: 0; background: none; }}
+
+        .table-scroll, article table {{ display: block; overflow-x: auto; }}
+
+        article table {{ border-collapse: collapse; width: 100%; }}
+
+        article th, article td {{
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }}
+
+        article th {{ background: var(--tint); }}
+
+        article hr {{ border: none; border-top: 1px solid var(--border-color); }}
+
+        footer {{
+            padding-bottom: 48px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="{prefix}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Artefacts</span>
+        </a>
+        <h1>{title}</h1>
+    </header>
+
+    <main>
+        <article id="markdown-body"></article>
+    </main>
+
+    <footer>
+        <p>Rendered from Markdown in the browser.</p>
+    </footer>
+
+{block_start}{markdown}{block_end}
+    <script src="{prefix}{vendor}"></script>
+    <script>
+        // The source block carries the Markdown verbatim except for two escaped
+        // sequences; the same substitution runs in reverse here. See
+        // escape_markdown_block in scripts/artefacts.py.
+        (function () {{
+            // textContent starts at the newline that follows the opening tag, which
+            // the Python-side extract_markdown slice does not include. Drop it so
+            // both sides see the same bytes.
+            var raw = document.getElementById('markdown-source').textContent.replace(/^\\n/, '');
+            var text = raw.replace(/<(\\\\+)(\\/script|!--)/gi, function (match, slashes, marker) {{
+                return '<' + slashes.slice(1) + marker;
+            }});
+            document.getElementById('markdown-body').innerHTML = marked.parse(text);
+        }})();
+    </script>
+</body>
+</html>
+"""
+
+
+def markdown_vendor_path(manifest: Manifest) -> PurePosixPath:
+    for path in manifest.protected_files:
+        if path.name == MARKDOWN_VENDOR_NAME:
+            return path
+    raise TransformationError(
+        f"{MARKDOWN_VENDOR_NAME} must be listed in protected_files to publish Markdown"
+    )
+
+
+def render_markdown_page(
+    entry: Entry, source_bytes: bytes, vendor_path: PurePosixPath
+) -> bytes:
+    """One self-contained page carrying the Markdown verbatim.
+
+    The Markdown is embedded rather than converted because this script is
+    standard-library only. Its bytes are preserved exactly: the trailing-space
+    stripping `transform_html` applies would turn a Markdown hard line break into a
+    soft one, and both `apply`'s byte check and the diff preview depend on the
+    embed-extract round trip being lossless.
+    """
+    try:
+        text = source_bytes.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise TransformationError(
+            f"Markdown source is not UTF-8: {entry.source}"
+        ) from error
+    if text and not text.endswith("\n"):
+        text += "\n"
+    prefix = "../" * len(entry.destination.parent.parts)
+    document = MARKDOWN_PAGE_TEMPLATE.format(
+        title=html.escape(entry.title),
+        prefix=prefix,
+        vendor=vendor_path.as_posix(),
+        block_start=MARKDOWN_BLOCK_START,
+        markdown=escape_markdown_block(text),
+        block_end=MARKDOWN_BLOCK_END,
+    )
+    if has_cdnjs_reference(document):
+        raise TransformationError(
+            f"forbidden cdnjs reference in generated Markdown page for {entry.id}"
+        )
+    return document.encode("utf-8")
+
+
 def _slug(value: str) -> str:
     slug = SLUG_SEPARATOR.sub("-", value.lower()).strip("-")
     if not slug:
