@@ -27,6 +27,7 @@ def valid_payload() -> dict:
     return {
         "version": 1,
         "protected_files": ["vendor/chart.umd.min.js"],
+        "ignored_sources": [],
         "collections": [
             {
                 "id": "charts",
@@ -176,6 +177,62 @@ class ManifestTests(unittest.TestCase):
 
         self.assertEqual([entry.order for entry in manifest.entries], [10, 10])
 
+    def test_ignored_sources_default_to_empty_when_absent(self):
+        payload = valid_payload()
+        del payload["ignored_sources"]  # a manifest written before the field existed
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(manifest.ignored_sources, ())
+
+    def test_loads_file_and_directory_ignore_rules(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/", "fde/analysis.md"]
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(manifest.ignored_sources, ("Last30Days/", "fde/analysis.md"))
+
+    def test_rejects_an_ignore_rule_that_escapes_the_source_root(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["../secrets.md"]
+        self.assert_manifest_error(payload, "ignored source must be a safe relative path")
+
+    def test_rejects_a_duplicate_ignore_rule(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/", "Last30Days/"]
+        self.assert_manifest_error(payload, "duplicate ignored source")
+
+    def test_rejects_an_ignore_rule_that_is_also_an_entry_source(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = [payload["entries"][0]["source"]]
+        self.assert_manifest_error(payload, "ignored source is also an entry source")
+
+    def test_rejects_a_directory_rule_containing_an_entry_source(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Charts/"]
+        self.assert_manifest_error(payload, "ignored source is also an entry source")
+
+    def test_ignored_sources_survive_a_json_round_trip(self):
+        payload = valid_payload()
+        payload["ignored_sources"] = ["Last30Days/"]
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        restored = artefacts_cli.manifest_from_bytes(
+            artefacts_cli.manifest_to_json(manifest), "round trip"
+        )
+        self.assertEqual(restored.ignored_sources, ("Last30Days/",))
+
+    def test_accepts_markdown_source_with_directory_index_destination(self):
+        payload = valid_payload()
+        payload["entries"][0]["source"] = "Notes/Report.md"
+        payload["entries"][0]["destination"] = "notes/report/index.html"
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(
+            manifest.entries[0].destination, PurePosixPath("notes/report/index.html")
+        )
+
+    def test_rejects_markdown_destination_that_keeps_the_md_extension(self):
+        payload = valid_payload()
+        payload["entries"][0]["source"] = "Notes/Report.md"
+        payload["entries"][0]["destination"] = "notes/report.md"
+        self.assert_manifest_error(payload, "must end in index.html")
+
 
 class NormalizeOrdersTests(unittest.TestCase):
     def manifest_from(self, payload: dict):
@@ -295,13 +352,13 @@ class SourceInventoryTests(unittest.TestCase):
     def test_scan_reports_only_approved_files(self):
         root = self.make_source()
         (root / "topic" / "Chart.PNG").write_bytes(b"png")
-        (root / "topic" / "notes.md").write_text("private", encoding="utf-8")
+        (root / "topic" / "notes.txt").write_text("private", encoding="utf-8")
         (root / ".DS_Store").write_bytes(b"metadata")
 
         inventory = artefacts_cli.scan_source(root)
 
         self.assertEqual(inventory.approved, (PurePosixPath("topic/Chart.PNG"),))
-        self.assertEqual(inventory.excluded_suffixes, (".md",))
+        self.assertEqual(inventory.excluded_suffixes, (".txt",))
 
     def test_scan_prunes_nested_repository_copy(self):
         root = self.make_source()
@@ -344,6 +401,79 @@ class SourceInventoryTests(unittest.TestCase):
 
         self.assertEqual(tuple(entry.id for entry in result.missing_entries), ("item-1",))
         self.assertEqual(result.next_manifest.entries, ())
+
+    def test_scan_reports_markdown_as_approved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text("# Report\n", encoding="utf-8")
+            (root / "Notes" / "Draft.docx").write_bytes(b"binary")
+            inventory = artefacts_cli.scan_source(root)
+        self.assertEqual(inventory.approved, (PurePosixPath("Notes/Report.md"),))
+        self.assertEqual(inventory.excluded_suffixes, (".docx",))
+
+    def inventory_of(self, *paths: str) -> "artefacts_cli.SourceInventory":
+        return artefacts_cli.SourceInventory(
+            approved=tuple(PurePosixPath(path) for path in paths),
+            excluded_suffixes=(),
+        )
+
+    def test_a_file_rule_ignores_only_that_file(self):
+        inventory = self.inventory_of("fde/analysis.md", "fde/report.md")
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("fde/analysis.md",)
+        )
+        self.assertEqual(filtered.approved, (PurePosixPath("fde/report.md"),))
+        self.assertEqual(rules, (("fde/analysis.md", 1),))
+
+    def test_a_directory_rule_ignores_the_whole_subtree(self):
+        inventory = self.inventory_of(
+            "Last30Days/a.md", "Last30Days/nested/b.md", "fde/report.md"
+        )
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("Last30Days/",)
+        )
+        self.assertEqual(filtered.approved, (PurePosixPath("fde/report.md"),))
+        self.assertEqual(rules, (("Last30Days/", 2),))
+
+    def test_a_directory_rule_does_not_match_a_prefix_of_a_sibling_name(self):
+        # "Last30Days/" must not swallow "Last30DaysArchive/notes.md".
+        inventory = self.inventory_of("Last30DaysArchive/notes.md")
+        filtered, rules = artefacts_cli.apply_source_ignores(
+            inventory, ("Last30Days/",)
+        )
+        self.assertEqual(filtered.approved, inventory.approved)
+        self.assertEqual(rules, (("Last30Days/", 0),))
+
+    def test_a_rule_matching_nothing_is_reported_with_a_zero_count(self):
+        inventory = self.inventory_of("fde/report.md")
+        _, rules = artefacts_cli.apply_source_ignores(inventory, ("gone/",))
+        self.assertEqual(rules, (("gone/", 0),))
+
+    def test_excluded_suffixes_are_left_alone(self):
+        inventory = artefacts_cli.SourceInventory(
+            approved=(PurePosixPath("fde/report.md"),), excluded_suffixes=(".docx",)
+        )
+        filtered, _ = artefacts_cli.apply_source_ignores(inventory, ("fde/",))
+        self.assertEqual(filtered.approved, ())
+        self.assertEqual(filtered.excluded_suffixes, (".docx",))
+
+    def test_ignored_sources_never_reach_the_unlisted_set(self):
+        manifest = artefacts_cli.manifest_from_dict(
+            {**valid_payload(), "ignored_sources": ["Notes/"]}
+        )
+        inventory = self.inventory_of("Charts/Cost.png", "Notes/Draft.md")
+        filtered, _ = artefacts_cli.apply_source_ignores(
+            inventory, manifest.ignored_sources
+        )
+        result = artefacts_cli.reconcile_inventory(manifest, filtered)
+        self.assertEqual(result.missing_entries, ())
+
+    def test_suggest_destination_maps_markdown_to_a_directory_index(self):
+        self.assertEqual(
+            artefacts_cli.suggest_destination(PurePosixPath("Notes/My_Report.md")),
+            PurePosixPath("notes/my-report/index.html"),
+        )
 
 
 class ManifestProposalTests(unittest.TestCase):
@@ -565,6 +695,50 @@ class ManifestProposalTests(unittest.TestCase):
             ["charts/cost.png", "travel/map.png"],
         )
 
+    def proposal_for(self, name: str, body: str):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        (root / "Notes").mkdir()
+        (root / "Notes" / name).write_text(body, encoding="utf-8")
+        manifest = artefacts_cli.manifest_from_dict(valid_payload())
+        artefacts_cli.validate_manifest(manifest)
+        return artefacts_cli.propose_manifest_additions(
+            manifest, (PurePosixPath(f"Notes/{name}"),), root
+        )
+
+    def test_markdown_title_comes_from_the_first_heading(self):
+        proposal = self.proposal_for(
+            "AI_Education_Catalogue.md", "# AI Education Catalogue\n\nBody.\n"
+        )
+        self.assertEqual(proposal.entries[0].title, "AI Education Catalogue")
+
+    def test_markdown_title_falls_back_to_the_stem(self):
+        proposal = self.proposal_for("01-my_report.md", "Body with no heading.\n")
+        self.assertEqual(proposal.entries[0].title, "My report")
+
+    def test_markdown_title_ignores_a_deeper_heading(self):
+        proposal = self.proposal_for("my_report.md", "## Section\n\n# Real Title\n")
+        self.assertEqual(proposal.entries[0].title, "Real Title")
+
+    def test_markdown_proposal_gets_no_replacements_or_warning(self):
+        # A cdnjs URL in Markdown prose is content, not a dependency to vendor.
+        proposal = self.proposal_for(
+            "my_report.md",
+            "# Report\n\nhttps://cdnjs.cloudflare.com/ajax/libs/x/x.js\n",
+        )
+        self.assertEqual(proposal.entries[0].replacements, {})
+        self.assertEqual(proposal.warnings, {})
+
+    def test_markdown_only_collection_joins_the_presentation_section(self):
+        # A .md publishes to a directory index.html, so _sections_by_media will read
+        # the collection back as a presentation. The proposal must agree on the way
+        # in, or the collection is filed under images and moves on the next run.
+        proposal = self.proposal_for("my_report.md", "# Report\n")
+        self.assertEqual(
+            proposal.collections[0].section, artefacts_cli.PRESENTATION_SECTION
+        )
+
 
 class DesiredTreeTests(unittest.TestCase):
     def make_source_and_manifest(
@@ -667,6 +841,218 @@ class DesiredTreeTests(unittest.TestCase):
         desired = artefacts_cli.build_desired_files(manifest, root)
 
         self.assertEqual(desired, {})
+
+    def test_build_desired_files_renders_markdown_entries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text(
+                "# Report\n\nBody.\n", encoding="utf-8"
+            )
+            manifest = artefacts_cli.Manifest(
+                version=1,
+                protected_files=(PurePosixPath("vendor/marked.min.js"),),
+                collections=(),
+                entries=(markdown_entry(),),
+            )
+            desired = artefacts_cli.build_desired_files(manifest, root)
+        page = desired[PurePosixPath("notes/report/index.html")].decode("utf-8")
+        self.assertEqual(artefacts_cli.extract_markdown(page), "# Report\n\nBody.\n")
+        self.assertIn('src="../../vendor/marked.min.js"', page)
+
+    def test_build_desired_files_requires_the_vendored_parser(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text("# R\n", encoding="utf-8")
+            manifest = artefacts_cli.Manifest(
+                version=1,
+                protected_files=(),
+                collections=(),
+                entries=(markdown_entry(),),
+            )
+            with self.assertRaisesRegex(
+                artefacts_cli.TransformationError, "marked.min.js"
+            ):
+                artefacts_cli.build_desired_files(manifest, root)
+
+
+class MarkdownEscapingTests(unittest.TestCase):
+    def round_trip(self, text: str) -> str:
+        return artefacts_cli.unescape_markdown_block(
+            artefacts_cli.escape_markdown_block(text)
+        )
+
+    def test_escapes_a_script_terminator(self):
+        escaped = artefacts_cli.escape_markdown_block("text </script> more")
+        self.assertNotIn("</script", escaped)
+        self.assertIn("<\\/script", escaped)
+
+    def test_escapes_a_comment_opener(self):
+        escaped = artefacts_cli.escape_markdown_block("text <!-- hidden --> more")
+        self.assertNotIn("<!--", escaped)
+        self.assertIn("<\\!--", escaped)
+
+    def test_escape_is_case_insensitive_on_the_tag_name(self):
+        escaped = artefacts_cli.escape_markdown_block("</SCRIPT>")
+        self.assertNotIn("</SCRIPT", escaped)
+        self.assertIn("<\\/SCRIPT", escaped)
+
+    def test_round_trip_preserves_plain_markdown_exactly(self):
+        text = "# Title\n\nBody with two trailing spaces  \nnext line\n\n- a\n- b\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_round_trip_preserves_a_preexisting_escaped_marker(self):
+        # A source that already contains the escaped form must not be corrupted:
+        # escaping adds a backslash, unescaping removes exactly one.
+        text = "literal <\\/script and <\\!-- in the source\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_round_trip_preserves_markers_inside_a_code_fence(self):
+        text = "```html\n<script>alert(1)</script>\n<!-- note -->\n```\n"
+        self.assertEqual(self.round_trip(text), text)
+
+    def test_extract_markdown_recovers_the_embedded_source(self):
+        text = "# Title\n\nSee </script> and <!-- this -->.\n"
+        document = (
+            "<body>\n"
+            + artefacts_cli.MARKDOWN_BLOCK_START
+            + artefacts_cli.escape_markdown_block(text)
+            + artefacts_cli.MARKDOWN_BLOCK_END
+            + "\n</body>\n"
+        )
+        self.assertEqual(artefacts_cli.extract_markdown(document), text)
+
+    def test_extract_markdown_returns_none_without_a_block(self):
+        self.assertIsNone(artefacts_cli.extract_markdown("<html>no block</html>"))
+
+
+def markdown_entry(destination: str = "notes/report/index.html") -> "artefacts_cli.Entry":
+    return artefacts_cli.Entry(
+        id="report",
+        source=PurePosixPath("Notes/Report.md"),
+        destination=PurePosixPath(destination),
+        title="Report & Analysis",
+        collection="notes",
+        order=10,
+        replacements={},
+    )
+
+
+class MarkdownRenderTests(unittest.TestCase):
+    VENDOR = PurePosixPath("vendor/marked.min.js")
+
+    def render(self, text: str, destination: str = "notes/report/index.html") -> str:
+        return artefacts_cli.render_markdown_page(
+            markdown_entry(destination), text.encode("utf-8"), self.VENDOR
+        ).decode("utf-8")
+
+    def test_page_embeds_the_source_and_extraction_recovers_it(self):
+        text = "# Report\n\nBody with </script> and <!-- note -->.\n"
+        page = self.render(text)
+        self.assertEqual(artefacts_cli.extract_markdown(page), text)
+
+    def test_page_escapes_the_title_and_uses_it_verbatim(self):
+        page = self.render("# Report\n")
+        self.assertIn("<title>Report &amp; Analysis | Artefacts</title>", page)
+        self.assertIn("<h1>Report &amp; Analysis</h1>", page)
+
+    def test_vendor_reference_depth_follows_the_destination(self):
+        two_deep = self.render("# R\n", "notes/report/index.html")
+        self.assertIn('src="../../vendor/marked.min.js"', two_deep)
+        three_deep = self.render("# R\n", "notes/prompts/report/index.html")
+        self.assertIn('src="../../../vendor/marked.min.js"', three_deep)
+
+    def test_back_link_points_at_the_catalogue(self):
+        page = self.render("# R\n", "notes/report/index.html")
+        self.assertIn('href="../../"', page)
+
+    def test_page_has_no_cdnjs_reference(self):
+        self.assertFalse(
+            artefacts_cli.has_cdnjs_reference(self.render("# R\n"))
+        )
+
+    def test_render_is_deterministic(self):
+        text = "# Report\n\nBody.\n"
+        self.assertEqual(self.render(text), self.render(text))
+
+    def test_render_rejects_a_non_utf8_source(self):
+        with self.assertRaisesRegex(
+            artefacts_cli.TransformationError, "not UTF-8"
+        ):
+            artefacts_cli.render_markdown_page(
+                markdown_entry(), b"\xff\xfe not utf-8", self.VENDOR
+            )
+
+    def test_page_drops_a_lead_heading_that_repeats_the_title(self):
+        # The removal runs in the browser: the embedded Markdown must stay
+        # byte-exact, so the duplicate cannot be stripped from the source.
+        page = self.render("# Report & Analysis\n\nBody.\n")
+        self.assertIn("lead.remove()", page)
+        self.assertEqual(
+            artefacts_cli.extract_markdown(page), "# Report & Analysis\n\nBody.\n"
+        )
+
+    def test_page_ends_with_a_newline(self):
+        self.assertTrue(self.render("# R\n").endswith("\n"))
+
+    def test_vendor_lookup_finds_the_registered_parser(self):
+        manifest = artefacts_cli.Manifest(
+            version=1,
+            protected_files=(
+                PurePosixPath("vendor/chart.umd.min.js"),
+                PurePosixPath("vendor/marked.min.js"),
+            ),
+            collections=(),
+            entries=(),
+        )
+        self.assertEqual(artefacts_cli.markdown_vendor_path(manifest), self.VENDOR)
+
+    def test_vendor_lookup_reports_an_unregistered_parser(self):
+        manifest = artefacts_cli.Manifest(
+            version=1,
+            protected_files=(PurePosixPath("vendor/chart.umd.min.js"),),
+            collections=(),
+            entries=(),
+        )
+        with self.assertRaisesRegex(
+            artefacts_cli.TransformationError, "marked.min.js"
+        ):
+            artefacts_cli.markdown_vendor_path(manifest)
+
+
+class MarkdownDiffTests(unittest.TestCase):
+    def page(self, text: str) -> bytes:
+        return artefacts_cli.render_markdown_page(
+            markdown_entry(), text.encode("utf-8"), PurePosixPath("vendor/marked.min.js")
+        )
+
+    def test_diff_reports_changed_lines_only(self):
+        diff = artefacts_cli.markdown_diff(
+            self.page("# Title\n\nOld body.\n"), b"# Title\n\nNew body.\n"
+        )
+        self.assertIn("-Old body.", diff)
+        self.assertIn("+New body.", diff)
+        self.assertNotIn("-# Title", diff)
+
+    def test_identical_markdown_produces_no_diff(self):
+        text = "# Title\n\nBody.\n"
+        self.assertEqual(artefacts_cli.markdown_diff(self.page(text), text.encode()), "")
+
+    def test_diff_is_truncated_with_the_remaining_count(self):
+        old = "# Title\n\n" + "".join(f"old line {n}\n" for n in range(60))
+        new = "# Title\n\n" + "".join(f"new line {n}\n" for n in range(60))
+        diff = artefacts_cli.markdown_diff(self.page(old), new.encode("utf-8"), limit=10)
+        lines = diff.splitlines()
+        self.assertEqual(len(lines), 11)
+        self.assertRegex(lines[-1], r"^… truncated, \d+ more lines$")
+
+    def test_unextractable_page_reports_the_diff_as_unavailable(self):
+        diff = artefacts_cli.markdown_diff(b"<html>hand written</html>", b"# New\n")
+        self.assertIn("diff unavailable", diff)
+
+    def test_missing_published_page_produces_no_diff(self):
+        self.assertEqual(artefacts_cli.markdown_diff(None, b"# New\n"), "")
 
 
 class CatalogueTests(unittest.TestCase):
@@ -1207,7 +1593,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
 
     def test_format_plan_lists_each_change_kind_and_excluded_types(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
-        (source / "notes.md").write_text("private", encoding="utf-8")
+        (source / "notes.txt").write_text("private", encoding="utf-8")
         plan = artefacts_cli.create_sync_plan(
             manifest_path, source, repo / "artefacts", head_manifest
         )
@@ -1218,7 +1604,160 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn("Update (3)", output)
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
         self.assertIn("Delete (orphaned) (1)\n  - notes.txt", output)
-        self.assertIn("Excluded source types: .md", output)
+        self.assertIn("Excluded source types: .txt", output)
+
+    def test_plan_diffs_a_changed_markdown_document(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts = repo / "artefacts"
+        (artefacts / "vendor" / "marked.min.js").write_bytes(b"/* parser */")
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["protected_files"].append("vendor/marked.min.js")
+        payload["entries"].append(
+            {
+                "id": "notes",
+                "source": "Notes/Report.md",
+                "destination": "charts/report/index.html",
+                "title": "Report",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (source / "Notes").mkdir()
+        (source / "Notes" / "Report.md").write_text(
+            "# Report\n\nSecond version.\n", encoding="utf-8"
+        )
+        published = artefacts / "charts" / "report"
+        published.mkdir(parents=True)
+        (published / "index.html").write_bytes(
+            artefacts_cli.render_markdown_page(
+                artefacts_cli.Entry(
+                    id="notes",
+                    source=PurePosixPath("Notes/Report.md"),
+                    destination=PurePosixPath("charts/report/index.html"),
+                    title="Report",
+                    collection="charts",
+                    order=40,
+                    replacements={},
+                ),
+                b"# Report\n\nFirst version.\n",
+                PurePosixPath("vendor/marked.min.js"),
+            )
+        )
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts, manifest_path.read_bytes()
+        )
+        diffs = dict(plan.markdown_diffs)
+        self.assertIn(PurePosixPath("charts/report/index.html"), diffs)
+        body = diffs[PurePosixPath("charts/report/index.html")]
+        self.assertIn("-First version.", body)
+        self.assertIn("+Second version.", body)
+        rendered = artefacts_cli.format_plan(plan)
+        self.assertIn("Markdown changes (1)", rendered)
+        self.assertIn("charts/report/index.html", rendered)
+
+    def test_plan_without_markdown_reports_no_markdown_changes(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+        self.assertEqual(plan.markdown_diffs, ())
+        self.assertNotIn("Markdown changes", artefacts_cli.format_plan(plan))
+
+    def test_an_ignored_source_neither_blocks_nor_publishes(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        (source / "Notes").mkdir()
+        (source / "Notes" / "Working.md").write_text("# Draft\n", encoding="utf-8")
+
+        # Without a rule the unlisted working file aborts the run.
+        with self.assertRaises(artefacts_cli.UnlistedSourceError):
+            artefacts_cli.create_sync_plan(
+                manifest_path, source, repo / "artefacts", head_manifest
+            )
+
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["ignored_sources"] = ["Notes/"]
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        self.assertEqual(plan.ignored_sources, (("Notes/", 1),))
+        self.assertNotIn(
+            PurePosixPath("notes/working/index.html"), plan.desired_files
+        )
+        rendered = artefacts_cli.format_plan(plan)
+        self.assertIn("Ignored sources (1)\n  - Notes/ (1 file)", rendered)
+
+    def test_a_plan_without_ignore_rules_omits_the_heading(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+        self.assertEqual(plan.ignored_sources, ())
+        self.assertNotIn("Ignored sources", artefacts_cli.format_plan(plan))
+
+    def test_markdown_add_then_update_cycle_validates(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts = repo / "artefacts"
+        (artefacts / "vendor" / "marked.min.js").write_bytes(b"/* parser */")
+        (artefacts / "notes.txt").unlink()  # keep validate's expected set exact
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["protected_files"].append("vendor/marked.min.js")
+        payload["entries"] = [
+            entry for entry in payload["entries"] if entry["id"] != "removed"
+        ]
+        payload["entries"].append(
+            {
+                "id": "notes-report",
+                "source": "Notes/Report.md",
+                "destination": "charts/report/index.html",
+                "title": "Report",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        # The `removed` entry is gone from the manifest, so its published file would
+        # be swept as an orphan; delete it here to keep the plan focused on Markdown.
+        # Do NOT create Charts/Removed.png — an approved source with no entry raises
+        # UnlistedSourceError and aborts the plan.
+        (artefacts / "charts" / "removed.png").unlink()
+        (source / "Notes").mkdir()
+        report = source / "Notes" / "Report.md"
+        report.write_text("# Report\n\nFirst version.\n", encoding="utf-8")
+
+        head = manifest_path.read_bytes()
+        first = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
+        self.assertIn(
+            artefacts_cli.Change("add", PurePosixPath("charts/report/index.html")),
+            first.changes,
+        )
+        self.assertEqual(first.markdown_diffs, ())
+        artefacts_cli.apply_plan(first, artefacts)
+        artefacts_cli.validate_repository(repo, None)
+
+        report.write_text("# Report\n\nSecond version.\n", encoding="utf-8")
+        second = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
+        self.assertIn(
+            artefacts_cli.Change("update", PurePosixPath("charts/report/index.html")),
+            second.changes,
+        )
+        body = dict(second.markdown_diffs)[PurePosixPath("charts/report/index.html")]
+        self.assertIn("-First version.", body)
+        self.assertIn("+Second version.", body)
+        artefacts_cli.apply_plan(second, artefacts)
+        artefacts_cli.validate_repository(repo, None)
+
+        page = (artefacts / "charts" / "report" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            artefacts_cli.extract_markdown(page), "# Report\n\nSecond version.\n"
+        )
 
 
 class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):

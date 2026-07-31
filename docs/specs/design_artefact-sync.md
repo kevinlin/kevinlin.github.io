@@ -81,23 +81,123 @@ JSON is selected because Python can parse it without installing dependencies and
 
 ## Source and Destination Rules
 
-The command recursively scans the source directory for `.html`, `.png`, `.jpeg`, `.jpg`, and `.ico` files. It prunes nested repository copies, ignores metadata such as `.DS_Store`, reports excluded document types, and rejects symbolic links.
+The command recursively scans the source directory for `.html`, `.md`, `.png`, `.jpeg`, `.jpg`, and `.ico` files. It prunes nested repository copies, ignores metadata such as `.DS_Store`, reports excluded document types, and rejects symbolic links.
 
 The following rules apply:
 
-- Every approved source file must have one manifest entry. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [Manifest Proposals](#manifest-proposals).
+- Every approved source file must have one manifest entry, unless the manifest ignores it. An unlisted source blocks publication and prints a complete derived entry, plus a derived collection when the source folder maps to none. See [Manifest Proposals](#manifest-proposals) and [Ignored Sources](#ignored-sources).
 - Every manifest source must exist. A missing source is shown as a deletion and, after confirmation, removes its entry and destination.
 - Every published file must be explained by the manifest. A file under `artefacts/` that the desired tree does not contain is shown as an orphan deletion. See [Orphan Cleanup](#orphan-cleanup).
 - Destination paths must be unique, relative, lowercase kebab-case, and contained below `artefacts/`.
-- HTML presentations use a directory `index.html`; images retain an approved image extension.
+- HTML presentations and Markdown documents use a directory `index.html`; images retain an approved image extension.
 - Binary files are copied byte-for-byte. `apply` reads every written file back and compares it to the planned bytes.
-- HTML replacements are exact manifest declarations. An expected replacement that is absent is an error.
+- HTML replacements are exact manifest declarations. An expected replacement that is absent is an error. Markdown entries declare no replacements: the generated page owns its own references.
 - HTML lines have trailing spaces and tabs removed deterministically so generated commits pass Git whitespace checks.
 - Published HTML must not contain forbidden cdnjs runtime references after transformation.
 - Vendor files and the catalogue shell are protected and are never deleted by source mirroring.
 - Files outside the allowlist are never copied.
 
 Renaming a source does not require changing its public URL. Only the manifest's `source` field changes. Changing a `destination` is treated as an explicit public URL migration and appears as one deletion and one addition in the preview.
+
+## Ignored Sources
+
+### Why the list exists
+
+Approving `.md` turned thirty working files under `~/Downloads/Artefacts` into blockers. Raw captures, intermediate analysis, and image-generation prompts sit beside the images they produced. None is a publication, and each one aborts `plan`, `apply`, and `publish` under the rule that every approved source carries an entry.
+
+Publishing them puts working notes on a public site. Moving them out of the source directory separates a prompt from the image it generated, which is why they share a folder. The third option is to say so in the manifest, where every other publication decision already lives.
+
+### What it is
+
+`ignored_sources` is an array of paths relative to the source root. A plain path ignores one file; a path ending in `/` ignores that subtree. No wildcards.
+
+```json
+  "ignored_sources": [
+    "Last30Days/",
+    "fde/prompts/",
+    "fde/analysis.md"
+  ],
+```
+
+The two forms carry different claims. A directory says the folder is a workspace, so whatever lands there next is a working file too. A file path says this one document is a working file, and leaves its folder open. `fde/` holds published images, so a future `.md` there should stop the run and be decided on, which is what a bare `fde/*.md` pattern would take away. Wildcards are excluded because a pattern decides for files nobody has written yet, and the case that motivated the list is folders and named documents, not shapes of filenames.
+
+The field is optional and defaults to empty, so a manifest written before it existed still parses. `manifest_to_json` always emits it.
+
+### Where it applies
+
+Ignoring happens between the scan and the reconciliation. `scan_source` stays manifest-unaware and keeps reporting excluded document types; `apply_source_ignores` then subtracts the ignored paths from the approved set. Everything downstream — the unlisted check, the proposal, the desired tree, the catalogue — sees an inventory the ignored files were never in, so no other rule needs to learn about them.
+
+An ignored path that also appears as an entry `source` is a manifest error. The manifest would be saying publish this and skip this at once, and resolving it silently in either direction would hide a mistake in the file the user edits by hand.
+
+A rule matching nothing is not an error. Deleting a source is normal, and a stale rule publishes nothing.
+
+### Preview
+
+`SyncPlan` carries `ignored_sources: tuple[tuple[str, int], ...]`, one pair per rule with the number of files it matched. `format_plan` prints an `Ignored sources (N)` heading over one line per rule, `N` being the total files suppressed:
+
+```text
+Ignored sources (28)
+  - Last30Days/ (8 files)
+  - fde/prompts/ (6 files)
+  - fde/analysis.md (1 file)
+```
+
+Per rule rather than per file, because twenty-eight paths on every run is noise that trains the user to skip the block, and the rule is what they would edit to change the outcome. A rule matching zero files still prints, so a stale rule is visible rather than silently carried.
+
+The heading is omitted when the list is empty, matching `Renumbered order` and `Markdown changes`.
+
+Silence is the failure mode that matters here. A file the user meant to publish, quietly skipped by a rule they forgot, is the one way this list can lose work, and the count is what catches it.
+
+### Not in scope
+
+Wildcard and regular-expression patterns, and ignoring anything outside the source root. `validate` is untouched: it never reads the source directory, and checks only that the field holds safe relative paths.
+
+## Markdown Documents
+
+### Why the page is generated rather than converted
+
+`artefacts.py` uses the standard library only, which holds no Markdown renderer. Converting Markdown to static HTML in Python therefore means writing and maintaining a parser in this script, and that parser is wrong on tables, nested lists, and fenced code long before it is useful.
+
+The page is generated instead. `render_markdown_page` emits one self-contained HTML document that carries the Markdown verbatim and renders it in the browser with a vendored `marked.min.js`. Parsing moves to a maintained library, and the entry keeps one destination. The committed HTML still holds the prose, so a `git diff` on a published document reads as a Markdown diff.
+
+Publishing the `.md` beside a shell that fetches it was rejected: two published files for one entry contradicts the one-entry-one-destination invariant that manifest validation, the orphan sweep, and `validate` all rest on.
+
+### Destination and manifest rules
+
+A `.md` source follows the `.html` destination rule: `<folder>/<slug>/index.html`, produced by the existing `suggest_destination`. `validate_manifest` accepts `.md` in the same branch that requires an `index.html` destination, so a Markdown entry whose destination keeps a `.md` extension is a manifest error.
+
+`marked.min.js` is vendored into `artefacts/vendor/` and listed in `protected_files`. It is a runtime dependency, not a catalogue entry, and the orphan sweep never touches it. The deployed page loads it by relative path, so no cdnjs reference exists to ban.
+
+A Markdown collection's destinations are `.html`, so `_sections_by_media` classifies it as a presentation collection and its cards sit under the section that already holds presentations. Markdown gets no section of its own: the published thing is an HTML page, and a fourth heading would split the catalogue on how a page was authored rather than on what a reader gets.
+
+### Page shell
+
+One template, matching `artefacts/index.html`: the same colour tokens and fonts inline, the same pre-paint theme script, a readable prose column, and a back-link to the catalogue. The CSS is inline rather than a shared `markdown.css`, because every other published page is self-contained and a shared stylesheet adds a cross-file reference for `validate` to resolve on every document.
+
+The `<title>` is the manifest title, escaped. The body holds the Markdown inside `<script type="text/markdown">` and a short inline script that hands the block to `marked` and writes the result into the article element.
+
+Most documents open with their own `# ` heading, and the proposal derives the manifest title from that heading, so the rendered page would print the title twice. After parsing, the script drops the article's leading `<h1>` when its text matches the header's. The removal happens in the browser because the embedded Markdown stays byte-exact: stripping the heading from the source would break the round trip that `apply`'s byte check and the diff both rest on. A document whose first heading differs from its manifest title keeps both, which is the case where the two really do say different things.
+
+### Script-block escaping
+
+Raw text in a `<script>` element ends at a literal `</script`, so the Markdown cannot be embedded unchanged. Two byte sequences are escaped on write and reversed in the page's own JavaScript:
+
+- `</script` → `<\/script` (case-insensitive on the tag name)
+- `<!--` → `<\!--`
+
+Both reversals are exact, so the round trip is lossless and the escaped form still reads as Markdown in review. The second sequence is escaped because `<!--` inside script data opens the double-escaped parse state, where the terminator rules change; escaping it keeps the block in one state regardless of document content.
+
+`extract_markdown` reverses the escaping and returns the original source bytes. It is the inverse of the embedding step and the basis of the diff preview below, so a change to one is a change to both.
+
+### Diff preview
+
+A changed `.md` already surfaces as an `Update`, because the generated page differs byte-for-byte. That says a document changed without saying what changed, and the preview is the last point before a public commit.
+
+`SyncPlan` gains `markdown_diffs: tuple[tuple[PurePosixPath, str], ...]`. For every Markdown entry classified as an `Update`, the currently published `artefacts/<destination>` is read, `extract_markdown` recovers the published Markdown, and `difflib.unified_diff` compares it with the new source. The published file is the same basis the byte comparison uses, so the diff cannot disagree with the change classification, and no git invocation is needed.
+
+`format_plan` prints the result under a `Markdown changes (N)` heading, capped at 40 diff lines per entry followed by an explicit `… truncated, M more lines` marker. Silent truncation would read as a complete diff. The PR body embeds `format_plan` already, so the pull request carries the same record.
+
+Additions produce no diff. There is nothing to compare against. A published file whose Markdown cannot be extracted, because it was hand-edited or written before this scheme existed, is reported as `diff unavailable` for that entry rather than failing the plan.
 
 ## Manifest Proposals
 
@@ -152,9 +252,9 @@ Section names are manifest content, so they are learned rather than matched agai
 
 - `source` is the scanned path; `destination` comes from the existing `suggest_destination`.
 - `id` — slugged destination minus extension, `/` replaced with `-`; `-2`, `-3` … on collision with an existing or proposed id.
-- `title` — source stem with a leading `NN-` ordering prefix stripped, `-` and `_` replaced with spaces, sentence-cased. `01-iceberg-bright-dark-line.png` becomes `Iceberg bright dark line`.
+- `title` — source stem with a leading `NN-` ordering prefix stripped, `-` and `_` replaced with spaces, sentence-cased. `01-iceberg-bright-dark-line.png` becomes `Iceberg bright dark line`. A `.md` source uses its first `# ` heading verbatim instead, and falls back to the stem rule when the document has none: the stem rule turns `AI_Education_Catalogue.md` into `Ai education catalogue`, and the heading the author already wrote is the better starting point.
 - `order` — `max + 10` within the collection, then `+10` per further file, sources sorted by path.
-- `replacements` — `{}` for images. For `.html`, each `https://cdnjs…/<basename>` whose `<basename>` matches a `protected_files` basename is mapped to that vendor file's path relative to the destination.
+- `replacements` — `{}` for images and for `.md`. For `.html`, each `https://cdnjs…/<basename>` whose `<basename>` matches a `protected_files` basename is mapped to that vendor file's path relative to the destination.
 
 Names are compared with the `.min` build marker dropped from both sides, so a page loading `chart.umd.js` picks up the vendored `chart.umd.min.js`. Same library, same API, different build. An exact name match instead leaves the entry with empty `replacements` and hands the user a `transform_html` failure to repair by hand, which is what `swe_bench_pro_by_lab.html` needed. Version numbers are already outside the match: the basename carries no version, so `Chart.js/4.4.1/` and `Chart.js/3.9.0/` both resolve to whichever build the repository vendors.
 
@@ -246,11 +346,11 @@ An entry whose source is missing contributes no date, so a card whose deletion i
 
 1. Resolve and validate the repository and source roots.
 2. Parse and validate the manifest.
-3. Scan approved source files and detect unlisted or missing entries. Unlisted sources print a manifest proposal and end the run with exit code 3.
+3. Scan approved source files, subtract the ignored ones, and detect unlisted or missing entries. Unlisted sources print a manifest proposal and end the run with exit code 3.
 4. Build the complete desired managed tree in a temporary directory.
-5. Apply declared HTML replacements and generate the catalogue region.
+5. Apply declared HTML replacements, render Markdown pages, and generate the catalogue region.
 6. Validate paths, hashes, catalogue coverage, and local references.
-7. Print additions, updates, deletions, orphan deletions, unchanged files, and excluded file types.
+7. Print additions, updates, deletions, orphan deletions, Markdown diffs, ignored sources, unchanged files, and excluded file types.
 
 `apply` runs the same plan, asks for confirmation, and then updates only destinations represented by the pre-apply manifest, approved new entries, and the generated catalogue region. Missing managed sources are valid deletion proposals. An invalid manifest blocks application. Unlisted approved source files stop the run after `apply` and `publish` have written the confirmed manifest proposal; `plan` prints the proposal and writes nothing.
 
@@ -313,12 +413,32 @@ Manifest proposals:
 - cdnjs replacement pre-fill, and no replacements for a `.html` file with no vendored reference.
 - A cdnjs reference left unmapped after the pre-fill warns; a fully vendored file does not.
 
+Ignored sources:
+
+- A file path ignores exactly that file; a sibling in the same folder stays approved.
+- A path ending in `/` ignores the subtree, including a file added to it later.
+- An ignored file is absent from the unlisted set, so it raises no error and reaches no proposal.
+- A path that is both ignored and an entry `source` is a manifest error.
+- A rule matching no file is accepted and still printed, with a count of zero.
+- `format_plan` reports one line per rule with its match count, and omits the heading when the list is empty.
+
 Last updated dates:
 
 - A card shows the newest date among its entries, once, and not the older ones.
 - Cards in a section run newest first; undated cards come last, in declared order.
 - No timestamp mapping renders the catalogue with no date markup.
 - `collect_source_timestamps` reads the source mtime and skips an entry whose source is missing.
+
+Markdown documents:
+
+- A `.md` source is approved, and a manifest entry whose `.md` destination is not an `index.html` is rejected.
+- `suggest_destination` maps a `.md` source to a directory `index.html`.
+- The rendered page is deterministic, references only the vendored parser, and carries no cdnjs reference.
+- `</script` and `<!--` survive the embed-and-extract round trip; `extract_markdown` returns the source bytes exactly.
+- The proposed title comes from the first `# ` heading, and falls back to the stem rule when there is none.
+- An updated document produces a unified diff; an unchanged one produces none; an addition produces none.
+- A diff longer than the cap is truncated with the remaining line count stated.
+- A published page whose Markdown cannot be extracted reports `diff unavailable` and does not fail the plan.
 
 Orphan cleanup:
 
@@ -349,7 +469,9 @@ The pull-request workflow runs the complete test suite and repository validation
 
 - Background folder watchers or scheduled synchronization.
 - Publishing without an explicit local confirmation.
-- Uploading Markdown, Word, PDF, or other unapproved file types.
-- Editing artefact content beyond declared HTML dependency replacements and deterministic trailing-whitespace removal.
+- Uploading Word, PDF, or other unapproved file types.
+- Server-side Markdown conversion, syntax highlighting, or a Markdown extension set beyond the vendored parser's default.
+- Assets referenced from inside a Markdown document. No current source has any; a document that gains one gets a broken reference rather than a copied file.
+- Editing artefact content beyond declared HTML dependency replacements, Markdown script-block escaping, and deterministic trailing-whitespace removal.
 - Automatically changing existing public paths when source files are renamed.
 - Rename detection between deleted and added destinations.

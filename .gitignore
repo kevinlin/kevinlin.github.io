@@ -41,3 +41,6 @@ jspm_packages/
 
 # Python cache
 **/__pycache__/
+
+# Worktrees
+.worktrees/

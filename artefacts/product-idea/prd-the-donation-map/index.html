@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRD: The Donation Map | Artefacts</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --tint: rgba(0, 99, 163, 0.1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --tint: rgba(67, 137, 185, 0.16);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        header, main, footer {
+            width: min(760px, calc(100% - 48px));
+            margin-inline: auto;
+        }
+
+        header { padding: 56px 0 8px; }
+
+        a { color: var(--primary-color); text-underline-offset: 0.2em; }
+        a:hover { color: var(--accent-color); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-link:hover span { text-decoration: underline; }
+
+        h1 {
+            margin: 24px 0 8px;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+
+        main { padding-bottom: 72px; }
+
+        article {
+            padding: 32px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        article > :first-child { margin-top: 0; }
+        article > :last-child { margin-bottom: 0; }
+
+        article h1, article h2, article h3, article h4 {
+            margin: 2em 0 0.6em;
+            line-height: 1.3;
+            text-wrap: balance;
+        }
+
+        article h2 {
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        article h3 { font-size: 1.2rem; }
+
+        article img { max-width: 100%; height: auto; }
+
+        article blockquote {
+            margin: 1.5em 0;
+            padding: 0.2em 1.2em;
+            border-left: 3px solid var(--primary-color);
+            color: var(--light-text);
+        }
+
+        article code {
+            padding: 0.15em 0.4em;
+            background: var(--tint);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        article pre {
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        article pre code { padding: 0; background: none; }
+
+        .table-scroll, article table { display: block; overflow-x: auto; }
+
+        article table { border-collapse: collapse; width: 100%; }
+
+        article th, article td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        article th { background: var(--tint); }
+
+        article hr { border: none; border-top: 1px solid var(--border-color); }
+
+        footer {
+            padding-bottom: 48px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="../../">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Artefacts</span>
+        </a>
+        <h1>PRD: The Donation Map</h1>
+    </header>
+
+    <main>
+        <article id="markdown-body"></article>
+    </main>
+
+    <footer>
+        <p>Rendered from Markdown in the browser.</p>
+    </footer>
+
+<script type="text/markdown" id="markdown-source">
+# PRD: The Donation Map
+
+## 1. Overview
+
+The Donation Map is an interactive fundraising map where donors support wildlife conservation and leave a symbolic animal avatar on a world map. The workshop goal is to build a simplified version that demonstrates the core product idea: browse a map, choose an animal, enter donation details, place a marker, and see donor activity reflected in the experience.
+
+### 1.1 Goals
+
+1. Create a donation-inspired map experience that feels personal and visual.
+2. Let users choose an animal avatar to represent their contribution.
+3. Let users place their avatar on a world map.
+4. Show existing donor activity to create momentum and social proof.
+5. Keep the experience simple enough to build in a coding workshop.
+
+### 1.2 Target Users
+
+- Individual donors who want a personal way to show support.
+- Groups or companies that want to appear on a public map.
+- Visitors who want to explore donation activity before participating.
+- Workshop builders who need a clear product target with room for interpretation.
+
+## 2. Core User Journeys
+
+### 2.1 Explore the Map
+
+1. User lands on an interactive map.
+2. User sees existing animal markers and summary donation stats.
+3. User explores the map by moving around, zooming, or searching.
+4. User can inspect existing markers to understand who donated and which animal they chose.
+
+### 2.2 Place an Animal Marker
+
+1. User starts the placement flow from the map.
+2. User chooses an animal avatar.
+3. User enters basic donor information and a donation amount.
+4. User chooses where to place the marker.
+5. User confirms the placement.
+6. The new marker appears on the map.
+
+### 2.3 Browse Donor Activity
+
+1. User opens a donor activity or leaderboard view.
+2. User sees ranked or recent donors.
+3. User can compare donor names, animals, placement counts, and donation amounts.
+4. User can return to the map and continue exploring.
+
+## 3. Functional Requirements
+
+### 3.1 Home Map
+
+- The home screen should center the experience around an interactive world map.
+- The map should display animal markers for existing donations.
+- The screen should include a clear call to action to place a new marker.
+- The screen should show lightweight donation summary stats.
+- The product should make it clear that map placements are symbolic.
+
+### 3.2 Map Interaction
+
+- Users should be able to navigate the map.
+- Users should be able to inspect a marker.
+- Users should be able to search or otherwise move to a location.
+- The map should remain understandable when multiple markers are visible.
+
+### 3.3 Marker Details
+
+- A marker detail view should show enough information to make the donation feel personal.
+- At minimum, marker details should include:
+  - Donor display name or anonymous state.
+  - Animal avatar.
+  - Donation amount.
+  - Optional short message.
+- The detail view should be easy to dismiss.
+
+### 3.4 Animal Selection
+
+- Users should be able to choose from multiple animal avatars.
+- Each animal choice should be visually distinct.
+- The selected animal should carry through the placement flow and appear on the final marker.
+
+### 3.5 Donor Details
+
+- Users should be able to enter a donor name or choose to appear anonymously.
+- Users should be able to enter a donation amount.
+- Users may add a short optional message.
+- The app should prevent confirmation until the minimum required information is provided.
+
+### 3.6 Marker Placement
+
+- Users should be able to choose a location for their marker.
+- The app should show the selected location before final confirmation.
+- After confirmation, the marker should appear on the map with the selected animal and donor details.
+
+### 3.7 Donor Activity
+
+- The app should include a simple donor activity view.
+- The view can be a leaderboard, recent activity list, or another clear summary.
+- Donor activity should help users understand that other people have participated.
+
+## 4. Acceptance Criteria
+
+1. A user can open the app and see an interactive map with existing animal markers.
+2. A user can inspect an existing marker and see donor details.
+3. A user can start a placement flow from the map.
+4. A user can select an animal avatar.
+5. A user can enter donor details, including a name or anonymous choice and a donation amount.
+6. A user can choose a placement location.
+7. A user can confirm placement and see the new marker on the map.
+8. A user can view donor activity or rankings.
+9. The app communicates that marker placement is symbolic.
+10. The prototype remains simple, coherent, and suitable for workshop implementation.
+
+</script>
+    <script src="../../vendor/marked.min.js"></script>
+    <script>
+        // The source block carries the Markdown verbatim except for two escaped
+        // sequences; the same substitution runs in reverse here. See
+        // escape_markdown_block in scripts/artefacts.py.
+        (function () {
+            // textContent starts at the newline that follows the opening tag, which
+            // the Python-side extract_markdown slice does not include. Drop it so
+            // both sides see the same bytes.
+            var raw = document.getElementById('markdown-source').textContent.replace(/^\n/, '');
+            var text = raw.replace(/<(\\+)(\/script|!--)/gi, function (match, slashes, marker) {
+                return '<' + slashes.slice(1) + marker;
+            });
+            var body = document.getElementById('markdown-body');
+            body.innerHTML = marked.parse(text);
+            // Most documents open with their own H1, and the proposal derives the
+            // manifest title from exactly that heading, so the page would print the
+            // title twice. Drop the article's copy when it repeats the header rather
+            // than stripping it from the source, which has to stay byte-exact.
+            var lead = body.firstElementChild;
+            var heading = document.querySelector('header h1');
+            if (lead && lead.tagName === 'H1' && heading &&
+                lead.textContent.trim() === heading.textContent.trim()) {
+                lead.remove();
+            }
+        })();
+    </script>
+</body>
+</html>

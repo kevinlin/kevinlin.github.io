@@ -5,6 +5,7 @@ import argparse
 from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime
+import difflib
 import html
 from html.parser import HTMLParser
 import json
@@ -19,7 +20,10 @@ from typing import Any, Callable
 from urllib.parse import unquote, urljoin, urlsplit
 
 
-APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
+# Sources that become a generated page rather than a byte copy. Both publish to a
+# directory index.html so the public URL carries no file extension.
+DIRECTORY_INDEX_EXTENSIONS = frozenset({".html", ".md"})
+APPROVED_EXTENSIONS = frozenset({".html", ".md", ".png", ".jpeg", ".jpg", ".ico"})
 PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
@@ -119,6 +123,10 @@ class Manifest:
     protected_files: tuple[PurePosixPath, ...]
     collections: tuple[Collection, ...]
     entries: tuple[Entry, ...]
+    # Source paths the scan subtracts before reconciliation. A trailing "/" makes a
+    # rule cover a subtree. Kept as written rather than as PurePosixPath, because
+    # PurePosixPath discards the trailing separator the two forms are told apart by.
+    ignored_sources: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -154,6 +162,8 @@ class SyncPlan:
     changes: tuple[Change, ...]
     unchanged: tuple[PurePosixPath, ...]
     excluded_suffixes: tuple[str, ...]
+    markdown_diffs: tuple[tuple[PurePosixPath, str], ...] = ()
+    ignored_sources: tuple[tuple[str, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -283,12 +293,28 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
             )
         )
 
+    ignored_payload = payload.get("ignored_sources", [])
+    if not isinstance(ignored_payload, list):
+        raise ManifestError("ignored_sources must be an array")
+    ignored_sources = tuple(
+        _safe_ignore_rule(value) for value in ignored_payload
+    )
+
     return Manifest(
         version=payload.get("version"),
         protected_files=protected_files,
         collections=collections,
         entries=tuple(entries),
+        ignored_sources=ignored_sources,
     )
+
+
+def _safe_ignore_rule(value: Any) -> str:
+    """One ignore rule, validated as a relative path with its trailing "/" kept."""
+    if not isinstance(value, str):
+        raise ManifestError("ignored source must be a safe relative path")
+    _safe_relative_path(value.rstrip("/"), "ignored source")
+    return value
 
 
 def _require_unique(values: list[Any], message: str) -> None:
@@ -317,6 +343,15 @@ def validate_manifest(manifest: Manifest) -> None:
         [entry.destination for entry in manifest.entries], "duplicate destination"
     )
     _require_unique(list(manifest.protected_files), "duplicate protected file")
+    _require_unique(list(manifest.ignored_sources), "duplicate ignored source")
+
+    # An entry says publish this and an ignore rule says never look at it. Resolving
+    # the contradiction either way would hide an edit the user made by hand.
+    for entry in manifest.entries:
+        if _is_ignored(entry.source, manifest.ignored_sources):
+            raise ManifestError(
+                f"ignored source is also an entry source: {entry.source.as_posix()}"
+            )
 
     collection_ids = {collection.id for collection in manifest.collections}
     reserved_destinations = {PurePosixPath("index.html"), PurePosixPath("manifest.json")}
@@ -338,10 +373,10 @@ def validate_manifest(manifest: Manifest) -> None:
         _validate_path_components(
             entry.destination, PUBLIC_COMPONENT, "destination must be lowercase kebab-case"
         )
-        if source_suffix == ".html":
+        if source_suffix in DIRECTORY_INDEX_EXTENSIONS:
             if entry.destination.name != "index.html":
                 raise ManifestError(
-                    f"HTML destination for entry {entry.id} must end in index.html"
+                    f"generated destination for entry {entry.id} must end in index.html"
                 )
         elif destination_suffix != source_suffix:
             raise ManifestError(
@@ -447,11 +482,393 @@ def scan_source(source_root: Path) -> SourceInventory:
     )
 
 
+def _is_ignored(source: PurePosixPath, rules: tuple[str, ...]) -> bool:
+    text = source.as_posix()
+    return any(
+        text.startswith(rule) if rule.endswith("/") else text == rule
+        for rule in rules
+    )
+
+
+def apply_source_ignores(
+    inventory: SourceInventory, rules: tuple[str, ...]
+) -> tuple[SourceInventory, tuple[tuple[str, int], ...]]:
+    """The inventory without the ignored sources, and each rule's match count.
+
+    Applied between the scan and the reconciliation so `scan_source` stays
+    manifest-unaware and every rule downstream sees an inventory the ignored files
+    were never in. The counts are returned rather than logged because a silently
+    skipped file is the one way this list can lose work.
+    """
+    approved = tuple(
+        source for source in inventory.approved if not _is_ignored(source, rules)
+    )
+    counts = tuple(
+        (
+            rule,
+            sum(1 for source in inventory.approved if _is_ignored(source, (rule,))),
+        )
+        for rule in rules
+    )
+    return replace(inventory, approved=approved), counts
+
+
 SLUG_SEPARATOR = re.compile(r"[^a-z0-9]+")
 LEADING_NUMBER = re.compile(r"^\d+[-_ ]+")
 WORD_SEPARATOR = re.compile(r"[-_]+")
 REPEATED_SPACE = re.compile(r"\s+")
 TRAILING_SPACE = re.compile(r"[ \t]+(?=\r?$)", re.MULTILINE)
+
+MARKDOWN_BLOCK_START = '<script type="text/markdown" id="markdown-source">\n'
+MARKDOWN_BLOCK_END = "</script>"
+
+# Raw text in a <script> element ends at a literal `</script`, and `<!--` opens the
+# double-escaped parse state where the terminator rules change. Both are escaped by
+# inserting one backslash after the `<`. The pattern also matches an already-escaped
+# marker, so escaping adds a backslash and unescaping removes exactly one: the round
+# trip is lossless even for a source that contains the escaped form verbatim.
+MARKDOWN_MARKER = re.compile(r"<(\\*)(/script|!--)", re.IGNORECASE)
+
+
+def escape_markdown_block(text: str) -> str:
+    return MARKDOWN_MARKER.sub(
+        lambda match: "<" + "\\" * (len(match.group(1)) + 1) + match.group(2), text
+    )
+
+
+def unescape_markdown_block(text: str) -> str:
+    return MARKDOWN_MARKER.sub(
+        lambda match: "<" + "\\" * max(len(match.group(1)) - 1, 0) + match.group(2), text
+    )
+
+
+def extract_markdown(document: str) -> str | None:
+    """The Markdown embedded in a generated page, or None if there is no block.
+
+    Exact inverse of the embedding in `render_markdown_page`, and the basis of the
+    diff preview. A published page that predates this scheme, or one edited by
+    hand, has no block and yields None rather than an error.
+    """
+    start = document.find(MARKDOWN_BLOCK_START)
+    if start < 0:
+        return None
+    start += len(MARKDOWN_BLOCK_START)
+    end = document.find(MARKDOWN_BLOCK_END, start)
+    if end < 0:
+        return None
+    return unescape_markdown_block(document[start:end])
+
+
+MARKDOWN_VENDOR_NAME = "marked.min.js"
+
+# One self-contained document per Markdown entry, matching artefacts/index.html:
+# same colour tokens and fonts, same pre-paint theme script, a prose column, and a
+# back-link to the catalogue. The CSS is inline because every other published page
+# is self-contained; a shared stylesheet would add a cross-file reference for
+# `validate` to resolve on every document.
+MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} | Artefacts</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {{
+            try {{
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            }} catch (e) {{}}
+        }})();
+    </script>
+    <style>
+        :root {{
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --tint: rgba(0, 99, 163, 0.1);
+        }}
+
+        [data-theme="dark"] {{
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --tint: rgba(67, 137, 185, 0.16);
+        }}
+
+        *, *::before, *::after {{ box-sizing: border-box; }}
+
+        html {{
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }}
+
+        body {{
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }}
+
+        header, main, footer {{
+            width: min(760px, calc(100% - 48px));
+            margin-inline: auto;
+        }}
+
+        header {{ padding: 56px 0 8px; }}
+
+        a {{ color: var(--primary-color); text-underline-offset: 0.2em; }}
+        a:hover {{ color: var(--accent-color); }}
+
+        .back-link {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }}
+
+        .back-link:hover span {{ text-decoration: underline; }}
+
+        h1 {{
+            margin: 24px 0 8px;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            text-wrap: balance;
+        }}
+
+        main {{ padding-bottom: 72px; }}
+
+        article {{
+            padding: 32px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }}
+
+        article > :first-child {{ margin-top: 0; }}
+        article > :last-child {{ margin-bottom: 0; }}
+
+        article h1, article h2, article h3, article h4 {{
+            margin: 2em 0 0.6em;
+            line-height: 1.3;
+            text-wrap: balance;
+        }}
+
+        article h2 {{
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+        }}
+
+        article h3 {{ font-size: 1.2rem; }}
+
+        article img {{ max-width: 100%; height: auto; }}
+
+        article blockquote {{
+            margin: 1.5em 0;
+            padding: 0.2em 1.2em;
+            border-left: 3px solid var(--primary-color);
+            color: var(--light-text);
+        }}
+
+        article code {{
+            padding: 0.15em 0.4em;
+            background: var(--tint);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }}
+
+        article pre {{
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }}
+
+        article pre code {{ padding: 0; background: none; }}
+
+        .table-scroll, article table {{ display: block; overflow-x: auto; }}
+
+        article table {{ border-collapse: collapse; width: 100%; }}
+
+        article th, article td {{
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }}
+
+        article th {{ background: var(--tint); }}
+
+        article hr {{ border: none; border-top: 1px solid var(--border-color); }}
+
+        footer {{
+            padding-bottom: 48px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }}
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="{prefix}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Artefacts</span>
+        </a>
+        <h1>{title}</h1>
+    </header>
+
+    <main>
+        <article id="markdown-body"></article>
+    </main>
+
+    <footer>
+        <p>Rendered from Markdown in the browser.</p>
+    </footer>
+
+{block_start}{markdown}{block_end}
+    <script src="{prefix}{vendor}"></script>
+    <script>
+        // The source block carries the Markdown verbatim except for two escaped
+        // sequences; the same substitution runs in reverse here. See
+        // escape_markdown_block in scripts/artefacts.py.
+        (function () {{
+            // textContent starts at the newline that follows the opening tag, which
+            // the Python-side extract_markdown slice does not include. Drop it so
+            // both sides see the same bytes.
+            var raw = document.getElementById('markdown-source').textContent.replace(/^\\n/, '');
+            var text = raw.replace(/<(\\\\+)(\\/script|!--)/gi, function (match, slashes, marker) {{
+                return '<' + slashes.slice(1) + marker;
+            }});
+            var body = document.getElementById('markdown-body');
+            body.innerHTML = marked.parse(text);
+            // Most documents open with their own H1, and the proposal derives the
+            // manifest title from exactly that heading, so the page would print the
+            // title twice. Drop the article's copy when it repeats the header rather
+            // than stripping it from the source, which has to stay byte-exact.
+            var lead = body.firstElementChild;
+            var heading = document.querySelector('header h1');
+            if (lead && lead.tagName === 'H1' && heading &&
+                lead.textContent.trim() === heading.textContent.trim()) {{
+                lead.remove();
+            }}
+        }})();
+    </script>
+</body>
+</html>
+"""
+
+
+def markdown_vendor_path(manifest: Manifest) -> PurePosixPath:
+    for path in manifest.protected_files:
+        if path.name == MARKDOWN_VENDOR_NAME:
+            return path
+    raise TransformationError(
+        f"{MARKDOWN_VENDOR_NAME} must be listed in protected_files to publish Markdown"
+    )
+
+
+def render_markdown_page(
+    entry: Entry, source_bytes: bytes, vendor_path: PurePosixPath
+) -> bytes:
+    """One self-contained page carrying the Markdown verbatim.
+
+    The Markdown is embedded rather than converted because this script is
+    standard-library only. Its bytes are preserved exactly: the trailing-space
+    stripping `transform_html` applies would turn a Markdown hard line break into a
+    soft one, and both `apply`'s byte check and the diff preview depend on the
+    embed-extract round trip being lossless.
+    """
+    try:
+        text = source_bytes.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise TransformationError(
+            f"Markdown source is not UTF-8: {entry.source}"
+        ) from error
+    if text and not text.endswith("\n"):
+        text += "\n"
+    prefix = "../" * len(entry.destination.parent.parts)
+    document = MARKDOWN_PAGE_TEMPLATE.format(
+        title=html.escape(entry.title),
+        prefix=prefix,
+        vendor=vendor_path.as_posix(),
+        block_start=MARKDOWN_BLOCK_START,
+        markdown=escape_markdown_block(text),
+        block_end=MARKDOWN_BLOCK_END,
+    )
+    if has_cdnjs_reference(document):
+        raise TransformationError(
+            f"forbidden cdnjs reference in generated Markdown page for {entry.id}"
+        )
+    return document.encode("utf-8")
+
+
+MARKDOWN_DIFF_LINE_LIMIT = 40
+
+
+def markdown_diff(
+    published: bytes | None,
+    source: bytes,
+    limit: int = MARKDOWN_DIFF_LINE_LIMIT,
+) -> str:
+    """Unified diff between the published Markdown and the new source.
+
+    The published page is the same basis the byte comparison uses, so the diff
+    cannot disagree with the change classification. Truncation is stated rather
+    than silent: a cut-off diff that looked complete would be worse than no diff.
+    """
+    if published is None:
+        return ""
+    try:
+        document = published.decode("utf-8")
+    except UnicodeDecodeError:
+        return "diff unavailable: published page is not UTF-8"
+    previous = extract_markdown(document)
+    if previous is None:
+        return "diff unavailable: published page has no embedded Markdown"
+    try:
+        current = source.decode("utf-8")
+    except UnicodeDecodeError:
+        return "diff unavailable: source is not UTF-8"
+    lines = list(
+        difflib.unified_diff(
+            previous.splitlines(),
+            current.splitlines(),
+            fromfile="published",
+            tofile="source",
+            lineterm="",
+        )
+    )
+    if not lines:
+        return ""
+    if len(lines) > limit:
+        remaining = len(lines) - limit
+        lines = lines[:limit] + [f"… truncated, {remaining} more lines"]
+    return "\n".join(lines)
 
 
 def _slug(value: str) -> str:
@@ -465,7 +882,7 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
     parent_parts = tuple(_slug(part) for part in source.parent.parts if part != ".")
     stem = _slug(source.stem)
     suffix = source.suffix.lower()
-    if suffix == ".html":
+    if suffix in DIRECTORY_INDEX_EXTENSIONS:
         return PurePosixPath(*parent_parts, stem, "index.html")
     return PurePosixPath(*parent_parts, f"{stem}{suffix}")
 
@@ -488,6 +905,25 @@ def _normalize_words(stem: str) -> str:
 def _derive_title(stem: str) -> str:
     text = _normalize_words(stem)
     return text[0].upper() + text[1:]
+
+
+MARKDOWN_HEADING = re.compile(r"^#[ \t]+(\S.*?)[ \t]*#*[ \t]*$", re.MULTILINE)
+
+
+def markdown_title(source_path: Path) -> str | None:
+    """The document's first level-one heading, or None when it has none.
+
+    The stem rule normalizes separators and sentence-cases, which loses whatever
+    casing and punctuation the author chose. The heading they already wrote is the
+    better starting point, and the result is still a proposal the user edits before
+    publishing.
+    """
+    try:
+        text = source_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return None
+    match = MARKDOWN_HEADING.search(text)
+    return match.group(1) if match else None
 
 
 def _unique_id(base: str, taken: set[str]) -> str:
@@ -612,7 +1048,15 @@ def propose_manifest_additions(
             label = group or sources[0].stem
             collection_id = _unique_id(_slug(label), collection_ids)
             collection_ids.add(collection_id)
-            is_presentation = any(source.suffix.lower() == ".html" for source in sources)
+            # Classified on the source extensions that produce a directory
+            # index.html, because that is the destination suffix
+            # `_sections_by_media` reads the collection back by. Matching only
+            # ".html" here would file a Markdown-only collection under images and
+            # move it to presentations on the next proposal.
+            is_presentation = any(
+                source.suffix.lower() in DIRECTORY_INDEX_EXTENSIONS
+                for source in sources
+            )
             section = sections_by_media.get(
                 is_presentation,
                 PRESENTATION_SECTION if is_presentation else IMAGE_SECTION,
@@ -639,9 +1083,12 @@ def propose_manifest_additions(
             order_in_collection[collection_id] = (
                 order_in_collection.get(collection_id, 0) + 10
             )
-            if source.suffix.lower() == ".html":
+            source_path = source_root / source.as_posix()
+            title = _derive_title(source.stem)
+            suffix = source.suffix.lower()
+            if suffix == ".html":
                 replacements, unmapped = _vendor_replacements(
-                    vendor_by_name, source_root / source.as_posix(), destination
+                    vendor_by_name, source_path, destination
                 )
                 if unmapped:
                     warnings[entry_id] = (
@@ -649,13 +1096,17 @@ def propose_manifest_additions(
                         "protected_files or the next run fails in transform_html"
                     )
             else:
+                # Markdown entries declare no replacements: the generated page owns
+                # its references, and a cdnjs URL in the prose is content.
                 replacements = {}
+                if suffix == ".md":
+                    title = markdown_title(source_path) or title
             entries.append(
                 Entry(
                     id=entry_id,
                     source=source,
                     destination=destination,
-                    title=_derive_title(source.stem),
+                    title=title,
                     collection=collection_id,
                     order=order_in_collection[collection_id],
                     replacements=replacements,
@@ -759,8 +1210,15 @@ def build_desired_files(
             f"source path escapes source directory: {source_path}",
         )
         source_bytes = source_path.read_bytes()
-        if entry.source.suffix.lower() == ".html":
+        suffix = entry.source.suffix.lower()
+        if suffix == ".html":
             output = transform_html(entry, source_bytes)
+        elif suffix == ".md":
+            # Looked up per entry on purpose: a manifest with no Markdown must not
+            # require the parser to be vendored.
+            output = render_markdown_page(
+                entry, source_bytes, markdown_vendor_path(manifest)
+            )
         else:
             output = source_bytes
         desired[entry.destination] = output
@@ -885,6 +1343,7 @@ def manifest_to_json(manifest: Manifest) -> bytes:
     payload = {
         "version": manifest.version,
         "protected_files": [path.as_posix() for path in manifest.protected_files],
+        "ignored_sources": list(manifest.ignored_sources),
         "collections": [
             {
                 "id": collection.id,
@@ -983,7 +1442,9 @@ def create_sync_plan(
 ) -> SyncPlan:
     declared = load_manifest(manifest_path)
     manifest = normalize_orders(declared)
-    inventory = scan_source(source_root)
+    inventory, ignored_rules = apply_source_ignores(
+        scan_source(source_root), manifest.ignored_sources
+    )
     reconciliation = reconcile_inventory(manifest, inventory)
     next_manifest = reconciliation.next_manifest
     desired_files = build_desired_files(next_manifest, source_root)
@@ -1049,6 +1510,25 @@ def create_sync_plan(
         if destination not in planned_deletions:
             changes.append(Change("orphan", destination))
 
+    # Only updates are diffed. An add has nothing to compare against, and a delete
+    # or orphan has no source left to read.
+    markdown_sources = {
+        entry.destination: entry.source
+        for entry in next_manifest.entries
+        if entry.source.suffix.lower() == ".md"
+    }
+    updated = {change.destination for change in changes if change.kind == "update"}
+    markdown_diffs: list[tuple[PurePosixPath, str]] = []
+    for destination in sorted(updated & markdown_sources.keys(), key=str):
+        published_path = artefacts_root / destination.as_posix()
+        source_path = source_root / markdown_sources[destination].as_posix()
+        body = markdown_diff(
+            published_path.read_bytes() if published_path.is_file() else None,
+            source_path.read_bytes(),
+        )
+        if body:
+            markdown_diffs.append((destination, body))
+
     return SyncPlan(
         manifest=declared,
         next_manifest=next_manifest,
@@ -1056,6 +1536,8 @@ def create_sync_plan(
         changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
         unchanged=tuple(sorted(unchanged, key=str)),
         excluded_suffixes=inventory.excluded_suffixes,
+        markdown_diffs=tuple(markdown_diffs),
+        ignored_sources=ignored_rules,
     )
 
 
@@ -1101,6 +1583,20 @@ def format_plan(plan: SyncPlan) -> str:
     if renumbered:
         lines.append(f"Renumbered order ({len(renumbered)})")
         lines.extend(f"  ~ {label}" for label in renumbered)
+    if plan.markdown_diffs:
+        lines.append(f"Markdown changes ({len(plan.markdown_diffs)})")
+        for destination, body in plan.markdown_diffs:
+            lines.append(f"  ~ {destination.as_posix()}")
+            lines.extend(f"      {line}" for line in body.splitlines())
+    if plan.ignored_sources:
+        # One line per rule, not per file: a long path list on every run trains the
+        # reader to skip the block, and the rule is what they would edit.
+        total = sum(count for _, count in plan.ignored_sources)
+        lines.append(f"Ignored sources ({total})")
+        lines.extend(
+            f"  - {rule} ({count} file{'' if count == 1 else 's'})"
+            for rule, count in plan.ignored_sources
+        )
     lines.append(f"Unchanged ({len(plan.unchanged)})")
     lines.append(f"Excluded source types: {', '.join(plan.excluded_suffixes) or 'none'}")
     return "\n".join(lines)
@@ -1542,8 +2038,8 @@ def publish(
         + format_plan(plan)
         + "\n```\n\n"
         "## Privacy boundary\n\n"
-        "Only manifest-listed HTML, PNG, JPEG, JPG, and ICO files are published. "
-        "Excluded document types and local metadata remain private.\n\n"
+        "Only manifest-listed HTML, Markdown, PNG, JPEG, JPG, and ICO files are "
+        "published. Excluded document types and local metadata remain private.\n\n"
         "## Verification\n\n"
         "Local unit tests and repository validation passed before push.\n"
     )
