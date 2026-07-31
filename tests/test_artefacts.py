@@ -176,6 +176,21 @@ class ManifestTests(unittest.TestCase):
 
         self.assertEqual([entry.order for entry in manifest.entries], [10, 10])
 
+    def test_accepts_markdown_source_with_directory_index_destination(self):
+        payload = valid_payload()
+        payload["entries"][0]["source"] = "Notes/Report.md"
+        payload["entries"][0]["destination"] = "notes/report/index.html"
+        manifest = artefacts_cli.load_manifest(self.write_manifest(payload))
+        self.assertEqual(
+            manifest.entries[0].destination, PurePosixPath("notes/report/index.html")
+        )
+
+    def test_rejects_markdown_destination_that_keeps_the_md_extension(self):
+        payload = valid_payload()
+        payload["entries"][0]["source"] = "Notes/Report.md"
+        payload["entries"][0]["destination"] = "notes/report.md"
+        self.assert_manifest_error(payload, "must end in index.html")
+
 
 class NormalizeOrdersTests(unittest.TestCase):
     def manifest_from(self, payload: dict):
@@ -295,13 +310,13 @@ class SourceInventoryTests(unittest.TestCase):
     def test_scan_reports_only_approved_files(self):
         root = self.make_source()
         (root / "topic" / "Chart.PNG").write_bytes(b"png")
-        (root / "topic" / "notes.md").write_text("private", encoding="utf-8")
+        (root / "topic" / "notes.txt").write_text("private", encoding="utf-8")
         (root / ".DS_Store").write_bytes(b"metadata")
 
         inventory = artefacts_cli.scan_source(root)
 
         self.assertEqual(inventory.approved, (PurePosixPath("topic/Chart.PNG"),))
-        self.assertEqual(inventory.excluded_suffixes, (".md",))
+        self.assertEqual(inventory.excluded_suffixes, (".txt",))
 
     def test_scan_prunes_nested_repository_copy(self):
         root = self.make_source()
@@ -344,6 +359,22 @@ class SourceInventoryTests(unittest.TestCase):
 
         self.assertEqual(tuple(entry.id for entry in result.missing_entries), ("item-1",))
         self.assertEqual(result.next_manifest.entries, ())
+
+    def test_scan_reports_markdown_as_approved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Notes").mkdir()
+            (root / "Notes" / "Report.md").write_text("# Report\n", encoding="utf-8")
+            (root / "Notes" / "Draft.docx").write_bytes(b"binary")
+            inventory = artefacts_cli.scan_source(root)
+        self.assertEqual(inventory.approved, (PurePosixPath("Notes/Report.md"),))
+        self.assertEqual(inventory.excluded_suffixes, (".docx",))
+
+    def test_suggest_destination_maps_markdown_to_a_directory_index(self):
+        self.assertEqual(
+            artefacts_cli.suggest_destination(PurePosixPath("Notes/My_Report.md")),
+            PurePosixPath("notes/my-report/index.html"),
+        )
 
 
 class ManifestProposalTests(unittest.TestCase):
@@ -1207,7 +1238,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
 
     def test_format_plan_lists_each_change_kind_and_excluded_types(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
-        (source / "notes.md").write_text("private", encoding="utf-8")
+        (source / "notes.txt").write_text("private", encoding="utf-8")
         plan = artefacts_cli.create_sync_plan(
             manifest_path, source, repo / "artefacts", head_manifest
         )
@@ -1218,7 +1249,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertIn("Update (3)", output)
         self.assertIn("Delete (1)\n  - charts/removed.png", output)
         self.assertIn("Delete (orphaned) (1)\n  - notes.txt", output)
-        self.assertIn("Excluded source types: .md", output)
+        self.assertIn("Excluded source types: .txt", output)
 
 
 class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):

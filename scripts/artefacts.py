@@ -19,7 +19,10 @@ from typing import Any, Callable
 from urllib.parse import unquote, urljoin, urlsplit
 
 
-APPROVED_EXTENSIONS = frozenset({".html", ".png", ".jpeg", ".jpg", ".ico"})
+# Sources that become a generated page rather than a byte copy. Both publish to a
+# directory index.html so the public URL carries no file extension.
+DIRECTORY_INDEX_EXTENSIONS = frozenset({".html", ".md"})
+APPROVED_EXTENSIONS = frozenset({".html", ".md", ".png", ".jpeg", ".jpg", ".ico"})
 PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
@@ -338,10 +341,10 @@ def validate_manifest(manifest: Manifest) -> None:
         _validate_path_components(
             entry.destination, PUBLIC_COMPONENT, "destination must be lowercase kebab-case"
         )
-        if source_suffix == ".html":
+        if source_suffix in DIRECTORY_INDEX_EXTENSIONS:
             if entry.destination.name != "index.html":
                 raise ManifestError(
-                    f"HTML destination for entry {entry.id} must end in index.html"
+                    f"generated destination for entry {entry.id} must end in index.html"
                 )
         elif destination_suffix != source_suffix:
             raise ManifestError(
@@ -465,7 +468,7 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
     parent_parts = tuple(_slug(part) for part in source.parent.parts if part != ".")
     stem = _slug(source.stem)
     suffix = source.suffix.lower()
-    if suffix == ".html":
+    if suffix in DIRECTORY_INDEX_EXTENSIONS:
         return PurePosixPath(*parent_parts, stem, "index.html")
     return PurePosixPath(*parent_parts, f"{stem}{suffix}")
 
