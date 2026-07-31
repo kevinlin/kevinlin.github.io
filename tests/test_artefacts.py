@@ -1548,6 +1548,66 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertEqual(plan.markdown_diffs, ())
         self.assertNotIn("Markdown changes", artefacts_cli.format_plan(plan))
 
+    def test_markdown_add_then_update_cycle_validates(self):
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts = repo / "artefacts"
+        (artefacts / "vendor" / "marked.min.js").write_bytes(b"/* parser */")
+        (artefacts / "notes.txt").unlink()  # keep validate's expected set exact
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["protected_files"].append("vendor/marked.min.js")
+        payload["entries"] = [
+            entry for entry in payload["entries"] if entry["id"] != "removed"
+        ]
+        payload["entries"].append(
+            {
+                "id": "notes-report",
+                "source": "Notes/Report.md",
+                "destination": "charts/report/index.html",
+                "title": "Report",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        # The `removed` entry is gone from the manifest, so its published file would
+        # be swept as an orphan; delete it here to keep the plan focused on Markdown.
+        # Do NOT create Charts/Removed.png — an approved source with no entry raises
+        # UnlistedSourceError and aborts the plan.
+        (artefacts / "charts" / "removed.png").unlink()
+        (source / "Notes").mkdir()
+        report = source / "Notes" / "Report.md"
+        report.write_text("# Report\n\nFirst version.\n", encoding="utf-8")
+
+        head = manifest_path.read_bytes()
+        first = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
+        self.assertIn(
+            artefacts_cli.Change("add", PurePosixPath("charts/report/index.html")),
+            first.changes,
+        )
+        self.assertEqual(first.markdown_diffs, ())
+        artefacts_cli.apply_plan(first, artefacts)
+        artefacts_cli.validate_repository(repo, None)
+
+        report.write_text("# Report\n\nSecond version.\n", encoding="utf-8")
+        second = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
+        self.assertIn(
+            artefacts_cli.Change("update", PurePosixPath("charts/report/index.html")),
+            second.changes,
+        )
+        body = dict(second.markdown_diffs)[PurePosixPath("charts/report/index.html")]
+        self.assertIn("-First version.", body)
+        self.assertIn("+Second version.", body)
+        artefacts_cli.apply_plan(second, artefacts)
+        artefacts_cli.validate_repository(repo, None)
+
+        page = (artefacts / "charts" / "report" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            artefacts_cli.extract_markdown(page), "# Report\n\nSecond version.\n"
+        )
+
 
 class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):
     def make_fixture_with_unlisted(self):

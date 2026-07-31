@@ -1945,8 +1945,8 @@ def publish(
         + format_plan(plan)
         + "\n```\n\n"
         "## Privacy boundary\n\n"
-        "Only manifest-listed HTML, PNG, JPEG, JPG, and ICO files are published. "
-        "Excluded document types and local metadata remain private.\n\n"
+        "Only manifest-listed HTML, Markdown, PNG, JPEG, JPG, and ICO files are "
+        "published. Excluded document types and local metadata remain private.\n\n"
         "## Verification\n\n"
         "Local unit tests and repository validation passed before push.\n"
     )
