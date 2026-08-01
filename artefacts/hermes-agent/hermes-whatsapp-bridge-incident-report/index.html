@@ -294,9 +294,13 @@ The desktop agent process and gateway process both wrote to the same `state.db` 
             // manifest title from exactly that heading, so the page would print the
             // title twice. Drop the article's copy when it repeats the header rather
             // than stripping it from the source, which has to stay byte-exact.
-            var lead = body.firstElementChild;
+            // The H1 is not always the first element — several sources open with a
+            // banner line — so match on the first H1 anywhere in the article. Equal
+            // text is the whole test: a heading that differs really does say
+            // something else, and both copies stay.
+            var lead = body.querySelector('h1');
             var heading = document.querySelector('header h1');
-            if (lead && lead.tagName === 'H1' && heading &&
+            if (lead && heading &&
                 lead.textContent.trim() === heading.textContent.trim()) {
                 lead.remove();
             }

@@ -993,6 +993,14 @@ class MarkdownRenderTests(unittest.TestCase):
             artefacts_cli.extract_markdown(page), "# Report & Analysis\n\nBody.\n"
         )
 
+    def test_page_finds_the_lead_heading_past_a_preamble(self):
+        # Several sources open with a banner line before their H1, so the first
+        # element is a paragraph. Anchoring on firstElementChild missed those and
+        # printed the title twice.
+        page = self.render("Banner line\n\n# Report & Analysis\n\nBody.\n")
+        self.assertIn("body.querySelector('h1')", page)
+        self.assertNotIn("firstElementChild", page)
+
     def test_page_ends_with_a_newline(self):
         self.assertTrue(self.render("# R\n").endswith("\n"))
 

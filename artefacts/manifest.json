@@ -494,7 +494,7 @@
       "id": "last30days-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
       "source": "Last30Days/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
       "destination": "last30days/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
-      "title": "last30days v3.3.2: ralph loop AI coding agent technique",
+      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
       "collection": "last30days",
       "order": 90,
       "replacements": {}
@@ -503,7 +503,7 @@
       "id": "last30days-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
       "source": "Last30Days/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
       "destination": "last30days/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
-      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code",
+      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
       "collection": "last30days",
       "order": 100,
       "replacements": {}
@@ -512,7 +512,7 @@
       "id": "last30days-20260610-ralph-loop-raw-v3",
       "source": "Last30Days/20260610_ralph-loop-raw-v3.md",
       "destination": "last30days/20260610-ralph-loop-raw-v3/index.html",
-      "title": "last30days v3.3.2: ralph loop",
+      "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
       "collection": "last30days",
       "order": 110,
       "replacements": {}
@@ -521,7 +521,7 @@
       "id": "last30days-20260611-claude-fable-5-raw-v3",
       "source": "Last30Days/20260611_claude-fable-5-raw-v3.md",
       "destination": "last30days/20260611-claude-fable-5-raw-v3/index.html",
-      "title": "last30days v3.3.2: Claude Fable 5",
+      "title": "last30days v3.3.2: Claude Fable 5 (June 11, 2026)",
       "collection": "last30days",
       "order": 120,
       "replacements": {}
@@ -530,7 +530,7 @@
       "id": "last30days-20260614-kilo-code-raw-v3",
       "source": "Last30Days/20260614_kilo-code-raw-v3.md",
       "destination": "last30days/20260614-kilo-code-raw-v3/index.html",
-      "title": "last30days v3.3.2: Kilo Code",
+      "title": "last30days v3.3.2: Kilo Code (June 14, 2026)",
       "collection": "last30days",
       "order": 130,
       "replacements": {}
@@ -539,7 +539,7 @@
       "id": "last30days-20260617-langchain-raw-v3",
       "source": "Last30Days/20260617_langchain-raw-v3.md",
       "destination": "last30days/20260617-langchain-raw-v3/index.html",
-      "title": "last30days v3.3.2: LangChain",
+      "title": "last30days v3.3.2: LangChain (June 17, 2026)",
       "collection": "last30days",
       "order": 140,
       "replacements": {}
@@ -548,7 +548,7 @@
       "id": "last30days-20260713-loop-engineering-raw",
       "source": "Last30Days/20260713_loop-engineering-raw.md",
       "destination": "last30days/20260713-loop-engineering-raw/index.html",
-      "title": "last30days v3.14.0: Loop Engineering",
+      "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
       "collection": "last30days",
       "order": 150,
       "replacements": {}
@@ -557,7 +557,7 @@
       "id": "last30days-20260731-skillops-raw",
       "source": "Last30Days/20260731_skillops-raw.md",
       "destination": "last30days/20260731-skillops-raw/index.html",
-      "title": "last30days v3.18.4: SkillOps",
+      "title": "last30days v3.18.4: SkillOps (July 31, 2026)",
       "collection": "last30days",
       "order": 160,
       "replacements": {}
