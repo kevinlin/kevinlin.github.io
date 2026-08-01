@@ -491,75 +491,75 @@
       "replacements": {}
     },
     {
-      "id": "last30days-claude-fable-5-raw-v3",
-      "source": "Last30Days/claude-fable-5-raw-v3.md",
-      "destination": "last30days/claude-fable-5-raw-v3/index.html",
-      "title": "last30days v3.3.2: Claude Fable 5",
-      "collection": "last30days",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-kilo-code-raw-v3",
-      "source": "Last30Days/kilo-code-raw-v3.md",
-      "destination": "last30days/kilo-code-raw-v3/index.html",
-      "title": "last30days v3.3.2: Kilo Code",
-      "collection": "last30days",
-      "order": 20,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-langchain-raw-v3",
-      "source": "Last30Days/langchain-raw-v3.md",
-      "destination": "last30days/langchain-raw-v3/index.html",
-      "title": "last30days v3.3.2: LangChain",
-      "collection": "last30days",
-      "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-loop-engineering-raw",
-      "source": "Last30Days/loop-engineering-raw.md",
-      "destination": "last30days/loop-engineering-raw/index.html",
-      "title": "last30days v3.14.0: Loop Engineering",
-      "collection": "last30days",
-      "order": 40,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-ralph-loop-ai-coding-agent-technique-raw-v1",
-      "source": "Last30Days/ralph-loop-ai-coding-agent-technique-raw-v1.md",
-      "destination": "last30days/ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
+      "id": "last30days-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
+      "source": "Last30Days/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
+      "destination": "last30days/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
       "title": "last30days v3.3.2: ralph loop AI coding agent technique",
       "collection": "last30days",
-      "order": 50,
+      "order": 90,
       "replacements": {}
     },
     {
-      "id": "last30days-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
-      "source": "Last30Days/ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
-      "destination": "last30days/ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
+      "id": "last30days-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
+      "source": "Last30Days/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
+      "destination": "last30days/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
       "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code",
       "collection": "last30days",
-      "order": 60,
+      "order": 100,
       "replacements": {}
     },
     {
-      "id": "last30days-ralph-loop-raw-v3",
-      "source": "Last30Days/ralph-loop-raw-v3.md",
-      "destination": "last30days/ralph-loop-raw-v3/index.html",
+      "id": "last30days-20260610-ralph-loop-raw-v3",
+      "source": "Last30Days/20260610_ralph-loop-raw-v3.md",
+      "destination": "last30days/20260610-ralph-loop-raw-v3/index.html",
       "title": "last30days v3.3.2: ralph loop",
       "collection": "last30days",
-      "order": 70,
+      "order": 110,
       "replacements": {}
     },
     {
-      "id": "last30days-skillops-raw",
-      "source": "Last30Days/skillops-raw.md",
-      "destination": "last30days/skillops-raw/index.html",
+      "id": "last30days-20260611-claude-fable-5-raw-v3",
+      "source": "Last30Days/20260611_claude-fable-5-raw-v3.md",
+      "destination": "last30days/20260611-claude-fable-5-raw-v3/index.html",
+      "title": "last30days v3.3.2: Claude Fable 5",
+      "collection": "last30days",
+      "order": 120,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-20260614-kilo-code-raw-v3",
+      "source": "Last30Days/20260614_kilo-code-raw-v3.md",
+      "destination": "last30days/20260614-kilo-code-raw-v3/index.html",
+      "title": "last30days v3.3.2: Kilo Code",
+      "collection": "last30days",
+      "order": 130,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-20260617-langchain-raw-v3",
+      "source": "Last30Days/20260617_langchain-raw-v3.md",
+      "destination": "last30days/20260617-langchain-raw-v3/index.html",
+      "title": "last30days v3.3.2: LangChain",
+      "collection": "last30days",
+      "order": 140,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-20260713-loop-engineering-raw",
+      "source": "Last30Days/20260713_loop-engineering-raw.md",
+      "destination": "last30days/20260713-loop-engineering-raw/index.html",
+      "title": "last30days v3.14.0: Loop Engineering",
+      "collection": "last30days",
+      "order": 150,
+      "replacements": {}
+    },
+    {
+      "id": "last30days-20260731-skillops-raw",
+      "source": "Last30Days/20260731_skillops-raw.md",
+      "destination": "last30days/20260731-skillops-raw/index.html",
       "title": "last30days v3.18.4: SkillOps",
       "collection": "last30days",
-      "order": 80,
+      "order": 160,
       "replacements": {}
     }
   ]
