@@ -562,24 +562,6 @@
       "replacements": {}
     },
     {
-      "id": "java-interview-index",
-      "source": "java-interview/index.html",
-      "destination": "java-interview/index/index.html",
-      "title": "Index",
-      "collection": "java-interview",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "java-interview-java-interview-questions",
-      "source": "java-interview/java-interview-questions.md",
-      "destination": "java-interview/java-interview-questions/index.html",
-      "title": "Java interview questions",
-      "collection": "java-interview",
-      "order": 20,
-      "replacements": {}
-    },
-    {
       "id": "product-timeline-java-release-timeline",
       "source": "product-timeline/java-release-timeline.html",
       "destination": "product-timeline/java-release-timeline/index.html",
@@ -595,6 +577,15 @@
       "title": "Java releases",
       "collection": "product-timeline",
       "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "java-interview-java-interview-questions",
+      "source": "java-interview/java-interview-questions.html",
+      "destination": "java-interview/java-interview-questions/index.html",
+      "title": "Java interview questions",
+      "collection": "java-interview",
+      "order": 10,
       "replacements": {}
     }
   ]
