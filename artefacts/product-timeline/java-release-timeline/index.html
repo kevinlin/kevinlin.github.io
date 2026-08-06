@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Java release timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F2EC;
+    --panel:#FCFBF7;
+    --panel-2:#EEEBE2;
+    --grid:#E4E1D7;
+    --grid-strong:#C9C4B6;
+    --ink:#17191A;
+    --ink-soft:#575C5E;
+    --ink-dim:#83888A;
+
+    --lts:#9A4A0C;
+    --ga:#2C5A72;
+    --preview:#6B3D92;
+    --final:#146A49;
+
+    --lts-tint:rgba(154,74,12,.12);
+    --ga-tint:rgba(44,90,114,.12);
+
+    --code-bg:#1B1D1E;
+    --code-ink:#E7E4DB;
+    --code-key:#EBA655;
+    --code-str:#9DC58C;
+    --code-com:#8B9190;
+    --code-num:#D69AC0;
+    --code-ann:#7FB4D6;
+
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.22,.8,.24,1);
+    --shell:1180px;
+    --gutter:24px;
+
+    --col:240px;
+    --row-top:210px;
+    --row-axis:44px;
+    --axis-y:232px;
+
+    --z-veil:60;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+  body{
+    font-family:var(--mono);background:var(--bg);color:var(--ink);
+    padding-bottom:56px;min-height:100vh;
+    background-image:
+      radial-gradient(110% 70% at 50% -8%, rgba(154,74,12,.06), transparent 60%),
+      radial-gradient(85% 55% at 50% 108%, rgba(44,90,114,.05), transparent 58%);
+    background-attachment:fixed;
+  }
+  /* paper grain, so the flat cream has some tooth */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:var(--z-veil);
+    background:repeating-linear-gradient(180deg, rgba(23,25,26,.018) 0 1px, transparent 1px 3px);
+    mix-blend-mode:multiply;
+  }
+
+  :focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:3px}
+
+  .shell{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter)}
+
+  .skip{position:absolute;left:-9999px;top:0;padding:10px 16px;background:var(--ink);color:var(--bg);
+        font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;z-index:80}
+  .skip:focus{left:16px;top:16px}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+           clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+  /* ---------- header ---------- */
+
+  header{padding:56px 0 28px;border-bottom:1px solid var(--grid-strong);position:relative}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+                background:linear-gradient(90deg,var(--lts),var(--ga) 58%,transparent);opacity:.7}
+
+  .eyebrow{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:500;letter-spacing:.24em;
+           text-transform:uppercase;color:var(--ink-soft);margin-bottom:20px}
+  .eyebrow .caret{width:7px;height:13px;flex:none;background:var(--lts);animation:blink 1.15s steps(1) infinite}
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  h1{font-size:clamp(26px,4.6vw,46px);font-weight:700;line-height:1.06;letter-spacing:-.015em;
+     text-transform:uppercase;text-wrap:balance;margin-bottom:18px}
+  h1 .accent{color:var(--lts)}
+
+  .lede{max-width:68ch;font-size:13px;line-height:1.75;color:var(--ink-soft);text-wrap:pretty}
+  .lede b{color:var(--ink);font-weight:500}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(216px,1fr));gap:12px;max-width:880px;margin-top:26px}
+  .stat{position:relative;padding:14px 16px;background:var(--panel);border:1px solid var(--grid-strong);border-radius:8px}
+  .stat::before{content:"";position:absolute;left:-1px;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--ink-dim)}
+  .stat.lts::before{background:var(--lts)}
+  .stat.ga::before{background:var(--ga)}
+  .stat .k{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:600;letter-spacing:.2em;
+           text-transform:uppercase;color:var(--ink-soft)}
+  .stat .v{display:block;margin-top:9px;font-size:22px;font-weight:600;letter-spacing:-.02em;
+           font-variant-numeric:tabular-nums;line-height:1}
+  .stat .u{font-size:12px;font-weight:400;color:var(--ink-soft);letter-spacing:0}
+  .stat.lts .v{color:var(--lts)} .stat.ga .v{color:var(--ga)}
+  .swatch{width:9px;height:9px;flex:none;display:inline-block;border-radius:2px}
+  .sw-lts{background:var(--lts);border-radius:50%}
+  .sw-ga{background:var(--ga)}
+
+  /* ---------- rail ---------- */
+
+  .hint{display:flex;flex-wrap:wrap;gap:8px 24px;padding:26px 0 12px;font-size:10.5px;font-weight:500;
+        letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
+  .hint .arrow{display:inline-block;animation:drift 2.4s var(--ease) infinite}
+  @keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+
+  .scroller{
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    border-top:1px solid var(--grid-strong);border-bottom:1px solid var(--grid-strong);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/100% 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 100%,
+      var(--panel);
+    scrollbar-color:var(--grid-strong) transparent;scrollbar-width:thin;
+  }
+  .scroller::-webkit-scrollbar{height:10px}
+  .scroller::-webkit-scrollbar-track{background:transparent}
+  .scroller::-webkit-scrollbar-thumb{background:var(--grid-strong);border-radius:5px}
+  .scroller:hover::-webkit-scrollbar-thumb{background:#AFA99B}
+
+  .track{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:var(--col);
+         grid-template-rows:var(--row-top) var(--row-axis) var(--row-top);
+         width:max-content;padding:36px 40px 28px}
+  /* the axis itself */
+  .track::before{
+    content:"";position:absolute;left:0;right:0;top:calc(36px + var(--axis-y));height:1px;
+    background:var(--ink);opacity:.85;
+    transform:scaleX(0);transform-origin:left center;transition:transform 1.4s var(--ease);
+  }
+  .track.in::before{transform:scaleX(1)}
+
+  .slot{position:relative;display:grid;grid-row:1 / -1;grid-template-rows:subgrid;justify-items:center}
+  /* vertical hairline through every release, stronger where the year turns */
+  .slot::before{
+    content:"";position:absolute;top:0;bottom:0;width:1px;left:50%;
+    background:linear-gradient(180deg,transparent,var(--grid) 8%,var(--grid) 92%,transparent);
+  }
+  .slot.newyear::before{background:linear-gradient(180deg,transparent,var(--grid-strong) 6%,var(--grid-strong) 94%,transparent)}
+
+  .yearlab{position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+           font-size:12px;font-weight:700;letter-spacing:.22em;color:var(--ink);
+           font-variant-numeric:tabular-nums}
+
+  .marker{grid-row:2;align-self:center;display:grid;place-items:center;position:relative;pointer-events:none}
+  .dot{display:block;width:11px;height:11px;background:var(--c);transform:scale(0);
+       transition:transform .45s var(--ease),box-shadow .16s var(--ease)}
+  .slot.lts .dot{border-radius:50%;width:13px;height:13px}
+  .track.in .dot{transform:scale(1)}
+  .stem{display:block;position:absolute;left:50%;width:1px;background:var(--c);opacity:.45;
+        transform:scaleY(0);transition:transform .5s var(--ease) .1s,opacity .18s var(--ease)}
+  .slot.up .stem{bottom:50%;height:22px;transform-origin:bottom center}
+  .slot.down .stem{top:50%;height:22px;transform-origin:top center}
+  .track.in .stem{transform:scaleY(1)}
+
+  .card{
+    grid-row:1;align-self:end;width:212px;text-align:left;cursor:pointer;
+    font:inherit;color:inherit;background:var(--panel);
+    border:1px solid var(--grid-strong);border-radius:10px;border-top:3px solid var(--c);
+    padding:13px 14px 14px;
+    box-shadow:0 1px 2px rgba(23,25,26,.04),0 2px 6px rgba(23,25,26,.04);
+    transition:transform .14s var(--ease),box-shadow .14s var(--ease),
+               border-color .14s var(--ease),background-color .14s var(--ease);
+  }
+  .slot.down .card{grid-row:3;align-self:start;border-top:1px solid var(--grid-strong);border-bottom:3px solid var(--c)}
+
+  @media (hover:hover) and (pointer:fine){
+    .card:hover{background:#FFFEFA;box-shadow:0 1px 2px rgba(23,25,26,.05),0 4px 10px rgba(23,25,26,.07);transform:translateY(-2px)}
+    .slot.down .card:hover{transform:translateY(2px)}
+  }
+  .card:active{transform:scale(.985)}
+  .slot.active .card{border-color:var(--c);background:var(--tint);
+                     box-shadow:0 1px 2px rgba(23,25,26,.06),0 6px 16px rgba(23,25,26,.10)}
+  .slot.active .dot{transform:scale(1.5);box-shadow:0 0 0 5px var(--tint)}
+  .slot.active .stem{opacity:1}
+
+  .card .v{display:flex;align-items:baseline;gap:8px}
+  .card .v b{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--c);font-variant-numeric:tabular-nums}
+  .card .badge{font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+               padding:2px 6px;border-radius:4px;background:var(--tint);color:var(--c)}
+  .card .when{display:block;margin-top:7px;font-size:10.5px;font-weight:500;letter-spacing:.16em;
+              text-transform:uppercase;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .card .tags{list-style:none;display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+  .card .tags li{padding:4px 8px;border-radius:6px;background:var(--panel-2);
+                 font-size:10px;letter-spacing:.03em;color:var(--ink-soft);line-height:1.4}
+  .card .more{display:block;margin-top:10px;font-size:9.5px;font-weight:600;letter-spacing:.18em;
+              text-transform:uppercase;color:var(--ink-dim)}
+  .slot.active .card .more{color:var(--c)}
+
+  /* ---------- detail panel ---------- */
+
+  .detail{margin-top:34px}
+  .detail-inner{
+    background:var(--panel);border:1px solid var(--grid-strong);border-radius:14px;
+    border-left:4px solid var(--c);overflow:hidden;
+    box-shadow:0 1px 2px rgba(23,25,26,.04),0 6px 18px rgba(23,25,26,.05);
+  }
+  .d-head{padding:22px 26px 20px;border-bottom:1px solid var(--grid);background:var(--tint)}
+  .d-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px}
+  .d-title h2{font-size:clamp(20px,3.4vw,28px);font-weight:700;letter-spacing:-.02em;color:var(--c);
+              text-transform:uppercase}
+  .d-title .badge{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+                  padding:4px 9px;border-radius:6px;background:var(--panel);border:1px solid var(--c);color:var(--c)}
+  .d-title time{font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);
+                font-variant-numeric:tabular-nums}
+  .d-summary{margin-top:12px;max-width:76ch;font-size:12.5px;line-height:1.8;color:var(--ink-soft);text-wrap:pretty}
+
+  .d-body{padding:6px 26px 26px}
+
+  .feature{padding:22px 0;border-bottom:1px solid var(--grid)}
+  .feature:last-child{border-bottom:0;padding-bottom:6px}
+  .f-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .f-head h3{font-size:14.5px;font-weight:600;letter-spacing:-.005em;line-height:1.4}
+  .chip{font-size:9.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+        padding:3px 8px;border-radius:5px;border:1px solid currentColor;line-height:1.5}
+  .chip.preview{color:var(--preview)}
+  .chip.final{color:var(--final)}
+  .chip.tool{color:var(--ga)}
+  .chip.jvm{color:var(--lts)}
+  .f-purpose{margin-top:10px;max-width:76ch;font-size:12.5px;line-height:1.8;color:var(--ink-soft);text-wrap:pretty}
+  .f-purpose code{background:var(--panel-2);padding:1px 5px;border-radius:4px;font-size:11.5px;color:var(--ink)}
+
+  .snippet{margin-top:14px;border-radius:10px;overflow:hidden;background:var(--code-bg)}
+  .s-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+         padding:8px 10px 8px 14px;border-bottom:1px solid rgba(231,228,219,.12)}
+  .s-lang{font-size:9.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#9AA09F}
+  .copy{font:inherit;font-size:9.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+        color:#9AA09F;background:transparent;border:1px solid rgba(231,228,219,.18);
+        border-radius:6px;padding:5px 10px;cursor:pointer;
+        transition:color .14s var(--ease),border-color .14s var(--ease),background-color .14s var(--ease)}
+  .copy:hover{color:var(--code-ink);border-color:rgba(231,228,219,.4)}
+  .copy:active{transform:scale(.97)}
+  .copy[data-done="true"]{color:var(--code-str);border-color:var(--code-str)}
+  .copy:focus-visible{outline:2px solid var(--code-ink);outline-offset:2px}
+  .snippet pre{overflow-x:auto;padding:14px 16px 16px;
+               scrollbar-color:rgba(231,228,219,.25) transparent;scrollbar-width:thin}
+  .snippet code{font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--code-ink);white-space:pre}
+  .snippet .k{color:var(--code-key)}
+  .snippet .s{color:var(--code-str)}
+  .snippet .c{color:var(--code-com);font-style:italic}
+  .snippet .n{color:var(--code-num)}
+  .snippet .a{color:var(--code-ann)}
+  .s-caption{font-size:11px;line-height:1.7;letter-spacing:.04em;color:var(--ink-dim);margin-top:9px}
+
+  /* ---------- footer ---------- */
+
+  footer{padding:30px 0 0;margin-top:32px;border-top:1px solid var(--grid)}
+  .rule{font-size:11.5px;line-height:1.85;color:var(--ink-soft);max-width:82ch;text-wrap:pretty}
+  .rule b{display:block;margin-bottom:4px;color:var(--ink);font-weight:600;letter-spacing:.14em;
+          text-transform:uppercase;font-size:10px}
+  .rule + .rule{margin-top:16px}
+
+  /* ---------- vertical layout ---------- */
+
+  @media (max-width:920px){
+    .hint .only-h{display:none}
+    .scroller{overflow:visible;border:0;background:none}
+    .track{display:block;width:auto;max-width:var(--shell);margin:0 auto;
+           padding:22px var(--gutter) 8px;position:relative}
+    /* one spine down the left instead of a horizontal axis */
+    .track::before{left:calc(var(--gutter) + 5px);right:auto;top:14px;bottom:22px;height:auto;width:2px;border-radius:1px;
+      background:linear-gradient(180deg,transparent,var(--grid-strong) 4%,var(--grid-strong) 96%,transparent);
+      transform:scaleY(0);transform-origin:top center;transition:transform 1s var(--ease)}
+    .track.in::before{transform:scaleY(1)}
+    .slot{display:block;padding-left:30px;margin-bottom:12px}
+    .slot::before{display:none}
+    .yearlab{position:relative;left:auto;top:auto;transform:none;display:block;
+             width:100%;justify-self:start;text-align:left;
+             margin:24px 0 12px -30px;padding-left:30px;font-size:14px;letter-spacing:.22em}
+    .yearlab::before{content:"";position:absolute;left:0;top:50%;width:12px;height:2px;
+                     transform:translateY(-50%);background:var(--ink)}
+    .marker{position:absolute;left:0;top:20px;display:block}
+    .dot{transform:scale(1);width:12px;height:12px;background:var(--panel);border:2px solid var(--c)}
+    .slot.lts .dot{width:12px;height:12px}
+    .track.in .dot,.slot.active .dot{transform:scale(1)}
+    .slot.active .dot{background:var(--c);box-shadow:0 0 0 4px var(--tint)}
+    .stem{display:none}
+    .card{width:100%;border-top:1px solid var(--grid-strong);border-left:3px solid var(--c)}
+    .slot.down .card,.slot.up .card{border-bottom:1px solid var(--grid-strong);border-top:1px solid var(--grid-strong)}
+    .d-head,.d-body{padding-left:18px;padding-right:18px}
+  }
+
+  @media (max-width:560px){
+    :root{--gutter:16px}
+    header{padding:34px 0 22px}
+    .eyebrow{margin-bottom:16px;letter-spacing:.18em}
+    .stats{grid-template-columns:1fr}
+    .snippet code{font-size:11.5px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+                         transition-duration:.01ms!important;scroll-behavior:auto!important}
+    .track::before{transform:none!important}
+    .dot{transform:scale(1)!important}
+    .stem{transform:scaleY(1)!important}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#timeline">Skip to the timeline</a>
+
+<div class="shell">
+  <header>
+    <p class="eyebrow"><span class="caret" aria-hidden="true"></span>OpenJDK feature releases &middot; Sep 2018 &ndash; Mar 2026</p>
+    <h1>Java <span class="accent">release</span> timeline</h1>
+    <p class="lede">
+      Every six months since Java&nbsp;10, OpenJDK ships a feature release. <b>LTS releases</b> plot above the
+      axis on round markers; <b>interim feature releases</b> plot below it on square ones. Each card carries the
+      headline features; pick one to open the detail panel with the purpose and working code behind them.
+    </p>
+    <div class="stats" id="stats"></div>
+  </header>
+</div>
+
+<div id="timeline">
+  <div class="shell">
+    <p class="hint">
+      <span class="only-h">Scroll sideways <span class="arrow" aria-hidden="true">&rarr;</span></span>
+      <span>Select a release for the detail panel</span>
+      <span>Arrow keys move between releases</span>
+    </p>
+  </div>
+
+  <div class="scroller" id="scroller">
+    <div class="track" id="track" role="tablist" aria-label="Java feature releases in date order"></div>
+  </div>
+</div>
+
+<div class="shell">
+  <section class="detail" id="detail" role="tabpanel" tabindex="-1" aria-live="polite"></section>
+
+  <footer>
+    <div class="rule">
+      <b>Scope</b>
+      Developer-facing language, API and tooling changes rather than every JEP. A feature marked
+      <em>preview</em> needs <code>--enable-preview</code> at both compile and run time, and its syntax can change
+      or be withdrawn &mdash; string templates, previewed in Java 21 and 22, were dropped rather than finalised.
+    </div>
+    <div class="rule">
+      <b>Support</b>
+      Java 11, 17, 21 and 25 are the long-term-support releases in this range. Interim releases are superseded by
+      the next feature release six months later. As of August 2026, Java 26 is the latest feature release and
+      Java 25 the latest LTS.
+    </div>
+    <div class="rule">
+      <b>Sources</b>
+      openjdk.org JDK project pages 11 through 26, plus the Java SE API documentation for the finalised APIs.
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Data. One entry per feature release, in date order.
+   tag: preview | final | tool | jvm  — drives the chip colour only.
+--------------------------------------------------------------- */
+const releases = [
+{
+  v:11, year:2018, month:"September", lts:true,
+  tags:["HTTP Client API","var in lambdas","Flight Recorder"],
+  summary:"The first LTS of the six-month era. The HTTP client left incubation, Flight Recorder was open-sourced into the JDK, and the last Java EE and CORBA modules were removed — the release most migrations from Java 8 actually land on.",
+  features:[
+    {
+      name:"HTTP Client API", tag:"final",
+      purpose:"The incubating client from Java 9 and 10 became a standard API in <code>java.net.http</code>. It handles HTTP/1.1 and HTTP/2, synchronous and asynchronous calls and WebSocket, with immutable requests — enough to drop <code>HttpURLConnection</code> and, for simple cases, a third-party client too.",
+      lang:"java",
+      code:`import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Example {
+    public static void main(String[] args) throws Exception {
+        HttpClient client = HttpClient.newHttpClient();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://example.com"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        System.out.println(response.statusCode());
+        System.out.println(response.body());
+    }
+}`
+    },
+    {
+      name:"var in lambda parameters", tag:"final",
+      purpose:"Java 10 introduced <code>var</code> for local variables. Java 11 allows it in implicitly typed lambda parameters, mainly so an annotation can be attached to a parameter without having to spell out its full type.",
+      lang:"java",
+      code:`import java.util.function.BiFunction;
+
+BiFunction<String, String, String> join =
+        (var first, var second) -> first + second;`
+    },
+    {
+      name:"Java Flight Recorder", tag:"tool",
+      purpose:"JFR became a standard, free production profiler. It records JVM and application events with low enough overhead to leave on in production, and the recording opens in JDK Mission Control.",
+      lang:"bash",
+      code:`java -XX:StartFlightRecording=filename=recording.jfr,duration=60s \\
+     -jar application.jar`
+    }
+  ]
+},
+{
+  v:12, year:2019, month:"March", lts:false,
+  tags:["Switch expressions (preview)","Shenandoah GC"],
+  summary:"A small release whose one visible language change — switch expressions — went on to unlock pattern matching. Underneath: the experimental Shenandoah collector, default CDS archives and G1 improvements.",
+  features:[
+    {
+      name:"Switch expressions", tag:"preview",
+      purpose:"A <code>switch</code> can produce a value. Arrow cases take a list of labels and do not fall through, which removes the two classic switch bugs: a forgotten <code>break</code>, and a variable that has to be declared before the switch just so both branches can assign it.",
+      lang:"java",
+      code:`int numberOfDays = switch (month) {
+    case 2 -> 28;
+    case 4, 6, 9, 11 -> 30;
+    default -> 31;
+};`,
+      caption:"Preview in Java 12, so it needs --enable-preview --release 12 at compile and run time."
+    },
+    {
+      name:"Shenandoah GC", tag:"jvm",
+      purpose:"Shenandoah does its evacuation work concurrently with application threads, so pause times stay roughly flat as the heap grows. Experimental here; production-ready in Java 15.",
+      lang:"bash",
+      code:`java -XX:+UnlockExperimentalVMOptions \\
+     -XX:+UseShenandoahGC \\
+     -jar application.jar`
+    }
+  ]
+},
+{
+  v:13, year:2019, month:"September", lts:false,
+  tags:["Text blocks (preview)","yield","Dynamic CDS"],
+  summary:"Text blocks arrived in preview, switch expressions swapped Java 12's break-with-value for yield, and class-data-sharing archives could be generated from a real run instead of a curated class list.",
+  features:[
+    {
+      name:"Text blocks", tag:"preview",
+      purpose:"Multiline JSON, SQL and HTML stop being a wall of escapes and concatenation. Incidental leading whitespace is stripped relative to the closing delimiter, so the literal can stay indented with the code around it.",
+      lang:"java",
+      code:`String json = """
+        {
+          "name": "Ada",
+          "role": "Engineer"
+        }
+        """;`
+    },
+    {
+      name:"The same literal before text blocks", tag:"preview",
+      purpose:"For comparison — every quote escaped, every line break spelled out, and the shape of the payload lost.",
+      lang:"java",
+      code:`String json = "{\\n" +
+              "  \\"name\\": \\"Ada\\",\\n" +
+              "  \\"role\\": \\"Engineer\\"\\n" +
+              "}";`
+    },
+    {
+      name:"yield in switch expressions", tag:"preview",
+      purpose:"When a case needs more than one statement, its block ends with <code>yield</code> to hand a value back to the switch. This replaced Java 12's overloaded <code>break value</code> syntax.",
+      lang:"java",
+      code:`String category = switch (day) {
+    case SATURDAY, SUNDAY -> "weekend";
+    default -> {
+        System.out.println("Working day");
+        yield "weekday";
+    }
+};`
+    },
+    {
+      name:"Dynamic CDS archives", tag:"jvm",
+      purpose:"An application can dump a class-data-sharing archive when it exits, then memory-map it on the next start. Cuts startup time without anyone having to hand-maintain a class list.",
+      lang:"bash",
+      code:`java -XX:ArchiveClassesAtExit=application.jsa \\
+     -cp application.jar com.example.Main
+
+java -XX:SharedArchiveFile=application.jsa \\
+     -cp application.jar com.example.Main`
+    }
+  ]
+},
+{
+  v:14, year:2020, month:"March", lts:false,
+  tags:["Records (preview)","instanceof patterns","Helpful NPEs"],
+  summary:"Switch expressions finalised, and the two features that reshaped everyday Java — records and instanceof pattern matching — landed in preview. Helpful null-pointer messages and jpackage arrived alongside.",
+  features:[
+    {
+      name:"Records", tag:"preview",
+      purpose:"A record declares what data it carries, and the compiler writes the rest. It replaces the hand-written or IDE-generated data class whose <code>equals</code> quietly drifts out of sync with its fields.",
+      lang:"java",
+      code:`record User(String id, String email) {
+}
+
+User user = new User("123", "ada@example.com");
+
+System.out.println(user.id());
+System.out.println(user.email());`,
+      caption:"Generated for you: final fields, a canonical constructor, accessors, equals, hashCode and toString."
+    },
+    {
+      name:"Pattern matching for instanceof", tag:"preview",
+      purpose:"The type test binds a variable of that type, so the cast disappears. The binding is only in scope where the test provably passed.",
+      lang:"java",
+      code:`Object value = "Hello";
+
+if (value instanceof String text) {
+    System.out.println(text.toUpperCase());
+}
+
+// before: test, then cast the same thing again
+if (value instanceof String) {
+    String text = (String) value;
+    System.out.println(text.toUpperCase());
+}`
+    },
+    {
+      name:"Helpful null-pointer exceptions", tag:"jvm",
+      purpose:"The JVM names the part of the expression that was null, so a chained call no longer produces an NPE that could have come from any link in it.",
+      lang:"java",
+      code:`String city = customer.address().city();
+
+// Cannot invoke "Address.city()" because the return value of
+// "Customer.address()" is null`
+    }
+  ]
+},
+{
+  v:15, year:2020, month:"September", lts:false,
+  tags:["Text blocks final","Sealed classes (preview)","ZGC production"],
+  summary:"Text blocks finalised, sealed classes previewed, and both low-pause collectors — ZGC and Shenandoah — graduated out of experimental status.",
+  features:[
+    {
+      name:"Text blocks", tag:"final",
+      purpose:"Final and unconditional. Embedded SQL, JSON and HTML now read as themselves inside Java source.",
+      lang:"java",
+      code:`String query = """
+        SELECT id, name, email
+        FROM users
+        WHERE active = true
+        ORDER BY name
+        """;`
+    },
+    {
+      name:"Sealed classes", tag:"preview",
+      purpose:"A sealed type lists the subtypes permitted to extend it. That turns an open hierarchy into a closed set the compiler knows about — the missing half of pattern matching, and the reason a pattern switch can later be checked for exhaustiveness.",
+      lang:"java",
+      code:`sealed interface Shape permits Circle, Rectangle {
+}
+
+record Circle(double radius) implements Shape {
+}
+
+final class Rectangle implements Shape {
+    private final double width;
+    private final double height;
+
+    Rectangle(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
+}`,
+      caption:"Every permitted subtype must be final, sealed or non-sealed. Records are implicitly final."
+    },
+    {
+      name:"Production ZGC", tag:"jvm",
+      purpose:"ZGC holds pause times in the sub-millisecond range largely independent of heap size, which makes it the default choice for large-heap, latency-sensitive services.",
+      lang:"bash",
+      code:`java -XX:+UseZGC -jar application.jar`
+    }
+  ]
+},
+{
+  v:16, year:2021, month:"March", lts:false,
+  tags:["Records final","Patterns final","jpackage","Unix sockets"],
+  summary:"Records and instanceof pattern matching became permanent language features, jpackage shipped for real, and Unix-domain socket channels were added to NIO.",
+  features:[
+    {
+      name:"Records", tag:"final",
+      purpose:"With records final, the compact constructor is the place to validate: it runs before the fields are assigned, and any parameter it reassigns is what gets stored. Records can also carry derived methods.",
+      lang:"java",
+      code:`import java.util.Objects;
+
+record User(String id, String email) {
+    User {
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(email);
+
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException("Invalid email");
+        }
+    }
+
+    String displayName() {
+        return id + " <" + email + ">";
+    }
+}`
+    },
+    {
+      name:"Pattern matching for instanceof", tag:"final",
+      purpose:"The pattern variable takes part in the surrounding boolean expression: after <code>&amp;&amp;</code> the compiler knows the test passed, so the binding is usable in the same condition.",
+      lang:"java",
+      code:`Object value = "Java";
+
+if (value instanceof String text && !text.isBlank()) {
+    System.out.println(text.toUpperCase());
+}`
+    },
+    {
+      name:"jpackage", tag:"tool",
+      purpose:"Builds a platform-native installer — msi, dmg, deb, rpm — bundling the application with a trimmed runtime, so end users need no JDK installed.",
+      lang:"bash",
+      code:`jpackage \\
+  --input build/libs \\
+  --main-jar application.jar \\
+  --main-class com.example.Main \\
+  --name ExampleApp`
+    },
+    {
+      name:"Unix-domain socket channels", tag:"final",
+      purpose:"<code>SocketChannel</code> and <code>ServerSocketChannel</code> speak the Unix-domain protocol family. For same-host IPC that means no loopback stack and filesystem permissions instead of port security — the usual way to talk to a container runtime or a local daemon.",
+      lang:"java",
+      code:`import java.net.StandardProtocolFamily;
+import java.net.UnixDomainSocketAddress;
+import java.nio.channels.SocketChannel;
+
+var address = UnixDomainSocketAddress.of("/tmp/example.sock");
+
+try (var channel = SocketChannel.open(StandardProtocolFamily.UNIX)) {
+    channel.connect(address);
+}`
+    }
+  ]
+},
+{
+  v:17, year:2021, month:"September", lts:true,
+  tags:["Sealed classes final","Pattern switch (preview)","Strong encapsulation"],
+  summary:"The LTS most enterprise codebases moved to. Sealed classes finalised, pattern matching for switch previewed, and JDK internals were strongly encapsulated — the change that actually breaks old libraries during migration.",
+  features:[
+    {
+      name:"Sealed classes", tag:"final",
+      purpose:"Model a closed set of outcomes as types rather than as a status field plus nullable extras. The compiler knows the hierarchy is complete, so nothing can slip in a fourth case later without a compile error.",
+      lang:"java",
+      code:`sealed interface PaymentResult permits PaymentSuccess, PaymentFailure {
+}
+
+record PaymentSuccess(String transactionId)
+        implements PaymentResult {
+}
+
+record PaymentFailure(String reason)
+        implements PaymentResult {
+}`
+    },
+    {
+      name:"Pattern matching for switch", tag:"preview",
+      purpose:"Switch over types instead of over constants. On a sealed hierarchy the compiler checks the switch is exhaustive, so a <code>default</code> branch is unnecessary — and adding a new permitted subtype turns every incomplete switch into a compile error rather than a runtime surprise.",
+      lang:"java",
+      code:`static String describe(PaymentResult result) {
+    return switch (result) {
+        case PaymentSuccess success ->
+                "Transaction: " + success.transactionId();
+
+        case PaymentFailure failure ->
+                "Failed: " + failure.reason();
+    };
+}`,
+      caption:"Preview in Java 17: javac --enable-preview --release 17, then java --enable-preview."
+    },
+    {
+      name:"Enhanced pseudo-random generators", tag:"final",
+      purpose:"One interface over all the JDK's random algorithms, with streamable and jumpable generators for parallel work. Algorithms are selected by name rather than by picking a class.",
+      lang:"java",
+      code:`import java.util.random.RandomGenerator;
+
+RandomGenerator random =
+        RandomGenerator.of("L64X128MixRandom");
+
+int value = random.nextInt(1, 101);`
+    },
+    {
+      name:"Strong encapsulation of JDK internals", tag:"jvm",
+      purpose:"Access to internal packages such as <code>sun.misc</code> is denied by default rather than warned about. This is the main source of migration failures on Java 17 — usually from older bytecode, serialization or dependency-injection libraries reaching into the JDK.",
+      lang:"bash",
+      code:`# escape hatch while dependencies catch up, one package at a time
+java --add-opens java.base/java.lang=ALL-UNNAMED \\
+     -jar application.jar`
+    }
+  ]
+},
+{
+  v:18, year:2022, month:"March", lts:false,
+  tags:["UTF-8 by default","jwebserver","Javadoc snippets"],
+  summary:"A housekeeping release with one change that quietly fixes a whole class of bugs: the default charset is UTF-8 everywhere, regardless of operating system or locale.",
+  features:[
+    {
+      name:"UTF-8 by default", tag:"final",
+      purpose:"APIs that fall back on the default charset now behave the same on every machine. Before this, the same code could write a file readable on Linux and mojibake on a Windows developer's laptop.",
+      lang:"java",
+      code:`import java.nio.file.Files;
+import java.nio.file.Path;
+
+Path path = Path.of("message.txt");
+
+Files.writeString(path, "你好, Java");
+String content = Files.readString(path);`
+    },
+    {
+      name:"Simple web server", tag:"tool",
+      purpose:"A static file server in the JDK for testing, demos and local prototyping. No configuration, no dependency, not intended for production.",
+      lang:"bash",
+      code:`jwebserver -p 8080 -d public
+# then open http://localhost:8080`
+    },
+    {
+      name:"Code snippets in Javadoc", tag:"tool",
+      purpose:"<code>{@snippet}</code> replaces <code>&lt;pre&gt;{@code ...}</code>. Snippets can be pulled from real source files and validated at build time, so documented examples stop compiling against APIs that no longer exist.",
+      lang:"java",
+      code:`/**
+ * Creates an immutable user.
+ *
+ * {@snippet :
+ * User user = new User("123", "ada@example.com");
+ * System.out.println(user.email());
+ * }
+ */
+record User(String id, String email) {
+}`
+    }
+  ]
+},
+{
+  v:19, year:2022, month:"September", lts:false,
+  tags:["Virtual threads (preview)","Record patterns","FFM API"],
+  summary:"Project Loom and Project Panama surfaced together. Everything here is preview or incubating, but this is where virtual threads, record patterns and the foreign function API first became testable.",
+  features:[
+    {
+      name:"Virtual threads", tag:"preview",
+      purpose:"Threads scheduled by the JVM rather than the OS, cheap enough to create one per request. Blocking a virtual thread parks it and frees its carrier, so plain blocking code scales like asynchronous code — without the callback or reactive rewrite.",
+      lang:"java",
+      code:`import java.util.concurrent.Executors;
+
+try (var executor =
+             Executors.newVirtualThreadPerTaskExecutor()) {
+
+    var future = executor.submit(() -> {
+        Thread.sleep(100);
+        return "completed";
+    });
+
+    System.out.println(future.get());
+}`,
+      caption:"The win is on I/O-bound work. CPU-bound work is still limited by the number of cores."
+    },
+    {
+      name:"Record patterns", tag:"preview",
+      purpose:"A pattern can destructure a record in the same step that tests its type, binding the components directly. Patterns nest, so a tree of records can be matched in a single expression.",
+      lang:"java",
+      code:`record Point(int x, int y) {
+}
+
+Object value = new Point(10, 20);
+
+if (value instanceof Point(int x, int y)) {
+    System.out.println("x=" + x + ", y=" + y);
+}`
+    },
+    {
+      name:"Structured concurrency", tag:"preview",
+      purpose:"Concurrent subtasks are scoped to a block, so they are joined or cancelled together. If one fork fails the siblings are cancelled, and nothing outlives the scope — which is what makes thread-per-task leaks impossible rather than merely unlikely.",
+      lang:"java",
+      code:`import jdk.incubator.concurrent.StructuredTaskScope;
+
+try (var scope =
+             new StructuredTaskScope.ShutdownOnFailure()) {
+
+    var user = scope.fork(() -> loadUser());
+    var orders = scope.fork(() -> loadOrders());
+
+    scope.join();
+    scope.throwIfFailed();
+
+    return new Response(user.resultNow(), orders.resultNow());
+}`,
+      caption:"Incubating here; the API kept changing through later releases and is still preview in Java 26."
+    }
+  ]
+},
+{
+  v:20, year:2023, month:"March", lts:false,
+  tags:["Scoped values","Second-round previews"],
+  summary:"Seven JEPs, every one of them a preview or incubator re-run: scoped values, virtual threads, record patterns, pattern switch, the FFM API, structured concurrency and the Vector API. A staging release on the way to Java 21.",
+  features:[
+    {
+      name:"Scoped values", tag:"preview",
+      purpose:"An immutable value bound for the duration of one operation and visible to everything it calls, including its forked subtasks. Unlike <code>ThreadLocal</code> there is nothing to remove in a finally block, and nothing to inherit expensively when you have a million virtual threads.",
+      lang:"java",
+      code:`import jdk.incubator.concurrent.ScopedValue;
+
+static final ScopedValue<String> CURRENT_USER =
+        ScopedValue.newInstance();
+
+void handleRequest() {
+    ScopedValue.where(CURRENT_USER, "alice")
+            .run(() -> processRequest());
+}
+
+void processRequest() {
+    System.out.println(CURRENT_USER.get());
+}`
+    },
+    {
+      name:"Virtual threads, second preview", tag:"preview",
+      purpose:"Refinement ahead of finalisation. A one-off virtual thread can be started directly when there is no executor to hang it on.",
+      lang:"java",
+      code:`Thread thread = Thread.startVirtualThread(() -> {
+    System.out.println(
+            "Running on " + Thread.currentThread()
+    );
+});
+
+thread.join();`
+    }
+  ]
+},
+{
+  v:21, year:2023, month:"September", lts:true,
+  tags:["Virtual threads final","Pattern switch final","Sequenced collections"],
+  summary:"The most consequential LTS since Java 8. Virtual threads, record patterns and pattern matching for switch all finalised together, which is what makes data-oriented Java practical. Sequenced collections and generational ZGC round it out.",
+  features:[
+    {
+      name:"Virtual threads", tag:"final",
+      purpose:"Final and production-ready. Thread-per-request stops being a capacity problem: tens of thousands of concurrent blocking calls cost heap rather than OS threads, and the stack traces stay readable because the code is still sequential.",
+      lang:"java",
+      code:`import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
+try (var executor =
+             Executors.newVirtualThreadPerTaskExecutor()) {
+
+    var futures = IntStream.range(0, 10_000)
+            .mapToObj(id ->
+                    executor.submit(() -> fetchCustomer(id)))
+            .toList();
+
+    for (var future : futures) {
+        System.out.println(future.get());
+    }
+}`,
+      caption:"Do not pool virtual threads, and watch for pinning inside synchronized blocks — fixed later, in Java 24."
+    },
+    {
+      name:"Record patterns and pattern switch", tag:"final",
+      purpose:"Sealed hierarchy plus record patterns plus switch is the finished combination: each case tests a type and destructures it in one line, and the compiler proves the switch covers every permitted subtype.",
+      lang:"java",
+      code:`sealed interface Shape permits Circle, Rectangle {
+}
+
+record Circle(double radius) implements Shape {
+}
+
+record Rectangle(double width, double height)
+        implements Shape {
+}
+
+static double area(Shape shape) {
+    return switch (shape) {
+        case Circle(double radius) ->
+                Math.PI * radius * radius;
+
+        case Rectangle(double width, double height) ->
+                width * height;
+    };
+}`
+    },
+    {
+      name:"Sequenced collections", tag:"final",
+      purpose:"<code>SequencedCollection</code>, <code>SequencedSet</code> and <code>SequencedMap</code> give every ordered collection the same first, last and reversed operations. Before this, getting the last element meant a different incantation for each collection type — and <code>LinkedHashSet</code> had none at all.",
+      lang:"java",
+      code:`import java.util.ArrayList;
+import java.util.List;
+import java.util.SequencedCollection;
+
+SequencedCollection<String> names =
+        new ArrayList<>(List.of("Bob", "Carol"));
+
+names.addFirst("Alice");
+names.addLast("David");
+
+System.out.println(names.getFirst()); // Alice
+System.out.println(names.getLast());  // David
+System.out.println(names.reversed());`
+    },
+    {
+      name:"Generational ZGC", tag:"jvm",
+      purpose:"ZGC learns the generational hypothesis: most objects die young, so collect young objects more often. Same pause profile, meaningfully less CPU and heap headroom needed.",
+      lang:"bash",
+      code:`java -XX:+UseZGC \\
+     -XX:+ZGenerational \\
+     -jar application.jar`
+    }
+  ]
+},
+{
+  v:22, year:2024, month:"March", lts:false,
+  tags:["FFM API final","Unnamed variables","Stream Gatherers"],
+  summary:"The Foreign Function and Memory API finalised, giving Java a supported route to native code without JNI. Unnamed variables landed, and Stream Gatherers previewed.",
+  features:[
+    {
+      name:"Foreign Function and Memory API", tag:"final",
+      purpose:"Allocate and access off-heap memory, and call native functions, under a lifetime you control. An <code>Arena</code> frees everything it allocated when it closes, and access after that throws instead of corrupting memory — the safety JNI never had.",
+      lang:"java",
+      code:`import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+
+try (Arena arena = Arena.ofConfined()) {
+    MemorySegment numbers =
+            arena.allocate(ValueLayout.JAVA_INT, 3);
+
+    numbers.setAtIndex(ValueLayout.JAVA_INT, 0, 10);
+    numbers.setAtIndex(ValueLayout.JAVA_INT, 1, 20);
+    numbers.setAtIndex(ValueLayout.JAVA_INT, 2, 30);
+
+    int value =
+            numbers.getAtIndex(ValueLayout.JAVA_INT, 1);
+
+    System.out.println(value); // 20
+}`
+    },
+    {
+      name:"Unnamed variables and patterns", tag:"final",
+      purpose:"<code>_</code> marks a binding you are required to declare but do not intend to use. It states the intent to the reader and stops static analysis complaining about an unused name.",
+      lang:"java",
+      code:`try {
+    processFile();
+} catch (java.io.IOException _) {
+    System.out.println("Unable to process file");
+}
+
+// also inside patterns, to skip components you don't need
+if (value instanceof Point(int x, _)) {
+    System.out.println("x = " + x);
+}`
+    },
+    {
+      name:"Stream Gatherers", tag:"preview",
+      purpose:"A plug-in point for custom intermediate stream operations. Windowing, running totals and stateful transformations become ordinary stream stages instead of a collector abused into doing the job.",
+      lang:"java",
+      code:`import java.util.List;
+import java.util.stream.Gatherers;
+
+List<List<Integer>> windows =
+        List.of(1, 2, 3, 4, 5)
+                .stream()
+                .gather(Gatherers.windowFixed(3))
+                .toList();
+
+System.out.println(windows);
+// [[1, 2, 3], [4, 5]]`
+    },
+    {
+      name:"Multi-file source programs", tag:"tool",
+      purpose:"The launcher compiles the referenced source files in memory, so a small multi-class program runs straight from source with no build step.",
+      lang:"bash",
+      code:`# Main.java alongside MessageService.java
+java Main.java`
+    }
+  ]
+},
+{
+  v:23, year:2024, month:"September", lts:false,
+  tags:["Markdown Javadoc","Module imports","Primitive patterns"],
+  summary:"Documentation comments can be written in Markdown, module imports and primitive patterns previewed, and generational mode became the default for ZGC.",
+  features:[
+    {
+      name:"Markdown documentation comments", tag:"tool",
+      purpose:"A <code>///</code> comment is Markdown. No more <code>&lt;p&gt;</code>, <code>&lt;ul&gt;</code> and escaped angle brackets in prose that was only ever meant to be a bulleted list. The <code>@param</code> and <code>@return</code> tags work as before.",
+      lang:"java",
+      code:`/// Finds a customer by ID.
+///
+/// Returns an empty result when the customer does not exist.
+///
+/// @param id the customer identifier
+/// @return the matching customer
+Optional<Customer> findCustomer(String id) {
+    // ...
+}`
+    },
+    {
+      name:"Module import declarations", tag:"preview",
+      purpose:"Import every public type from a module's exported packages in one line. Aimed at scripts and teaching code, where a dozen <code>java.util</code> imports are pure ceremony.",
+      lang:"java",
+      code:`import module java.base;
+
+List<String> names = List.of("Alice", "Bob");
+Map<String, Integer> scores = new HashMap<>();`
+    },
+    {
+      name:"Primitive types in patterns", tag:"preview",
+      purpose:"Patterns extend to primitives, testing whether a value fits a narrower type without losing information. It removes the hand-written range checks that usually get the boundary wrong.",
+      lang:"java",
+      code:`static String classify(long value) {
+    return switch (value) {
+        case byte b -> "fits in byte: " + b;
+        case short s -> "fits in short: " + s;
+        case int i -> "fits in int: " + i;
+        default -> "requires long";
+    };
+}`
+    },
+    {
+      name:"Generational ZGC by default", tag:"jvm",
+      purpose:"Selecting ZGC now selects the generational implementation. The separate flag is no longer needed.",
+      lang:"bash",
+      code:`java -XX:+UseZGC -jar application.jar`
+    }
+  ]
+},
+{
+  v:24, year:2025, month:"March", lts:false,
+  tags:["Gatherers final","Class-File API","No more pinning"],
+  summary:"Stream Gatherers and the Class-File API finalised. The JVM stopped pinning virtual threads on ordinary synchronized blocks, which removed the last big caveat on adopting them, and the Security Manager was permanently disabled.",
+  features:[
+    {
+      name:"Stream Gatherers", tag:"final",
+      purpose:"Final. Gatherers cover what <code>map</code>, <code>filter</code> and <code>reduce</code> cannot express on their own: fixed and sliding windows, running accumulations, stateful transformations and custom short-circuiting.",
+      lang:"java",
+      code:`import java.util.List;
+import java.util.stream.Gatherers;
+
+List<Integer> runningTotals =
+        List.of(1, 2, 3, 4)
+                .stream()
+                .gather(Gatherers.scan(
+                        () -> 0,
+                        Integer::sum
+                ))
+                .toList();
+
+System.out.println(runningTotals);
+// [1, 3, 6, 10]`
+    },
+    {
+      name:"Class-File API", tag:"final",
+      purpose:"A standard API to parse, generate and transform <code>.class</code> files, maintained in lockstep with the class-file format itself. Agents and frameworks stop depending on a shaded ASM that breaks on every new bytecode version.",
+      lang:"java",
+      code:`import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassModel;
+import java.nio.file.Path;
+
+ClassModel model =
+        ClassFile.of().parse(Path.of("Example.class"));
+
+model.methods().forEach(method ->
+        System.out.println(
+                method.methodName().stringValue()
+        )
+);`
+    },
+    {
+      name:"Virtual threads and synchronized", tag:"jvm",
+      purpose:"Before Java 24, blocking inside a <code>synchronized</code> block pinned the virtual thread to its carrier and could starve the pool. Monitors now release the carrier, so existing code benefits without swapping every monitor for a <code>ReentrantLock</code>.",
+      lang:"java",
+      code:`synchronized (lock) {
+    response = blockingNetworkCall();
+}`
+    }
+  ]
+},
+{
+  v:25, year:2025, month:"September", lts:true,
+  tags:["Compact source files","Module imports final","Scoped values final"],
+  summary:"The current LTS. Beginner-facing syntax finalised — a program can be a single main method with no class — along with module imports, flexible constructor bodies and scoped values. Compact object headers cut heap use on object-heavy applications.",
+  features:[
+    {
+      name:"Compact source files and instance main methods", tag:"final",
+      purpose:"A small program needs no class declaration, no <code>String[] args</code> and no <code>static</code>. Four concepts a first-time reader had to accept on faith disappear from the first program they see, while the traditional entry point keeps working unchanged.",
+      lang:"java",
+      code:`void main() {
+    IO.println("Hello, Java 25");
+}
+
+// run it straight from source:  java Hello.java
+
+// the classic form is still valid
+public static void main(String[] args) {
+}`
+    },
+    {
+      name:"Module import declarations", tag:"final",
+      purpose:"Final, and it composes with compact source files: a single-file program can reach the whole of <code>java.base</code> in one import.",
+      lang:"java",
+      code:`import module java.base;
+
+void main() {
+    List<String> names =
+            List.of("Alice", "Bob", "Carol");
+
+    IO.println(names);
+}`
+    },
+    {
+      name:"Flexible constructor bodies", tag:"final",
+      purpose:"Statements may run before <code>super(...)</code> as long as they do not touch the instance under construction. Arguments can now be validated before the superclass constructor runs, instead of in a static helper written purely to dodge the old rule.",
+      lang:"java",
+      code:`class PositivePoint extends Point {
+    PositivePoint(int x, int y) {
+        if (x < 0 || y < 0) {
+            throw new IllegalArgumentException(
+                    "Coordinates must be positive"
+            );
+        }
+
+        super(x, y);
+    }
+}`
+    },
+    {
+      name:"Scoped values", tag:"final",
+      purpose:"Final. Request context — user, tenant, trace id — propagates into subtasks without the leak risk and inheritance cost of <code>ThreadLocal</code>, which matters once every request is its own virtual thread.",
+      lang:"java",
+      code:`static final ScopedValue<String> CURRENT_USER =
+        ScopedValue.newInstance();
+
+void handleRequest() {
+    ScopedValue.where(CURRENT_USER, "alice")
+            .run(() -> authorizeAndProcess());
+}
+
+void authorizeAndProcess() {
+    System.out.println(
+            "User: " + CURRENT_USER.get()
+    );
+}`
+    },
+    {
+      name:"Compact object headers", tag:"jvm",
+      purpose:"Shrinks the HotSpot object header from 96 to 64 bits. Applications holding many small objects see a real drop in live heap, and better cache behaviour with it.",
+      lang:"bash",
+      code:`java -XX:+UseCompactObjectHeaders \\
+     -jar application.jar`
+    }
+  ]
+},
+{
+  v:26, year:2026, month:"March", lts:false,
+  tags:["HTTP/3","Lazy constants (preview)","Final means final"],
+  summary:"The latest feature release. HTTP/3 in the standard client, AOT object caching with any collector, the Applet API finally gone, and a warning shot for frameworks that mutate final fields by reflection.",
+  features:[
+    {
+      name:"HTTP/3 support", tag:"final",
+      purpose:"The standard client speaks HTTP/3 over QUIC with a version setting. It is opt-in, and falls back to HTTP/2 or HTTP/1.1 when the server or network cannot do it.",
+      lang:"java",
+      code:`import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+var client = HttpClient.newBuilder()
+        .version(HttpClient.Version.HTTP_3)
+        .build();
+
+var request = HttpRequest.newBuilder(
+            URI.create("https://openjdk.org/")
+        )
+        .GET()
+        .build();
+
+var response = client.send(
+        request,
+        HttpResponse.BodyHandlers.ofString()
+);
+
+System.out.println(response.version());`
+    },
+    {
+      name:"Lazy constants", tag:"preview",
+      purpose:"Thread-safe, at-most-once initialisation that the JIT can still fold as a constant. It replaces the double-checked-locking holder idiom, and unlike a plain <code>final</code> field the work happens on first use rather than at class initialisation.",
+      lang:"java",
+      code:`import java.lang.LazyConstant;
+import java.util.logging.Logger;
+
+class OrderService {
+    private final LazyConstant<Logger> logger =
+            LazyConstant.of(() ->
+                    Logger.getLogger(
+                            OrderService.class.getName()
+                    )
+            );
+
+    void submitOrder() {
+        logger.get().info("Submitting order");
+    }
+}`,
+      caption:"Second preview: javac --enable-preview --release 26, then java --enable-preview."
+    },
+    {
+      name:"Final-field mutation warnings", tag:"jvm",
+      purpose:"Deep reflection that writes a <code>final</code> field now warns. A future release is expected to reject it outright, so serialization, dependency-injection and proxy libraries need to be checked well before that lands.",
+      lang:"java",
+      code:`Field field = Config.class.getDeclaredField("value");
+field.setAccessible(true);
+field.set(config, "modified"); // warning in Java 26`
+    },
+    {
+      name:"Applet API removal", tag:"jvm",
+      purpose:"<code>java.applet</code> is gone, having been deprecated for removal since Java 17. Any surviving reference has to be deleted rather than migrated — nothing replaces it.",
+      lang:"bash",
+      code:`# find the stragglers before upgrading
+grep -rn "java.applet" src/`
+    }
+  ]
+}
+];
+
+/* ---------------------------------------------------------------
+   Rendering
+--------------------------------------------------------------- */
+
+const track = document.getElementById("track");
+const detail = document.getElementById("detail");
+const scroller = document.getElementById("scroller");
+const narrow = window.matchMedia("(max-width:920px)");
+
+const colourOf = r => r.lts ? "var(--lts)" : "var(--ga)";
+const tintOf   = r => r.lts ? "var(--lts-tint)" : "var(--ga-tint)";
+
+function node(tag, className, text){
+  const n = document.createElement(tag);
+  if (className) n.className = className;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+/* Escape only the characters that would break out of a text node, so quotes
+   survive intact and the string rule below can still see them. */
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+const JAVA_KEYWORDS = ["abstract","assert","boolean","break","byte","case","catch","char","class","const",
+  "continue","default","do","double","else","enum","extends","final","finally","float","for","goto","if",
+  "implements","import","instanceof","int","interface","long","native","new","package","private","protected",
+  "public","return","short","static","strictfp","super","switch","synchronized","this","throw","throws",
+  "transient","try","void","volatile","while","var","record","sealed","permits","non-sealed","yield","module",
+  "true","false","null"];
+
+/* One pass, alternatives ordered so comments and strings win over keywords inside them. */
+const JAVA_RE = new RegExp(
+  "(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)" +          // 1 comment
+  "|(\"\"\"[\\s\\S]*?\"\"\"|\"(?:\\\\.|[^\"\\\\\\n])*\")" + // 2 string / text block
+  "|(@\\w+)" +                                        // 3 annotation
+  "|\\b(" + JAVA_KEYWORDS.join("|") + ")\\b" +        // 4 keyword
+  "|\\b(\\d[\\d_]*(?:\\.\\d+)?[LlDdFf]?)\\b",         // 5 number
+  "g");
+
+const SHELL_RE = /(#[^\n]*)|("(?:\\.|[^"\\\n])*")|(\s--?[\w:+-]+)/g;
+
+function highlight(code, lang){
+  const src = esc(code);
+  if (lang === "java"){
+    return src.replace(JAVA_RE, (m, com, str, ann, kw, num) =>
+      com ? `<span class="c">${com}</span>` :
+      str ? `<span class="s">${str}</span>` :
+      ann ? `<span class="a">${ann}</span>` :
+      kw  ? `<span class="k">${kw}</span>` :
+            `<span class="n">${num}</span>`);
+  }
+  return src.replace(SHELL_RE, (m, com, str, flag) =>
+    com  ? `<span class="c">${com}</span>` :
+    str  ? `<span class="s">${str}</span>` :
+           `<span class="k">${flag}</span>`);
+}
+
+function snippet(feature){
+  const wrap = node("div","snippet");
+
+  const bar = node("div","s-bar");
+  bar.appendChild(node("span","s-lang", feature.lang === "java" ? "Java" : "Shell"));
+
+  const copy = node("button","copy","Copy");
+  copy.type = "button";
+  copy.setAttribute("aria-label", `Copy the ${feature.name} example`);
+  copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(feature.code);
+      copy.textContent = "Copied";
+      copy.dataset.done = "true";
+      setTimeout(() => { copy.textContent = "Copy"; copy.dataset.done = "false"; }, 1600);
+    } catch {
+      copy.textContent = "Press ⌘C";
+      setTimeout(() => { copy.textContent = "Copy"; }, 1600);
+    }
+  });
+  bar.appendChild(copy);
+
+  const pre = node("pre");
+  const code = node("code");
+  code.innerHTML = highlight(feature.code, feature.lang);
+  pre.appendChild(code);
+
+  wrap.append(bar, pre);
+  return wrap;
+}
+
+const CHIP_LABEL = { preview:"Preview", final:"Final", tool:"Tooling", jvm:"JVM / Runtime" };
+
+function renderDetail(r){
+  const inner = node("div","detail-inner");
+  inner.style.setProperty("--c", colourOf(r));
+  inner.style.setProperty("--tint", tintOf(r));
+
+  const head = node("div","d-head");
+  const title = node("div","d-title");
+  title.appendChild(node("h2", null, "Java " + r.v));
+  title.appendChild(node("span","badge", r.lts ? "LTS" : "Feature release"));
+  const when = node("time", null, `${r.month} ${r.year}`);
+  when.setAttribute("datetime", `${r.year}-${String(monthIndex(r.month)).padStart(2,"0")}`);
+  title.appendChild(when);
+  head.appendChild(title);
+  head.appendChild(node("p","d-summary", r.summary));
+
+  const body = node("div","d-body");
+  r.features.forEach(f => {
+    const sec = node("section","feature");
+
+    const fh = node("div","f-head");
+    fh.appendChild(node("h3", null, f.name));
+    fh.appendChild(node("span","chip " + f.tag, CHIP_LABEL[f.tag]));
+    sec.appendChild(fh);
+
+    const purpose = node("p","f-purpose");
+    purpose.innerHTML = f.purpose;   // trusted, authored inline above
+    sec.appendChild(purpose);
+
+    sec.appendChild(snippet(f));
+    if (f.caption) sec.appendChild(node("p","s-caption", f.caption));
+
+    body.appendChild(sec);
+  });
+
+  inner.append(head, body);
+  detail.replaceChildren(inner);
+}
+
+const MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+const monthIndex = m => MONTHS.indexOf(m) + 1;
+
+let activeSlot = null;
+
+function select(slot, r, opts = {}){
+  if (activeSlot === slot) return;
+  if (activeSlot){
+    activeSlot.classList.remove("active");
+    activeSlot.querySelector(".card").setAttribute("aria-selected","false");
+    activeSlot.querySelector(".card").tabIndex = -1;
+  }
+  activeSlot = slot;
+  slot.classList.add("active");
+  const card = slot.querySelector(".card");
+  card.setAttribute("aria-selected","true");
+  card.tabIndex = 0;
+
+  renderDetail(r);
+  detail.setAttribute("aria-labelledby", card.id);
+
+  if (opts.scrollIntoView && narrow.matches){
+    detail.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+}
+
+function buildTrack(){
+  const frag = document.createDocumentFragment();
+  let currentYear = null;
+
+  releases.forEach((r, i) => {
+    const slot = node("div","slot " + (r.lts ? "up lts" : "down ga"));
+    slot.style.setProperty("--c", colourOf(r));
+    slot.style.setProperty("--tint", tintOf(r));
+
+    if (r.year !== currentYear){
+      currentYear = r.year;
+      slot.classList.add("newyear");
+      slot.appendChild(node("span","yearlab", String(r.year)));
+    }
+
+    const marker = node("span","marker");
+    marker.setAttribute("aria-hidden","true");
+    marker.appendChild(node("span","dot"));
+    marker.appendChild(node("span","stem"));
+    slot.appendChild(marker);
+
+    const card = node("button","card");
+    card.type = "button";
+    card.id = "release-" + r.v;
+    card.setAttribute("role","tab");
+    card.setAttribute("aria-selected","false");
+    card.setAttribute("aria-controls","detail");
+    card.tabIndex = -1;
+
+    const v = node("div","v");
+    v.appendChild(node("b", null, "Java " + r.v));
+    v.appendChild(node("span","badge", r.lts ? "LTS" : "Interim"));
+    card.appendChild(v);
+
+    card.appendChild(node("span","when", `${r.month.slice(0,3)} ${r.year}`));
+
+    const tags = node("ul","tags");
+    r.tags.forEach(t => tags.appendChild(node("li", null, t)));
+    card.appendChild(tags);
+
+    card.appendChild(node("span","more", `${r.features.length} features →`));
+
+    card.addEventListener("click", () => select(slot, r, { scrollIntoView:true }));
+    card.addEventListener("keydown", e => {
+      const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1
+                 : e.key === "ArrowLeft"  || e.key === "ArrowUp"   ? -1
+                 : e.key === "Home" ? -releases.length
+                 : e.key === "End"  ?  releases.length : 0;
+      if (!step) return;
+      e.preventDefault();
+      const next = Math.min(releases.length - 1, Math.max(0, i + step));
+      const target = track.querySelectorAll(".slot")[next];
+      // select first, so the roving tabindex is already on the card we focus
+      select(target, releases[next]);
+      target.querySelector(".card").focus();
+    });
+
+    slot.appendChild(card);
+    frag.appendChild(slot);
+  });
+
+  track.appendChild(frag);
+}
+
+function renderStats(){
+  const lts = releases.filter(r => r.lts);
+  const features = releases.reduce((n, r) => n + r.features.length, 0);
+  document.getElementById("stats").innerHTML = `
+    <div class="stat lts"><span class="k"><i class="swatch sw-lts"></i>Long-term support</span>
+      <span class="v">${lts.length}<span class="u"> releases</span></span></div>
+    <div class="stat ga"><span class="k"><i class="swatch sw-ga"></i>Interim</span>
+      <span class="v">${releases.length - lts.length}<span class="u"> releases</span></span></div>
+    <div class="stat"><span class="k">Cadence</span>
+      <span class="v">6<span class="u"> months, since Java 10</span></span></div>
+    <div class="stat"><span class="k">Documented here</span>
+      <span class="v">${features}<span class="u"> features</span></span></div>`;
+}
+
+renderStats();
+buildTrack();
+
+/* Java 21 is the release most teams are on or moving to, so open on it. */
+const initial = releases.findIndex(r => r.v === 21);
+const slots = track.querySelectorAll(".slot");
+select(slots[initial], releases[initial]);
+
+requestAnimationFrame(() => track.classList.add("in"));
+
+/* Centre the opening release in the horizontal rail without moving the page. */
+if (!narrow.matches){
+  const card = slots[initial].querySelector(".card").getBoundingClientRect();
+  const rail = scroller.getBoundingClientRect();
+  scroller.scrollLeft += (card.left - rail.left) - (rail.width - card.width) / 2;
+}
+
+/* A vertical wheel over the rail scrolls it sideways, but only while there is
+   rail left to travel — otherwise the page stops scrolling and feels stuck. */
+scroller.addEventListener("wheel", e => {
+  if (narrow.matches) return;
+  if (e.deltaY === 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  const max = scroller.scrollWidth - scroller.clientWidth;
+  if ((scroller.scrollLeft <= 0 && e.deltaY < 0) || (scroller.scrollLeft >= max && e.deltaY > 0)) return;
+  e.preventDefault();
+  scroller.scrollLeft += e.deltaY;
+}, { passive:false });
+</script>
+</body>
+</html>
