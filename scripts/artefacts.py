@@ -1048,6 +1048,11 @@ def propose_manifest_additions(
     warnings: dict[str, str] = {}
     for group, sources in grouped.items():
         collection_id = collection_by_group.get(group)
+        if collection_id is None and group and _slug(group) in collection_ids:
+            # The group's collection exists but currently holds no entry, as after
+            # a source rename drops the only one. Reuse it rather than inventing a
+            # second collection beside it under a suffixed id.
+            collection_id = _slug(group)
         if collection_id is None:
             label = group or sources[0].stem
             collection_id = _unique_id(_slug(label), collection_ids)
@@ -1155,6 +1160,18 @@ def format_proposal(proposal: ManifestProposal) -> str:
     return "\n".join(lines)
 
 
+def drop_entries_without_source(
+    manifest: Manifest, approved: set[PurePosixPath]
+) -> tuple[Manifest, tuple[Entry, ...]]:
+    """Manifest without the entries whose source file is gone, and those entries."""
+    missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
+    kept = replace(
+        manifest,
+        entries=tuple(entry for entry in manifest.entries if entry.source in approved),
+    )
+    return kept, missing
+
+
 def reconcile_inventory(
     manifest: Manifest, inventory: SourceInventory
 ) -> SourceReconciliation:
@@ -1165,11 +1182,7 @@ def reconcile_inventory(
         raise UnlistedSourceError(
             "unlisted approved source files", manifest, tuple(unlisted)
         )
-    missing = tuple(entry for entry in manifest.entries if entry.source not in approved)
-    next_manifest = replace(
-        manifest,
-        entries=tuple(entry for entry in manifest.entries if entry.source in approved),
-    )
+    next_manifest, missing = drop_entries_without_source(manifest, approved)
     return SourceReconciliation(next_manifest=next_manifest, missing_entries=missing)
 
 
@@ -2141,8 +2154,24 @@ def handle_unlisted_sources(
     write: bool,
     confirm: Callable[[str], str],
 ) -> int:
-    """Print derived manifest additions and, for apply and publish, write them."""
-    proposal = propose_manifest_additions(error.manifest, error.unlisted, source_root)
+    """Print derived manifest additions and, for apply and publish, write them.
+
+    Entries whose source file is gone are dropped before the proposal is derived.
+    A renamed source arrives here as one unlisted file plus one stale entry, and
+    both claim the same destination, so proposing against the unpruned manifest
+    fails validation on a duplicate destination instead of recording the rename.
+    """
+    inventory, _ = apply_source_ignores(
+        scan_source(source_root), error.manifest.ignored_sources
+    )
+    manifest, missing = drop_entries_without_source(
+        error.manifest, set(inventory.approved)
+    )
+    if missing:
+        print(f"Entries with no source file, to be dropped ({len(missing)})")
+        for entry in missing:
+            print(f"  - {entry.id}: {entry.source.as_posix()}")
+    proposal = propose_manifest_additions(manifest, error.unlisted, source_root)
     print(format_proposal(proposal))
     if not write:
         print("Run apply or publish to write these manifest additions.")
@@ -2150,7 +2179,7 @@ def handle_unlisted_sources(
     if confirm("Write these manifest additions? Type yes to continue: ") != "yes":
         print("Cancelled.")
         return 2
-    payload = manifest_to_json(merge_manifest_proposal(error.manifest, proposal))
+    payload = manifest_to_json(merge_manifest_proposal(manifest, proposal))
     manifest_from_bytes(payload, "proposed manifest")
     _atomic_write(manifest_path, payload)
     print(
@@ -2223,13 +2252,20 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
             return 2
         return 0
     except UnlistedSourceError as error:
-        return handle_unlisted_sources(
-            error,
-            manifest_path,
-            args.source.expanduser(),
-            args.command in {"apply", "publish"},
-            input_fn,
-        )
+        try:
+            return handle_unlisted_sources(
+                error,
+                manifest_path,
+                args.source.expanduser(),
+                args.command in {"apply", "publish"},
+                input_fn,
+            )
+        except ArtefactError as proposal_error:
+            print(f"Error: {proposal_error}", file=sys.stderr)
+            return 1
+        except KeyboardInterrupt:
+            print("Cancelled.", file=sys.stderr)
+            return 130
     except ArtefactError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
