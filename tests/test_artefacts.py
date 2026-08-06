@@ -501,6 +501,17 @@ class ManifestProposalTests(unittest.TestCase):
         self.assertEqual(proposal.collections, ())
         self.assertEqual(proposal.entries[0].collection, "renamed-charts")
 
+    def test_collection_left_empty_is_reused_instead_of_duplicated(self):
+        payload = valid_payload()
+        payload["entries"] = []
+
+        proposal = self.propose(
+            artefacts_cli.manifest_from_dict(payload), "charts/Extra.png"
+        )
+
+        self.assertEqual(proposal.collections, ())
+        self.assertEqual(proposal.entries[0].collection, "charts")
+
     def test_new_image_collection_joins_the_existing_image_section(self):
         proposal = self.propose(
             artefacts_cli.manifest_from_dict(valid_payload()), "Travel/Map.png"
@@ -1807,6 +1818,44 @@ class UnlistedSourceCommandTests(ArtefactFixture, unittest.TestCase):
         self.assertIn(
             PurePosixPath("travel/map.png"),
             [entry.destination for entry in manifest.entries],
+        )
+
+    def make_fixture_with_renamed_source(self):
+        """A Markdown entry whose source came back as HTML under the same name."""
+        repo, source, manifest_path, _ = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"].append(
+            {
+                "id": "doc",
+                "source": "Charts/Doc.md",
+                "destination": "charts/doc/index.html",
+                "title": "Doc",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (source / "Charts" / "Doc.html").write_text("<p>doc</p>\n", encoding="utf-8")
+        return repo, source, manifest_path
+
+    def test_renamed_source_replaces_the_stale_entry(self):
+        repo, source, manifest_path = self.make_fixture_with_renamed_source()
+
+        code = self.run_command("apply", repo, source)
+
+        self.assertEqual(code, 3)
+        manifest = artefacts_cli.load_manifest(manifest_path)
+        sources = [entry.source for entry in manifest.entries]
+        self.assertIn(PurePosixPath("Charts/Doc.html"), sources)
+        self.assertNotIn(PurePosixPath("Charts/Doc.md"), sources)
+        self.assertEqual(
+            [
+                entry.destination
+                for entry in manifest.entries
+                if entry.destination == PurePosixPath("charts/doc/index.html")
+            ],
+            [PurePosixPath("charts/doc/index.html")],
         )
 
     def test_declining_the_proposal_writes_nothing(self):
