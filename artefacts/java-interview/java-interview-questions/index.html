@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java interview questions | Artefacts</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --tint: rgba(0, 99, 163, 0.1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --tint: rgba(67, 137, 185, 0.16);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        header, main, footer {
+            width: min(72rem, calc(100% - 48px));
+            margin-inline: auto;
+        }
+
+        header { padding: 56px 0 8px; }
+
+        a { color: var(--primary-color); text-underline-offset: 0.2em; }
+        a:hover { color: var(--accent-color); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-link:hover span { text-decoration: underline; }
+
+        h1 {
+            margin: 24px 0 8px;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+
+        main { padding-bottom: 72px; }
+
+        article {
+            padding: 32px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        article > :first-child { margin-top: 0; }
+        article > :last-child { margin-bottom: 0; }
+
+        article h1, article h2, article h3, article h4 {
+            margin: 2em 0 0.6em;
+            line-height: 1.3;
+            text-wrap: balance;
+        }
+
+        article h2 {
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        article h3 { font-size: 1.2rem; }
+
+        article img { max-width: 100%; height: auto; }
+
+        article blockquote {
+            margin: 1.5em 0;
+            padding: 0.2em 1.2em;
+            border-left: 3px solid var(--primary-color);
+            color: var(--light-text);
+        }
+
+        article code {
+            padding: 0.15em 0.4em;
+            background: var(--tint);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        article pre {
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        article pre code { padding: 0; background: none; }
+
+        .table-scroll, article table { display: block; overflow-x: auto; }
+
+        article table { border-collapse: collapse; width: 100%; }
+
+        article th, article td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        article th { background: var(--tint); }
+
+        article hr { border: none; border-top: 1px solid var(--border-color); }
+
+        footer {
+            padding-bottom: 48px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="../../">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Artefacts</span>
+        </a>
+        <h1>Java interview questions</h1>
+    </header>
+
+    <main>
+        <article id="markdown-body"></article>
+    </main>
+
+    <footer>
+        <p>Rendered from Markdown in the browser.</p>
+    </footer>
+
+<script type="text/markdown" id="markdown-source">
+Below are likely interview questions, with sample answers you can adapt.
+## Dependency Injection and IoC
+
+### 5. What is inversion of control?
+
+**Sample answer:**
+
+Inversion of control means that application code does not control the full lifecycle and wiring of its dependencies. The framework or container does.
+
+For example, instead of a service constructing its own repository:
+
+```java
+class OrderService {
+    private final OrderRepository repository =
+        new JpaOrderRepository();
+}
+```
+
+Spring creates the repository and injects it:
+
+```java
+@Service
+class OrderService {
+    private final OrderRepository repository;
+
+    OrderService(OrderRepository repository) {
+        this.repository = repository;
+    }
+}
+```
+
+This reduces coupling and makes the service easier to test.
+
+---
+
+### 6. What is the difference between IoC and dependency injection?
+
+**Sample answer:**
+
+IoC is the broader principle. Dependency injection is one technique used to implement IoC.
+
+With dependency injection, dependencies are supplied to an object instead of being created by the object itself.
+
+---
+
+### 7. Why do you prefer constructor injection?
+
+**Sample answer:**
+
+I prefer constructor injection because:
+
+* Required dependencies are explicit
+* The object cannot be created in an invalid state
+* Fields can be final
+* Unit tests can instantiate the class directly
+* It avoids hidden dependencies
+* It helps identify classes with too many responsibilities
+
+Field injection is less explicit and makes plain unit testing harder.
+
+---
+
+### 8. What happens when Spring finds multiple beans of the same type?
+
+**Sample answer:**
+
+Spring cannot decide which bean to inject and normally throws `NoUniqueBeanDefinitionException`.
+
+I can resolve this using:
+
+* `@Qualifier`
+* `@Primary`
+* Injecting a collection of implementations
+* Improving the application design so the required implementation is explicit
+
+Example:
+
+```java
+@Service
+class PaymentService {
+    PaymentService(
+        @Qualifier("stripePaymentClient")
+        PaymentClient paymentClient
+    ) {
+    }
+}
+```
+
+---
+
+### 9. What are common Spring bean scopes?
+
+**Sample answer:**
+
+The main scopes are:
+
+* `singleton`: one bean instance per Spring application context
+* `prototype`: a new instance each time it is requested
+* `request`: one instance per HTTP request
+* `session`: one instance per HTTP session
+
+Most stateless services are singleton beans. Therefore, I avoid storing request-specific mutable state inside them.
+
+---
+
+### 10. What is a circular dependency, and how would you fix it?
+
+**Sample answer:**
+
+A circular dependency occurs when bean A depends on bean B and bean B depends on bean A.
+
+I would normally treat it as a design issue rather than solve it using `@Lazy`. Typical fixes include:
+
+* Extracting shared logic into a third service
+* Introducing an event
+* Reversing or clarifying the dependency direction
+* Separating orchestration from domain logic
+
+---
+
+## JPA and Hibernate
+
+### 11. What is the difference between JPA and Hibernate?
+
+**Sample answer:**
+
+JPA is a Java persistence specification. It defines APIs and concepts such as entities, repositories, persistence contexts, and relationships.
+
+Hibernate is a common implementation of the JPA specification. It also provides additional features beyond standard JPA.
+
+I normally code against JPA abstractions where practical, while understanding Hibernate-specific behaviour such as proxies, dirty checking, batching, and fetch strategies.
+
+---
+
+### 12. What are the entity lifecycle states?
+
+**Sample answer:**
+
+The common JPA entity states are:
+
+* Transient: a normal Java object not managed by JPA
+* Managed or persistent: tracked by the persistence context
+* Detached: previously managed but no longer tracked
+* Removed: marked for deletion
+
+A managed entity is automatically checked for changes. Hibernate can generate an update during transaction commit without an explicit update call.
+
+---
+
+### 13. What is dirty checking?
+
+**Sample answer:**
+
+Dirty checking means Hibernate tracks changes to managed entities. At flush or commit time, it compares their current state with the original state and generates the required SQL updates.
+
+For example:
+
+```java
+@Transactional
+public void renameCustomer(Long id, String name) {
+    Customer customer = repository.findById(id)
+        .orElseThrow();
+
+    customer.setName(name);
+}
+```
+
+An explicit `save` may not be required because the entity is managed.
+
+---
+
+### 14. What is the difference between `LAZY` and `EAGER` fetching?
+
+**Sample answer:**
+
+`LAZY` loading retrieves the related entity only when it is accessed. `EAGER` loading retrieves it as part of the initial operation, although the exact SQL strategy depends on the provider.
+
+I prefer lazy loading for most relationships because eager loading can retrieve unnecessary data and produce large object graphs.
+
+But lazy loading must be handled carefully because it can cause:
+
+* N+1 queries
+* `LazyInitializationException`
+* Unexpected database access during serialization
+
+I use fetch joins, entity graphs, DTO projections, or dedicated queries depending on the use case.
+
+---
+
+### 15. What is the N+1 query problem?
+
+**Sample answer:**
+
+The N+1 problem occurs when one query loads a collection of parent records, followed by one additional query for each parent.
+
+For example:
+
+```java
+List<Order> orders = orderRepository.findAll();
+
+for (Order order : orders) {
+    order.getItems().size();
+}
+```
+
+This may execute one query for orders and N queries for their items.
+
+I would diagnose it through SQL logging, APM tracing, or Hibernate statistics. Possible solutions include:
+
+* Fetch joins
+* Entity graphs
+* Batch fetching
+* DTO projections
+* Redesigning the query around the actual use case
+
+---
+
+### 16. What is the owning side of a JPA relationship?
+
+**Sample answer:**
+
+The owning side controls the foreign-key relationship from JPA's perspective.
+
+In a bidirectional relationship, the side without `mappedBy` is usually the owning side.
+
+For example:
+
+```java
+@Entity
+class OrderItem {
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+}
+
+@Entity
+class Order {
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> items;
+}
+```
+
+`OrderItem` owns the relationship because it contains the foreign key.
+
+---
+
+### 17. What is the difference between `persist`, `merge`, and `save`?
+
+**Sample answer:**
+
+`persist` makes a new entity managed. It returns `void`.
+
+`merge` copies state from a detached object into a managed entity and returns that managed instance. The object passed into `merge` does not itself become managed.
+
+`save` is a Spring Data abstraction. Depending on whether the entity is considered new, it generally delegates to either `persist` or `merge`.
+
+---
+
+### 18. What problems can `CascadeType.ALL` cause?
+
+**Sample answer:**
+
+`CascadeType.ALL` includes persist, merge, remove, refresh, and detach.
+
+It can be dangerous when applied without considering aggregate boundaries. In particular, cascading remove may delete related records unexpectedly.
+
+I use cascading only when the child lifecycle is genuinely owned by the parent. For shared entities, I avoid cascading remove.
+
+---
+
+### 19. What is optimistic locking?
+
+**Sample answer:**
+
+Optimistic locking prevents lost updates without holding a database lock for the full transaction.
+
+JPA commonly uses a version field:
+
+```java
+@Version
+private Long version;
+```
+
+When two transactions update the same entity, the second transaction may fail with an optimistic-lock exception because its version is outdated.
+
+It is suitable when conflicts are possible but not frequent.
+
+---
+
+### 20. How would you improve JPA performance?
+
+**Sample answer:**
+
+I would first measure the problem through SQL logs, query plans, Hibernate statistics, or application tracing.
+
+Common improvements include:
+
+* Avoiding N+1 queries
+* Selecting only required columns using DTO projections
+* Using pagination
+* Adding appropriate database indexes
+* Enabling JDBC batching
+* Controlling fetch plans
+* Avoiding unnecessarily large persistence contexts
+* Using read-only transactions for read operations
+* Avoiding entity serialization directly from controllers
+* Reviewing connection-pool sizing
+
+---
+
+## Kafka and JMS
+
+### 21. When would you use Kafka?
+
+**Sample answer:**
+
+I would use Kafka when the system needs:
+
+* High-throughput event streaming
+* Durable event history
+* Multiple independent consumers
+* Replay of past events
+* Stream processing
+* Loose coupling between producers and consumers
+* Partition-based horizontal scaling
+
+Examples include domain events, activity streams, audit pipelines, analytics ingestion, and change-data capture.
+
+---
+
+### 22. When would you use JMS?
+
+**Sample answer:**
+
+I would use JMS when the application needs traditional enterprise messaging, especially:
+
+* Work queues
+* Reliable command delivery
+* Transactional messaging
+* Integration with existing enterprise systems
+* Request-reply messaging
+* Broker features such as selectors or dead-letter queues
+
+JMS is an API specification, not a message broker. Implementations include ActiveMQ Artemis and IBM MQ.
+
+---
+
+### 23. What is the main difference between Kafka and JMS?
+
+**Sample answer:**
+
+Kafka is a distributed event log. Messages are retained according to a retention policy, even after they are consumed. Consumers track their own positions and can replay events.
+
+Traditional JMS brokers are usually focused on delivering messages to consumers. A queue message is typically removed after successful acknowledgement.
+
+Kafka is strong for event streams and replay. JMS is strong for enterprise messaging and command-oriented workflows.
+
+The choice should be based on delivery semantics, ordering, replay requirements, operational environment, and integration constraints.
+
+---
+
+### 24. Can Kafka replace JMS?
+
+**Sample answer:**
+
+Not in every case.
+
+Kafka can support many asynchronous messaging use cases, but JMS brokers may be more suitable when the system needs:
+
+* Strong request-reply patterns
+* Message selectors
+* Broker-managed per-message delivery
+* Integration with existing JMS-based systems
+* Traditional distributed transaction support
+* Simple work queues with individual-message acknowledgement
+
+I would not replace JMS with Kafka only because Kafka is newer. I would first understand the messaging semantics.
+
+---
+
+## Queue versus topic
+
+### 25. What is the difference between a queue and a topic?
+
+**Sample answer:**
+
+A queue normally uses point-to-point messaging. Each message is processed by one consumer from the competing consumer group.
+
+A topic normally uses publish-subscribe messaging. Each subscription receives its own copy of the message.
+
+For example:
+
+* Queue: process an invoice exactly once by one worker
+* Topic: publish an `OrderCreated` event to inventory, notification, analytics, and fraud services
+
+---
+
+### 26. If several consumers listen to a queue, who receives the message?
+
+**Sample answer:**
+
+Normally, one consumer receives each message. Consumers compete for messages, which allows horizontal scaling.
+
+The exact delivery and redelivery behaviour depends on acknowledgements, transactions, and broker configuration.
+
+---
+
+### 27. How is a Kafka topic different from a JMS topic?
+
+**Sample answer:**
+
+A Kafka topic is divided into partitions and acts as a retained log. Consumer groups independently track offsets. Events can be replayed while they remain within the retention period.
+
+A JMS topic generally sends messages to active subscriptions. Durable subscriptions allow consumers to receive messages that were published while they were disconnected, but the model is still different from Kafka's log and offset model.
+
+---
+
+### 28. How do you preserve message ordering in Kafka?
+
+**Sample answer:**
+
+Kafka guarantees ordering within a partition, not across the whole topic.
+
+To preserve ordering for a particular entity, I use a stable partition key, such as `customerId` or `orderId`. Events with the same key go to the same partition.
+
+The trade-off is that one hot key can limit scalability.
+
+---
+
+### 29. How do you handle duplicate message processing?
+
+**Sample answer:**
+
+I design consumers to be idempotent because duplicates can occur during retries or failure recovery.
+
+Common approaches include:
+
+* A processed-message table keyed by event ID
+* Unique database constraints
+* Idempotency keys
+* Upserts
+* State-transition validation
+* Transactional outbox and inbox patterns
+
+I would not rely only on the broker's “exactly once” terminology. End-to-end processing also includes database writes and downstream calls.
+
+---
+
+### 30. What is a dead-letter queue?
+
+**Sample answer:**
+
+A dead-letter queue stores messages that could not be processed after a configured number of attempts.
+
+I would include:
+
+* The original message
+* Error details
+* Attempt count
+* Timestamp
+* Consumer or service name
+* Correlation ID
+
+I would also distinguish transient failures from permanent failures. Transient errors may be retried with backoff, while invalid business data should normally go directly to a dead-letter path.
+
+---
+
+## Kubernetes fundamentals
+
+### 31. Explain a basic Kubernetes application setup.
+
+**Sample answer:**
+
+A typical setup includes:
+
+* A `Deployment` to manage stateless application pods
+* A `Service` to provide stable internal networking
+* An `Ingress` to expose HTTP routes externally
+* A `ConfigMap` for non-sensitive configuration
+* A `Secret` for sensitive values
+* Readiness and liveness probes
+* CPU and memory requests and limits
+* Horizontal Pod Autoscaler where appropriate
+* Persistent volumes for workloads that require storage
+
+The deployment creates ReplicaSets, and the ReplicaSet maintains the required number of pods.
+
+---
+
+### 32. What is a pod?
+
+**Sample answer:**
+
+A pod is the smallest deployable unit in Kubernetes. It contains one or more containers that share:
+
+* Network namespace
+* IP address
+* Port space
+* Volumes
+* Lifecycle
+
+Most application pods contain one main application container, sometimes with sidecars for proxies, logging, or other supporting functions.
+
+---
+
+### 33. What is the difference between a pod and a deployment?
+
+**Sample answer:**
+
+A pod is a running instance of one or more containers.
+
+A deployment manages pods declaratively. It handles:
+
+* Desired replica count
+* Rolling updates
+* Rollbacks
+* Pod replacement
+* ReplicaSet management
+
+I normally create a deployment rather than managing standalone pods.
+
+---
+
+### 34. What is an Ingress?
+
+**Sample answer:**
+
+An Ingress defines HTTP or HTTPS routing rules from outside the cluster to Kubernetes services.
+
+For example, it can route:
+
+* `/orders` to the order service
+* `/customers` to the customer service
+* Different hostnames to different services
+
+An Ingress resource requires an Ingress controller, such as NGINX Ingress, Traefik, or a cloud-specific controller.
+
+---
+
+### 35. What is a ConfigMap?
+
+**Sample answer:**
+
+A ConfigMap stores non-sensitive configuration separately from the container image.
+
+It can be exposed to a pod as:
+
+* Environment variables
+* Command-line arguments
+* Mounted files
+
+I would use a Secret rather than a ConfigMap for passwords, tokens, or certificates. I would also consider an external secrets manager for production secrets.
+
+---
+
+### 36. Does updating a ConfigMap restart the pod?
+
+**Sample answer:**
+
+Not automatically in every setup.
+
+If a ConfigMap is mounted as a volume, the files may eventually update, but the application must reload them.
+
+If values are injected as environment variables, existing pods do not receive the new values. They must be restarted.
+
+A common deployment approach is to include a ConfigMap checksum in the pod template. When the ConfigMap changes, the deployment template changes and triggers a rollout.
+
+---
+
+## Kubernetes memory consumption
+
+### 37. What is the difference between memory request and memory limit?
+
+**Sample answer:**
+
+The memory request is used by the scheduler to decide where the pod can run.
+
+The memory limit is the maximum memory the container is allowed to consume.
+
+If a container exceeds its memory limit, it may be terminated with an `OOMKilled` status.
+
+Unlike CPU, memory cannot simply be throttled safely when the limit is exceeded.
+
+---
+
+### 38. What happens when a pod exceeds its memory limit?
+
+**Sample answer:**
+
+The container is usually killed by the Linux kernel's out-of-memory mechanism. Kubernetes may then restart the container according to its restart policy.
+
+The pod may enter `CrashLoopBackOff` if the problem repeats.
+
+I would verify this using:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+and check whether the previous container state shows:
+
+```text
+Reason: OOMKilled
+Exit Code: 137
+```
+
+---
+
+### 39. How do you check memory usage for a pod?
+
+**Sample answer:**
+
+For current usage:
+
+```bash
+kubectl top pod <pod-name>
+```
+
+For container-level usage:
+
+```bash
+kubectl top pod <pod-name> --containers
+```
+
+I would also inspect:
+
+```bash
+kubectl describe pod <pod-name>
+kubectl logs <pod-name> --previous
+kubectl get events --sort-by=.metadata.creationTimestamp
+```
+
+For historical analysis, I would use metrics from Prometheus, Grafana, Datadog, or the cloud monitoring platform.
+
+---
+
+## Troubleshooting an OOM restart
+
+### 40. What would you do when a pod keeps restarting because of an out-of-memory error?
+
+**Sample answer:**
+
+I would follow a structured process.
+
+First, confirm the failure reason:
+
+```bash
+kubectl describe pod <pod-name>
+kubectl logs <pod-name> --previous
+```
+
+I would check for:
+
+* `OOMKilled`
+* Exit code `137`
+* Restart count
+* Kubernetes events
+* Current requests and limits
+
+Next, I would determine whether the issue is caused by:
+
+* A memory leak
+* Incorrect JVM heap configuration
+* A sudden traffic increase
+* Large payloads or queries
+* Excessive caching
+* Too many concurrent requests
+* A batch job processing too much data at once
+* Sidecar container usage
+* A memory limit that is simply too low
+
+For a Java application, I would verify that the JVM is container-aware and inspect settings such as:
+
+```text
+-Xmx
+-Xms
+-XX:MaxRAMPercentage
+-XX:InitialRAMPercentage
+```
+
+The Java heap limit must leave room for non-heap memory, including:
+
+* Metaspace
+* Thread stacks
+* Direct buffers
+* Native libraries
+* JIT compiler memory
+* Garbage collector structures
+
+For example, setting `-Xmx` equal to the Kubernetes memory limit is unsafe.
+
+As a temporary mitigation, I may increase the pod memory limit or reduce traffic. But I would not treat that as the final fix without understanding the growth pattern.
+
+Then I would collect evidence using:
+
+* Heap dumps
+* Java Flight Recorder
+* GC logs
+* APM memory metrics
+* Thread counts
+* Allocation profiling
+
+Finally, I would fix the root cause, run a load test, and set memory requests and limits based on measured behaviour with suitable headroom.
+
+---
+
+### 41. The pod has a 1 GB memory limit. Should `-Xmx` also be 1 GB?
+
+**Sample answer:**
+
+No.
+
+The Java process uses memory outside the heap, such as metaspace, direct buffers, thread stacks, native libraries, and JVM internal structures.
+
+If the container limit is 1 GB, I may initially allocate perhaps 60 to 75 percent to the heap, depending on the application's behaviour. I would then measure actual non-heap and native usage.
+
+For example:
+
+```text
+-XX:MaxRAMPercentage=70
+```
+
+The exact value should come from profiling and load testing, not a fixed universal rule.
+
+---
+
+### 42. What is `CrashLoopBackOff`?
+
+**Sample answer:**
+
+`CrashLoopBackOff` means a container repeatedly starts and fails, and Kubernetes is increasing the delay before restarting it again.
+
+It is not the root cause. I would inspect:
+
+* `kubectl describe pod`
+* Current and previous logs
+* Exit code
+* Probe failures
+* Missing configuration
+* Permission errors
+* OOM events
+* Dependency failures
+
+---
+
+### 43. Can a liveness probe cause repeated restarts?
+
+**Sample answer:**
+
+Yes.
+
+If the liveness probe is too aggressive or checks a dependency that is temporarily unavailable, Kubernetes may repeatedly kill an otherwise recoverable application.
+
+I separate the responsibilities:
+
+* Startup probe: allows slow startup
+* Readiness probe: decides whether the pod should receive traffic
+* Liveness probe: detects an unrecoverable process state
+
+A liveness probe should normally verify the application's own health rather than every downstream dependency.
+
+---
+
+## Hands-on scenario questions
+
+### 44. A Java service becomes slow, memory grows continuously, and the pod restarts every few hours. How would you investigate?
+
+**Sample answer:**
+
+I would first correlate memory growth, traffic, GC activity, thread count, and request latency.
+
+Then I would:
+
+1. Confirm the pod is `OOMKilled`
+2. Compare heap usage with total container memory
+3. Enable GC logs and Java Flight Recorder
+4. Capture a heap dump before termination
+5. Analyse dominant retained objects
+6. Check caches, static collections, thread locals, connection handling, and large request payloads
+7. Compare the problem with deployment or traffic changes
+8. Reproduce it under load
+9. Apply the fix and verify that memory reaches a stable plateau
+
+I would also check native memory because a stable heap does not rule out direct-buffer, thread, or native-memory growth.
+
+---
+
+### 45. Your Kafka consumer processes the same payment event twice. What would you do?
+
+**Sample answer:**
+
+I would not assume duplicate delivery can be completely prevented. I would make processing idempotent.
+
+For a payment event, I could:
+
+* Use the payment event ID as an idempotency key
+* Insert it into a processed-event table with a unique constraint
+* Perform the business update and inbox record in one database transaction
+* Commit the Kafka offset only after successful processing
+* Return safely when the event ID already exists
+
+I would also inspect whether the duplicate came from consumer rebalancing, a retry, a producer retry, or an offset commit failure.
+
+---
+
+### 46. You need one message to trigger inventory, email, and analytics processing. Queue or topic?
+
+**Sample answer:**
+
+I would use a topic or publish-subscribe model because each independent subscriber needs to receive the event.
+
+The services should use separate subscriptions or Kafka consumer groups so that each service processes the event independently.
+
+Within one service, multiple instances can share the same consumer group to distribute the workload.
+
+---
+
+### 47. You need ten workers to process image-conversion jobs, but each job should be handled by one worker only. Queue or topic?
+
+**Sample answer:**
+
+I would use a queue, or one Kafka consumer group reading from a topic.
+
+The workers should compete for work, and each job should be processed by one worker in the group. I would still implement idempotency because redelivery can occur after failures.
+
+---
+
+## Good questions to ask Eko
+
+At the end, you could ask:
+
+1. How much of the role is hands-on Java development versus architecture and technical leadership?
+2. Is the current messaging platform mainly Kafka, JMS, or a combination of both?
+3. What are the main production challenges today: performance, reliability, deployment frequency, or legacy modernisation?
+4. How are Kubernetes workloads monitored and troubleshot in production?
+5. Are Java 21 features, such as virtual threads, already used in production?
+6. What level of ownership would this role have over design decisions and production incidents?
+</script>
+    <script src="../../vendor/marked.min.js"></script>
+    <script>
+        // The source block carries the Markdown verbatim except for two escaped
+        // sequences; the same substitution runs in reverse here. See
+        // escape_markdown_block in scripts/artefacts.py.
+        (function () {
+            // textContent starts at the newline that follows the opening tag, which
+            // the Python-side extract_markdown slice does not include. Drop it so
+            // both sides see the same bytes.
+            var raw = document.getElementById('markdown-source').textContent.replace(/^\n/, '');
+            var text = raw.replace(/<(\\+)(\/script|!--)/gi, function (match, slashes, marker) {
+                return '<' + slashes.slice(1) + marker;
+            });
+            var body = document.getElementById('markdown-body');
+            body.innerHTML = marked.parse(text);
+            // Most documents open with their own H1, and the proposal derives the
+            // manifest title from exactly that heading, so the page would print the
+            // title twice. Drop the article's copy when it repeats the header rather
+            // than stripping it from the source, which has to stay byte-exact.
+            // The H1 is not always the first element — several sources open with a
+            // banner line — so match on the first H1 anywhere in the article. Equal
+            // text is the whole test: a heading that differs really does say
+            // something else, and both copies stay.
+            var lead = body.querySelector('h1');
+            var heading = document.querySelector('header h1');
+            if (lead && heading &&
+                lead.textContent.trim() === heading.textContent.trim()) {
+                lead.remove();
+            }
+        })();
+    </script>
+</body>
+</html>

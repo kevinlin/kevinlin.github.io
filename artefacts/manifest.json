@@ -176,6 +176,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 50
+    },
+    {
+      "id": "java-interview",
+      "title": "Java Interview",
+      "description": "Java, messaging, and Kubernetes interview questions",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 60
     }
   ],
   "entries": [
@@ -527,15 +535,6 @@
       "replacements": {}
     },
     {
-      "id": "last30days-20260614-kilo-code-raw-v3",
-      "source": "Last30Days/20260614_kilo-code-raw-v3.md",
-      "destination": "last30days/20260614-kilo-code-raw-v3/index.html",
-      "title": "last30days v3.3.2: Kilo Code (June 14, 2026)",
-      "collection": "last30days",
-      "order": 130,
-      "replacements": {}
-    },
-    {
       "id": "last30days-20260617-langchain-raw-v3",
       "source": "Last30Days/20260617_langchain-raw-v3.md",
       "destination": "last30days/20260617-langchain-raw-v3/index.html",
@@ -560,6 +559,42 @@
       "title": "last30days v3.18.4: SkillOps (July 31, 2026)",
       "collection": "last30days",
       "order": 160,
+      "replacements": {}
+    },
+    {
+      "id": "java-interview-index",
+      "source": "java-interview/index.html",
+      "destination": "java-interview/index/index.html",
+      "title": "Index",
+      "collection": "java-interview",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "java-interview-java-interview-questions",
+      "source": "java-interview/java-interview-questions.md",
+      "destination": "java-interview/java-interview-questions/index.html",
+      "title": "Java interview questions",
+      "collection": "java-interview",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "product-timeline-java-release-timeline",
+      "source": "product-timeline/java-release-timeline.html",
+      "destination": "product-timeline/java-release-timeline/index.html",
+      "title": "Java release timeline",
+      "collection": "product-timeline",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "product-timeline-java-releases",
+      "source": "product-timeline/java-releases.md",
+      "destination": "product-timeline/java-releases/index.html",
+      "title": "Java releases",
+      "collection": "product-timeline",
+      "order": 40,
       "replacements": {}
     }
   ]
