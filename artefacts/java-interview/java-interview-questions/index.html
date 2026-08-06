@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Java interview questions</title>
-<meta name="description" content="Interactive question and answer deck covering Spring dependency injection, JPA, Kafka and JMS, Kubernetes, and production troubleshooting.">
+<meta name="description" content="Interactive question and answer deck covering new Java 17 to 21 features, Spring dependency injection, JPA, Kafka and JMS, Kubernetes, and production troubleshooting.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet">
@@ -238,10 +238,10 @@
   <div class="shell">
     <p class="eyebrow">Interview preparation</p>
     <h1>Java, messaging, and Kubernetes interview questions</h1>
-    <p class="lede">Forty-three questions with sample answers you can adapt. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
+    <p class="lede">Forty-seven questions with sample answers you can adapt. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
     <p class="stats">
-      <span><b>43</b> questions</span>
-      <span><b>8</b> topics</span>
+      <span><b>47</b> questions</span>
+      <span><b>9</b> topics</span>
       <span><b id="revealed">0</b> revealed</span>
     </p>
   </div>
@@ -250,6 +250,7 @@
 <div class="bar">
   <div class="shell bar-inner">
     <nav class="topics" aria-label="Topics">
+      <a class="chip" href="#java17-21">Java 17 to 21</a>
       <a class="chip" href="#di">Dependency injection</a>
       <a class="chip" href="#jpa">JPA and Hibernate</a>
       <a class="chip" href="#messaging">Kafka and JMS</a>
@@ -265,7 +266,101 @@
 
 <main id="main" class="shell">
 
-  <!-- ============ 1. Dependency injection and IoC ============ -->
+  <!-- ============ 1. New features in Java 17 to 21 ============ -->
+  <section class="topic" id="java17-21" aria-labelledby="java17-21-h">
+    <div class="topic-head">
+      <h2 id="java17-21-h">New features in Java 17 to 21</h2>
+      <span class="topic-count">4 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">01</span>
+          <span class="q">Which Java 17 to 21 features have you used?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I have mainly used Java 17 features in production and followed the newer features introduced up to Java 21.</p>
+          <p>Features I have used or evaluated include:</p>
+          <ul>
+            <li>Records for immutable data-transfer objects</li>
+            <li>Sealed classes for controlled type hierarchies</li>
+            <li>Pattern matching for <code>instanceof</code></li>
+            <li>Switch expressions and pattern matching for switch</li>
+            <li>Text blocks for SQL, JSON, and test data</li>
+            <li>Virtual threads in Java 21 for high-concurrency, I/O-heavy workloads</li>
+          </ul>
+          <p>For example, records reduce boilerplate for request and response models:</p>
+<pre><code>public record CustomerResponse(
+    String id,
+    String name,
+    String status
+) {}</code></pre>
+          <p>Virtual threads are useful when an application performs many blocking calls, such as database queries or downstream HTTP requests. But I would still validate library compatibility, connection-pool limits, observability, and actual performance before adopting them.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">02</span>
+          <span class="q">What is the difference between platform threads and virtual threads?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Platform threads are usually mapped closely to operating-system threads. They are relatively expensive, so applications normally use bounded thread pools.</p>
+          <p>Virtual threads are lightweight threads managed by the JVM. A Java application can create a much larger number of them. They are useful for I/O-bound workloads that use blocking programming models.</p>
+          <p>However, virtual threads do not make CPU-bound work faster. They also do not remove downstream limits such as database connection-pool size or API rate limits.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">03</span>
+          <span class="q">When would you use records?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I use records for immutable data carriers, such as:</p>
+          <ul>
+            <li>API request and response objects</li>
+            <li>Domain events</li>
+            <li>Query results</li>
+            <li>Configuration values</li>
+          </ul>
+          <p>I would not automatically use them for JPA entities because JPA entities usually require mutable state, proxying, and a no-argument constructor. Records are a better fit at application boundaries than as persistence entities.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">04</span>
+          <span class="q">What problem do sealed classes solve?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Sealed classes restrict which classes can extend or implement a type. They are useful when the domain has a known set of variants.</p>
+          <p>For example:</p>
+<pre><code>public sealed interface PaymentResult
+    permits PaymentSucceeded, PaymentFailed {
+}
+
+public record PaymentSucceeded(String transactionId)
+    implements PaymentResult {
+}
+
+public record PaymentFailed(String reason)
+    implements PaymentResult {
+}</code></pre>
+          <p>This makes the model clearer and allows exhaustive switch handling.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 2. Dependency injection and IoC ============ -->
   <section class="topic" id="di" aria-labelledby="di-h">
     <div class="topic-head">
       <h2 id="di-h">Dependency injection and IoC</h2>
@@ -276,7 +371,7 @@
 
       <details class="qa">
         <summary>
-          <span class="num">01</span>
+          <span class="num">05</span>
           <span class="q">What is inversion of control?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -302,7 +397,7 @@ class OrderService {
 
       <details class="qa">
         <summary>
-          <span class="num">02</span>
+          <span class="num">06</span>
           <span class="q">What is the difference between IoC and dependency injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -314,7 +409,7 @@ class OrderService {
 
       <details class="qa">
         <summary>
-          <span class="num">03</span>
+          <span class="num">07</span>
           <span class="q">Why do you prefer constructor injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -334,7 +429,7 @@ class OrderService {
 
       <details class="qa">
         <summary>
-          <span class="num">04</span>
+          <span class="num">08</span>
           <span class="q">What happens when Spring finds multiple beans of the same type?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -361,7 +456,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">05</span>
+          <span class="num">09</span>
           <span class="q">What are common Spring bean scopes?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -379,7 +474,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">06</span>
+          <span class="num">10</span>
           <span class="q">What is a circular dependency, and how would you fix it?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -398,7 +493,7 @@ class PaymentService {
     </div>
   </section>
 
-  <!-- ============ 2. JPA and Hibernate ============ -->
+  <!-- ============ 3. JPA and Hibernate ============ -->
   <section class="topic" id="jpa" aria-labelledby="jpa-h">
     <div class="topic-head">
       <h2 id="jpa-h">JPA and Hibernate</h2>
@@ -409,7 +504,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">07</span>
+          <span class="num">11</span>
           <span class="q">What is the difference between JPA and Hibernate?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -422,7 +517,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">08</span>
+          <span class="num">12</span>
           <span class="q">What are the entity lifecycle states?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -440,7 +535,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">09</span>
+          <span class="num">13</span>
           <span class="q">What is dirty checking?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -460,7 +555,7 @@ public void renameCustomer(Long id, String name) {
 
       <details class="qa">
         <summary>
-          <span class="num">10</span>
+          <span class="num">14</span>
           <span class="q">What is the difference between <code>LAZY</code> and <code>EAGER</code> fetching?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -479,7 +574,7 @@ public void renameCustomer(Long id, String name) {
 
       <details class="qa">
         <summary>
-          <span class="num">11</span>
+          <span class="num">15</span>
           <span class="q">What is the N+1 query problem?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -505,7 +600,7 @@ for (Order order : orders) {
 
       <details class="qa">
         <summary>
-          <span class="num">12</span>
+          <span class="num">16</span>
           <span class="q">What is the owning side of a JPA relationship?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -531,7 +626,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">13</span>
+          <span class="num">17</span>
           <span class="q">What is the difference between <code>persist</code>, <code>merge</code>, and <code>save</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -544,7 +639,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">14</span>
+          <span class="num">18</span>
           <span class="q">What problems can <code>CascadeType.ALL</code> cause?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -557,7 +652,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">15</span>
+          <span class="num">19</span>
           <span class="q">What is optimistic locking?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -573,7 +668,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">16</span>
+          <span class="num">20</span>
           <span class="q">How would you improve JPA performance?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -598,7 +693,7 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 3. Kafka and JMS ============ -->
+  <!-- ============ 4. Kafka and JMS ============ -->
   <section class="topic" id="messaging" aria-labelledby="messaging-h">
     <div class="topic-head">
       <h2 id="messaging-h">Kafka and JMS</h2>
@@ -609,7 +704,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">17</span>
+          <span class="num">21</span>
           <span class="q">When would you use Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -630,7 +725,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">18</span>
+          <span class="num">22</span>
           <span class="q">When would you use JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -650,7 +745,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">19</span>
+          <span class="num">23</span>
           <span class="q">What is the main difference between Kafka and JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -664,7 +759,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">20</span>
+          <span class="num">24</span>
           <span class="q">Can Kafka replace JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -686,7 +781,7 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 4. Queue versus topic ============ -->
+  <!-- ============ 5. Queue versus topic ============ -->
   <section class="topic" id="queue-topic" aria-labelledby="queue-topic-h">
     <div class="topic-head">
       <h2 id="queue-topic-h">Queue versus topic</h2>
@@ -697,7 +792,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">21</span>
+          <span class="num">25</span>
           <span class="q">What is the difference between a queue and a topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -714,7 +809,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">22</span>
+          <span class="num">26</span>
           <span class="q">If several consumers listen to a queue, who receives the message?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -726,7 +821,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">23</span>
+          <span class="num">27</span>
           <span class="q">How is a Kafka topic different from a JMS topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -738,7 +833,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">24</span>
+          <span class="num">28</span>
           <span class="q">How do you preserve message ordering in Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -751,7 +846,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">25</span>
+          <span class="num">29</span>
           <span class="q">How do you handle duplicate message processing?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -772,7 +867,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">26</span>
+          <span class="num">30</span>
           <span class="q">What is a dead-letter queue?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -794,7 +889,7 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 5. Kubernetes fundamentals ============ -->
+  <!-- ============ 6. Kubernetes fundamentals ============ -->
   <section class="topic" id="k8s" aria-labelledby="k8s-h">
     <div class="topic-head">
       <h2 id="k8s-h">Kubernetes fundamentals</h2>
@@ -805,7 +900,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">27</span>
+          <span class="num">31</span>
           <span class="q">Explain a basic Kubernetes application setup.<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -828,7 +923,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">28</span>
+          <span class="num">32</span>
           <span class="q">What is a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -847,7 +942,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">29</span>
+          <span class="num">33</span>
           <span class="q">What is the difference between a pod and a deployment?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -867,7 +962,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">30</span>
+          <span class="num">34</span>
           <span class="q">What is an Ingress?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -885,7 +980,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">31</span>
+          <span class="num">35</span>
           <span class="q">What is a ConfigMap?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -903,7 +998,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">32</span>
+          <span class="num">36</span>
           <span class="q">Does updating a ConfigMap restart the pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -918,7 +1013,7 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 6. Kubernetes memory consumption ============ -->
+  <!-- ============ 7. Kubernetes memory consumption ============ -->
   <section class="topic" id="memory" aria-labelledby="memory-h">
     <div class="topic-head">
       <h2 id="memory-h">Kubernetes memory consumption</h2>
@@ -929,7 +1024,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">33</span>
+          <span class="num">37</span>
           <span class="q">What is the difference between memory request and memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -943,7 +1038,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">34</span>
+          <span class="num">38</span>
           <span class="q">What happens when a pod exceeds its memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -960,7 +1055,7 @@ Exit Code: 137</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">35</span>
+          <span class="num">39</span>
           <span class="q">How do you check memory usage for a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -980,7 +1075,7 @@ kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
     </div>
   </section>
 
-  <!-- ============ 7. Troubleshooting an OOM restart ============ -->
+  <!-- ============ 8. Troubleshooting an OOM restart ============ -->
   <section class="topic" id="oom" aria-labelledby="oom-h">
     <div class="topic-head">
       <h2 id="oom-h">Troubleshooting an OOM restart</h2>
@@ -991,7 +1086,7 @@ kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">36</span>
+          <span class="num">40</span>
           <span class="q">What would you do when a pod keeps restarting because of an out-of-memory error?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1051,7 +1146,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">37</span>
+          <span class="num">41</span>
           <span class="q">The pod has a 1 GB memory limit. Should <code>-Xmx</code> also be 1 GB?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1067,7 +1162,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">38</span>
+          <span class="num">42</span>
           <span class="q">What is <code>CrashLoopBackOff</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1089,7 +1184,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">39</span>
+          <span class="num">43</span>
           <span class="q">Can a liveness probe cause repeated restarts?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1109,7 +1204,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
     </div>
   </section>
 
-  <!-- ============ 8. Hands-on scenarios ============ -->
+  <!-- ============ 9. Hands-on scenarios ============ -->
   <section class="topic" id="scenarios" aria-labelledby="scenarios-h">
     <div class="topic-head">
       <h2 id="scenarios-h">Hands-on scenario questions</h2>
@@ -1120,7 +1215,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">40</span>
+          <span class="num">44</span>
           <span class="q">A Java service becomes slow, memory grows continuously, and the pod restarts every few hours. How would you investigate?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1144,7 +1239,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">41</span>
+          <span class="num">45</span>
           <span class="q">Your Kafka consumer processes the same payment event twice. What would you do?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1164,7 +1259,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">42</span>
+          <span class="num">46</span>
           <span class="q">You need one message to trigger inventory, email, and analytics processing. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1177,7 +1272,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">43</span>
+          <span class="num">47</span>
           <span class="q">You need ten workers to process image-conversion jobs, but each job should be handled by one worker only. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1207,7 +1302,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
   </section>
 
   <footer>
-    <span>43 questions across 8 topics</span>
+    <span>47 questions across 9 topics</span>
     <span>Sample answers to adapt, not to recite</span>
   </footer>
 </main>
