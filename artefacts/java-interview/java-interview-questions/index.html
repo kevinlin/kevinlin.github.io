@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Java interview questions</title>
-<meta name="description" content="Interactive question and answer deck covering new Java 17 to 21 features, Spring dependency injection, JPA, Kafka and JMS, Kubernetes, and production troubleshooting.">
+<title>Java fullstack interview questions</title>
+<meta name="description" content="Interactive question and answer deck covering Java 17 to 21, virtual threads, React and Redux, Spring IoC and bean lifecycle, JPA, Kafka and JMS, Kubernetes, Helm, and production troubleshooting.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet">
@@ -31,12 +31,14 @@
     --code-line:#DED7C9;
     --code-scroll:rgba(25,24,23,.22);
 
+    --mark:rgba(168,69,26,.16);
+
     --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     --serif:"IBM Plex Serif",Georgia,serif;
     --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 
     --ease:cubic-bezier(.23,1,.32,1);
-    --shell:900px;
+    --shell:1320px;
     --gutter:20px;
 
     --z-sticky:20;
@@ -67,6 +69,8 @@
       --code-ink:#E4DFD5;
       --code-line:#332F2B;
       --code-scroll:rgba(255,255,255,.20);
+
+      --mark:rgba(224,138,90,.22);
 
       --shadow-rest:0 1px 2px rgba(0,0,0,.30),0 4px 12px rgba(0,0,0,.24);
       --shadow-lift:0 1px 2px rgba(0,0,0,.36),0 10px 26px rgba(0,0,0,.32);
@@ -112,7 +116,7 @@
            text-transform:uppercase;color:var(--ember)}
   h1{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,5.5vw,3rem);
      line-height:1.12;letter-spacing:-.015em;text-wrap:balance;margin:12px 0 16px}
-  .lede{max-width:62ch;color:var(--ink-soft);text-wrap:pretty;font-size:1.0625rem}
+  .lede{color:var(--ink-soft);text-wrap:pretty;font-size:1.0625rem}
 
   .stats{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:24px;
          font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
@@ -123,10 +127,18 @@
        background:color-mix(in srgb, var(--bg) 88%, transparent);
        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
        border-bottom:1px solid var(--line)}
-  .bar-inner{display:flex;align-items:center;gap:12px;padding:10px 0;min-height:56px}
+  /* two rows: controls on top, the full topic strip below, so all 13 topics stay reachable */
+  .bar-inner{display:flex;align-items:center;gap:8px 12px;padding:8px 0;flex-wrap:wrap}
 
-  .topics{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;
-          -webkit-overflow-scrolling:touch;padding:2px 0}
+  /* progress rail sits on the bar's bottom edge */
+  .progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:transparent;overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:var(--ember);
+              transition:width 240ms var(--ease)}
+
+  .topics{position:relative;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+          order:2;flex:1 1 100%;min-width:0;-webkit-overflow-scrolling:touch;padding:2px 0 4px;
+          mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 20px),transparent 100%);
+          -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 20px),transparent 100%)}
   .topics::-webkit-scrollbar{display:none}
   .chip{flex:0 0 auto;display:inline-flex;align-items:center;min-height:36px;padding:0 12px;
         border:1px solid var(--line);border-radius:999px;background:var(--panel);
@@ -139,7 +151,23 @@
   }
   .chip:active{transform:scale(.97)}
 
-  .toggle-all{flex:0 0 auto;min-height:36px;padding:0 14px;border-radius:999px;cursor:pointer;
+  /* ---------- search ---------- */
+  .search{position:relative;order:1;flex:1 1 auto;min-width:150px;display:flex;align-items:center}
+  .search svg.glass{position:absolute;left:11px;width:14px;height:14px;color:var(--ink-dim);pointer-events:none}
+  .search input{width:100%;min-height:36px;padding:0 32px 0 32px;
+        border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);
+        font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+        transition:border-color 140ms var(--ease),background-color 140ms var(--ease)}
+  .search input::placeholder{color:var(--ink-dim)}
+  .search input:focus{border-color:var(--line-strong);outline:none}
+  .search input:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+  .search .clear{position:absolute;right:4px;display:none;align-items:center;justify-content:center;
+        width:28px;height:28px;border:0;border-radius:999px;background:none;color:var(--ink-dim);cursor:pointer}
+  .search .clear::before{content:"";position:absolute;inset:-8px}
+  .search[data-filled="true"] .clear{display:inline-flex}
+  @media (hover:hover) and (pointer:fine){ .search .clear:hover{color:var(--ink)} }
+
+  .toggle-all{order:1;flex:0 0 auto;min-height:36px;padding:0 14px;border-radius:999px;cursor:pointer;
         border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);
         font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;
         transition:background-color 140ms var(--ease),border-color 140ms var(--ease),transform 100ms var(--ease)}
@@ -149,7 +177,8 @@
   .toggle-all:active{transform:scale(.97)}
 
   /* ---------- sections ---------- */
-  section.topic{padding-top:56px;scroll-margin-top:76px}
+  section.topic{padding-top:56px;scroll-margin-top:116px}
+  section.topic[hidden]{display:none}
   .topic-head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
   h2{font-family:var(--serif);font-weight:600;font-size:1.5rem;letter-spacing:-.01em;text-wrap:balance}
   .topic-count{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);
@@ -162,6 +191,7 @@
   .qa{border:1px solid var(--line);border-radius:14px;background:var(--panel);
       box-shadow:var(--shadow-rest);
       transition:box-shadow 180ms var(--ease),border-color 180ms var(--ease)}
+  .qa[hidden]{display:none}
   @media (hover:hover) and (pointer:fine){
     .qa:hover{border-color:var(--line-strong);box-shadow:var(--shadow-lift)}
   }
@@ -192,27 +222,39 @@
   }
   .answer > *{margin-top:14px}
   .answer > *:first-child{margin-top:16px}
-  .answer p{color:var(--ink-soft);text-wrap:pretty;max-width:65ch}
-  .answer ul,.answer ol{padding-left:20px;color:var(--ink-soft);max-width:65ch}
+  .answer p{color:var(--ink-soft);text-wrap:pretty}
+  .answer ul,.answer ol{padding-left:20px;color:var(--ink-soft)}
   .answer li{margin-top:6px;text-wrap:pretty}
   .answer li::marker{color:var(--ink-dim)}
   .answer code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
                border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink)}
   .answer strong{font-weight:600;color:var(--ink)}
+  .answer h3{font-family:var(--sans);font-size:.8125rem;font-weight:600;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--ink);margin-top:20px}
 
   pre{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--code-line);
       border-radius:10px;padding:14px 16px;overflow-x:auto;
       font-family:var(--mono);font-size:13px;line-height:1.6}
-  pre code{background:none;border:0;padding:0;color:inherit;font-size:inherit}
+  /* specificity has to beat `.answer code`, or inline-chip styling leaks into code blocks */
+  pre code,.answer pre code{background:none;border:0;padding:0;color:inherit;font-size:inherit}
   pre::-webkit-scrollbar{height:8px}
   pre::-webkit-scrollbar-thumb{background:var(--code-scroll);border-radius:8px}
+
+  mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 2px}
+
+  /* ---------- empty state ---------- */
+  .empty{display:none;margin-top:56px;border:1px dashed var(--line-strong);border-radius:14px;
+         background:var(--panel-2);padding:28px 24px;text-align:center}
+  .empty[data-visible="true"]{display:block}
+  .empty p{color:var(--ink-soft)}
+  .empty b{font-family:var(--mono);color:var(--ink)}
 
   /* ---------- closing panel ---------- */
   .closing{margin-top:20px;border:1px solid var(--line);border-radius:14px;
            background:var(--panel-2);padding:24px 24px 26px}
   .closing h2{font-size:1.25rem;margin-bottom:6px}
-  .closing p{color:var(--ink-soft);max-width:62ch}
-  .closing ol{margin-top:14px;padding-left:20px;color:var(--ink-soft);max-width:65ch}
+  .closing p{color:var(--ink-soft)}
+  .closing ol{margin-top:14px;padding-left:20px;color:var(--ink-soft)}
   .closing li{margin-top:8px;text-wrap:pretty}
 
   footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
@@ -237,11 +279,11 @@
 <header class="masthead">
   <div class="shell">
     <p class="eyebrow">Interview preparation</p>
-    <h1>Java, messaging, and Kubernetes interview questions</h1>
-    <p class="lede">Forty-seven questions with sample answers you can adapt. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
+    <h1>Java fullstack, messaging, and Kubernetes interview questions</h1>
+    <p class="lede">Seventy-two questions with sample answers you can adapt. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
     <p class="stats">
-      <span><b>47</b> questions</span>
-      <span><b>9</b> topics</span>
+      <span><b id="stat-questions">72</b> questions</span>
+      <span><b id="stat-topics">13</b> topics</span>
       <span><b id="revealed">0</b> revealed</span>
     </p>
   </div>
@@ -251,26 +293,40 @@
   <div class="shell bar-inner">
     <nav class="topics" aria-label="Topics">
       <a class="chip" href="#java17-21">Java 17 to 21</a>
-      <a class="chip" href="#di">Dependency injection</a>
+      <a class="chip" href="#react">React and Redux</a>
+      <a class="chip" href="#spring">Spring IoC</a>
       <a class="chip" href="#jpa">JPA and Hibernate</a>
       <a class="chip" href="#messaging">Kafka and JMS</a>
       <a class="chip" href="#queue-topic">Queue vs topic</a>
       <a class="chip" href="#k8s">Kubernetes</a>
+      <a class="chip" href="#peak">Peak traffic</a>
       <a class="chip" href="#memory">Pod memory</a>
-      <a class="chip" href="#oom">OOM restarts</a>
+      <a class="chip" href="#oom">Restarts and OOM</a>
+      <a class="chip" href="#helm">Helm</a>
+      <a class="chip" href="#ai">AI-assisted work</a>
       <a class="chip" href="#scenarios">Scenarios</a>
     </nav>
+    <div class="search" id="search">
+      <svg class="glass" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <label class="sr-only" for="search-input">Filter questions</label>
+      <input id="search-input" type="search" autocomplete="off" spellcheck="false" placeholder="Filter&hellip;  /">
+      <button class="clear" id="search-clear" type="button" aria-label="Clear filter">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="12" height="12"><path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
     <button class="toggle-all" id="toggle-all" type="button" aria-expanded="false">Expand all</button>
   </div>
+  <div class="progress" aria-hidden="true"><i id="progress-fill"></i></div>
 </div>
 
 <main id="main" class="shell">
+  <p class="sr-only" role="status" aria-live="polite" id="filter-status"></p>
 
-  <!-- ============ 1. New features in Java 17 to 21 ============ -->
+  <!-- ============ 1. Java 17 to 21 ============ -->
   <section class="topic" id="java17-21" aria-labelledby="java17-21-h">
     <div class="topic-head">
-      <h2 id="java17-21-h">New features in Java 17 to 21</h2>
-      <span class="topic-count">4 questions</span>
+      <h2 id="java17-21-h">Java 17 to 21 and virtual threads</h2>
+      <span class="topic-count">7 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
@@ -305,6 +361,41 @@
       <details class="qa">
         <summary>
           <span class="num">02</span>
+          <span class="q">Have you used virtual threads from Java 21?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I have experimented with virtual threads and understand how to apply them, although I have not yet used them extensively in a production system.</p>
+          <p>Virtual threads are lightweight Java threads managed by the JVM rather than mapped one-to-one to operating-system threads. They are useful for high-concurrency, I/O-bound applications, such as services making many database queries or downstream HTTP calls.</p>
+          <p>For example:</p>
+<pre><code>try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    var futures = IntStream.range(0, 1_000)
+        .mapToObj(i -&gt; executor.submit(() -&gt; callRemoteService(i)))
+        .toList();
+
+    for (var future : futures) {
+        future.get();
+    }
+}</code></pre>
+          <p>The main benefit is that we can continue using a straightforward blocking programming model without maintaining large platform-thread pools. Oracle recommends treating each concurrent task as a virtual thread rather than pooling virtual threads.</p>
+          <p>With Spring Boot on Java 21 or later, virtual threads can be enabled with:</p>
+<pre><code>spring.threads.virtual.enabled=true</code></pre>
+          <p>Spring Boot can then use virtual threads for its auto-configured task executor.</p>
+          <p>I would still test it carefully because virtual threads do not:</p>
+          <ul>
+            <li>Make CPU-bound work faster</li>
+            <li>Increase database connection-pool capacity</li>
+            <li>Remove downstream API limits</li>
+            <li>Replace backpressure or rate limiting</li>
+            <li>Automatically fix poor concurrency design</li>
+          </ul>
+          <p>I would monitor thread count, database-pool saturation, HTTP connection pools, latency, throughput, and memory before and after enabling them.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">03</span>
           <span class="q">What is the difference between platform threads and virtual threads?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -317,7 +408,51 @@
 
       <details class="qa">
         <summary>
-          <span class="num">03</span>
+          <span class="num">04</span>
+          <span class="q">How are Java virtual threads similar to Go goroutines?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>They are similar at a high level because both allow a large number of lightweight concurrent tasks without creating one operating-system thread for every task.</p>
+          <p>The main difference is the programming model.</p>
+          <p>A Java virtual thread is still a <code>java.lang.Thread</code>. Existing blocking Java code, debugging tools, stack traces, and thread-based APIs can generally continue to work. The JVM schedules virtual threads onto a smaller number of carrier threads.</p>
+          <p>A Go goroutine is part of the Go runtime and is commonly combined with channels and the <code>select</code> statement for communication and coordination.</p>
+          <p>Because I understand goroutines, the motivation behind virtual threads is familiar to me:</p>
+          <ul>
+            <li>Use lightweight concurrency</li>
+            <li>Avoid creating large operating-system thread pools</li>
+            <li>Allow the runtime to schedule concurrent tasks</li>
+            <li>Keep concurrent code relatively easy to read</li>
+          </ul>
+          <p>But I would not say that virtual threads and goroutines are identical. Their runtime behaviour, synchronization mechanisms, APIs, and ecosystems differ.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">05</span>
+          <span class="q">When should virtual threads not be used?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Virtual threads are mainly useful for workloads that spend significant time waiting for I/O.</p>
+          <p>They do not improve CPU-intensive work such as encryption, image processing, or complex calculations. CPU-bound work is still limited by the available CPU cores.</p>
+          <p>I would also check:</p>
+          <ul>
+            <li>Database connection-pool limits</li>
+            <li>Downstream service concurrency limits</li>
+            <li>HTTP client connection limits</li>
+            <li>Thread-local usage</li>
+            <li>Synchronization and native calls</li>
+            <li>Observability-tool support</li>
+          </ul>
+          <p>For example, creating 10,000 virtual threads does not help if the database pool only allows 20 active connections. It may simply create 9,980 tasks waiting for connections.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">06</span>
           <span class="q">When would you use records?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -335,7 +470,7 @@
 
       <details class="qa">
         <summary>
-          <span class="num">04</span>
+          <span class="num">07</span>
           <span class="q">What problem do sealed classes solve?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -360,44 +495,198 @@ public record PaymentFailed(String reason)
     </div>
   </section>
 
-  <!-- ============ 2. Dependency injection and IoC ============ -->
-  <section class="topic" id="di" aria-labelledby="di-h">
+  <!-- ============ 2. React and Redux ============ -->
+  <section class="topic" id="react" aria-labelledby="react-h">
     <div class="topic-head">
-      <h2 id="di-h">Dependency injection and IoC</h2>
-      <span class="topic-count">6 questions</span>
+      <h2 id="react-h">React and Redux</h2>
+      <span class="topic-count">4 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">05</span>
-          <span class="q">What is inversion of control?<span class="hint">Tap to reveal</span></span>
+          <span class="num">08</span>
+          <span class="q">Explain React.<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>Inversion of control means that application code does not control the full lifecycle and wiring of its dependencies. The framework or container does.</p>
-          <p>For example, instead of a service constructing its own repository:</p>
-<pre><code>class OrderService {
-    private final OrderRepository repository =
-        new JpaOrderRepository();
-}</code></pre>
-          <p>Spring creates the repository and injects it:</p>
-<pre><code>@Service
-class OrderService {
-    private final OrderRepository repository;
+          <p>React is a library for building user interfaces from reusable components.</p>
+          <p>A component receives inputs through props, manages local state where necessary, and returns a description of what the UI should look like. When its props or state change, React renders the component again and reconciles the result with the existing DOM.</p>
+          <p>For example:</p>
+<pre><code>type CounterProps = {
+  initialValue?: number;
+};
 
-    OrderService(OrderRepository repository) {
-        this.repository = repository;
-    }
+export function Counter({ initialValue = 0 }: CounterProps) {
+  const [count, setCount] = useState(initialValue);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(current =&gt; current + 1)}&gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
 }</code></pre>
-          <p>This reduces coupling and makes the service easier to test.</p>
+          <p>The important React concepts are:</p>
+          <ul>
+            <li>Component-based UI composition</li>
+            <li>Declarative rendering</li>
+            <li>Props for passing data</li>
+            <li>State for data that changes</li>
+            <li>Hooks for state, effects, context, and reusable behaviour</li>
+            <li>One-way data flow from parent to child</li>
+            <li>Reconciliation when the rendered output changes</li>
+          </ul>
+          <p>React's documentation describes components as the building blocks of a UI and focuses on composing, displaying, and updating them based on data.</p>
+          <p>I try to keep state as close as possible to where it is used. I move it into a shared store only when multiple parts of the application genuinely need it.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">06</span>
+          <span class="num">09</span>
+          <span class="q">Explain Redux.<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Redux is a predictable state-management library, commonly used for application-wide state that is shared across multiple components.</p>
+          <p>The main concepts are:</p>
+          <ul>
+            <li><strong>Store</strong>: holds the application state</li>
+            <li><strong>Action</strong>: describes what happened</li>
+            <li><strong>Reducer</strong>: calculates the next state</li>
+            <li><strong>Dispatch</strong>: sends an action to the store</li>
+            <li><strong>Selector</strong>: reads or derives data from the state</li>
+            <li><strong>Middleware</strong>: handles concerns such as asynchronous operations, logging, or side effects</li>
+          </ul>
+          <p>The data flow is one-directional:</p>
+<pre><code>UI → dispatch action → reducer updates state → UI reads new state</code></pre>
+          <p>A simple example using Redux Toolkit is:</p>
+<pre><code>const counterSlice = createSlice({
+  name: "counter",
+  initialState: { value: 0 },
+  reducers: {
+    increment(state) {
+      state.value += 1;
+    }
+  }
+});
+
+export const { increment } = counterSlice.actions;
+export default counterSlice.reducer;</code></pre>
+          <p>React components normally interact with Redux using React-Redux hooks:</p>
+<pre><code>function Counter() {
+  const count = useSelector(
+    (state: RootState) =&gt; state.counter.value
+  );
+
+  const dispatch = useDispatch();
+
+  return (
+    &lt;button onClick={() =&gt; dispatch(increment())}&gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+          <p>React-Redux connects React components to the Redux store, while Redux Toolkit is the officially recommended approach for writing modern Redux logic with less boilerplate.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">10</span>
+          <span class="q">When would you use Redux?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would use Redux when the application has complex shared state that must be accessed and updated across different screens or components.</p>
+          <p>Examples include:</p>
+          <ul>
+            <li>Authenticated-user information</li>
+            <li>Complex workflow state</li>
+            <li>Shared filters and search criteria</li>
+            <li>Cached server responses</li>
+            <li>Application-wide notifications</li>
+            <li>State that needs debugging, auditing, or predictable transitions</li>
+          </ul>
+          <p>I would not put every piece of state into Redux. Temporary UI state such as whether a dialog is open can normally remain inside the component.</p>
+          <p>For server state, I would also consider RTK Query or another query-management solution rather than manually implementing loading, caching, invalidation, and error handling.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">11</span>
+          <span class="q">Why does Redux have a reputation for boilerplate?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Older Redux implementations often required separate files and code for:</p>
+          <ul>
+            <li>Action-type constants</li>
+            <li>Action creators</li>
+            <li>Reducers</li>
+            <li>Immutable state updates</li>
+            <li>Selectors</li>
+            <li>Thunks</li>
+            <li>Store configuration</li>
+          </ul>
+          <p>Modern Redux Toolkit reduces much of that boilerplate through <code>createSlice</code>, <code>configureStore</code>, <code>createAsyncThunk</code>, and RTK Query. The Redux documentation recommends Redux Toolkit as the standard way to write Redux applications today.</p>
+          <p>However, if the team already has an established Redux architecture, I would first understand its conventions. I would not introduce a large migration merely because a newer pattern exists. Changes should be incremental and supported by tests.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 3. Spring IoC, DI, and bean lifecycle ============ -->
+  <section class="topic" id="spring" aria-labelledby="spring-h">
+    <div class="topic-head">
+      <h2 id="spring-h">Spring IoC and bean lifecycle</h2>
+      <span class="topic-count">9 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">12</span>
+          <span class="q">What is inversion of control?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Inversion of control means that control over object creation, configuration, and lifecycle is transferred from application code to a container or framework.</p>
+          <p>Without IoC, a service constructs its own dependencies:</p>
+<pre><code>public class PaymentService {
+    private final PaymentRepository repository =
+        new JpaPaymentRepository();
+}</code></pre>
+          <p>With Spring IoC, the service declares what it needs, and Spring supplies it:</p>
+<pre><code>@Service
+public class PaymentService {
+
+    private final PaymentRepository repository;
+
+    public PaymentService(PaymentRepository repository) {
+        this.repository = repository;
+    }
+}</code></pre>
+          <p>This gives us:</p>
+          <ul>
+            <li>Lower coupling</li>
+            <li>Easier unit testing</li>
+            <li>Explicit dependencies</li>
+            <li>Centralized configuration</li>
+            <li>Framework-managed lifecycle</li>
+            <li>Easier replacement of implementations</li>
+          </ul>
+          <p>I normally prefer constructor injection because required dependencies are visible and fields can remain final.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">13</span>
           <span class="q">What is the difference between IoC and dependency injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -409,7 +698,7 @@ class OrderService {
 
       <details class="qa">
         <summary>
-          <span class="num">07</span>
+          <span class="num">14</span>
           <span class="q">Why do you prefer constructor injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -429,7 +718,96 @@ class OrderService {
 
       <details class="qa">
         <summary>
-          <span class="num">08</span>
+          <span class="num">15</span>
+          <span class="q">Explain the lifecycle of a Spring bean.<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>At a high level, the lifecycle of a Spring bean is:</p>
+          <ol>
+            <li>Spring reads the bean definition.</li>
+            <li>The bean is instantiated through a constructor or factory method.</li>
+            <li>Dependencies and properties are injected.</li>
+            <li><code>Aware</code> callbacks are invoked, where applicable.</li>
+            <li><code>BeanPostProcessor</code> logic runs before initialization.</li>
+            <li>Initialization callbacks run.</li>
+            <li><code>BeanPostProcessor</code> logic runs after initialization.</li>
+            <li>The bean is available for application use.</li>
+            <li>When the context closes, destruction callbacks run.</li>
+          </ol>
+          <p>Initialization can be implemented through:</p>
+<pre><code>@PostConstruct
+public void initialize() {
+    // Validate configuration or initialize resources
+}</code></pre>
+          <p>Destruction can be implemented through:</p>
+<pre><code>@PreDestroy
+public void cleanup() {
+    // Close resources
+}</code></pre>
+          <p>Spring supports <code>@PostConstruct</code> and <code>@PreDestroy</code> as lifecycle callbacks and uses bean post-processors to identify and invoke them.</p>
+          <p>A more detailed sequence is:</p>
+<pre><code>Constructor
+    ↓
+Dependency injection
+    ↓
+Aware callbacks
+    ↓
+BeanPostProcessor.beforeInitialization()
+    ↓
+@PostConstruct
+    ↓
+InitializingBean.afterPropertiesSet()
+    ↓
+Custom init method
+    ↓
+BeanPostProcessor.afterInitialization()
+    ↓
+Bean ready for use
+    ↓
+@PreDestroy / destroy callbacks</code></pre>
+          <p>The <code>postProcessBeforeInitialization</code> callback runs before initialization methods such as <code>afterPropertiesSet</code>, while post-initialization processing is also where Spring may return a proxied object for features such as AOP.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">16</span>
+          <span class="q">Does Spring manage every bean lifecycle in the same way?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>No. The lifecycle depends partly on the bean scope.</p>
+          <p>For a singleton bean, Spring normally manages creation, initialization, and destruction.</p>
+          <p>For a prototype bean, Spring creates and initializes the object, but it does not normally manage its complete destruction lifecycle after handing the object to the caller.</p>
+          <p>Web applications can also use request and session scopes, where the bean lifecycle follows the HTTP request or user session.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">17</span>
+          <span class="q">What is a <code>BeanPostProcessor</code>?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>A <code>BeanPostProcessor</code> allows Spring or application code to inspect or modify bean instances before and after initialization.</p>
+          <p>Spring uses bean post-processors for features such as:</p>
+          <ul>
+            <li>Dependency injection annotations</li>
+            <li>Lifecycle annotations</li>
+            <li>AOP proxies</li>
+            <li>Transactional proxies</li>
+            <li>Security proxies</li>
+            <li>Custom framework integration</li>
+          </ul>
+          <p>For example, Spring can detect <code>@Autowired</code>, <code>@PostConstruct</code>, and proxy-related annotations through post-processors rather than putting that logic directly into every bean.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">18</span>
           <span class="q">What happens when Spring finds multiple beans of the same type?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -456,7 +834,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">09</span>
+          <span class="num">19</span>
           <span class="q">What are common Spring bean scopes?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -474,7 +852,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">10</span>
+          <span class="num">20</span>
           <span class="q">What is a circular dependency, and how would you fix it?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -493,7 +871,7 @@ class PaymentService {
     </div>
   </section>
 
-  <!-- ============ 3. JPA and Hibernate ============ -->
+  <!-- ============ 4. JPA and Hibernate ============ -->
   <section class="topic" id="jpa" aria-labelledby="jpa-h">
     <div class="topic-head">
       <h2 id="jpa-h">JPA and Hibernate</h2>
@@ -504,7 +882,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">11</span>
+          <span class="num">21</span>
           <span class="q">What is the difference between JPA and Hibernate?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -517,7 +895,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">12</span>
+          <span class="num">22</span>
           <span class="q">What are the entity lifecycle states?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -535,7 +913,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">13</span>
+          <span class="num">23</span>
           <span class="q">What is dirty checking?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -555,7 +933,7 @@ public void renameCustomer(Long id, String name) {
 
       <details class="qa">
         <summary>
-          <span class="num">14</span>
+          <span class="num">24</span>
           <span class="q">What is the difference between <code>LAZY</code> and <code>EAGER</code> fetching?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -574,7 +952,7 @@ public void renameCustomer(Long id, String name) {
 
       <details class="qa">
         <summary>
-          <span class="num">15</span>
+          <span class="num">25</span>
           <span class="q">What is the N+1 query problem?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -600,7 +978,7 @@ for (Order order : orders) {
 
       <details class="qa">
         <summary>
-          <span class="num">16</span>
+          <span class="num">26</span>
           <span class="q">What is the owning side of a JPA relationship?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -626,7 +1004,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">17</span>
+          <span class="num">27</span>
           <span class="q">What is the difference between <code>persist</code>, <code>merge</code>, and <code>save</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -639,7 +1017,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">18</span>
+          <span class="num">28</span>
           <span class="q">What problems can <code>CascadeType.ALL</code> cause?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -652,7 +1030,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">19</span>
+          <span class="num">29</span>
           <span class="q">What is optimistic locking?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -668,7 +1046,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">20</span>
+          <span class="num">30</span>
           <span class="q">How would you improve JPA performance?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -693,18 +1071,18 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 4. Kafka and JMS ============ -->
+  <!-- ============ 5. Kafka and JMS ============ -->
   <section class="topic" id="messaging" aria-labelledby="messaging-h">
     <div class="topic-head">
       <h2 id="messaging-h">Kafka and JMS</h2>
-      <span class="topic-count">4 questions</span>
+      <span class="topic-count">6 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">21</span>
+          <span class="num">31</span>
           <span class="q">When would you use Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -725,7 +1103,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">22</span>
+          <span class="num">32</span>
           <span class="q">When would you use JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -745,7 +1123,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">23</span>
+          <span class="num">33</span>
           <span class="q">What is the main difference between Kafka and JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -759,7 +1137,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">24</span>
+          <span class="num">34</span>
           <span class="q">Can Kafka replace JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -778,21 +1156,66 @@ private Long version;</code></pre>
         </div>
       </details>
 
+      <details class="qa">
+        <summary>
+          <span class="num">35</span>
+          <span class="q">What is the difference between a Kafka topic and a queue?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Kafka fundamentally provides topics rather than a separate queue resource.</p>
+          <p>Queue-like behaviour is created by putting multiple consumer instances in the same consumer group. Each partition is assigned to one consumer in that group, so the work is distributed among the consumers.</p>
+<pre><code>Topic
+  ├── Partition 0 → Consumer A
+  ├── Partition 1 → Consumer B
+  └── Partition 2 → Consumer C</code></pre>
+          <p>Publish-subscribe behaviour is created by using different consumer groups:</p>
+<pre><code>Order topic
+  ├── Inventory consumer group
+  ├── Notification consumer group
+  └── Analytics consumer group</code></pre>
+          <p>Each group independently consumes the events.</p>
+          <p>Kafka's documentation describes a consumer group as providing queue-like load distribution, while separate consumer groups provide publish-subscribe behaviour.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">36</span>
+          <span class="q">When would you use Kafka instead of a traditional queue?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would prefer Kafka when the system needs:</p>
+          <ul>
+            <li>High-throughput event streaming</li>
+            <li>Retained event history</li>
+            <li>Replay</li>
+            <li>Multiple independent consumers</li>
+            <li>Partition-based scaling</li>
+            <li>Stream processing</li>
+            <li>Event-driven integration</li>
+          </ul>
+          <p>I would consider a traditional JMS queue when the use case is primarily command delivery, request-reply, integration with existing enterprise middleware, or broker-managed message-routing features.</p>
+          <p>The decision should be based on required semantics, not only throughput or technology preference.</p>
+        </div>
+      </details>
+
     </div>
   </section>
 
-  <!-- ============ 5. Queue versus topic ============ -->
+  <!-- ============ 6. Queue versus topic ============ -->
   <section class="topic" id="queue-topic" aria-labelledby="queue-topic-h">
     <div class="topic-head">
       <h2 id="queue-topic-h">Queue versus topic</h2>
-      <span class="topic-count">6 questions</span>
+      <span class="topic-count">7 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">25</span>
+          <span class="num">37</span>
           <span class="q">What is the difference between a queue and a topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -809,7 +1232,25 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">26</span>
+          <span class="num">38</span>
+          <span class="q">What is the difference between a JMS queue and a JMS topic?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>A JMS queue normally implements point-to-point messaging. One message is processed by one consumer.</p>
+          <p>A JMS topic implements publish-subscribe messaging. Every active or durable subscription can receive the message.</p>
+          <p>Examples:</p>
+          <ul>
+            <li>A queue is suitable for assigning a payment-processing job to one worker.</li>
+            <li>A topic is suitable for publishing an <code>OrderCreated</code> event to inventory, notification, and analytics services.</li>
+          </ul>
+          <p>In Kafka, both patterns can be implemented using topics and consumer groups.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">39</span>
           <span class="q">If several consumers listen to a queue, who receives the message?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -821,7 +1262,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">27</span>
+          <span class="num">40</span>
           <span class="q">How is a Kafka topic different from a JMS topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -833,7 +1274,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">28</span>
+          <span class="num">41</span>
           <span class="q">How do you preserve message ordering in Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -846,7 +1287,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">29</span>
+          <span class="num">42</span>
           <span class="q">How do you handle duplicate message processing?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -867,7 +1308,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">30</span>
+          <span class="num">43</span>
           <span class="q">What is a dead-letter queue?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -889,18 +1330,18 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 6. Kubernetes fundamentals ============ -->
+  <!-- ============ 7. Kubernetes fundamentals and service communication ============ -->
   <section class="topic" id="k8s" aria-labelledby="k8s-h">
     <div class="topic-head">
-      <h2 id="k8s-h">Kubernetes fundamentals</h2>
-      <span class="topic-count">6 questions</span>
+      <h2 id="k8s-h">Kubernetes fundamentals and networking</h2>
+      <span class="topic-count">9 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">31</span>
+          <span class="num">44</span>
           <span class="q">Explain a basic Kubernetes application setup.<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -923,7 +1364,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">32</span>
+          <span class="num">45</span>
           <span class="q">What is a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -942,7 +1383,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">33</span>
+          <span class="num">46</span>
           <span class="q">What is the difference between a pod and a deployment?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -962,7 +1403,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">34</span>
+          <span class="num">47</span>
           <span class="q">What is an Ingress?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -980,7 +1421,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">35</span>
+          <span class="num">48</span>
           <span class="q">What is a ConfigMap?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -998,7 +1439,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">36</span>
+          <span class="num">49</span>
           <span class="q">Does updating a ConfigMap restart the pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1010,10 +1451,158 @@ private Long version;</code></pre>
         </div>
       </details>
 
+      <details class="qa">
+        <summary>
+          <span class="num">50</span>
+          <span class="q">How do microservices communicate inside the same cluster and namespace?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>For normal service-to-service communication, I would expose each application through a Kubernetes <code>ClusterIP</code> Service.</p>
+          <p>For example:</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - port: 8080
+      targetPort: 8080</code></pre>
+          <p>Another application in the same namespace can call it using the service name:</p>
+<pre><code>http://order-service:8080</code></pre>
+          <p>Kubernetes DNS resolves the service name to the Service's stable cluster IP, and the Service load-balances requests across its ready pods.</p>
+          <p>I would not call individual pod IP addresses because pods are temporary and their IP addresses can change after rescheduling.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">51</span>
+          <span class="q">How do services communicate across namespaces?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>From another namespace, I would include the target namespace in the DNS name:</p>
+<pre><code>http://order-service.orders:8080</code></pre>
+          <p>Or use the fully qualified service name:</p>
+<pre><code>http://order-service.orders.svc.cluster.local:8080</code></pre>
+          <p>A short service name is resolved within the caller's namespace. Cross-namespace communication therefore requires the namespace-qualified name.</p>
+          <p>NetworkPolicies must also allow the required ingress and egress traffic. A default-deny policy can block both service traffic and DNS resolution unless explicit rules are provided.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">52</span>
+          <span class="q">When would you use a headless Service?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would use a headless Service when clients need to discover and communicate with individual pod endpoints rather than going through one virtual service IP.</p>
+          <p>Typical examples include:</p>
+          <ul>
+            <li>StatefulSets</li>
+            <li>Databases</li>
+            <li>Broker clusters</li>
+            <li>Leader-election systems</li>
+            <li>Applications performing client-side discovery</li>
+          </ul>
+          <p>For ordinary stateless Spring Boot services, a standard <code>ClusterIP</code> Service is normally the right choice.</p>
+        </div>
+      </details>
+
     </div>
   </section>
 
-  <!-- ============ 7. Kubernetes memory consumption ============ -->
+  <!-- ============ 8. Handling peak traffic ============ -->
+  <section class="topic" id="peak" aria-labelledby="peak-h">
+    <div class="topic-head">
+      <h2 id="peak-h">Handling peak traffic</h2>
+      <span class="topic-count">2 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">53</span>
+          <span class="q">A microservice receives peak traffic in Kubernetes. How would you handle it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would first identify the actual bottleneck. It could be CPU, memory, database connections, thread pools, downstream services, ingress capacity, or external API limits.</p>
+          <p>For a stateless service, I would normally use several layers of protection.</p>
+          <h3>Horizontal scaling</h3>
+          <p>Configure a Horizontal Pod Autoscaler based on suitable metrics:</p>
+          <ul>
+            <li>CPU utilization</li>
+            <li>Request rate</li>
+            <li>Request latency</li>
+            <li>Active requests</li>
+            <li>Kafka consumer lag</li>
+            <li>Queue depth</li>
+          </ul>
+          <p>The HPA adjusts the replica count of workloads such as Deployments based on observed metrics.</p>
+          <h3>Cluster capacity</h3>
+          <p>Ensure the cluster has sufficient node capacity. Workload autoscaling may need to be combined with node autoscaling so that newly created pods have somewhere to run.</p>
+          <h3>Traffic protection</h3>
+          <p>Use:</p>
+          <ul>
+            <li>Rate limiting</li>
+            <li>Backpressure</li>
+            <li>Timeouts</li>
+            <li>Circuit breakers</li>
+            <li>Bulkheads</li>
+            <li>Load shedding</li>
+            <li>Request-size limits</li>
+            <li>Connection-pool limits</li>
+          </ul>
+          <h3>Absorb asynchronous work</h3>
+          <p>For workloads that do not need an immediate response, put work onto Kafka or a queue and scale consumers independently.</p>
+          <h3>Reduce repeated work</h3>
+          <p>Use caching where the data and consistency requirements allow it.</p>
+          <h3>Prepare for sudden peaks</h3>
+          <p>Autoscaling takes time. For known traffic peaks, I may:</p>
+          <ul>
+            <li>Pre-scale before the event</li>
+            <li>Maintain minimum spare replicas</li>
+            <li>Overprovision some node capacity</li>
+            <li>Warm application and database caches</li>
+            <li>Run load and stress tests</li>
+          </ul>
+          <p>Kubernetes documents node overprovisioning as a way to reduce scheduling delays during sudden scaling events.</p>
+          <p>Finally, I would verify the complete path under load. Adding application replicas does not help if all replicas are blocked by the same database connection limit.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">54</span>
+          <span class="q">Would you scale based only on CPU?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Not necessarily.</p>
+          <p>CPU is useful when CPU usage correlates with traffic, but it may not represent the real bottleneck.</p>
+          <p>For example:</p>
+          <ul>
+            <li>An I/O-bound API may have low CPU but high latency.</li>
+            <li>A Kafka consumer should often scale based on consumer lag.</li>
+            <li>A queue worker may scale based on queue depth.</li>
+            <li>A gateway may scale based on requests per second or concurrent requests.</li>
+            <li>A Java service may have high memory use that does not fall quickly after traffic decreases.</li>
+          </ul>
+          <p>I would choose metrics that represent service demand and saturation, then validate the behaviour through load testing.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 9. Kubernetes memory consumption ============ -->
   <section class="topic" id="memory" aria-labelledby="memory-h">
     <div class="topic-head">
       <h2 id="memory-h">Kubernetes memory consumption</h2>
@@ -1024,7 +1613,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">37</span>
+          <span class="num">55</span>
           <span class="q">What is the difference between memory request and memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1038,7 +1627,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">38</span>
+          <span class="num">56</span>
           <span class="q">What happens when a pod exceeds its memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1055,7 +1644,7 @@ Exit Code: 137</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">39</span>
+          <span class="num">57</span>
           <span class="q">How do you check memory usage for a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1075,18 +1664,88 @@ kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
     </div>
   </section>
 
-  <!-- ============ 8. Troubleshooting an OOM restart ============ -->
+  <!-- ============ 10. Restarts and OOM troubleshooting ============ -->
   <section class="topic" id="oom" aria-labelledby="oom-h">
     <div class="topic-head">
-      <h2 id="oom-h">Troubleshooting an OOM restart</h2>
-      <span class="topic-count">4 questions</span>
+      <h2 id="oom-h">Repeated restarts and OOM troubleshooting</h2>
+      <span class="topic-count">7 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">40</span>
+          <span class="num">58</span>
+          <span class="q">A pod restarts every few hours. How would you troubleshoot it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would not immediately assume it is an out-of-memory issue. I would first confirm the termination reason.</p>
+<pre><code>kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt;
+
+kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;
+
+kubectl logs &lt;pod-name&gt; \
+  -n &lt;namespace&gt; \
+  --previous
+
+kubectl get events \
+  -n &lt;namespace&gt; \
+  --sort-by=.metadata.creationTimestamp</code></pre>
+          <p>I would inspect:</p>
+          <ul>
+            <li>Last container state</li>
+            <li>Exit code</li>
+            <li>Restart count</li>
+            <li>Kubernetes events</li>
+            <li>Application logs</li>
+            <li>Liveness and startup probe failures</li>
+            <li>Node evictions</li>
+            <li>Configuration errors</li>
+            <li>Dependency failures</li>
+          </ul>
+          <p><code>CrashLoopBackOff</code> is not the root cause. It means Kubernetes is applying increasing delays because the container repeatedly starts and fails. Causes can include application failures, invalid configuration, resource shortages, and failed health checks.</p>
+          <p>Because the restart happens after a few hours rather than immediately, I would correlate it with:</p>
+          <ul>
+            <li>Memory growth</li>
+            <li>Traffic patterns</li>
+            <li>Scheduled jobs</li>
+            <li>Cache growth</li>
+            <li>Thread growth</li>
+            <li>Database-pool usage</li>
+            <li>File-descriptor usage</li>
+            <li>Token or certificate expiry</li>
+            <li>Dependency timeouts</li>
+            <li>Liveness-probe failures</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">59</span>
+          <span class="q">How do you confirm that a pod was killed because of memory?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would run:</p>
+<pre><code>kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;</code></pre>
+          <p>I would look for something similar to:</p>
+<pre><code>Last State:  Terminated
+Reason:      OOMKilled
+Exit Code:   137</code></pre>
+          <p>I would also check current and historical memory usage:</p>
+<pre><code>kubectl top pod &lt;pod-name&gt; \
+  -n &lt;namespace&gt; \
+  --containers</code></pre>
+          <p>The <code>OOMKilled</code> reason indicates that the container attempted to use more memory than its configured limit.</p>
+          <p>I would distinguish this from node-level memory pressure. In that case, Kubernetes events may show pod eviction or node memory pressure rather than the application container exceeding its own limit.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">60</span>
           <span class="q">What would you do when a pod keeps restarting because of an out-of-memory error?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1146,23 +1805,88 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">41</span>
-          <span class="q">The pod has a 1 GB memory limit. Should <code>-Xmx</code> also be 1 GB?<span class="hint">Tap to reveal</span></span>
+          <span class="num">61</span>
+          <span class="q">What would you do after confirming <code>OOMKilled</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>No.</p>
-          <p>The Java process uses memory outside the heap, such as metaspace, direct buffers, thread stacks, native libraries, and JVM internal structures.</p>
-          <p>If the container limit is 1 GB, I may initially allocate perhaps 60 to 75 percent to the heap, depending on the application's behaviour. I would then measure actual non-heap and native usage.</p>
-          <p>For example:</p>
-<pre><code>-XX:MaxRAMPercentage=70</code></pre>
-          <p>The exact value should come from profiling and load testing, not a fixed universal rule.</p>
+          <p>I would handle it in three stages.</p>
+          <h3>1. Stabilize the service</h3>
+          <p>As an immediate mitigation, I may increase the container's memory <strong>limit</strong> so that it can stay alive long enough to collect diagnostics.</p>
+          <p>I may also adjust the memory <strong>request</strong> if the existing request is too low for correct scheduling or appropriate quality of service. The request is used for scheduling, while the limit controls how much memory the container may consume.</p>
+          <p>I would be careful not to present increasing memory as the final solution.</p>
+          <h3>2. Collect evidence</h3>
+          <p>For a Java application, I would enable heap dumps:</p>
+<pre><code>-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/dumps</code></pre>
+          <p>I would ensure <code>/dumps</code> uses storage that survives long enough for the dump to be collected.</p>
+          <p>I would also collect:</p>
+          <ul>
+            <li>GC logs</li>
+            <li>Java Flight Recorder data</li>
+            <li>Heap-usage metrics</li>
+            <li>Metaspace metrics</li>
+            <li>Direct-buffer usage</li>
+            <li>Thread count</li>
+            <li>Native-memory usage</li>
+            <li>Request and job activity</li>
+            <li>Application logs</li>
+          </ul>
+          <p>I would analyse the heap dump using a tool such as Eclipse MAT and look for:</p>
+          <ul>
+            <li>Large retained object graphs</li>
+            <li>Unbounded caches</li>
+            <li>Static collections</li>
+            <li>ThreadLocal values</li>
+            <li>Unreleased sessions or buffers</li>
+            <li>Excessive queued tasks</li>
+            <li>Large request or response objects</li>
+            <li>JPA persistence-context growth</li>
+          </ul>
+          <p>I would also check non-heap memory. The Kubernetes memory limit applies to the entire container, not only the Java heap.</p>
+          <h3>3. Fix and verify</h3>
+          <p>After identifying the root cause, I would:</p>
+          <ol>
+            <li>Fix the leak or memory-growth issue.</li>
+            <li>Reproduce the scenario under load.</li>
+            <li>Verify that memory reaches a stable plateau.</li>
+            <li>Confirm GC behaviour and response latency.</li>
+            <li>Run the service for longer than the original failure window.</li>
+            <li>Set the request and limit to measured values with suitable headroom.</li>
+            <li>Deploy gradually and monitor it.</li>
+          </ol>
+          <p>I would not automatically revert to the original memory settings. I would right-size them based on the fixed application's measured behaviour.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">42</span>
+          <span class="num">62</span>
+          <span class="q">The pod limit is 1 GiB. Should the Java heap also be 1 GiB?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>No.</p>
+          <p>The Java process uses memory outside the heap, including:</p>
+          <ul>
+            <li>Metaspace</li>
+            <li>Thread stacks</li>
+            <li>Direct buffers</li>
+            <li>Native libraries</li>
+            <li>JIT compiler memory</li>
+            <li>Garbage-collector structures</li>
+            <li>JVM internal data</li>
+          </ul>
+          <p>If <code>-Xmx</code> is set to the entire container limit, the process can be killed even when the Java heap itself has not reached <code>-Xmx</code>.</p>
+          <p>As a starting point I may allocate perhaps 60 to 75 percent of the container limit to the heap, then measure actual non-heap and native usage:</p>
+<pre><code>-XX:MaxRAMPercentage=70</code></pre>
+          <p>The exact ratio should be determined through profiling and load testing rather than a universal percentage.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">63</span>
           <span class="q">What is <code>CrashLoopBackOff</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1184,7 +1908,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">43</span>
+          <span class="num">64</span>
           <span class="q">Can a liveness probe cause repeated restarts?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1204,7 +1928,192 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
     </div>
   </section>
 
-  <!-- ============ 9. Hands-on scenarios ============ -->
+  <!-- ============ 11. Helm ============ -->
+  <section class="topic" id="helm" aria-labelledby="helm-h">
+    <div class="topic-head">
+      <h2 id="helm-h">Slow Helm deployments</h2>
+      <span class="topic-count">2 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">65</span>
+          <span class="q">A Helm chart takes 30 minutes to deploy. What could cause it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would first determine whether the delay is caused by Helm rendering the chart, Kubernetes creating the resources, or Helm waiting for the resources to become ready.</p>
+          <p>If it consistently takes or fails at exactly 30 minutes, I would inspect whether the pipeline uses:</p>
+<pre><code>--wait
+--atomic
+--timeout 30m</code></pre>
+          <p>With waiting enabled, Helm can wait for Kubernetes resources and hook Jobs to become ready until the configured timeout. Helm hooks can run Jobs before or after installation and upgrades.</p>
+          <p>Common causes include:</p>
+          <ul>
+            <li>A pre-install or pre-upgrade hook Job taking a long time</li>
+            <li>A database-migration Job hanging</li>
+            <li>Pods remaining in <code>Pending</code></li>
+            <li>Insufficient CPU or memory on cluster nodes</li>
+            <li>Slow container-image pulls</li>
+            <li>An inaccessible image registry</li>
+            <li>Long-running init containers</li>
+            <li>Readiness or startup probes failing</li>
+            <li>Incorrect application configuration</li>
+            <li>PersistentVolumeClaims waiting for storage</li>
+            <li>LoadBalancer provisioning delays</li>
+            <li>Pods waiting for secrets or ConfigMaps</li>
+            <li>Deployment rollout failing</li>
+            <li>NetworkPolicies blocking dependencies</li>
+            <li>Kubernetes API throttling</li>
+            <li>A large number of resources or chart dependencies</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">66</span>
+          <span class="q">How would you troubleshoot a slow Helm deployment?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would start with:</p>
+<pre><code>helm upgrade &lt;release&gt; &lt;chart&gt; \
+  --namespace &lt;namespace&gt; \
+  --debug</code></pre>
+          <p>Then inspect the Helm release:</p>
+<pre><code>helm status &lt;release&gt; -n &lt;namespace&gt;
+helm history &lt;release&gt; -n &lt;namespace&gt;</code></pre>
+          <p>Helm status shows whether a release is deployed, failed, pending installation, pending upgrade, or pending rollback.</p>
+          <p>Next, I would inspect Kubernetes:</p>
+<pre><code>kubectl get pods,jobs,deployments \
+  -n &lt;namespace&gt;
+
+kubectl get events \
+  -n &lt;namespace&gt; \
+  --sort-by=.metadata.creationTimestamp
+
+kubectl describe pod &lt;pod-name&gt; \
+  -n &lt;namespace&gt;
+
+kubectl logs &lt;pod-name&gt; \
+  -n &lt;namespace&gt;
+
+kubectl rollout status deployment/&lt;deployment&gt; \
+  -n &lt;namespace&gt;</code></pre>
+          <p>I would check hook Jobs separately:</p>
+<pre><code>kubectl get jobs \
+  -n &lt;namespace&gt; \
+  -o yaml</code></pre>
+          <p>And look for annotations such as:</p>
+<pre><code>helm.sh/hook: pre-install,pre-upgrade</code></pre>
+          <p>To separate chart rendering from cluster deployment, I would run:</p>
+<pre><code>time helm template &lt;release&gt; &lt;chart&gt; \
+  -n &lt;namespace&gt; &gt; rendered.yaml</code></pre>
+          <p>If <code>helm template</code> completes quickly, the delay is probably in Kubernetes resource creation, scheduling, hooks, or readiness rather than Helm template rendering.</p>
+          <p>Finally, I would optimize the actual cause:</p>
+          <ul>
+            <li>Reduce unnecessary hook work</li>
+            <li>Move long migrations into a controlled deployment step</li>
+            <li>Improve image size and registry access</li>
+            <li>Correct resource requests</li>
+            <li>Fix readiness and startup probes</li>
+            <li>Ensure sufficient cluster capacity</li>
+            <li>Add clear hook timeouts</li>
+            <li>Avoid waiting on resources that are not required for release completion</li>
+          </ul>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 12. AI-assisted development ============ -->
+  <section class="topic" id="ai" aria-labelledby="ai-h">
+    <div class="topic-head">
+      <h2 id="ai-h">AI-assisted development</h2>
+      <span class="topic-count">2 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">67</span>
+          <span class="q">React Redux and Spring Boot contain substantial boilerplate. Can AI help?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Yes. This is one of the areas where I have applied AI-assisted development.</p>
+          <p>For React and Redux, AI can help generate:</p>
+          <ul>
+            <li>Typed components and hooks</li>
+            <li>Redux Toolkit slices</li>
+            <li>Selectors</li>
+            <li>Async thunks</li>
+            <li>RTK Query endpoints</li>
+            <li>Form validation</li>
+            <li>API clients</li>
+            <li>Reducer and component tests</li>
+            <li>Migration from legacy <code>connect</code> code to hooks</li>
+            <li>Storybook stories and test fixtures</li>
+          </ul>
+          <p>For Spring Boot, AI can help generate:</p>
+          <ul>
+            <li>Controllers, services, and repositories</li>
+            <li>Request and response DTOs</li>
+            <li>Entity-to-DTO mappers</li>
+            <li>Validation rules</li>
+            <li>JPA queries</li>
+            <li>Database migrations</li>
+            <li>Unit and integration tests</li>
+            <li>Testcontainers setup</li>
+            <li>OpenAPI definitions and clients</li>
+            <li>Configuration and deployment manifests</li>
+          </ul>
+          <p>However, I would first reduce unnecessary boilerplate through framework capabilities such as Redux Toolkit, Spring Data, Java records, MapStruct, and OpenAPI code generation. AI should complement these tools, not create large amounts of code that the framework can already generate.</p>
+          <p>My normal workflow is:</p>
+          <ol>
+            <li>Give the AI the repository conventions and relevant examples.</li>
+            <li>Ask it to make a small, scoped change.</li>
+            <li>Review the generated design and code.</li>
+            <li>Run compilation, linting, tests, and security checks.</li>
+            <li>Inspect the diff manually.</li>
+            <li>Correct the result and capture reusable instructions.</li>
+          </ol>
+          <p>AI is particularly useful for repetitive code, test coverage, codebase discovery, refactoring, and documentation. But developers remain responsible for business correctness, security, performance, and maintainability.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">68</span>
+          <span class="q">How would you use AI safely in a bank?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would only use bank-approved models and tools, and I would follow the organization's rules for source code, production data, personal data, and confidential information.</p>
+          <p>I would also apply engineering controls:</p>
+          <ul>
+            <li>Do not send secrets or production customer data to an unapproved model</li>
+            <li>Keep generated changes small and reviewable</li>
+            <li>Require human review</li>
+            <li>Run automated tests and static analysis</li>
+            <li>Scan dependencies and generated code</li>
+            <li>Validate authorization and data-access behaviour</li>
+            <li>Keep an audit trail through normal version control</li>
+            <li>Measure whether AI improves quality and delivery rather than assuming it does</li>
+          </ul>
+          <p>The goal is not to let AI independently write the system. The goal is to help engineers understand, implement, test, and review changes more efficiently.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ 13. Hands-on scenarios ============ -->
   <section class="topic" id="scenarios" aria-labelledby="scenarios-h">
     <div class="topic-head">
       <h2 id="scenarios-h">Hands-on scenario questions</h2>
@@ -1215,7 +2124,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">44</span>
+          <span class="num">69</span>
           <span class="q">A Java service becomes slow, memory grows continuously, and the pod restarts every few hours. How would you investigate?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1239,7 +2148,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">45</span>
+          <span class="num">70</span>
           <span class="q">Your Kafka consumer processes the same payment event twice. What would you do?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1259,7 +2168,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">46</span>
+          <span class="num">71</span>
           <span class="q">You need one message to trigger inventory, email, and analytics processing. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1272,7 +2181,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">47</span>
+          <span class="num">72</span>
           <span class="q">You need ten workers to process image-conversion jobs, but each job should be handled by one worker only. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1285,6 +2194,10 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
     </div>
   </section>
 
+  <div class="empty" id="empty">
+    <p>No question matches <b id="empty-term"></b>. Try a shorter term, or clear the filter.</p>
+  </div>
+
   <!-- ============ closing ============ -->
   <section class="topic" id="ask" aria-labelledby="ask-h">
     <div class="closing">
@@ -1292,17 +2205,19 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
       <p>At the end of the conversation, you could ask:</p>
       <ol>
         <li>How much of the role is hands-on Java development versus architecture and technical leadership?</li>
+        <li>How is the frontend organised today: React with Redux, RTK Query, or a different state approach?</li>
         <li>Is the current messaging platform mainly Kafka, JMS, or a combination of both?</li>
         <li>What are the main production challenges today: performance, reliability, deployment frequency, or legacy modernisation?</li>
-        <li>How are Kubernetes workloads monitored and troubleshot in production?</li>
+        <li>How are Kubernetes workloads deployed, monitored, and troubleshot in production?</li>
         <li>Are Java 21 features, such as virtual threads, already used in production?</li>
+        <li>Which AI-assisted development tools are approved, and how is generated code reviewed?</li>
         <li>What level of ownership would this role have over design decisions and production incidents?</li>
       </ol>
     </div>
   </section>
 
   <footer>
-    <span>47 questions across 9 topics</span>
+    <span id="footer-count">72 questions across 13 topics</span>
     <span>Sample answers to adapt, not to recite</span>
   </footer>
 </main>
@@ -1310,34 +2225,113 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 <script>
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('details.qa'));
-  var counter = document.getElementById('revealed');
-  var toggleAll = document.getElementById('toggle-all');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section.topic[id]:not(#ask)'));
   var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
 
+  var counter = document.getElementById('revealed');
+  var progress = document.getElementById('progress-fill');
+  var toggleAll = document.getElementById('toggle-all');
+  var input = document.getElementById('search-input');
+  var searchBox = document.getElementById('search');
+  var clearBtn = document.getElementById('search-clear');
+  var empty = document.getElementById('empty');
+  var emptyTerm = document.getElementById('empty-term');
+  var status = document.getElementById('filter-status');
+
+  // Counts are derived from the DOM so the markup stays the single source of truth.
+  sections.forEach(function (section) {
+    var n = section.querySelectorAll('details.qa').length;
+    var label = section.querySelector('.topic-count');
+    if (label) { label.textContent = n + (n === 1 ? ' question' : ' questions'); }
+  });
+  document.getElementById('stat-questions').textContent = cards.length;
+  document.getElementById('stat-topics').textContent = sections.length;
+  document.getElementById('footer-count').textContent =
+    cards.length + ' questions across ' + sections.length + ' topics';
+
+  // Cache searchable text once, including collapsed answers.
+  var haystack = cards.map(function (card) {
+    return (card.textContent || '').toLowerCase().replace(/\s+/g, ' ');
+  });
+
+  function visibleCards() {
+    return cards.filter(function (c) { return !c.hidden; });
+  }
+
   function openCount() {
-    return cards.filter(function (c) { return c.open; }).length;
+    return visibleCards().filter(function (c) { return c.open; }).length;
   }
 
   function sync() {
+    var shown = visibleCards();
     var n = openCount();
     counter.textContent = n;
-    var allOpen = n === cards.length;
+    progress.style.width = cards.length ? (n / cards.length * 100) + '%' : '0';
+    var allOpen = shown.length > 0 && n === shown.length;
     toggleAll.textContent = allOpen ? 'Collapse all' : 'Expand all';
     toggleAll.setAttribute('aria-expanded', String(allOpen));
+    toggleAll.disabled = shown.length === 0;
   }
 
-  cards.forEach(function (card) {
-    card.addEventListener('toggle', sync);
-  });
+  cards.forEach(function (card) { card.addEventListener('toggle', sync); });
 
   toggleAll.addEventListener('click', function () {
-    var open = openCount() !== cards.length;
-    cards.forEach(function (card) { card.open = open; });
+    var shown = visibleCards();
+    var open = openCount() !== shown.length;
+    shown.forEach(function (card) { card.open = open; });
     sync();
   });
 
-  // Highlight the topic currently in view.
-  var sections = Array.prototype.slice.call(document.querySelectorAll('section.topic[id]'));
+  // ---------- filter ----------
+  function applyFilter(raw) {
+    var term = raw.trim().toLowerCase();
+    searchBox.setAttribute('data-filled', String(term.length > 0));
+
+    var matches = 0;
+    cards.forEach(function (card, i) {
+      var hit = !term || haystack[i].indexOf(term) !== -1;
+      card.hidden = !hit;
+      if (hit) { matches++; }
+      if (term && !hit) { card.open = false; }
+    });
+
+    sections.forEach(function (section) {
+      var any = Array.prototype.some.call(
+        section.querySelectorAll('details.qa'),
+        function (c) { return !c.hidden; }
+      );
+      section.hidden = !any;
+    });
+
+    empty.setAttribute('data-visible', String(term.length > 0 && matches === 0));
+    emptyTerm.textContent = raw.trim();
+    status.textContent = term
+      ? matches + (matches === 1 ? ' question matches ' : ' questions match ') + raw.trim()
+      : '';
+    sync();
+  }
+
+  input.addEventListener('input', function () { applyFilter(input.value); });
+
+  clearBtn.addEventListener('click', function () {
+    input.value = '';
+    applyFilter('');
+    input.focus();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      input.focus();
+      input.select();
+    } else if (event.key === 'Escape' && document.activeElement === input) {
+      input.value = '';
+      applyFilter('');
+    }
+  });
+
+  // ---------- topic highlight ----------
   var chipFor = {};
   chips.forEach(function (chip) { chipFor[chip.getAttribute('href').slice(1)] = chip; });
 
@@ -1354,9 +2348,12 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
         visible[entry.target.id] = entry.isIntersecting;
       });
       for (var i = 0; i < sections.length; i++) {
-        if (visible[sections[i].id]) { setCurrent(sections[i].id); return; }
+        if (visible[sections[i].id] && !sections[i].hidden) {
+          setCurrent(sections[i].id);
+          return;
+        }
       }
-    }, { rootMargin: '-72px 0px -60% 0px', threshold: 0 });
+    }, { rootMargin: '-112px 0px -60% 0px', threshold: 0 });
     sections.forEach(function (section) { observer.observe(section); });
   }
 
