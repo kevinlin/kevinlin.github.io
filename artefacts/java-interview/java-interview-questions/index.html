@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Java fullstack interview questions</title>
-<meta name="description" content="Interactive question and answer deck covering Java 17 to 21, virtual threads, React and Redux, Spring IoC and bean lifecycle, JPA, Kafka and JMS, Kubernetes, Helm, and production troubleshooting.">
+<meta name="description" content="Interactive question and answer deck covering AI-assisted engineering quality, Java 17 to 21, Spring IoC and transactions, JPA and JDBC, React and Redux, Kafka, REST and gRPC, Kubernetes, high-volume design, and production troubleshooting.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet">
@@ -127,7 +127,7 @@
        background:color-mix(in srgb, var(--bg) 88%, transparent);
        backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
        border-bottom:1px solid var(--line)}
-  /* two rows: controls on top, the full topic strip below, so all 13 topics stay reachable */
+  /* two rows: controls on top, the full topic strip below, so every topic stays reachable */
   .bar-inner{display:flex;align-items:center;gap:8px 12px;padding:8px 0;flex-wrap:wrap}
 
   /* progress rail sits on the bar's bottom edge */
@@ -203,7 +203,7 @@
 
   .num{flex:0 0 auto;font-family:var(--mono);font-size:11.5px;font-weight:500;
        font-variant-numeric:tabular-nums;color:var(--ember);
-       padding-top:3px;min-width:22px}
+       padding-top:3px;min-width:30px}
   .q{flex:1;font-weight:500;font-size:1.0625rem;line-height:1.45;text-wrap:pretty}
   .caret{flex:0 0 auto;width:20px;height:20px;margin-top:2px;color:var(--ink-dim);
          transition:transform 200ms var(--ease),color 140ms var(--ease)}
@@ -214,7 +214,7 @@
         text-transform:uppercase;color:var(--ink-dim);margin-top:6px}
   .qa[open] .hint{display:none}
 
-  .answer{padding-bottom:18px;border-top:1px solid var(--line);margin:0 16px 0 52px}
+  .answer{padding-bottom:18px;border-top:1px solid var(--line);margin:0 16px 0 60px}
   .qa[open] .answer{animation:reveal 220ms var(--ease) both}
   @keyframes reveal{
     from{opacity:0;transform:translateY(-4px)}
@@ -231,6 +231,16 @@
   .answer strong{font-weight:600;color:var(--ink)}
   .answer h3{font-family:var(--sans);font-size:.8125rem;font-weight:600;letter-spacing:.08em;
              text-transform:uppercase;color:var(--ink);margin-top:20px}
+  .answer blockquote{border-left:2px solid var(--ember);padding-left:16px;color:var(--ink)}
+
+  /* ---------- tables ---------- */
+  .table-wrap{overflow-x:auto}
+  .answer table{width:100%;border-collapse:collapse;font-size:.9375rem}
+  .answer th,.answer td{text-align:left;padding:8px 14px 8px 0;border-bottom:1px solid var(--line);
+                        color:var(--ink-soft);vertical-align:top}
+  .answer th{color:var(--ink);font-weight:600;font-size:.75rem;letter-spacing:.08em;
+             text-transform:uppercase;border-bottom-color:var(--line-strong);white-space:nowrap}
+  .answer td code{white-space:nowrap}
 
   pre{background:var(--code-bg);color:var(--code-ink);border:1px solid var(--code-line);
       border-radius:10px;padding:14px 16px;overflow-x:auto;
@@ -265,7 +275,7 @@
     header.masthead{padding:44px 0 24px}
     summary{padding:14px}
     .answer{margin-left:14px;margin-right:14px;padding-bottom:16px}
-    .num{min-width:20px}
+    .num{min-width:26px}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -279,11 +289,11 @@
 <header class="masthead">
   <div class="shell">
     <p class="eyebrow">Interview preparation</p>
-    <h1>Java fullstack, messaging, and Kubernetes interview questions</h1>
-    <p class="lede">Seventy-two questions with sample answers you can adapt. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
+    <h1>Java fullstack, platform, and AI engineering interview questions</h1>
+    <p class="lede">Sample answers you can adapt, ordered by the priority areas from the interview notes. Questions come first — reveal an answer only once you have tried to answer it yourself.</p>
     <p class="stats">
-      <span><b id="stat-questions">72</b> questions</span>
-      <span><b id="stat-topics">13</b> topics</span>
+      <span><b id="stat-questions">0</b> questions</span>
+      <span><b id="stat-topics">0</b> topics</span>
       <span><b id="revealed">0</b> revealed</span>
     </p>
   </div>
@@ -292,19 +302,22 @@
 <div class="bar">
   <div class="shell bar-inner">
     <nav class="topics" aria-label="Topics">
-      <a class="chip" href="#java17-21">Java 17 to 21</a>
-      <a class="chip" href="#react">React and Redux</a>
+      <a class="chip" href="#ai">AI engineering</a>
+      <a class="chip" href="#java">Java 17 to 21</a>
       <a class="chip" href="#spring">Spring IoC</a>
-      <a class="chip" href="#jpa">JPA and Hibernate</a>
+      <a class="chip" href="#tx">Transactions</a>
+      <a class="chip" href="#jpa">JPA and JDBC</a>
+      <a class="chip" href="#react">React and Redux</a>
       <a class="chip" href="#messaging">Kafka and JMS</a>
       <a class="chip" href="#queue-topic">Queue vs topic</a>
+      <a class="chip" href="#api">REST vs gRPC</a>
       <a class="chip" href="#k8s">Kubernetes</a>
-      <a class="chip" href="#peak">Peak traffic</a>
-      <a class="chip" href="#memory">Pod memory</a>
+      <a class="chip" href="#scale">High volume</a>
+      <a class="chip" href="#peak">API performance</a>
+      <a class="chip" href="#memory">Kubernetes</a>
       <a class="chip" href="#oom">Restarts and OOM</a>
       <a class="chip" href="#helm">Helm</a>
-      <a class="chip" href="#ai">AI-assisted work</a>
-      <a class="chip" href="#scenarios">Scenarios</a>
+      <a class="chip" href="#scenarios">Troubleshooting</a>
     </nav>
     <div class="search" id="search">
       <svg class="glass" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -322,11 +335,11 @@
 <main id="main" class="shell">
   <p class="sr-only" role="status" aria-live="polite" id="filter-status"></p>
 
-  <!-- ============ 1. Java 17 to 21 ============ -->
-  <section class="topic" id="java17-21" aria-labelledby="java17-21-h">
+  <!-- ============ AI engineering ============ -->
+  <section class="topic" id="ai" aria-labelledby="ai-h">
     <div class="topic-head">
-      <h2 id="java17-21-h">Java 17 to 21 and virtual threads</h2>
-      <span class="topic-count">7 questions</span>
+      <h2 id="ai-h">AI skills and engineering quality</h2>
+      <span class="topic-count">9 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
@@ -334,6 +347,328 @@
       <details class="qa">
         <summary>
           <span class="num">01</span>
+          <span class="q">We have a Skill that updates repositories. How do you make sure it works across different repos?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would treat the Skill like a software product rather than only a prompt.</p>
+          <p>Different repositories have different languages and framework versions, build systems, directory structures, coding conventions, test frameworks, dependency-management tools, and CI pipelines.</p>
+          <p>So I would separate the Skill into roughly three stages:</p>
+<pre><code>Discover → Change → Verify</code></pre>
+          <p>First, <strong>Discover</strong> the repository deterministically:</p>
+          <ul>
+            <li>Detect language and framework versions</li>
+            <li>Identify Maven, Gradle, npm, pnpm, and similar tools</li>
+            <li>Read repository-specific instructions</li>
+            <li>Identify build, test, and lint commands</li>
+            <li>Detect dependency constraints</li>
+          </ul>
+          <p>Second, <strong>Change</strong> using the appropriate strategy for that repository.</p>
+          <p>Third, <strong>Verify</strong> using the repository's own engineering controls:</p>
+<pre><code>compile
+→ lint
+→ static analysis
+→ unit tests
+→ integration tests
+→ dependency/security scan
+→ inspect diff</code></pre>
+          <p>I would also maintain a set of representative test repositories, effectively an evaluation suite for the Skill. Every Skill change should run against those repositories before release.</p>
+          <blockquote>Don't test whether the LLM produced a convincing answer. Test whether the resulting repository still builds and satisfies its engineering contracts.</blockquote>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">02</span>
+          <span class="q">Our vulnerability Skill gives different results every time we run it. How would you fix that?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would first identify where the nondeterminism comes from. Possible sources include:</p>
+          <ul>
+            <li>Different model versions</li>
+            <li>Temperature or sampling</li>
+            <li>Different files entering the context</li>
+            <li>Files discovered in different order</li>
+            <li>Search results changing</li>
+            <li>Tool versions changing</li>
+            <li>Dependencies being resolved differently</li>
+            <li>Prompt ambiguity</li>
+            <li>The LLM itself being used for deterministic analysis</li>
+          </ul>
+          <p>Then I would reduce the amount of work delegated to the LLM. For vulnerability discovery, established deterministic tools should do as much as possible:</p>
+<pre><code>Repository
+    ↓
+SAST / SCA / secret scanner / dependency scanner
+    ↓
+Structured findings
+    ↓
+LLM reasoning and triage
+    ↓
+Validated findings</code></pre>
+          <p>For example, the Skill could orchestrate Semgrep, CodeQL, dependency scanners, and repository inspection. The LLM can then correlate and explain findings.</p>
+          <p>I would also pin the Skill version, model version where possible, tool versions, dependency versions, prompt and instructions, and the repository commit SHA. And I would make file discovery deterministic by sorting paths and explicitly defining inclusion and exclusion rules.</p>
+          <p>Finally, I would create a <strong>golden evaluation set</strong>:</p>
+<pre><code>Repo A → expected vulnerabilities
+Repo B → expected vulnerabilities
+Repo C → expected no-findings</code></pre>
+          <p>Then measure precision, recall, and run-to-run variance. For a security Skill, reproducibility should be a measurable quality attribute.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">03</span>
+          <span class="q">How do you prevent &ldquo;vibe-coded AI slop&rdquo;?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would not rely on code review alone, and I would not rely only on linters.</p>
+          <p>The solution is to constrain AI-generated code with the same engineering controls we apply to human-written code:</p>
+<pre><code>Requirements / acceptance criteria
+        ↓
+AI implementation
+        ↓
+Compiler / type checker
+        ↓
+Formatter + linter
+        ↓
+Static analysis
+        ↓
+Unit tests
+        ↓
+Integration / contract tests
+        ↓
+Security scanning
+        ↓
+Human diff review
+        ↓
+CI quality gates</code></pre>
+          <p>I would also give the agent repository-specific instructions about architecture boundaries, preferred libraries, error-handling conventions, security requirements, testing requirements, naming conventions, and patterns to avoid.</p>
+          <p>And I prefer small, reviewable changes. Instead of &ldquo;refactor the payment subsystem&rdquo;, I would give it a scoped task with explicit acceptance criteria and require it to run the existing tests.</p>
+          <blockquote>AI can generate code quickly, but correctness must come from deterministic engineering feedback loops.</blockquote>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">04</span>
+          <span class="q">Engineers use an LLM to fix bugs they could easily solve themselves. Is that a problem?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Not necessarily.</p>
+          <p>I don't measure AI adoption by how frequently developers use an LLM. I measure whether it improves engineering outcomes. For a simple bug, asking an LLM may actually take longer than fixing it directly.</p>
+          <p>I encourage engineers to decide based on the task. AI is particularly useful for:</p>
+          <ul>
+            <li>Exploring an unfamiliar codebase</li>
+            <li>Finding dependencies</li>
+            <li>Generating repetitive changes</li>
+            <li>Generating tests</li>
+            <li>Large-scale refactoring</li>
+            <li>Comparing implementation options</li>
+            <li>Documentation</li>
+            <li>Root-cause hypothesis generation</li>
+          </ul>
+          <p>But engineers still need to understand the code. One risk is becoming dependent on AI without developing engineering judgment. I want AI to amplify engineering capability, not replace understanding.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">05</span>
+          <span class="q">You use an AI Skill to upgrade old libraries, but results differ across repos. How would you improve it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would make the Skill repository-aware rather than assuming every upgrade is the same.</p>
+          <p>For each repository I would first build a profile:</p>
+<pre><code>Java version
+Spring Boot version
+Build tool
+Dependency tree
+Test framework
+Plugins
+Current library version
+Target library version
+Known breaking changes</code></pre>
+          <p>Then generate a migration plan before modifying code:</p>
+<pre><code>Analyze
+  ↓
+Determine required upgrade path
+  ↓
+Update dependency
+  ↓
+Compile
+  ↓
+Fix compile errors
+  ↓
+Run tests
+  ↓
+Run static analysis
+  ↓
+Inspect API migrations
+  ↓
+Generate change report</code></pre>
+          <p>For major upgrades, I would use official migration tools and codemods where available before asking the LLM to modify code manually. And I would create regression fixtures covering different repository archetypes.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">06</span>
+          <span class="q">How would you use AI to migrate MongoDB to Oracle?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would use AI to accelerate analysis and implementation, but not let an LLM independently move production data.</p>
+          <p>First I would profile the MongoDB data: collections, document shapes, optional fields, nested objects, arrays, relationships, data volumes, indexes, and query patterns.</p>
+          <p>Then define the target relational model explicitly:</p>
+<pre><code>Mongo document
+    ↓
+Schema inference
+    ↓
+Relational model
+    ↓
+Mapping specification
+    ↓
+Transformation code
+    ↓
+Migration
+    ↓
+Reconciliation</code></pre>
+          <p>AI can help with:</p>
+          <ul>
+            <li>Analysing document structures</li>
+            <li>Proposing normalized schemas</li>
+            <li>Generating Oracle DDL</li>
+            <li>Generating transformation code</li>
+            <li>Generating migration scripts</li>
+            <li>Generating data-quality tests</li>
+            <li>Analysing incompatible query patterns</li>
+            <li>Producing reconciliation reports</li>
+          </ul>
+          <p>But I would use deterministic validation for the actual migration:</p>
+<pre><code>source count == target count
+financial totals match
+mandatory fields match
+referential integrity passes
+sample records match
+checksums where appropriate</code></pre>
+          <p>For a live migration I would consider:</p>
+          <ol>
+            <li>Initial bulk migration</li>
+            <li>CDC or incremental synchronization</li>
+            <li>Reconciliation</li>
+            <li>Controlled cutover</li>
+            <li>Rollback plan</li>
+            <li>Post-cutover validation</li>
+          </ol>
+          <p>AI assists the engineers. It should not be the source of truth for data correctness.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">07</span>
+          <span class="q">React Redux and Spring Boot contain substantial boilerplate. Can AI help?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Yes. This is one of the areas where I have applied AI-assisted development.</p>
+          <p>For React and Redux, AI can help generate typed components and hooks, Redux Toolkit slices, selectors, async thunks, RTK Query endpoints, form validation, API clients, reducer and component tests, migration from legacy <code>connect</code> code to hooks, and Storybook stories.</p>
+          <p>For Spring Boot, AI can help generate controllers, services, and repositories, request and response DTOs, entity-to-DTO mappers, validation rules, JPA queries, database migrations, unit and integration tests, Testcontainers setup, OpenAPI definitions and clients, and deployment manifests.</p>
+          <p>However, I would first reduce unnecessary boilerplate through framework capabilities such as Redux Toolkit, Spring Data, Java records, MapStruct, and OpenAPI code generation. AI should complement these tools, not create large amounts of code that the framework can already generate.</p>
+          <p>My normal workflow is:</p>
+          <ol>
+            <li>Give the AI the repository conventions and relevant examples.</li>
+            <li>Ask it to make a small, scoped change.</li>
+            <li>Review the generated design and code.</li>
+            <li>Run compilation, linting, tests, and security checks.</li>
+            <li>Inspect the diff manually.</li>
+            <li>Correct the result and capture reusable instructions.</li>
+          </ol>
+          <p>AI is particularly useful for repetitive code, test coverage, codebase discovery, refactoring, and documentation. But developers remain responsible for business correctness, security, performance, and maintainability.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">08</span>
+          <span class="q">How would you use AI safely in a bank?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would only use bank-approved models and tools, and I would follow the organization's rules for source code, production data, personal data, and confidential information.</p>
+          <p>I would also apply engineering controls:</p>
+          <ul>
+            <li>Do not send secrets or production customer data to an unapproved model</li>
+            <li>Keep generated changes small and reviewable</li>
+            <li>Require human review</li>
+            <li>Run automated tests and static analysis</li>
+            <li>Scan dependencies and generated code</li>
+            <li>Validate authorization and data-access behaviour</li>
+            <li>Keep an audit trail through normal version control</li>
+            <li>Measure whether AI improves quality and delivery rather than assuming it does</li>
+          </ul>
+          <p>The goal is not to let AI independently write the system. The goal is to help engineers understand, implement, test, and review changes more efficiently.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">09</span>
+          <span class="q">How do you maintain engineering quality when teams use AI heavily?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would make engineering quality independent of where the engineering team is located. The controls should be consistent across every team:</p>
+<pre><code>Architecture standards
+       +
+Repository instructions
+       +
+Automated tests
+       +
+Static analysis
+       +
+Security scans
+       +
+CI quality gates
+       +
+Code review
+       +
+Production observability</code></pre>
+          <p>With AI, I would add:</p>
+          <ul>
+            <li>Approved AI tooling</li>
+            <li>Repository-specific agent instructions</li>
+            <li>Evaluation suites for reusable Skills</li>
+            <li>Small reviewable diffs</li>
+            <li>Traceability to requirements</li>
+            <li>Mandatory verification commands</li>
+            <li>Metrics for escaped defects and rework</li>
+          </ul>
+          <p>The important question is not whether a human or an LLM wrote the code. It is:</p>
+          <blockquote>What evidence do we have that this change is correct, secure, maintainable, and production-ready?</blockquote>
+          <p>That is the engineering standard I would apply to every team.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ Java 17 to 21 ============ -->
+  <section class="topic" id="java" aria-labelledby="java-h">
+    <div class="topic-head">
+      <h2 id="java-h">Java 17 to 21 and virtual threads</h2>
+      <span class="topic-count">10 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">10</span>
           <span class="q">Which Java 17 to 21 features have you used?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -360,13 +695,38 @@
 
       <details class="qa">
         <summary>
-          <span class="num">02</span>
+          <span class="num">11</span>
+          <span class="q">What are virtual threads?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Virtual threads were introduced as a production feature in Java 21.</p>
+          <p>Traditional Java platform threads are relatively expensive because they are closely associated with OS threads.</p>
+          <p>Virtual threads are lightweight JVM-managed threads. Instead of:</p>
+<pre><code>1 request
+   ↓
+1 heavyweight OS-backed thread</code></pre>
+          <p>we can have very large numbers of lightweight virtual threads multiplexed over a smaller set of carrier threads.</p>
+          <p>They are particularly useful for I/O-bound applications that spend time waiting on:</p>
+          <ul>
+            <li>Database calls</li>
+            <li>HTTP APIs</li>
+            <li>Files</li>
+            <li>Messaging</li>
+            <li>Other network I/O</li>
+          </ul>
+          <p>They allow us to continue writing straightforward blocking code rather than necessarily moving to a reactive programming model.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">12</span>
           <span class="q">Have you used virtual threads from Java 21?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>I have experimented with virtual threads and understand how to apply them, although I have not yet used them extensively in a production system.</p>
-          <p>Virtual threads are lightweight Java threads managed by the JVM rather than mapped one-to-one to operating-system threads. They are useful for high-concurrency, I/O-bound applications, such as services making many database queries or downstream HTTP calls.</p>
           <p>For example:</p>
 <pre><code>try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
     var futures = IntStream.range(0, 1_000)
@@ -395,42 +755,78 @@
 
       <details class="qa">
         <summary>
-          <span class="num">03</span>
-          <span class="q">What is the difference between platform threads and virtual threads?<span class="hint">Tap to reveal</span></span>
+          <span class="num">13</span>
+          <span class="q">How are virtual threads different from regular platform threads?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>Platform threads are usually mapped closely to operating-system threads. They are relatively expensive, so applications normally use bounded thread pools.</p>
-          <p>Virtual threads are lightweight threads managed by the JVM. A Java application can create a much larger number of them. They are useful for I/O-bound workloads that use blocking programming models.</p>
-          <p>However, virtual threads do not make CPU-bound work faster. They also do not remove downstream limits such as database connection-pool size or API rate limits.</p>
+          <p>The programming interface looks very similar because both are Java <code>Thread</code>s. The major difference is implementation and cost.</p>
+          <h3>Platform thread</h3>
+<pre><code>Java Thread
+     ↓
+OS Thread</code></pre>
+          <p>Relatively expensive and therefore commonly pooled.</p>
+          <h3>Virtual thread</h3>
+<pre><code>Many Virtual Threads
+        ↓
+JVM scheduler
+        ↓
+Few carrier/platform threads
+        ↓
+OS threads</code></pre>
+          <p>A virtual thread can be parked when it performs supported blocking I/O, allowing the carrier thread to run something else.</p>
+          <p>But virtual threads do not provide additional CPU capacity. If I have eight CPU cores and CPU-intensive work, creating 100,000 virtual threads will not make the computation faster.</p>
+          <p>They primarily improve scalability for blocking I/O workloads.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">04</span>
+          <span class="num">14</span>
           <span class="q">How are Java virtual threads similar to Go goroutines?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>They are similar at a high level because both allow a large number of lightweight concurrent tasks without creating one operating-system thread for every task.</p>
-          <p>The main difference is the programming model.</p>
-          <p>A Java virtual thread is still a <code>java.lang.Thread</code>. Existing blocking Java code, debugging tools, stack traces, and thread-based APIs can generally continue to work. The JVM schedules virtual threads onto a smaller number of carrier threads.</p>
-          <p>A Go goroutine is part of the Go runtime and is commonly combined with channels and the <code>select</code> statement for communication and coordination.</p>
-          <p>Because I understand goroutines, the motivation behind virtual threads is familiar to me:</p>
-          <ul>
-            <li>Use lightweight concurrency</li>
-            <li>Avoid creating large operating-system thread pools</li>
-            <li>Allow the runtime to schedule concurrent tasks</li>
-            <li>Keep concurrent code relatively easy to read</li>
-          </ul>
-          <p>But I would not say that virtual threads and goroutines are identical. Their runtime behaviour, synchronization mechanisms, APIs, and ecosystems differ.</p>
+          <p>The mental model is similar. Both allow large numbers of lightweight concurrent tasks and let the runtime schedule them onto a smaller number of operating-system threads. That makes the concept familiar to someone who has worked with Go.</p>
+          <p>However, they are not identical.</p>
+          <p>Go encourages goroutines together with channels and <code>select</code>.</p>
+          <p>Java virtual threads deliberately preserve Java's normal thread and blocking programming model. Existing blocking code, debugging tools, stack traces, and thread-based APIs generally continue to work, so existing Java developers can use constructs such as:</p>
+<pre><code>Thread.startVirtualThread(() -&gt; processRequest());</code></pre>
+          <p>without rewriting the entire application around asynchronous callbacks.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">05</span>
+          <span class="num">15</span>
+          <span class="q">Would virtual threads solve a service receiving thousands of concurrent requests?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>They may help if the application is primarily I/O-bound, but they are only one part of the solution.</p>
+          <p>For example:</p>
+<pre><code>4,000 virtual threads
+        ↓
+Database pool: 50 connections</code></pre>
+          <p>The database still only handles roughly 50 concurrent database operations.</p>
+          <p>So I would also examine:</p>
+          <ul>
+            <li>Database connection pool</li>
+            <li>HTTP connection pool</li>
+            <li>Downstream service limits</li>
+            <li>Rate limiting</li>
+            <li>Backpressure</li>
+            <li>CPU</li>
+            <li>Memory</li>
+            <li>Database query performance</li>
+          </ul>
+          <p>Virtual threads can remove the application thread pool as a bottleneck. They cannot remove bottlenecks downstream.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">16</span>
           <span class="q">When should virtual threads not be used?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -452,7 +848,35 @@
 
       <details class="qa">
         <summary>
-          <span class="num">06</span>
+          <span class="num">17</span>
+          <span class="q">What is a Java record?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>A record is a concise way to represent an immutable data carrier.</p>
+          <p>Instead of writing:</p>
+<pre><code>public class CustomerDto {
+    private final String id;
+    private final String name;
+
+    // constructor
+    // getters
+    // equals
+    // hashCode
+    // toString
+}</code></pre>
+          <p>I can write:</p>
+<pre><code>public record CustomerDto(
+    String id,
+    String name
+) {}</code></pre>
+          <p>Java automatically provides the constructor, accessors, <code>equals</code>, <code>hashCode</code>, and <code>toString</code>.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">18</span>
           <span class="q">When would you use records?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -460,17 +884,18 @@
           <p>I use records for immutable data carriers, such as:</p>
           <ul>
             <li>API request and response objects</li>
+            <li>DTOs</li>
             <li>Domain events</li>
             <li>Query results</li>
-            <li>Configuration values</li>
+            <li>Value objects and configuration values</li>
           </ul>
-          <p>I would not automatically use them for JPA entities because JPA entities usually require mutable state, proxying, and a no-argument constructor. Records are a better fit at application boundaries than as persistence entities.</p>
+          <p>I would generally not use records directly as traditional mutable JPA entities because the persistence model has different requirements: JPA entities usually need mutable state, proxying, and a no-argument constructor. Records are a better fit at application boundaries than as persistence entities.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">07</span>
+          <span class="num">19</span>
           <span class="q">What problem do sealed classes solve?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -495,162 +920,18 @@ public record PaymentFailed(String reason)
     </div>
   </section>
 
-  <!-- ============ 2. React and Redux ============ -->
-  <section class="topic" id="react" aria-labelledby="react-h">
-    <div class="topic-head">
-      <h2 id="react-h">React and Redux</h2>
-      <span class="topic-count">4 questions</span>
-    </div>
-    <div class="rule"></div>
-    <div class="deck">
-
-      <details class="qa">
-        <summary>
-          <span class="num">08</span>
-          <span class="q">Explain React.<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>React is a library for building user interfaces from reusable components.</p>
-          <p>A component receives inputs through props, manages local state where necessary, and returns a description of what the UI should look like. When its props or state change, React renders the component again and reconciles the result with the existing DOM.</p>
-          <p>For example:</p>
-<pre><code>type CounterProps = {
-  initialValue?: number;
-};
-
-export function Counter({ initialValue = 0 }: CounterProps) {
-  const [count, setCount] = useState(initialValue);
-
-  return (
-    &lt;button onClick={() =&gt; setCount(current =&gt; current + 1)}&gt;
-      Count: {count}
-    &lt;/button&gt;
-  );
-}</code></pre>
-          <p>The important React concepts are:</p>
-          <ul>
-            <li>Component-based UI composition</li>
-            <li>Declarative rendering</li>
-            <li>Props for passing data</li>
-            <li>State for data that changes</li>
-            <li>Hooks for state, effects, context, and reusable behaviour</li>
-            <li>One-way data flow from parent to child</li>
-            <li>Reconciliation when the rendered output changes</li>
-          </ul>
-          <p>React's documentation describes components as the building blocks of a UI and focuses on composing, displaying, and updating them based on data.</p>
-          <p>I try to keep state as close as possible to where it is used. I move it into a shared store only when multiple parts of the application genuinely need it.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">09</span>
-          <span class="q">Explain Redux.<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>Redux is a predictable state-management library, commonly used for application-wide state that is shared across multiple components.</p>
-          <p>The main concepts are:</p>
-          <ul>
-            <li><strong>Store</strong>: holds the application state</li>
-            <li><strong>Action</strong>: describes what happened</li>
-            <li><strong>Reducer</strong>: calculates the next state</li>
-            <li><strong>Dispatch</strong>: sends an action to the store</li>
-            <li><strong>Selector</strong>: reads or derives data from the state</li>
-            <li><strong>Middleware</strong>: handles concerns such as asynchronous operations, logging, or side effects</li>
-          </ul>
-          <p>The data flow is one-directional:</p>
-<pre><code>UI → dispatch action → reducer updates state → UI reads new state</code></pre>
-          <p>A simple example using Redux Toolkit is:</p>
-<pre><code>const counterSlice = createSlice({
-  name: "counter",
-  initialState: { value: 0 },
-  reducers: {
-    increment(state) {
-      state.value += 1;
-    }
-  }
-});
-
-export const { increment } = counterSlice.actions;
-export default counterSlice.reducer;</code></pre>
-          <p>React components normally interact with Redux using React-Redux hooks:</p>
-<pre><code>function Counter() {
-  const count = useSelector(
-    (state: RootState) =&gt; state.counter.value
-  );
-
-  const dispatch = useDispatch();
-
-  return (
-    &lt;button onClick={() =&gt; dispatch(increment())}&gt;
-      Count: {count}
-    &lt;/button&gt;
-  );
-}</code></pre>
-          <p>React-Redux connects React components to the Redux store, while Redux Toolkit is the officially recommended approach for writing modern Redux logic with less boilerplate.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">10</span>
-          <span class="q">When would you use Redux?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>I would use Redux when the application has complex shared state that must be accessed and updated across different screens or components.</p>
-          <p>Examples include:</p>
-          <ul>
-            <li>Authenticated-user information</li>
-            <li>Complex workflow state</li>
-            <li>Shared filters and search criteria</li>
-            <li>Cached server responses</li>
-            <li>Application-wide notifications</li>
-            <li>State that needs debugging, auditing, or predictable transitions</li>
-          </ul>
-          <p>I would not put every piece of state into Redux. Temporary UI state such as whether a dialog is open can normally remain inside the component.</p>
-          <p>For server state, I would also consider RTK Query or another query-management solution rather than manually implementing loading, caching, invalidation, and error handling.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">11</span>
-          <span class="q">Why does Redux have a reputation for boilerplate?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>Older Redux implementations often required separate files and code for:</p>
-          <ul>
-            <li>Action-type constants</li>
-            <li>Action creators</li>
-            <li>Reducers</li>
-            <li>Immutable state updates</li>
-            <li>Selectors</li>
-            <li>Thunks</li>
-            <li>Store configuration</li>
-          </ul>
-          <p>Modern Redux Toolkit reduces much of that boilerplate through <code>createSlice</code>, <code>configureStore</code>, <code>createAsyncThunk</code>, and RTK Query. The Redux documentation recommends Redux Toolkit as the standard way to write Redux applications today.</p>
-          <p>However, if the team already has an established Redux architecture, I would first understand its conventions. I would not introduce a large migration merely because a newer pattern exists. Changes should be incremental and supported by tests.</p>
-        </div>
-      </details>
-
-    </div>
-  </section>
-
-  <!-- ============ 3. Spring IoC, DI, and bean lifecycle ============ -->
+  <!-- ============ Spring IoC and lifecycle ============ -->
   <section class="topic" id="spring" aria-labelledby="spring-h">
     <div class="topic-head">
-      <h2 id="spring-h">Spring IoC and bean lifecycle</h2>
-      <span class="topic-count">9 questions</span>
+      <h2 id="spring-h">Spring IoC, beans, and lifecycle</h2>
+      <span class="topic-count">10 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">12</span>
+          <span class="num">20</span>
           <span class="q">What is inversion of control?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -671,22 +952,14 @@ public class PaymentService {
         this.repository = repository;
     }
 }</code></pre>
-          <p>This gives us:</p>
-          <ul>
-            <li>Lower coupling</li>
-            <li>Easier unit testing</li>
-            <li>Explicit dependencies</li>
-            <li>Centralized configuration</li>
-            <li>Framework-managed lifecycle</li>
-            <li>Easier replacement of implementations</li>
-          </ul>
+          <p>This gives us lower coupling, easier unit testing, explicit dependencies, centralized configuration, framework-managed lifecycle, and easier replacement of implementations.</p>
           <p>I normally prefer constructor injection because required dependencies are visible and fields can remain final.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">13</span>
+          <span class="num">21</span>
           <span class="q">What is the difference between IoC and dependency injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -698,7 +971,7 @@ public class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">14</span>
+          <span class="num">22</span>
           <span class="q">Why do you prefer constructor injection?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -718,42 +991,19 @@ public class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">15</span>
+          <span class="num">23</span>
           <span class="q">Explain the lifecycle of a Spring bean.<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>At a high level, the lifecycle of a Spring bean is:</p>
-          <ol>
-            <li>Spring reads the bean definition.</li>
-            <li>The bean is instantiated through a constructor or factory method.</li>
-            <li>Dependencies and properties are injected.</li>
-            <li><code>Aware</code> callbacks are invoked, where applicable.</li>
-            <li><code>BeanPostProcessor</code> logic runs before initialization.</li>
-            <li>Initialization callbacks run.</li>
-            <li><code>BeanPostProcessor</code> logic runs after initialization.</li>
-            <li>The bean is available for application use.</li>
-            <li>When the context closes, destruction callbacks run.</li>
-          </ol>
-          <p>Initialization can be implemented through:</p>
-<pre><code>@PostConstruct
-public void initialize() {
-    // Validate configuration or initialize resources
-}</code></pre>
-          <p>Destruction can be implemented through:</p>
-<pre><code>@PreDestroy
-public void cleanup() {
-    // Close resources
-}</code></pre>
-          <p>Spring supports <code>@PostConstruct</code> and <code>@PreDestroy</code> as lifecycle callbacks and uses bean post-processors to identify and invoke them.</p>
-          <p>A more detailed sequence is:</p>
-<pre><code>Constructor
+          <p>At a simplified level:</p>
+<pre><code>Instantiate bean
     ↓
-Dependency injection
+Inject dependencies
     ↓
 Aware callbacks
     ↓
-BeanPostProcessor.beforeInitialization()
+BeanPostProcessor before initialization
     ↓
 @PostConstruct
     ↓
@@ -761,18 +1011,68 @@ InitializingBean.afterPropertiesSet()
     ↓
 Custom init method
     ↓
-BeanPostProcessor.afterInitialization()
+BeanPostProcessor after initialization
     ↓
-Bean ready for use
+Bean ready
+    ↓
+Application runs
     ↓
 @PreDestroy / destroy callbacks</code></pre>
-          <p>The <code>postProcessBeforeInitialization</code> callback runs before initialization methods such as <code>afterPropertiesSet</code>, while post-initialization processing is also where Spring may return a proxied object for features such as AOP.</p>
+          <p>Initialization and destruction can be implemented through:</p>
+<pre><code>@PostConstruct
+public void initialize() {
+    // Validate configuration or initialize resources
+}
+
+@PreDestroy
+public void cleanup() {
+    // Close resources
+}</code></pre>
+          <p>Bean post-processors are important because many Spring capabilities are implemented around this lifecycle, including proxy creation. Post-initialization processing is where Spring may return a proxied object for features such as AOP and transactions.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">16</span>
+          <span class="num">24</span>
+          <span class="q">Explain the Spring Boot application lifecycle.<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>At a higher application level:</p>
+<pre><code>SpringApplication.run()
+       ↓
+Prepare environment
+       ↓
+Create ApplicationContext
+       ↓
+Load bean definitions
+       ↓
+Instantiate singleton beans
+       ↓
+Dependency injection
+       ↓
+Bean initialization
+       ↓
+Start embedded server
+       ↓
+ApplicationRunner /
+CommandLineRunner
+       ↓
+ApplicationReadyEvent</code></pre>
+          <p>During shutdown:</p>
+<pre><code>ApplicationContext closes
+       ↓
+@PreDestroy / destroy callbacks
+       ↓
+Resources released</code></pre>
+          <p>I distinguish this application lifecycle from the lifecycle of an individual Spring bean.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">25</span>
           <span class="q">Does Spring manage every bean lifecycle in the same way?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -786,40 +1086,26 @@ Bean ready for use
 
       <details class="qa">
         <summary>
-          <span class="num">17</span>
+          <span class="num">26</span>
           <span class="q">What is a <code>BeanPostProcessor</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>A <code>BeanPostProcessor</code> allows Spring or application code to inspect or modify bean instances before and after initialization.</p>
-          <p>Spring uses bean post-processors for features such as:</p>
-          <ul>
-            <li>Dependency injection annotations</li>
-            <li>Lifecycle annotations</li>
-            <li>AOP proxies</li>
-            <li>Transactional proxies</li>
-            <li>Security proxies</li>
-            <li>Custom framework integration</li>
-          </ul>
+          <p>Spring uses bean post-processors for features such as dependency injection annotations, lifecycle annotations, AOP proxies, transactional proxies, security proxies, and custom framework integration.</p>
           <p>For example, Spring can detect <code>@Autowired</code>, <code>@PostConstruct</code>, and proxy-related annotations through post-processors rather than putting that logic directly into every bean.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">18</span>
+          <span class="num">27</span>
           <span class="q">What happens when Spring finds multiple beans of the same type?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>Spring cannot decide which bean to inject and normally throws <code>NoUniqueBeanDefinitionException</code>.</p>
-          <p>I can resolve this using:</p>
-          <ul>
-            <li><code>@Qualifier</code></li>
-            <li><code>@Primary</code></li>
-            <li>Injecting a collection of implementations</li>
-            <li>Improving the application design so the required implementation is explicit</li>
-          </ul>
+          <p>I can resolve this using <code>@Qualifier</code>, <code>@Primary</code>, injecting a collection of implementations, or improving the application design so the required implementation is explicit.</p>
           <p>Example:</p>
 <pre><code>@Service
 class PaymentService {
@@ -834,7 +1120,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">19</span>
+          <span class="num">28</span>
           <span class="q">What are common Spring bean scopes?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -852,7 +1138,7 @@ class PaymentService {
 
       <details class="qa">
         <summary>
-          <span class="num">20</span>
+          <span class="num">29</span>
           <span class="q">What is a circular dependency, and how would you fix it?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -871,114 +1157,362 @@ class PaymentService {
     </div>
   </section>
 
-  <!-- ============ 4. JPA and Hibernate ============ -->
-  <section class="topic" id="jpa" aria-labelledby="jpa-h">
+  <!-- ============ Spring transactions ============ -->
+  <section class="topic" id="tx" aria-labelledby="tx-h">
     <div class="topic-head">
-      <h2 id="jpa-h">JPA and Hibernate</h2>
-      <span class="topic-count">10 questions</span>
+      <h2 id="tx-h">Spring transactions and propagation</h2>
+      <span class="topic-count">8 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">21</span>
-          <span class="q">What is the difference between JPA and Hibernate?<span class="hint">Tap to reveal</span></span>
+          <span class="num">30</span>
+          <span class="q">What is a transaction?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>JPA is a Java persistence specification. It defines APIs and concepts such as entities, repositories, persistence contexts, and relationships.</p>
-          <p>Hibernate is a common implementation of the JPA specification. It also provides additional features beyond standard JPA.</p>
+          <p>A database transaction groups operations into one logical unit of work.</p>
+          <p>The classic properties are ACID: atomicity, consistency, isolation, and durability.</p>
+          <p>For example, transferring money might require:</p>
+<pre><code>debit Account A
+credit Account B
+write transaction record</code></pre>
+          <p>Either all operations commit or the transaction should roll back.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">31</span>
+          <span class="q">How does <code>@Transactional</code> work in Spring?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Spring normally implements declarative transactions through an AOP proxy.</p>
+          <p>For example:</p>
+<pre><code>@Service
+public class PaymentService {
+
+    @Transactional
+    public void processPayment() {
+        ...
+    }
+}</code></pre>
+          <p>Conceptually:</p>
+<pre><code>Caller
+  ↓
+Spring transaction proxy
+  ↓
+Begin transaction
+  ↓
+processPayment()
+  ↓
+Commit / rollback</code></pre>
+          <p>By default, <code>@Transactional</code> uses <code>Propagation.REQUIRED</code>.</p>
+          <p>One important detail is that Spring's normal proxy-based transaction handling intercepts <strong>external calls through the proxy</strong>. Self-invocation within the same object does not trigger another transactional interceptor.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">32</span>
+          <span class="q">What is transaction propagation?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Propagation determines what happens when a transactional method calls another method while a transaction already exists.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Propagation</th><th>Behaviour</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>REQUIRED</code></td><td>Join existing transaction, otherwise create one</td></tr>
+                <tr><td><code>REQUIRES_NEW</code></td><td>Suspend existing transaction and create another</td></tr>
+                <tr><td><code>NESTED</code></td><td>Use a nested transaction or savepoint where supported</td></tr>
+                <tr><td><code>SUPPORTS</code></td><td>Join if one exists, otherwise run without one</td></tr>
+                <tr><td><code>MANDATORY</code></td><td>Require an existing transaction</td></tr>
+                <tr><td><code>NOT_SUPPORTED</code></td><td>Suspend transaction and run without one</td></tr>
+                <tr><td><code>NEVER</code></td><td>Fail if a transaction exists</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>REQUIRED</code> is the default. <code>REQUIRES_NEW</code> creates an independent transaction and suspends the outer one.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">33</span>
+          <span class="q">Is putting <code>@Transactional</code> on the top-level method sufficient?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Often, yes, if all called database operations are supposed to participate in the same transaction.</p>
+          <p>For example:</p>
+<pre><code>@Transactional
+public void placeOrder() {
+    reserveInventory();
+    saveOrder();
+    createPayment();
+}</code></pre>
+          <p>All database work on the same transaction manager can participate in that transaction.</p>
+          <p>But there are important exceptions. If an inner method requires <code>REQUIRES_NEW</code>, different isolation, a different transaction manager, or a separate rollback boundary, then the inner transaction configuration needs to be applied correctly.</p>
+          <p>There is also the Spring proxy issue:</p>
+<pre><code>public void outer() {
+    inner();
+}
+
+@Transactional(propagation = REQUIRES_NEW)
+public void inner() {
+}</code></pre>
+          <p>If <code>outer()</code> and <code>inner()</code> are methods of the same object, <code>inner()</code> is called directly rather than through the Spring proxy. Therefore the <code>REQUIRES_NEW</code> behaviour may not be applied.</p>
+          <p>A common solution is to move the inner operation into a separate Spring service.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">34</span>
+          <span class="q">What happens with <code>REQUIRED</code>?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Consider:</p>
+<pre><code>@Transactional
+public void createOrder() {
+    paymentService.reservePayment();
+}</code></pre>
+          <p>and:</p>
+<pre><code>@Transactional
+public void reservePayment() {
+}</code></pre>
+          <p>Since <code>REQUIRED</code> is the default:</p>
+<pre><code>createOrder transaction
+        ↓
+reservePayment joins same transaction</code></pre>
+          <p>If an unchecked exception causes the transaction to roll back:</p>
+<pre><code>Order changes      rollback
+Payment changes    rollback</code></pre>
+          <p>They are part of the same physical transaction.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">35</span>
+          <span class="q">What happens with <code>REQUIRES_NEW</code>?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Consider:</p>
+<pre><code>@Transactional
+public void createOrder() {
+    auditService.writeAudit();
+    throw new RuntimeException();
+}</code></pre>
+          <p>and:</p>
+<pre><code>@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void writeAudit() {
+    ...
+}</code></pre>
+          <p>Assuming <code>auditService</code> is another proxied Spring bean:</p>
+<pre><code>Outer transaction starts
+        ↓
+Outer transaction suspended
+        ↓
+New audit transaction starts
+        ↓
+Audit transaction commits
+        ↓
+Outer transaction resumes
+        ↓
+Outer transaction fails
+        ↓
+Outer transaction rolls back</code></pre>
+          <p>The audit record remains committed because it used an independent transaction.</p>
+          <p>This can be useful for audit records, independent status updates, and failure logging. But I use it carefully because it changes atomicity.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">36</span>
+          <span class="q">If <code>REQUIRES_NEW</code> fails, does the outer transaction also roll back?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Not automatically, because they are separate transactions. The inner transaction rolls back independently.</p>
+          <p>But if its exception propagates back into the outer transactional method, Spring will normally mark the outer transaction for rollback as well:</p>
+<pre><code>Inner REQUIRES_NEW
+    ↓
+exception
+    ↓
+inner rollback
+    ↓
+exception propagates
+    ↓
+outer rollback</code></pre>
+          <p>If the outer method intentionally catches and handles the exception:</p>
+<pre><code>try {
+    auditService.writeAudit();
+} catch (Exception e) {
+    // handle it
+}</code></pre>
+          <p>then the outer transaction can potentially continue and commit. The exact desired behaviour should be intentional.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">37</span>
+          <span class="q">Is there any resource issue with <code>REQUIRES_NEW</code>?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Yes.</p>
+          <p>The outer transaction may continue holding a database connection while the inner <code>REQUIRES_NEW</code> transaction needs another one. Under heavy concurrency this can exhaust the connection pool.</p>
+          <p>For example:</p>
+<pre><code>100 concurrent outer transactions
+100 DB connections already held
+
+Each calls REQUIRES_NEW
+        ↓
+Needs another 100 connections</code></pre>
+          <p>So transaction propagation has performance and capacity implications, not just code-level semantics.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ JPA, Hibernate, JDBC ============ -->
+  <section class="topic" id="jpa" aria-labelledby="jpa-h">
+    <div class="topic-head">
+      <h2 id="jpa-h">JPA, Hibernate, and JDBC</h2>
+      <span class="topic-count">14 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">38</span>
+          <span class="q">What is the difference between JPA, Hibernate, and JDBC?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>They operate at different abstraction levels.</p>
+          <h3>JDBC</h3>
+          <p>Low-level Java API for interacting directly with relational databases. I control:</p>
+<pre><code>SQL
+parameters
+ResultSet mapping
+connections
+statements</code></pre>
+          <h3>JPA</h3>
+          <p>A Java persistence specification defining concepts such as entity, <code>EntityManager</code>, persistence context, relationships, and transactions.</p>
+          <h3>Hibernate</h3>
+          <p>A popular implementation of JPA that also provides additional features beyond the standard.</p>
+          <p>So:</p>
+<pre><code>Application
+    ↓
+JPA API
+    ↓
+Hibernate
+    ↓
+JDBC
+    ↓
+Database</code></pre>
           <p>I normally code against JPA abstractions where practical, while understanding Hibernate-specific behaviour such as proxies, dirty checking, batching, and fetch strategies.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">22</span>
-          <span class="q">What are the entity lifecycle states?<span class="hint">Tap to reveal</span></span>
+          <span class="num">39</span>
+          <span class="q">When would you use JPA/Hibernate versus JDBC?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>The common JPA entity states are:</p>
+          <p>I would use <strong>JPA/Hibernate</strong> when:</p>
           <ul>
-            <li><strong>Transient</strong>: a normal Java object not managed by JPA</li>
-            <li><strong>Managed or persistent</strong>: tracked by the persistence context</li>
-            <li><strong>Detached</strong>: previously managed but no longer tracked</li>
-            <li><strong>Removed</strong>: marked for deletion</li>
+            <li>The application has a rich relational domain model</li>
+            <li>CRUD is a large part of the workload</li>
+            <li>Entity relationships are useful</li>
+            <li>Developer productivity matters</li>
+            <li>Dirty checking and the persistence context help</li>
+            <li>Queries are relatively conventional</li>
           </ul>
-          <p>A managed entity is automatically checked for changes. Hibernate can generate an update during transaction commit without an explicit update call.</p>
+          <p>I would consider <strong>JDBC or <code>JdbcTemplate</code></strong> when:</p>
+          <ul>
+            <li>I need very precise SQL control</li>
+            <li>I have complex analytical queries</li>
+            <li>I am processing large volumes</li>
+            <li>I need high-performance bulk inserts or updates</li>
+            <li>Object graph mapping adds little value</li>
+            <li>Predictable database behaviour is more important than ORM convenience</li>
+          </ul>
+          <p>I don't see this as an either/or decision. A Spring Boot service can use JPA for normal domain persistence and JDBC for a performance-sensitive batch operation.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">23</span>
-          <span class="q">What is dirty checking?<span class="hint">Tap to reveal</span></span>
+          <span class="num">40</span>
+          <span class="q">Why can Hibernate become problematic at high data volumes?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>Dirty checking means Hibernate tracks changes to managed entities. At flush or commit time, it compares their current state with the original state and generates the required SQL updates.</p>
-          <p>For example:</p>
-<pre><code>@Transactional
-public void renameCustomer(Long id, String name) {
-    Customer customer = repository.findById(id)
-        .orElseThrow();
+          <p>Hibernate manages entities inside a persistence context.</p>
+          <p>If I load hundreds of thousands of records into one transaction, Hibernate may keep many managed objects in memory. That can lead to:</p>
+          <ul>
+            <li>High heap usage</li>
+            <li>Dirty-checking overhead</li>
+            <li>Long transactions</li>
+            <li>Large flush operations</li>
+            <li>GC pressure</li>
+          </ul>
+          <p>For bulk processing I might instead use pagination, streaming, JDBC batching, <code>flush()</code> and <code>clear()</code>, stateless Hibernate sessions, native SQL, or Spring Batch.</p>
+          <p>The choice depends on workload.</p>
+        </div>
+      </details>
 
-    customer.setName(name);
+      <details class="qa">
+        <summary>
+          <span class="num">41</span>
+          <span class="q">How would you design a one-to-many relationship?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Consider <code>Customer 1 → N Orders</code>.</p>
+          <p>At the database level, I would normally place the foreign key on the many side:</p>
+<pre><code>orders.customer_id</code></pre>
+          <p>In JPA:</p>
+<pre><code>@Entity
+class Order {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 }</code></pre>
-          <p>An explicit <code>save</code> may not be required because the entity is managed.</p>
-        </div>
-      </details>
+          <p>And if I genuinely need bidirectional navigation:</p>
+<pre><code>@Entity
+class Customer {
 
-      <details class="qa">
-        <summary>
-          <span class="num">24</span>
-          <span class="q">What is the difference between <code>LAZY</code> and <code>EAGER</code> fetching?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p><code>LAZY</code> loading retrieves the related entity only when it is accessed. <code>EAGER</code> loading retrieves it as part of the initial operation, although the exact SQL strategy depends on the provider.</p>
-          <p>I prefer lazy loading for most relationships because eager loading can retrieve unnecessary data and produce large object graphs.</p>
-          <p>But lazy loading must be handled carefully because it can cause:</p>
-          <ul>
-            <li>N+1 queries</li>
-            <li><code>LazyInitializationException</code></li>
-            <li>Unexpected database access during serialization</li>
-          </ul>
-          <p>I use fetch joins, entity graphs, DTO projections, or dedicated queries depending on the use case.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">25</span>
-          <span class="q">What is the N+1 query problem?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>The N+1 problem occurs when one query loads a collection of parent records, followed by one additional query for each parent.</p>
-          <p>For example:</p>
-<pre><code>List&lt;Order&gt; orders = orderRepository.findAll();
-
-for (Order order : orders) {
-    order.getItems().size();
+    @OneToMany(mappedBy = "customer")
+    private List&lt;Order&gt; orders;
 }</code></pre>
-          <p>This may execute one query for orders and N queries for their items.</p>
-          <p>I would diagnose it through SQL logging, APM tracing, or Hibernate statistics. Possible solutions include:</p>
-          <ul>
-            <li>Fetch joins</li>
-            <li>Entity graphs</li>
-            <li>Batch fetching</li>
-            <li>DTO projections</li>
-            <li>Redesigning the query around the actual use case</li>
-          </ul>
+          <p>The <code>Order</code> side owns the relationship because it contains the foreign key.</p>
+          <p>I would normally prefer lazy loading and query based on the use case rather than automatically retrieving the entire object graph.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">26</span>
+          <span class="num">42</span>
           <span class="q">What is the owning side of a JPA relationship?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1004,7 +1538,110 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">27</span>
+          <span class="num">43</span>
+          <span class="q">How would you fetch one-to-many data without creating an N+1 problem?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Suppose I fetch 100 customers and then access their orders. A naive implementation could generate:</p>
+<pre><code>1 query for customers
++
+100 queries for orders
+=
+101 queries</code></pre>
+          <p>I would first identify what the API actually needs. Options include:</p>
+          <ul>
+            <li>Fetch join</li>
+            <li>EntityGraph</li>
+            <li>DTO projection</li>
+            <li>Batch fetching</li>
+            <li>Explicit query</li>
+            <li>Separate batched queries</li>
+          </ul>
+          <p>For an API response, I often prefer a DTO projection tailored to the endpoint rather than returning persistence entities directly.</p>
+          <p>I also need to be careful with pagination. Fetch-joining large collections can produce huge Cartesian result sets and make pagination difficult.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">44</span>
+          <span class="q">What is the N+1 query problem?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>The N+1 problem occurs when one query loads a collection of parent records, followed by one additional query for each parent.</p>
+          <p>For example:</p>
+<pre><code>List&lt;Order&gt; orders = orderRepository.findAll();
+
+for (Order order : orders) {
+    order.getItems().size();
+}</code></pre>
+          <p>This may execute one query for orders and N queries for their items.</p>
+          <p>I would diagnose it through SQL logging, APM tracing, or Hibernate statistics. Possible solutions include fetch joins, entity graphs, batch fetching, DTO projections, or redesigning the query around the actual use case.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">45</span>
+          <span class="q">What are the JPA entity lifecycle states?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>The common JPA entity states are:</p>
+          <ul>
+            <li><strong>Transient</strong>: a normal Java object not managed by JPA</li>
+            <li><strong>Managed or persistent</strong>: tracked by the persistence context</li>
+            <li><strong>Detached</strong>: previously managed but no longer tracked</li>
+            <li><strong>Removed</strong>: marked for deletion</li>
+          </ul>
+          <p>A managed entity is automatically checked for changes. Hibernate can generate an update during transaction commit without an explicit update call.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">46</span>
+          <span class="q">What is dirty checking?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Dirty checking means Hibernate tracks changes to managed entities. At flush or commit time, it compares their current state with the original state and generates the required SQL updates.</p>
+          <p>For example:</p>
+<pre><code>@Transactional
+public void renameCustomer(Long id, String name) {
+    Customer customer = repository.findById(id)
+        .orElseThrow();
+
+    customer.setName(name);
+}</code></pre>
+          <p>An explicit <code>save</code> may not be required because the entity is managed.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">47</span>
+          <span class="q">What is the difference between <code>LAZY</code> and <code>EAGER</code> fetching?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p><code>LAZY</code> loading retrieves the related entity only when it is accessed. <code>EAGER</code> loading retrieves it as part of the initial operation, although the exact SQL strategy depends on the provider.</p>
+          <p>I prefer lazy loading for most relationships because eager loading can retrieve unnecessary data and produce large object graphs.</p>
+          <p>But lazy loading must be handled carefully because it can cause:</p>
+          <ul>
+            <li>N+1 queries</li>
+            <li><code>LazyInitializationException</code></li>
+            <li>Unexpected database access during serialization</li>
+          </ul>
+          <p>I use fetch joins, entity graphs, DTO projections, or dedicated queries depending on the use case.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">48</span>
           <span class="q">What is the difference between <code>persist</code>, <code>merge</code>, and <code>save</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1017,7 +1654,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">28</span>
+          <span class="num">49</span>
           <span class="q">What problems can <code>CascadeType.ALL</code> cause?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1030,7 +1667,7 @@ class Order {
 
       <details class="qa">
         <summary>
-          <span class="num">29</span>
+          <span class="num">50</span>
           <span class="q">What is optimistic locking?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1046,7 +1683,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">30</span>
+          <span class="num">51</span>
           <span class="q">How would you improve JPA performance?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1071,18 +1708,252 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 5. Kafka and JMS ============ -->
-  <section class="topic" id="messaging" aria-labelledby="messaging-h">
+  <!-- ============ React and Redux ============ -->
+  <section class="topic" id="react" aria-labelledby="react-h">
     <div class="topic-head">
-      <h2 id="messaging-h">Kafka and JMS</h2>
-      <span class="topic-count">6 questions</span>
+      <h2 id="react-h">React and Redux</h2>
+      <span class="topic-count">7 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">31</span>
+          <span class="num">52</span>
+          <span class="q">Explain React.<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>React is a library for building user interfaces from reusable components.</p>
+          <p>A component receives data through props, maintains local state where necessary, and declares what the UI should look like. When state changes, React re-renders the relevant component tree and reconciles the result with the DOM.</p>
+          <p>Important concepts include components, props, state, hooks, one-way data flow, component composition, effects, context, and reconciliation.</p>
+          <p>For example:</p>
+<pre><code>function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+          <p>I normally keep state as close as possible to where it is used and only move it into shared state when multiple components genuinely require it.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">53</span>
+          <span class="q">What is a controlled versus uncontrolled component in React?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>A <strong>controlled component</strong> has its state controlled by React:</p>
+<pre><code>function NameInput() {
+  const [name, setName] = useState("");
+
+  return (
+    &lt;input
+      value={name}
+      onChange={e =&gt; setName(e.target.value)}
+    /&gt;
+  );
+}</code></pre>
+          <p>React state is the source of truth.</p>
+          <p>An <strong>uncontrolled component</strong> stores the current value in the DOM:</p>
+<pre><code>function NameInput() {
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+  return &lt;input ref={inputRef} /&gt;;
+}</code></pre>
+          <p>Then I can access it using <code>inputRef.current?.value</code>.</p>
+          <h3>Controlled</h3>
+          <p>Useful when I need validation, dynamic UI behaviour, immediate state synchronization, or form logic that depends on the value.</p>
+          <h3>Uncontrolled</h3>
+          <p>Useful when the input is simple, I only need the value on submission, I am integrating with DOM-oriented libraries, or I am managing file inputs.</p>
+          <p>For most business forms, I generally prefer controlled inputs or a form library that efficiently manages the same concerns.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">54</span>
+          <span class="q">What is ReactJS versus React Native?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>ReactJS and React Native share the React programming model: components, props, state, hooks, and context.</p>
+          <p>But the rendering targets are different.</p>
+          <p>ReactJS normally renders to the browser DOM:</p>
+<pre><code>&lt;div&gt;
+&lt;button&gt;
+&lt;input&gt;</code></pre>
+          <p>React Native renders native platform components:</p>
+<pre><code>&lt;View&gt;
+&lt;Text&gt;
+&lt;Pressable&gt;</code></pre>
+          <p>React Native does not simply render HTML inside a mobile application. React coordinates native UI components on iOS and Android.</p>
+          <p>Business logic and some hooks can often be shared, but UI components and platform APIs frequently differ.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">55</span>
+          <span class="q">What is React versus JSX?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>React is the UI library.</p>
+          <p>JSX is syntax commonly used to describe React elements:</p>
+<pre><code>const element = &lt;button&gt;Save&lt;/button&gt;;</code></pre>
+          <p>Conceptually, JSX is transformed into JavaScript that creates React elements.</p>
+          <p>You can technically use React without JSX, but JSX makes component trees much easier to read and maintain.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">56</span>
+          <span class="q">Explain Redux.<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Redux manages shared application state using predictable one-way data flow.</p>
+          <p>The main concepts are store, state, action, reducer, dispatch, selector, and middleware.</p>
+          <p>The flow is:</p>
+<pre><code>UI
+ ↓
+dispatch(action)
+ ↓
+reducer
+ ↓
+new state
+ ↓
+UI re-renders</code></pre>
+          <p>With modern Redux, I would use Redux Toolkit rather than manually creating large numbers of action constants and reducers:</p>
+<pre><code>const counterSlice = createSlice({
+  name: "counter",
+  initialState: { value: 0 },
+  reducers: {
+    increment: state =&gt; {
+      state.value++;
+    }
+  }
+});</code></pre>
+          <p>React components normally read from the store using React-Redux hooks such as <code>useSelector</code> and <code>useDispatch</code>.</p>
+          <p>I would use Redux for genuinely shared application state, rather than putting every local UI state into the store.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">57</span>
+          <span class="q">When would you use Redux?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would use Redux when the application has complex shared state that must be accessed and updated across different screens or components.</p>
+          <p>Examples include:</p>
+          <ul>
+            <li>Authenticated-user information</li>
+            <li>Complex workflow state</li>
+            <li>Shared filters and search criteria</li>
+            <li>Cached server responses</li>
+            <li>Application-wide notifications</li>
+            <li>State that needs debugging, auditing, or predictable transitions</li>
+          </ul>
+          <p>I would not put every piece of state into Redux. Temporary UI state such as whether a dialog is open can normally remain inside the component.</p>
+          <p>For server state, I would also consider RTK Query or another query-management solution rather than manually implementing loading, caching, invalidation, and error handling.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">58</span>
+          <span class="q">Why does Redux have a reputation for boilerplate?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Older Redux implementations often required separate files and code for action-type constants, action creators, reducers, immutable state updates, selectors, thunks, and store configuration.</p>
+          <p>Modern Redux Toolkit reduces much of that boilerplate through <code>createSlice</code>, <code>configureStore</code>, <code>createAsyncThunk</code>, and RTK Query. The Redux documentation recommends Redux Toolkit as the standard way to write Redux applications today.</p>
+          <p>However, if the team already has an established Redux architecture, I would first understand its conventions. I would not introduce a large migration merely because a newer pattern exists. Changes should be incremental and supported by tests.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ Kafka and JMS ============ -->
+  <section class="topic" id="messaging" aria-labelledby="messaging-h">
+    <div class="topic-head">
+      <h2 id="messaging-h">Kafka, JMS, and compatibility</h2>
+      <span class="topic-count">7 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">59</span>
+          <span class="q">What is a Kafka topic versus a queue?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Kafka has topics rather than a separate queue primitive.</p>
+          <p>Queue-like behaviour comes from consumers sharing the same consumer group:</p>
+<pre><code>Topic
+ ├ Partition 0 → Worker A
+ ├ Partition 1 → Worker B
+ └ Partition 2 → Worker C</code></pre>
+          <p>Each partition is handled by one consumer within that group.</p>
+          <p>Publish-subscribe behaviour comes from multiple consumer groups:</p>
+<pre><code>OrderCreated
+   ├ Inventory group
+   ├ Notification group
+   └ Analytics group</code></pre>
+          <p>Each group independently receives the events.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">60</span>
+          <span class="q">I need to rename a Kafka topic used by multiple teams. How do I prevent consumer applications from breaking?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would treat a topic rename as a contract migration, not a simple rename. Kafka does not provide a transparent alias that makes this safe automatically.</p>
+          <p>I would create a new topic and use a staged migration:</p>
+<pre><code>             ┌ old-topic → old consumers
+Producer ────┤
+             └ new-topic → migrated consumers</code></pre>
+          <h3>Phase 1: Prepare</h3>
+          <ul>
+            <li>Create the new topic</li>
+            <li>Match partitioning where appropriate</li>
+            <li>Configure ACLs</li>
+            <li>Ensure schemas are compatible</li>
+            <li>Inform consumer teams</li>
+          </ul>
+          <h3>Phase 2: Dual publish or bridge</h3>
+          <p>Temporarily publish events to both old and new topics, or introduce a controlled replication or bridge process.</p>
+          <h3>Phase 3: Consumer migration</h3>
+          <p>Teams migrate independently:</p>
+<pre><code>Consumer A → new topic
+Consumer B → new topic
+Consumer C → old topic</code></pre>
+          <h3>Phase 4: Observe</h3>
+          <p>Monitor consumer lag, message counts, errors, and remaining consumption from the old topic.</p>
+          <h3>Phase 5: Deprecate</h3>
+          <p>Only after no consumers depend on the old topic: stop dual publishing, retain the old topic for an agreed period, remove ACLs, and delete it later.</p>
+          <p>The key is backward compatibility and an explicit deprecation window.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">61</span>
           <span class="q">When would you use Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1103,7 +1974,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">32</span>
+          <span class="num">62</span>
           <span class="q">When would you use JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1123,7 +1994,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">33</span>
+          <span class="num">63</span>
           <span class="q">What is the main difference between Kafka and JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1137,7 +2008,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">34</span>
+          <span class="num">64</span>
           <span class="q">Can Kafka replace JMS?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1158,44 +2029,12 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">35</span>
-          <span class="q">What is the difference between a Kafka topic and a queue?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>Kafka fundamentally provides topics rather than a separate queue resource.</p>
-          <p>Queue-like behaviour is created by putting multiple consumer instances in the same consumer group. Each partition is assigned to one consumer in that group, so the work is distributed among the consumers.</p>
-<pre><code>Topic
-  ├── Partition 0 → Consumer A
-  ├── Partition 1 → Consumer B
-  └── Partition 2 → Consumer C</code></pre>
-          <p>Publish-subscribe behaviour is created by using different consumer groups:</p>
-<pre><code>Order topic
-  ├── Inventory consumer group
-  ├── Notification consumer group
-  └── Analytics consumer group</code></pre>
-          <p>Each group independently consumes the events.</p>
-          <p>Kafka's documentation describes a consumer group as providing queue-like load distribution, while separate consumer groups provide publish-subscribe behaviour.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">36</span>
+          <span class="num">65</span>
           <span class="q">When would you use Kafka instead of a traditional queue?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>I would prefer Kafka when the system needs:</p>
-          <ul>
-            <li>High-throughput event streaming</li>
-            <li>Retained event history</li>
-            <li>Replay</li>
-            <li>Multiple independent consumers</li>
-            <li>Partition-based scaling</li>
-            <li>Stream processing</li>
-            <li>Event-driven integration</li>
-          </ul>
+          <p>I would prefer Kafka when the system needs high-throughput event streaming, retained event history, replay, multiple independent consumers, partition-based scaling, stream processing, or event-driven integration.</p>
           <p>I would consider a traditional JMS queue when the use case is primarily command delivery, request-reply, integration with existing enterprise middleware, or broker-managed message-routing features.</p>
           <p>The decision should be based on required semantics, not only throughput or technology preference.</p>
         </div>
@@ -1204,7 +2043,7 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 6. Queue versus topic ============ -->
+  <!-- ============ Queue versus topic ============ -->
   <section class="topic" id="queue-topic" aria-labelledby="queue-topic-h">
     <div class="topic-head">
       <h2 id="queue-topic-h">Queue versus topic</h2>
@@ -1215,7 +2054,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">37</span>
+          <span class="num">66</span>
           <span class="q">What is the difference between a queue and a topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1232,7 +2071,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">38</span>
+          <span class="num">67</span>
           <span class="q">What is the difference between a JMS queue and a JMS topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1250,7 +2089,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">39</span>
+          <span class="num">68</span>
           <span class="q">If several consumers listen to a queue, who receives the message?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1262,7 +2101,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">40</span>
+          <span class="num">69</span>
           <span class="q">How is a Kafka topic different from a JMS topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1274,7 +2113,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">41</span>
+          <span class="num">70</span>
           <span class="q">How do you preserve message ordering in Kafka?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1287,7 +2126,7 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">42</span>
+          <span class="num">71</span>
           <span class="q">How do you handle duplicate message processing?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1308,21 +2147,13 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">43</span>
+          <span class="num">72</span>
           <span class="q">What is a dead-letter queue?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>A dead-letter queue stores messages that could not be processed after a configured number of attempts.</p>
-          <p>I would include:</p>
-          <ul>
-            <li>The original message</li>
-            <li>Error details</li>
-            <li>Attempt count</li>
-            <li>Timestamp</li>
-            <li>Consumer or service name</li>
-            <li>Correlation ID</li>
-          </ul>
+          <p>I would include the original message, error details, attempt count, timestamp, consumer or service name, and correlation ID.</p>
           <p>I would also distinguish transient failures from permanent failures. Transient errors may be retried with backoff, while invalid business data should normally go directly to a dead-letter path.</p>
         </div>
       </details>
@@ -1330,18 +2161,157 @@ private Long version;</code></pre>
     </div>
   </section>
 
-  <!-- ============ 7. Kubernetes fundamentals and service communication ============ -->
-  <section class="topic" id="k8s" aria-labelledby="k8s-h">
+  <!-- ============ REST, gRPC, technology choice ============ -->
+  <section class="topic" id="api" aria-labelledby="api-h">
     <div class="topic-head">
-      <h2 id="k8s-h">Kubernetes fundamentals and networking</h2>
-      <span class="topic-count">9 questions</span>
+      <h2 id="api-h">REST, gRPC, and technology choice</h2>
+      <span class="topic-count">4 questions</span>
     </div>
     <div class="rule"></div>
     <div class="deck">
 
       <details class="qa">
         <summary>
-          <span class="num">44</span>
+          <span class="num">73</span>
+          <span class="q">What is the difference between REST and gRPC?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>REST typically exposes resources over HTTP using formats such as JSON:</p>
+<pre><code>GET /customers/123</code></pre>
+          <p>gRPC defines services and messages using Protocol Buffers:</p>
+<pre><code>service CustomerService {
+  rpc GetCustomer(GetCustomerRequest)
+      returns (CustomerResponse);
+}</code></pre>
+          <p>The main differences are:</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th></th><th>REST</th><th>gRPC</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Typical format</td><td>JSON</td><td>Protocol Buffers</td></tr>
+                <tr><td>Contract</td><td>OpenAPI optional or common</td><td><code>.proto</code> required</td></tr>
+                <tr><td>Transport</td><td>HTTP</td><td>Usually HTTP/2</td></tr>
+                <tr><td>Payload</td><td>Human-readable</td><td>Binary</td></tr>
+                <tr><td>Streaming</td><td>Less natural</td><td>Built in</td></tr>
+                <tr><td>Browser use</td><td>Very easy</td><td>More constraints</td></tr>
+                <tr><td>Internal services</td><td>Good</td><td>Very good</td></tr>
+                <tr><td>Public APIs</td><td>Very common</td><td>Less common</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">74</span>
+          <span class="q">When would you choose gRPC?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would consider gRPC for:</p>
+          <ul>
+            <li>Internal service-to-service communication</li>
+            <li>Low-latency APIs</li>
+            <li>High call volumes</li>
+            <li>Strong typed contracts</li>
+            <li>Polyglot microservices</li>
+            <li>Streaming</li>
+            <li>Efficient binary payloads</li>
+          </ul>
+          <p>For example:</p>
+<pre><code>Java Service
+      ↓ gRPC
+Go Service
+      ↓
+Python Service</code></pre>
+          <p>All clients can be generated from the same <code>.proto</code> definition.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">75</span>
+          <span class="q">When would you choose REST?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would prefer REST when:</p>
+          <ul>
+            <li>Exposing APIs to external consumers</li>
+            <li>Browser compatibility matters</li>
+            <li>Human-readable payloads help</li>
+            <li>Existing integrations use HTTP and JSON</li>
+            <li>HTTP caching semantics are useful</li>
+            <li>Organizational tooling is strongly REST-oriented</li>
+          </ul>
+          <p>I don't see gRPC as a universal replacement for REST. A common architecture is:</p>
+<pre><code>External clients
+      ↓
+REST API
+      ↓
+Internal microservices
+      ↓
+REST and/or gRPC</code></pre>
+          <p>depending on requirements.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">76</span>
+          <span class="q">Java is being used for everything, but performance is a concern. How would you approach that discussion?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would avoid starting from the language choice. I would first measure where the bottleneck actually is.</p>
+          <p>For many enterprise systems, performance is dominated by:</p>
+          <ul>
+            <li>Database queries</li>
+            <li>Network I/O</li>
+            <li>Serialization</li>
+            <li>External APIs</li>
+            <li>Messaging</li>
+            <li>Poor concurrency design</li>
+            <li>Excessive data movement</li>
+          </ul>
+          <p>rather than Java itself. Modern Java has strong runtime performance, JIT optimization, mature GC implementations, and now virtual threads.</p>
+          <p>But that doesn't mean Java is always the correct choice:</p>
+          <ul>
+            <li>A lightweight infrastructure service might be a good fit for Go.</li>
+            <li>Heavy numerical workloads may fit another ecosystem.</li>
+            <li>Data engineering may be better handled with dedicated data-processing platforms.</li>
+            <li>Existing team expertise also matters.</li>
+          </ul>
+          <p>I would make the decision using:</p>
+<pre><code>requirements
++ measured workload
++ operational constraints
++ ecosystem
++ team capability
++ maintainability</code></pre>
+          <p>rather than treating &ldquo;Java versus Go&rdquo; as an ideological choice.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ Kubernetes ============ -->
+  <section class="topic" id="k8s" aria-labelledby="k8s-h">
+    <div class="topic-head">
+      <h2 id="k8s-h">Kubernetes fundamentals and networking</h2>
+      <span class="topic-count">10 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">77</span>
           <span class="q">Explain a basic Kubernetes application setup.<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1364,101 +2334,37 @@ private Long version;</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">45</span>
+          <span class="num">78</span>
           <span class="q">What is a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>A pod is the smallest deployable unit in Kubernetes. It contains one or more containers that share:</p>
-          <ul>
-            <li>Network namespace</li>
-            <li>IP address</li>
-            <li>Port space</li>
-            <li>Volumes</li>
-            <li>Lifecycle</li>
-          </ul>
+          <p>A pod is the smallest deployable unit in Kubernetes. It contains one or more containers that share the network namespace, IP address, port space, volumes, and lifecycle.</p>
           <p>Most application pods contain one main application container, sometimes with sidecars for proxies, logging, or other supporting functions.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">46</span>
+          <span class="num">79</span>
           <span class="q">What is the difference between a pod and a deployment?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>A pod is a running instance of one or more containers.</p>
-          <p>A deployment manages pods declaratively. It handles:</p>
-          <ul>
-            <li>Desired replica count</li>
-            <li>Rolling updates</li>
-            <li>Rollbacks</li>
-            <li>Pod replacement</li>
-            <li>ReplicaSet management</li>
-          </ul>
+          <p>A deployment manages pods declaratively. It handles the desired replica count, rolling updates, rollbacks, pod replacement, and ReplicaSet management.</p>
           <p>I normally create a deployment rather than managing standalone pods.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">47</span>
-          <span class="q">What is an Ingress?<span class="hint">Tap to reveal</span></span>
+          <span class="num">80</span>
+          <span class="q">How do microservices communicate inside the same Kubernetes cluster and namespace?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>An Ingress defines HTTP or HTTPS routing rules from outside the cluster to Kubernetes services.</p>
-          <p>For example, it can route:</p>
-          <ul>
-            <li><code>/orders</code> to the order service</li>
-            <li><code>/customers</code> to the customer service</li>
-            <li>Different hostnames to different services</li>
-          </ul>
-          <p>An Ingress resource requires an Ingress controller, such as NGINX Ingress, Traefik, or a cloud-specific controller.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">48</span>
-          <span class="q">What is a ConfigMap?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>A ConfigMap stores non-sensitive configuration separately from the container image.</p>
-          <p>It can be exposed to a pod as:</p>
-          <ul>
-            <li>Environment variables</li>
-            <li>Command-line arguments</li>
-            <li>Mounted files</li>
-          </ul>
-          <p>I would use a Secret rather than a ConfigMap for passwords, tokens, or certificates. I would also consider an external secrets manager for production secrets.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">49</span>
-          <span class="q">Does updating a ConfigMap restart the pod?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>Not automatically in every setup.</p>
-          <p>If a ConfigMap is mounted as a volume, the files may eventually update, but the application must reload them.</p>
-          <p>If values are injected as environment variables, existing pods do not receive the new values. They must be restarted.</p>
-          <p>A common deployment approach is to include a ConfigMap checksum in the pod template. When the ConfigMap changes, the deployment template changes and triggers a rollout.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">50</span>
-          <span class="q">How do microservices communicate inside the same cluster and namespace?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>For normal service-to-service communication, I would expose each application through a Kubernetes <code>ClusterIP</code> Service.</p>
+          <p>For normal internal communication, I would expose each workload through a <code>ClusterIP</code> Service.</p>
           <p>For example:</p>
 <pre><code>apiVersion: v1
 kind: Service
@@ -1471,16 +2377,16 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080</code></pre>
-          <p>Another application in the same namespace can call it using the service name:</p>
+          <p>Within the same namespace another service can call:</p>
 <pre><code>http://order-service:8080</code></pre>
           <p>Kubernetes DNS resolves the service name to the Service's stable cluster IP, and the Service load-balances requests across its ready pods.</p>
-          <p>I would not call individual pod IP addresses because pods are temporary and their IP addresses can change after rescheduling.</p>
+          <p>I would not call pod IP addresses directly because pods can be recreated and receive new IP addresses.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">51</span>
+          <span class="num">81</span>
           <span class="q">How do services communicate across namespaces?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1496,28 +2402,244 @@ spec:
 
       <details class="qa">
         <summary>
-          <span class="num">52</span>
+          <span class="num">82</span>
           <span class="q">When would you use a headless Service?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>I would use a headless Service when clients need to discover and communicate with individual pod endpoints rather than going through one virtual service IP.</p>
-          <p>Typical examples include:</p>
-          <ul>
-            <li>StatefulSets</li>
-            <li>Databases</li>
-            <li>Broker clusters</li>
-            <li>Leader-election systems</li>
-            <li>Applications performing client-side discovery</li>
-          </ul>
+          <p>Typical examples include StatefulSets, databases, broker clusters, leader-election systems, and applications performing client-side discovery.</p>
           <p>For ordinary stateless Spring Boot services, a standard <code>ClusterIP</code> Service is normally the right choice.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">83</span>
+          <span class="q">What is an Ingress?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>An Ingress defines HTTP or HTTPS routing rules from outside the cluster to Kubernetes services.</p>
+          <p>For example, it can route <code>/orders</code> to the order service, <code>/customers</code> to the customer service, or different hostnames to different services.</p>
+          <p>An Ingress resource requires an Ingress controller, such as NGINX Ingress, Traefik, or a cloud-specific controller.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">84</span>
+          <span class="q">What is a ConfigMap?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>A ConfigMap stores non-sensitive application configuration separately from the container image.</p>
+          <p>For example:</p>
+<pre><code>data:
+  LOG_LEVEL: INFO
+  FEATURE_X_ENABLED: "true"</code></pre>
+          <p>It can be injected as environment variables, command-line arguments, or mounted files.</p>
+          <p>This allows the same container image to run with different configuration in different environments.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">85</span>
+          <span class="q">Should passwords and API keys go into ConfigMaps?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>No. A ConfigMap is intended for non-sensitive configuration.</p>
+          <p>Sensitive values should use Kubernetes Secrets or, preferably in an enterprise environment, integrate Kubernetes with an external secrets-management system such as:</p>
+          <ul>
+            <li>HashiCorp Vault</li>
+            <li>AWS Secrets Manager</li>
+            <li>Azure Key Vault</li>
+            <li>Cloud provider secret stores</li>
+          </ul>
+          <p>I would also use RBAC, encryption at rest, workload identities where possible, and secret rotation, and avoid logging secret values.</p>
+          <p>Kubernetes <code>Secret</code> values being base64-encoded should not be confused with encryption.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">86</span>
+          <span class="q">Does updating a ConfigMap restart the pod?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Not automatically in every setup.</p>
+          <p>If a ConfigMap is mounted as a volume, the files may eventually update, but the application must reload them.</p>
+          <p>If values are injected as environment variables, existing pods do not receive the new values. They must be restarted.</p>
+          <p>A common deployment approach is to include a ConfigMap checksum in the pod template. When the ConfigMap changes, the deployment template changes and triggers a rollout.</p>
         </div>
       </details>
 
     </div>
   </section>
 
-  <!-- ============ 8. Handling peak traffic ============ -->
+  <!-- ============ High volume and batch ============ -->
+  <section class="topic" id="scale" aria-labelledby="scale-h">
+    <div class="topic-head">
+      <h2 id="scale-h">High-concurrency and batch processing</h2>
+      <span class="topic-count">5 questions</span>
+    </div>
+    <div class="rule"></div>
+    <div class="deck">
+
+      <details class="qa">
+        <summary>
+          <span class="num">87</span>
+          <span class="q">A service needs to handle 2,000 to 3,000 requests in parallel. How would you design it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>The first thing I would clarify is whether that means 2,000 to 3,000 requests per hour, per second, or genuinely 2,000 to 3,000 concurrent requests. Those are completely different workloads.</p>
+          <p>If the requirement is <strong>thousands of concurrent requests</strong>, I would first determine where time is spent:</p>
+<pre><code>Client
+ ↓
+Ingress / gateway
+ ↓
+Service
+ ↓
+Database / downstream APIs</code></pre>
+          <p>Then address each layer.</p>
+          <h3>Application</h3>
+          <p>If the application is stateless:</p>
+          <ul>
+            <li>Run multiple replicas</li>
+            <li>Use a Kubernetes HPA</li>
+            <li>Use appropriate concurrency</li>
+            <li>Consider Java virtual threads for blocking I/O workloads</li>
+            <li>Configure connection pools</li>
+            <li>Set timeouts</li>
+            <li>Add backpressure</li>
+          </ul>
+          <h3>Database</h3>
+          <p>Analyse query plans, indexes, connection-pool size, lock contention, read replicas where appropriate, and caching.</p>
+          <h3>Downstream systems</h3>
+          <p>Protect them with circuit breakers, rate limiting, bulkheads, and timeouts.</p>
+          <h3>Asynchronous work</h3>
+          <p>If the caller doesn't require an immediate result:</p>
+<pre><code>API
+ ↓
+Kafka / queue
+ ↓
+workers</code></pre>
+          <p>This absorbs traffic spikes.</p>
+          <p>And I would load test the complete system. Scaling a single bottleneck does not automatically scale the system.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">88</span>
+          <span class="q">The service currently has only one Kubernetes pod. What would you do?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>If the application is stateless, horizontal scaling is the obvious starting point:</p>
+<pre><code>             ┌ Pod 1
+Service ─────┼ Pod 2
+             ├ Pod 3
+             └ Pod 4</code></pre>
+          <p>I would use a Deployment with multiple replicas, a ClusterIP Service, an HPA, and appropriate requests and limits.</p>
+          <p>If the application requires sticky sessions, I would first ask why. Ideally I would externalize session state into something such as Redis, a database, or a signed client token. Then any pod can handle any request.</p>
+          <p>Stateless services are much easier to scale and recover.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">89</span>
+          <span class="q">The interviewer says the endpoint is called 2,000 times per hour. Is that high traffic?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>Not by itself.</p>
+          <p>2,000 requests per hour is only around:</p>
+<pre><code>0.56 requests/second</code></pre>
+          <p>on average.</p>
+          <p>So I would clarify whether they mean average requests, peak requests, concurrency, or transactions performed per request.</p>
+          <p>For example, <code>2,000 requests/hour</code> is very different from <code>2,000 concurrent requests</code> or <code>2,000 requests/second</code>.</p>
+          <p>I would avoid proposing Kubernetes scaling before understanding the workload.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">90</span>
+          <span class="q">I have an endpoint that executes 4,000 database transactions. How would you build it in Java?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would first challenge whether the HTTP request really needs to execute all 4,000 transactions synchronously.</p>
+          <p>If not, I would consider:</p>
+<pre><code>POST /jobs
+    ↓
+Create job
+    ↓
+Kafka / queue
+    ↓
+Workers
+    ↓
+Process batches
+    ↓
+GET /jobs/{id}</code></pre>
+          <p>This gives retry, backpressure, progress tracking, horizontal scaling, and failure isolation.</p>
+          <p>If all 4,000 operations must be processed, I would also look for opportunities to batch them rather than perform 4,000 individual database round trips.</p>
+          <p>For example, instead of:</p>
+<pre><code>4000 individual INSERTs</code></pre>
+          <p>use JDBC batching:</p>
+<pre><code>batch 100
+batch 100
+...</code></pre>
+          <p>I would use bounded concurrency. I would <strong>not</strong> simply create 4,000 virtual threads and fire them at the database, because the database connection pool and the database itself are bounded resources.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">91</span>
+          <span class="q">A large data volume must be processed weekly within 90 minutes, and the data changes daily. How would you design it?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>The first question I would ask is:</p>
+          <blockquote>Why reprocess everything weekly if only part of the data changed?</blockquote>
+          <p>I would try to move from full processing to incremental processing:</p>
+<pre><code>Daily changes
+    ↓
+CDC / watermark / modified timestamp
+    ↓
+Incremental staging
+    ↓
+Weekly processing only handles delta</code></pre>
+          <p>Then I would:</p>
+          <ul>
+            <li>Partition the data</li>
+            <li>Process partitions in parallel</li>
+            <li>Batch database operations</li>
+            <li>Make processing idempotent</li>
+            <li>Introduce checkpoints</li>
+            <li>Allow failed partitions to retry</li>
+            <li>Avoid one huge transaction</li>
+            <li>Measure throughput</li>
+          </ul>
+          <p>Given a record count and the deadline, I can calculate the required sustained throughput:</p>
+<pre><code>required throughput =
+N / 5400 seconds</code></pre>
+          <p>Then load test against that target with headroom. For example, I might target completion within 60 to 70 minutes operationally rather than designing exactly to the 90-minute deadline.</p>
+          <p>If the data changes daily, preprocessing the delta daily may also substantially reduce the weekly peak.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ============ Peak traffic ============ -->
   <section class="topic" id="peak" aria-labelledby="peak-h">
     <div class="topic-head">
       <h2 id="peak-h">Handling peak traffic</h2>
@@ -1528,7 +2650,7 @@ spec:
 
       <details class="qa">
         <summary>
-          <span class="num">53</span>
+          <span class="num">92</span>
           <span class="q">A microservice receives peak traffic in Kubernetes. How would you handle it?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1536,43 +2658,17 @@ spec:
           <p>I would first identify the actual bottleneck. It could be CPU, memory, database connections, thread pools, downstream services, ingress capacity, or external API limits.</p>
           <p>For a stateless service, I would normally use several layers of protection.</p>
           <h3>Horizontal scaling</h3>
-          <p>Configure a Horizontal Pod Autoscaler based on suitable metrics:</p>
-          <ul>
-            <li>CPU utilization</li>
-            <li>Request rate</li>
-            <li>Request latency</li>
-            <li>Active requests</li>
-            <li>Kafka consumer lag</li>
-            <li>Queue depth</li>
-          </ul>
-          <p>The HPA adjusts the replica count of workloads such as Deployments based on observed metrics.</p>
+          <p>Configure a Horizontal Pod Autoscaler based on suitable metrics: CPU utilization, request rate, request latency, active requests, Kafka consumer lag, or queue depth. The HPA adjusts the replica count of workloads such as Deployments based on observed metrics.</p>
           <h3>Cluster capacity</h3>
           <p>Ensure the cluster has sufficient node capacity. Workload autoscaling may need to be combined with node autoscaling so that newly created pods have somewhere to run.</p>
           <h3>Traffic protection</h3>
-          <p>Use:</p>
-          <ul>
-            <li>Rate limiting</li>
-            <li>Backpressure</li>
-            <li>Timeouts</li>
-            <li>Circuit breakers</li>
-            <li>Bulkheads</li>
-            <li>Load shedding</li>
-            <li>Request-size limits</li>
-            <li>Connection-pool limits</li>
-          </ul>
+          <p>Use rate limiting, backpressure, timeouts, circuit breakers, bulkheads, load shedding, request-size limits, and connection-pool limits.</p>
           <h3>Absorb asynchronous work</h3>
           <p>For workloads that do not need an immediate response, put work onto Kafka or a queue and scale consumers independently.</p>
           <h3>Reduce repeated work</h3>
           <p>Use caching where the data and consistency requirements allow it.</p>
           <h3>Prepare for sudden peaks</h3>
-          <p>Autoscaling takes time. For known traffic peaks, I may:</p>
-          <ul>
-            <li>Pre-scale before the event</li>
-            <li>Maintain minimum spare replicas</li>
-            <li>Overprovision some node capacity</li>
-            <li>Warm application and database caches</li>
-            <li>Run load and stress tests</li>
-          </ul>
+          <p>Autoscaling takes time. For known traffic peaks, I may pre-scale before the event, maintain minimum spare replicas, overprovision some node capacity, warm application and database caches, and run load and stress tests.</p>
           <p>Kubernetes documents node overprovisioning as a way to reduce scheduling delays during sudden scaling events.</p>
           <p>Finally, I would verify the complete path under load. Adding application replicas does not help if all replicas are blocked by the same database connection limit.</p>
         </div>
@@ -1580,7 +2676,7 @@ spec:
 
       <details class="qa">
         <summary>
-          <span class="num">54</span>
+          <span class="num">93</span>
           <span class="q">Would you scale based only on CPU?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1602,7 +2698,7 @@ spec:
     </div>
   </section>
 
-  <!-- ============ 9. Kubernetes memory consumption ============ -->
+  <!-- ============ Pod memory ============ -->
   <section class="topic" id="memory" aria-labelledby="memory-h">
     <div class="topic-head">
       <h2 id="memory-h">Kubernetes memory consumption</h2>
@@ -1613,13 +2709,14 @@ spec:
 
       <details class="qa">
         <summary>
-          <span class="num">55</span>
+          <span class="num">94</span>
           <span class="q">What is the difference between memory request and memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>The memory request is used by the scheduler to decide where the pod can run.</p>
-          <p>The memory limit is the maximum memory the container is allowed to consume.</p>
+          <p>The memory request is used by the scheduler to decide where the pod can run. The memory limit is the maximum memory the container is allowed to consume.</p>
+<pre><code>request → scheduler capacity planning
+limit   → maximum container memory</code></pre>
           <p>If a container exceeds its memory limit, it may be terminated with an <code>OOMKilled</code> status.</p>
           <p>Unlike CPU, memory cannot simply be throttled safely when the limit is exceeded.</p>
         </div>
@@ -1627,7 +2724,7 @@ spec:
 
       <details class="qa">
         <summary>
-          <span class="num">56</span>
+          <span class="num">95</span>
           <span class="q">What happens when a pod exceeds its memory limit?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1644,7 +2741,7 @@ Exit Code: 137</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">57</span>
+          <span class="num">96</span>
           <span class="q">How do you check memory usage for a pod?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1664,7 +2761,7 @@ kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
     </div>
   </section>
 
-  <!-- ============ 10. Restarts and OOM troubleshooting ============ -->
+  <!-- ============ Restarts and OOM ============ -->
   <section class="topic" id="oom" aria-labelledby="oom-h">
     <div class="topic-head">
       <h2 id="oom-h">Repeated restarts and OOM troubleshooting</h2>
@@ -1675,55 +2772,44 @@ kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">58</span>
-          <span class="q">A pod restarts every few hours. How would you troubleshoot it?<span class="hint">Tap to reveal</span></span>
+          <span class="num">97</span>
+          <span class="q">A pod restarts every few hours. What do you do?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>I would not immediately assume it is an out-of-memory issue. I would first confirm the termination reason.</p>
-<pre><code>kubectl get pod &lt;pod-name&gt; -n &lt;namespace&gt;
-
-kubectl describe pod &lt;pod-name&gt; -n &lt;namespace&gt;
-
-kubectl logs &lt;pod-name&gt; \
-  -n &lt;namespace&gt; \
-  --previous
-
+          <p>I first confirm the reason rather than immediately assuming an OOM.</p>
+<pre><code>kubectl describe pod &lt;pod&gt;
+kubectl logs &lt;pod&gt; --previous
 kubectl get events \
-  -n &lt;namespace&gt; \
   --sort-by=.metadata.creationTimestamp</code></pre>
-          <p>I would inspect:</p>
+          <p>I inspect:</p>
+<pre><code>Last State
+Reason
+Exit Code
+Restart Count
+Events</code></pre>
+          <p>If I see:</p>
+<pre><code>Reason: OOMKilled
+Exit Code: 137</code></pre>
+          <p>then memory is the likely cause.</p>
+          <p>Because it takes several hours before failure, I would investigate gradual resource growth:</p>
           <ul>
-            <li>Last container state</li>
-            <li>Exit code</li>
-            <li>Restart count</li>
-            <li>Kubernetes events</li>
-            <li>Application logs</li>
-            <li>Liveness and startup probe failures</li>
-            <li>Node evictions</li>
-            <li>Configuration errors</li>
-            <li>Dependency failures</li>
+            <li>Heap</li>
+            <li>Metaspace</li>
+            <li>Native memory</li>
+            <li>Threads</li>
+            <li>Caches</li>
+            <li>Connection pools</li>
+            <li>Queues</li>
+            <li>File descriptors</li>
           </ul>
-          <p><code>CrashLoopBackOff</code> is not the root cause. It means Kubernetes is applying increasing delays because the container repeatedly starts and fails. Causes can include application failures, invalid configuration, resource shortages, and failed health checks.</p>
-          <p>Because the restart happens after a few hours rather than immediately, I would correlate it with:</p>
-          <ul>
-            <li>Memory growth</li>
-            <li>Traffic patterns</li>
-            <li>Scheduled jobs</li>
-            <li>Cache growth</li>
-            <li>Thread growth</li>
-            <li>Database-pool usage</li>
-            <li>File-descriptor usage</li>
-            <li>Token or certificate expiry</li>
-            <li>Dependency timeouts</li>
-            <li>Liveness-probe failures</li>
-          </ul>
+          <p>I would also correlate the timing with traffic patterns, scheduled jobs, token or certificate expiry, dependency timeouts, and liveness-probe failures.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">59</span>
+          <span class="num">98</span>
           <span class="q">How do you confirm that a pod was killed because of memory?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1745,24 +2831,53 @@ Exit Code:   137</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">60</span>
-          <span class="q">What would you do when a pod keeps restarting because of an out-of-memory error?<span class="hint">Tap to reveal</span></span>
+          <span class="num">99</span>
+          <span class="q">After confirming <code>OOMKilled</code>, what do you do?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>I would follow a structured process.</p>
-          <p>First, confirm the failure reason:</p>
-<pre><code>kubectl describe pod &lt;pod-name&gt;
-kubectl logs &lt;pod-name&gt; --previous</code></pre>
-          <p>I would check for:</p>
+          <p>I would use three stages.</p>
+          <h3>Stabilize</h3>
+          <p>Temporarily increase the <strong>memory limit</strong> so the service remains alive long enough to collect diagnostics. I would adjust the memory <strong>request</strong> separately if scheduling assumptions are also wrong.</p>
+          <p>I would be careful not to present increasing memory as the final solution.</p>
+          <h3>Diagnose</h3>
+          <p>For Java I might enable:</p>
+<pre><code>-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/dumps</code></pre>
+          <p>I would ensure <code>/dumps</code> uses storage that survives long enough for the dump to be collected.</p>
+          <p>Then collect a heap dump, GC logs, Java Flight Recorder data, APM metrics, and native-memory metrics.</p>
+          <p>Analyse for:</p>
           <ul>
-            <li><code>OOMKilled</code></li>
-            <li>Exit code <code>137</code></li>
-            <li>Restart count</li>
-            <li>Kubernetes events</li>
-            <li>Current requests and limits</li>
+            <li>Unbounded cache</li>
+            <li>Static collections</li>
+            <li>ThreadLocal leaks</li>
+            <li>Huge persistence contexts</li>
+            <li>Unreleased buffers</li>
+            <li>Queue growth</li>
+            <li>Unexpected object retention</li>
           </ul>
-          <p>Next, I would determine whether the issue is caused by:</p>
+          <p>I would also check non-heap memory. The Kubernetes memory limit applies to the entire container, not only the Java heap.</p>
+          <h3>Fix and verify</h3>
+          <p>After fixing:</p>
+          <ul>
+            <li>Load test</li>
+            <li>Run beyond the original failure period</li>
+            <li>Verify memory reaches a stable plateau</li>
+            <li>Measure GC</li>
+            <li>Right-size the memory request and limit</li>
+          </ul>
+          <p>I would not automatically revert to the old memory setting. I would configure the container based on measured behaviour.</p>
+        </div>
+      </details>
+
+      <details class="qa">
+        <summary>
+          <span class="num">100</span>
+          <span class="q">What would you check in the application when a Java pod keeps being OOMKilled?<span class="hint">Tap to reveal</span></span>
+          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="answer">
+          <p>I would determine whether the issue is caused by:</p>
           <ul>
             <li>A memory leak</li>
             <li>Incorrect JVM heap configuration</li>
@@ -1779,104 +2894,19 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 -Xms
 -XX:MaxRAMPercentage
 -XX:InitialRAMPercentage</code></pre>
-          <p>The Java heap limit must leave room for non-heap memory, including:</p>
-          <ul>
-            <li>Metaspace</li>
-            <li>Thread stacks</li>
-            <li>Direct buffers</li>
-            <li>Native libraries</li>
-            <li>JIT compiler memory</li>
-            <li>Garbage collector structures</li>
-          </ul>
-          <p>For example, setting <code>-Xmx</code> equal to the Kubernetes memory limit is unsafe.</p>
-          <p>As a temporary mitigation, I may increase the pod memory limit or reduce traffic. But I would not treat that as the final fix without understanding the growth pattern.</p>
-          <p>Then I would collect evidence using:</p>
-          <ul>
-            <li>Heap dumps</li>
-            <li>Java Flight Recorder</li>
-            <li>GC logs</li>
-            <li>APM memory metrics</li>
-            <li>Thread counts</li>
-            <li>Allocation profiling</li>
-          </ul>
-          <p>Finally, I would fix the root cause, run a load test, and set memory requests and limits based on measured behaviour with suitable headroom.</p>
+          <p>The Java heap limit must leave room for non-heap memory, including metaspace, thread stacks, direct buffers, native libraries, JIT compiler memory, and garbage-collector structures.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">61</span>
-          <span class="q">What would you do after confirming <code>OOMKilled</code>?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>I would handle it in three stages.</p>
-          <h3>1. Stabilize the service</h3>
-          <p>As an immediate mitigation, I may increase the container's memory <strong>limit</strong> so that it can stay alive long enough to collect diagnostics.</p>
-          <p>I may also adjust the memory <strong>request</strong> if the existing request is too low for correct scheduling or appropriate quality of service. The request is used for scheduling, while the limit controls how much memory the container may consume.</p>
-          <p>I would be careful not to present increasing memory as the final solution.</p>
-          <h3>2. Collect evidence</h3>
-          <p>For a Java application, I would enable heap dumps:</p>
-<pre><code>-XX:+HeapDumpOnOutOfMemoryError
--XX:HeapDumpPath=/dumps</code></pre>
-          <p>I would ensure <code>/dumps</code> uses storage that survives long enough for the dump to be collected.</p>
-          <p>I would also collect:</p>
-          <ul>
-            <li>GC logs</li>
-            <li>Java Flight Recorder data</li>
-            <li>Heap-usage metrics</li>
-            <li>Metaspace metrics</li>
-            <li>Direct-buffer usage</li>
-            <li>Thread count</li>
-            <li>Native-memory usage</li>
-            <li>Request and job activity</li>
-            <li>Application logs</li>
-          </ul>
-          <p>I would analyse the heap dump using a tool such as Eclipse MAT and look for:</p>
-          <ul>
-            <li>Large retained object graphs</li>
-            <li>Unbounded caches</li>
-            <li>Static collections</li>
-            <li>ThreadLocal values</li>
-            <li>Unreleased sessions or buffers</li>
-            <li>Excessive queued tasks</li>
-            <li>Large request or response objects</li>
-            <li>JPA persistence-context growth</li>
-          </ul>
-          <p>I would also check non-heap memory. The Kubernetes memory limit applies to the entire container, not only the Java heap.</p>
-          <h3>3. Fix and verify</h3>
-          <p>After identifying the root cause, I would:</p>
-          <ol>
-            <li>Fix the leak or memory-growth issue.</li>
-            <li>Reproduce the scenario under load.</li>
-            <li>Verify that memory reaches a stable plateau.</li>
-            <li>Confirm GC behaviour and response latency.</li>
-            <li>Run the service for longer than the original failure window.</li>
-            <li>Set the request and limit to measured values with suitable headroom.</li>
-            <li>Deploy gradually and monitor it.</li>
-          </ol>
-          <p>I would not automatically revert to the original memory settings. I would right-size them based on the fixed application's measured behaviour.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">62</span>
+          <span class="num">101</span>
           <span class="q">The pod limit is 1 GiB. Should the Java heap also be 1 GiB?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p>No.</p>
-          <p>The Java process uses memory outside the heap, including:</p>
-          <ul>
-            <li>Metaspace</li>
-            <li>Thread stacks</li>
-            <li>Direct buffers</li>
-            <li>Native libraries</li>
-            <li>JIT compiler memory</li>
-            <li>Garbage-collector structures</li>
-            <li>JVM internal data</li>
-          </ul>
+          <p>The Java process uses memory outside the heap, including metaspace, thread stacks, direct buffers, native libraries, JIT compiler memory, garbage-collector structures, and JVM internal data.</p>
           <p>If <code>-Xmx</code> is set to the entire container limit, the process can be killed even when the Java heap itself has not reached <code>-Xmx</code>.</p>
           <p>As a starting point I may allocate perhaps 60 to 75 percent of the container limit to the heap, then measure actual non-heap and native usage:</p>
 <pre><code>-XX:MaxRAMPercentage=70</code></pre>
@@ -1886,29 +2916,19 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">63</span>
+          <span class="num">102</span>
           <span class="q">What is <code>CrashLoopBackOff</code>?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
           <p><code>CrashLoopBackOff</code> means a container repeatedly starts and fails, and Kubernetes is increasing the delay before restarting it again.</p>
-          <p>It is not the root cause. I would inspect:</p>
-          <ul>
-            <li><code>kubectl describe pod</code></li>
-            <li>Current and previous logs</li>
-            <li>Exit code</li>
-            <li>Probe failures</li>
-            <li>Missing configuration</li>
-            <li>Permission errors</li>
-            <li>OOM events</li>
-            <li>Dependency failures</li>
-          </ul>
+          <p>It is not the root cause. I would inspect <code>kubectl describe pod</code>, current and previous logs, the exit code, probe failures, missing configuration, permission errors, OOM events, and dependency failures.</p>
         </div>
       </details>
 
       <details class="qa">
         <summary>
-          <span class="num">64</span>
+          <span class="num">103</span>
           <span class="q">Can a liveness probe cause repeated restarts?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -1928,7 +2948,7 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
     </div>
   </section>
 
-  <!-- ============ 11. Helm ============ -->
+  <!-- ============ Helm ============ -->
   <section class="topic" id="helm" aria-labelledby="helm-h">
     <div class="topic-head">
       <h2 id="helm-h">Slow Helm deployments</h2>
@@ -1939,33 +2959,31 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">65</span>
+          <span class="num">104</span>
           <span class="q">A Helm chart takes 30 minutes to deploy. What could cause it?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>I would first determine whether the delay is caused by Helm rendering the chart, Kubernetes creating the resources, or Helm waiting for the resources to become ready.</p>
-          <p>If it consistently takes or fails at exactly 30 minutes, I would inspect whether the pipeline uses:</p>
+          <p>I would first determine whether Helm itself is slow or whether Helm is waiting for Kubernetes.</p>
+          <p>If it consistently takes around 30 minutes, I would specifically check:</p>
 <pre><code>--wait
 --atomic
 --timeout 30m</code></pre>
-          <p>With waiting enabled, Helm can wait for Kubernetes resources and hook Jobs to become ready until the configured timeout. Helm hooks can run Jobs before or after installation and upgrades.</p>
+          <p>With waiting enabled, Helm can wait for Kubernetes resources and hook Jobs to become ready until the configured timeout.</p>
           <p>Common causes include:</p>
           <ul>
-            <li>A pre-install or pre-upgrade hook Job taking a long time</li>
-            <li>A database-migration Job hanging</li>
-            <li>Pods remaining in <code>Pending</code></li>
-            <li>Insufficient CPU or memory on cluster nodes</li>
-            <li>Slow container-image pulls</li>
-            <li>An inaccessible image registry</li>
+            <li>Pods stuck in <code>Pending</code></li>
+            <li>Slow image pulls or an inaccessible registry</li>
             <li>Long-running init containers</li>
-            <li>Readiness or startup probes failing</li>
-            <li>Incorrect application configuration</li>
-            <li>PersistentVolumeClaims waiting for storage</li>
-            <li>LoadBalancer provisioning delays</li>
-            <li>Pods waiting for secrets or ConfigMaps</li>
-            <li>Deployment rollout failing</li>
-            <li>NetworkPolicies blocking dependencies</li>
+            <li>Readiness probes failing</li>
+            <li>Startup probes failing</li>
+            <li>Pre-install or pre-upgrade hooks</li>
+            <li>Database migration Jobs hanging</li>
+            <li>PVC provisioning</li>
+            <li>Insufficient cluster capacity</li>
+            <li>Missing ConfigMaps or Secrets</li>
+            <li>Network problems or NetworkPolicies blocking dependencies</li>
+            <li>Broken application startup</li>
             <li>Kubernetes API throttling</li>
             <li>A large number of resources or chart dependencies</li>
           </ul>
@@ -1974,149 +2992,42 @@ kubectl logs &lt;pod-name&gt; --previous</code></pre>
 
       <details class="qa">
         <summary>
-          <span class="num">66</span>
+          <span class="num">105</span>
           <span class="q">How would you troubleshoot a slow Helm deployment?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="answer">
-          <p>I would start with:</p>
-<pre><code>helm upgrade &lt;release&gt; &lt;chart&gt; \
-  --namespace &lt;namespace&gt; \
-  --debug</code></pre>
-          <p>Then inspect the Helm release:</p>
-<pre><code>helm status &lt;release&gt; -n &lt;namespace&gt;
-helm history &lt;release&gt; -n &lt;namespace&gt;</code></pre>
-          <p>Helm status shows whether a release is deployed, failed, pending installation, pending upgrade, or pending rollback.</p>
-          <p>Next, I would inspect Kubernetes:</p>
-<pre><code>kubectl get pods,jobs,deployments \
-  -n &lt;namespace&gt;
+          <p>I would inspect the release and the cluster:</p>
+<pre><code>helm status &lt;release&gt;
+helm history &lt;release&gt;
+
+kubectl get pods,jobs
 
 kubectl get events \
-  -n &lt;namespace&gt; \
   --sort-by=.metadata.creationTimestamp
 
-kubectl describe pod &lt;pod-name&gt; \
-  -n &lt;namespace&gt;
+kubectl describe pod &lt;pod&gt;
 
-kubectl logs &lt;pod-name&gt; \
-  -n &lt;namespace&gt;
+kubectl logs &lt;pod&gt;
 
-kubectl rollout status deployment/&lt;deployment&gt; \
-  -n &lt;namespace&gt;</code></pre>
-          <p>I would check hook Jobs separately:</p>
-<pre><code>kubectl get jobs \
-  -n &lt;namespace&gt; \
-  -o yaml</code></pre>
-          <p>And look for annotations such as:</p>
+kubectl rollout status deployment/&lt;deployment&gt;</code></pre>
+          <p>Helm status shows whether a release is deployed, failed, pending installation, pending upgrade, or pending rollback.</p>
+          <p>I would check hook Jobs separately and look for annotations such as:</p>
 <pre><code>helm.sh/hook: pre-install,pre-upgrade</code></pre>
-          <p>To separate chart rendering from cluster deployment, I would run:</p>
-<pre><code>time helm template &lt;release&gt; &lt;chart&gt; \
-  -n &lt;namespace&gt; &gt; rendered.yaml</code></pre>
-          <p>If <code>helm template</code> completes quickly, the delay is probably in Kubernetes resource creation, scheduling, hooks, or readiness rather than Helm template rendering.</p>
-          <p>Finally, I would optimize the actual cause:</p>
-          <ul>
-            <li>Reduce unnecessary hook work</li>
-            <li>Move long migrations into a controlled deployment step</li>
-            <li>Improve image size and registry access</li>
-            <li>Correct resource requests</li>
-            <li>Fix readiness and startup probes</li>
-            <li>Ensure sufficient cluster capacity</li>
-            <li>Add clear hook timeouts</li>
-            <li>Avoid waiting on resources that are not required for release completion</li>
-          </ul>
+          <p>I can also separate template rendering from deployment:</p>
+<pre><code>time helm template &lt;release&gt; &lt;chart&gt; &gt; rendered.yaml</code></pre>
+          <p>If that takes seconds but deployment takes 30 minutes, Helm templating is not the bottleneck.</p>
+          <p>Finally, I would optimize the actual cause: reduce unnecessary hook work, move long migrations into a controlled deployment step, improve image size and registry access, correct resource requests, fix readiness and startup probes, ensure sufficient cluster capacity, and add clear hook timeouts.</p>
         </div>
       </details>
 
     </div>
   </section>
 
-  <!-- ============ 12. AI-assisted development ============ -->
-  <section class="topic" id="ai" aria-labelledby="ai-h">
-    <div class="topic-head">
-      <h2 id="ai-h">AI-assisted development</h2>
-      <span class="topic-count">2 questions</span>
-    </div>
-    <div class="rule"></div>
-    <div class="deck">
-
-      <details class="qa">
-        <summary>
-          <span class="num">67</span>
-          <span class="q">React Redux and Spring Boot contain substantial boilerplate. Can AI help?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>Yes. This is one of the areas where I have applied AI-assisted development.</p>
-          <p>For React and Redux, AI can help generate:</p>
-          <ul>
-            <li>Typed components and hooks</li>
-            <li>Redux Toolkit slices</li>
-            <li>Selectors</li>
-            <li>Async thunks</li>
-            <li>RTK Query endpoints</li>
-            <li>Form validation</li>
-            <li>API clients</li>
-            <li>Reducer and component tests</li>
-            <li>Migration from legacy <code>connect</code> code to hooks</li>
-            <li>Storybook stories and test fixtures</li>
-          </ul>
-          <p>For Spring Boot, AI can help generate:</p>
-          <ul>
-            <li>Controllers, services, and repositories</li>
-            <li>Request and response DTOs</li>
-            <li>Entity-to-DTO mappers</li>
-            <li>Validation rules</li>
-            <li>JPA queries</li>
-            <li>Database migrations</li>
-            <li>Unit and integration tests</li>
-            <li>Testcontainers setup</li>
-            <li>OpenAPI definitions and clients</li>
-            <li>Configuration and deployment manifests</li>
-          </ul>
-          <p>However, I would first reduce unnecessary boilerplate through framework capabilities such as Redux Toolkit, Spring Data, Java records, MapStruct, and OpenAPI code generation. AI should complement these tools, not create large amounts of code that the framework can already generate.</p>
-          <p>My normal workflow is:</p>
-          <ol>
-            <li>Give the AI the repository conventions and relevant examples.</li>
-            <li>Ask it to make a small, scoped change.</li>
-            <li>Review the generated design and code.</li>
-            <li>Run compilation, linting, tests, and security checks.</li>
-            <li>Inspect the diff manually.</li>
-            <li>Correct the result and capture reusable instructions.</li>
-          </ol>
-          <p>AI is particularly useful for repetitive code, test coverage, codebase discovery, refactoring, and documentation. But developers remain responsible for business correctness, security, performance, and maintainability.</p>
-        </div>
-      </details>
-
-      <details class="qa">
-        <summary>
-          <span class="num">68</span>
-          <span class="q">How would you use AI safely in a bank?<span class="hint">Tap to reveal</span></span>
-          <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </summary>
-        <div class="answer">
-          <p>I would only use bank-approved models and tools, and I would follow the organization's rules for source code, production data, personal data, and confidential information.</p>
-          <p>I would also apply engineering controls:</p>
-          <ul>
-            <li>Do not send secrets or production customer data to an unapproved model</li>
-            <li>Keep generated changes small and reviewable</li>
-            <li>Require human review</li>
-            <li>Run automated tests and static analysis</li>
-            <li>Scan dependencies and generated code</li>
-            <li>Validate authorization and data-access behaviour</li>
-            <li>Keep an audit trail through normal version control</li>
-            <li>Measure whether AI improves quality and delivery rather than assuming it does</li>
-          </ul>
-          <p>The goal is not to let AI independently write the system. The goal is to help engineers understand, implement, test, and review changes more efficiently.</p>
-        </div>
-      </details>
-
-    </div>
-  </section>
-
-  <!-- ============ 13. Hands-on scenarios ============ -->
+  <!-- ============ Troubleshooting scenarios ============ -->
   <section class="topic" id="scenarios" aria-labelledby="scenarios-h">
     <div class="topic-head">
-      <h2 id="scenarios-h">Hands-on scenario questions</h2>
+      <h2 id="scenarios-h">Hands-on troubleshooting scenarios</h2>
       <span class="topic-count">4 questions</span>
     </div>
     <div class="rule"></div>
@@ -2124,7 +3035,7 @@ kubectl rollout status deployment/&lt;deployment&gt; \
 
       <details class="qa">
         <summary>
-          <span class="num">69</span>
+          <span class="num">106</span>
           <span class="q">A Java service becomes slow, memory grows continuously, and the pod restarts every few hours. How would you investigate?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -2148,7 +3059,7 @@ kubectl rollout status deployment/&lt;deployment&gt; \
 
       <details class="qa">
         <summary>
-          <span class="num">70</span>
+          <span class="num">107</span>
           <span class="q">Your Kafka consumer processes the same payment event twice. What would you do?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -2168,7 +3079,7 @@ kubectl rollout status deployment/&lt;deployment&gt; \
 
       <details class="qa">
         <summary>
-          <span class="num">71</span>
+          <span class="num">108</span>
           <span class="q">You need one message to trigger inventory, email, and analytics processing. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -2181,7 +3092,7 @@ kubectl rollout status deployment/&lt;deployment&gt; \
 
       <details class="qa">
         <summary>
-          <span class="num">72</span>
+          <span class="num">109</span>
           <span class="q">You need ten workers to process image-conversion jobs, but each job should be handled by one worker only. Queue or topic?<span class="hint">Tap to reveal</span></span>
           <svg class="caret" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
@@ -2194,6 +3105,7 @@ kubectl rollout status deployment/&lt;deployment&gt; \
     </div>
   </section>
 
+
   <div class="empty" id="empty">
     <p>No question matches <b id="empty-term"></b>. Try a shorter term, or clear the filter.</p>
   </div>
@@ -2205,19 +3117,20 @@ kubectl rollout status deployment/&lt;deployment&gt; \
       <p>At the end of the conversation, you could ask:</p>
       <ol>
         <li>How much of the role is hands-on Java development versus architecture and technical leadership?</li>
-        <li>How is the frontend organised today: React with Redux, RTK Query, or a different state approach?</li>
-        <li>Is the current messaging platform mainly Kafka, JMS, or a combination of both?</li>
+        <li>Which AI tooling is approved today, and how is the quality of AI-assisted changes measured?</li>
+        <li>Are reusable Skills or agents maintained centrally, and do they have evaluation suites?</li>
+        <li>How is the frontend organised: React with Redux, RTK Query, or a different state approach?</li>
+        <li>Is service-to-service communication mainly REST, gRPC, or event-driven through Kafka?</li>
         <li>What are the main production challenges today: performance, reliability, deployment frequency, or legacy modernisation?</li>
         <li>How are Kubernetes workloads deployed, monitored, and troubleshot in production?</li>
         <li>Are Java 21 features, such as virtual threads, already used in production?</li>
-        <li>Which AI-assisted development tools are approved, and how is generated code reviewed?</li>
         <li>What level of ownership would this role have over design decisions and production incidents?</li>
       </ol>
     </div>
   </section>
 
   <footer>
-    <span id="footer-count">72 questions across 13 topics</span>
+    <span id="footer-count"></span>
     <span>Sample answers to adapt, not to recite</span>
   </footer>
 </main>
