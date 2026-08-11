@@ -174,7 +174,7 @@
     {
       "id": "last30days",
       "title": "Last30Days",
-      "description": "TODO: describe this collection.",
+      "description": "Topic research digests aggregating recent discussions and projects from GitHub, Hacker News, Reddit, and YouTube.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 50
@@ -190,7 +190,7 @@
     {
       "id": "star-wars",
       "title": "Star Wars",
-      "description": "TODO: describe this collection.",
+      "description": "Interesting stuff from the Star Wars universe.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 70
