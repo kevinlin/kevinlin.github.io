@@ -14,7 +14,9 @@
     "fde/prompts/",
     "fde/analysis.md",
     "fde/source-swen-fde.md",
-    "fde/structured-content.md"
+    "fde/structured-content.md",
+    "star-wars/README.md",
+    "star-wars/star-wars-timeline.src.html"
   ],
   "collections": [
     {
@@ -184,6 +186,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 60
+    },
+    {
+      "id": "star-wars",
+      "title": "Star Wars",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 70
     }
   ],
   "entries": [
@@ -595,6 +605,15 @@
       "title": "Technical Interview: Consolidated Questions and Sample Answers",
       "collection": "java-interview",
       "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "star-wars-star-wars-timeline",
+      "source": "star-wars/star-wars-timeline.html",
+      "destination": "star-wars/star-wars-timeline/index.html",
+      "title": "Star wars timeline",
+      "collection": "star-wars",
+      "order": 10,
       "replacements": {}
     }
   ]
