@@ -202,6 +202,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 80
+    },
+    {
+      "id": "coding-agent-war",
+      "title": "Coding Agent War",
+      "description": "A collection of artefacts tracking the race between Claude Code, Codex, and the next generation of coding agents.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 90
     }
   ],
   "entries": [
@@ -625,11 +633,11 @@
       "replacements": {}
     },
     {
-      "id": "claude-code-vs-codex-adoption-index",
-      "source": "claude-code-vs-codex-adoption/index.html",
-      "destination": "claude-code-vs-codex-adoption/index/index.html",
-      "title": "Index",
-      "collection": "claude-code-vs-codex-adoption",
+      "id": "coding-agent-war-claude-code-vs-codex-adoption",
+      "source": "coding-agent-war/claude-code-vs-codex-adoption.html",
+      "destination": "coding-agent-war/claude-code-vs-codex-adoption/index.html",
+      "title": "Claude code vs codex adoption",
+      "collection": "coding-agent-war",
       "order": 10,
       "replacements": {}
     }
