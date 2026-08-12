@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Adoption curves for Claude Code and Codex aligned to each product's month one, with every data point marked as published or estimated.">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<title>Claude Code vs Codex — adoption by month since release</title>
+<style>
+  :root {
+    color-scheme: light;
+
+    --page:            #f2f2ef;
+    --surface:         #fcfcfb;
+    --surface-sunk:    #f6f6f3;
+
+    --ink:             #0b0b0b;
+    --ink-2:           #52514e;
+    --ink-3:           #6f6e69;   /* darkened from the reference muted so axis + caption text clears 4.5:1 */
+
+    --rule:            #e1e0d9;
+    --rule-strong:     #c3c2b7;
+    --ring:            rgba(11,11,11,.10);
+
+    --claude:          #eb6834;
+    --codex:           #2a78d6;
+
+    --shadow:
+      0 1px 2px rgba(11,11,11,.04),
+      0 2px 6px rgba(11,11,11,.04),
+      0 8px 20px rgba(11,11,11,.04);
+
+    --ease-out: cubic-bezier(.23,1,.32,1);
+
+    --font-ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+
+      --page:          #0d0d0d;
+      --surface:       #1a1a19;
+      --surface-sunk:  #141413;
+
+      --ink:           #ffffff;
+      --ink-2:         #c3c2b7;
+      --ink-3:         #898781;
+
+      --rule:          #2c2c2a;
+      --rule-strong:   #383835;
+      --ring:          rgba(255,255,255,.10);
+
+      --claude:        #d95926;
+      --codex:         #3987e5;
+
+      --shadow:
+        0 1px 2px rgba(0,0,0,.4),
+        0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --page:          #0d0d0d;
+    --surface:       #1a1a19;
+    --surface-sunk:  #141413;
+
+    --ink:           #ffffff;
+    --ink-2:         #c3c2b7;
+    --ink-3:         #898781;
+
+    --rule:          #2c2c2a;
+    --rule-strong:   #383835;
+    --ring:          rgba(255,255,255,.10);
+
+    --claude:        #d95926;
+    --codex:         #3987e5;
+
+    --shadow:
+      0 1px 2px rgba(0,0,0,.4),
+      0 8px 24px rgba(0,0,0,.3);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 40px 20px 96px;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(28px, 4.6vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -.022em;
+    font-weight: 700;
+    text-wrap: balance;
+    margin: 10px 0 0;
+  }
+
+  h2 {
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -.012em;
+    font-weight: 650;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 650;
+    letter-spacing: -.004em;
+    margin: 0;
+  }
+
+  p { text-wrap: pretty; margin: 0; }
+
+  .lede {
+    font-size: 17px;
+    color: var(--ink-2);
+    max-width: 66ch;
+    margin-top: 14px;
+  }
+
+  header .flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .flag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-2);
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+
+  /* ---- cards ---- */
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .tile { gap: 10px; padding: 20px; }
+
+  .tile .who {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex: none;
+  }
+  .swatch.claude { background: var(--claude); }
+  .swatch.codex  { background: var(--codex); }
+
+  .tile .value {
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+  }
+  .tile .value.absent {
+    font-size: 24px;
+    letter-spacing: -.012em;
+    color: var(--ink-2);
+  }
+  .tile .caption {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  /* ---- chart ---- */
+
+  .chart-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .chart-head .titles { display: flex; flex-direction: column; gap: 5px; }
+  .chart-head .sub { font-size: 13.5px; color: var(--ink-2); }
+
+  .toggle {
+    display: inline-flex;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+  }
+
+  .toggle button {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    background: none;
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 13px;
+    min-height: 34px;
+    cursor: pointer;
+    transition: background-color 140ms var(--ease-out), color 140ms var(--ease-out);
+  }
+  .toggle button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(11,11,11,.06);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .toggle button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+  }
+  .toggle button:active { transform: scale(.97); }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .plot-wrap { position: relative; }
+  svg.plot { display: block; width: 100%; height: auto; touch-action: pan-y; }
+
+  .grid-line   { stroke: var(--rule); stroke-width: 1; }
+  .axis-line   { stroke: var(--rule-strong); stroke-width: 1; }
+  .tick-label  { fill: var(--ink-3); font-size: 11px; font-family: var(--font-ui); font-variant-numeric: tabular-nums; }
+  .axis-title  { fill: var(--ink-3); font-size: 11px; font-family: var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+  .anno-line   { stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: 3 4; }
+  .anno-label  { fill: var(--ink-3); font-size: 10.5px; font-family: var(--font-mono); letter-spacing: .04em; }
+
+  .series-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .series-line.est { stroke-dasharray: 6 5; }
+  .line-claude { stroke: var(--claude); }
+  .line-codex  { stroke: var(--codex); }
+
+  .dot { stroke-width: 2; }
+  .dot.official-claude { fill: var(--claude); stroke: var(--surface); }
+  .dot.official-codex  { fill: var(--codex);  stroke: var(--surface); }
+  .dot.est-claude { fill: var(--surface); stroke: var(--claude); }
+  .dot.est-codex  { fill: var(--surface); stroke: var(--codex); }
+
+  .end-label { font-size: 12px; font-weight: 650; font-family: var(--font-ui); }
+  .end-label.claude { fill: var(--claude); }
+  .end-label.codex  { fill: var(--codex); }
+
+  .crosshair { stroke: var(--rule-strong); stroke-width: 1; }
+  .hit { fill: transparent; }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 11px 13px;
+    min-width: 190px;
+    max-width: 280px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--ink);
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(.97);
+    transition: opacity 120ms var(--ease-out), transform 120ms var(--ease-out);
+    z-index: 10;
+  }
+  .tooltip[data-open="true"] { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+  .tooltip .tt-head {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 7px;
+  }
+  .tooltip .tt-row { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+  .tooltip .tt-row .swatch { margin-top: 4px; }
+  .tooltip .tt-name { color: var(--ink-2); }
+  .tooltip .tt-val { margin-left: auto; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .tooltip .tt-note {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  /* ---- legend ---- */
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    border-top: 1px solid var(--rule);
+    margin-top: 2px;
+    padding-top: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .legend-key { width: 26px; height: 12px; flex: none; }
+
+  /* ---- table ---- */
+
+  .table-scroll { overflow-x: auto; margin: 0 -22px; padding: 0 22px; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 660px;
+    font-size: 13px;
+  }
+  caption {
+    text-align: left;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    padding-bottom: 14px;
+    text-wrap: pretty;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 400;
+    border-bottom-color: var(--rule-strong);
+    white-space: nowrap;
+  }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.when { color: var(--ink-2); white-space: nowrap; }
+  td.note { color: var(--ink-2); font-size: 12.5px; line-height: 1.45; min-width: 260px; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 5px;
+    white-space: nowrap;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-2);
+  }
+  .pill.official { border-color: var(--ink-2); color: var(--ink); }
+
+  .prod-cell { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+  /* ---- notes ---- */
+
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .note-card { gap: 10px; padding: 20px; }
+  .note-card p { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+  .note-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+  .note-card li { margin-bottom: 6px; text-wrap: pretty; }
+  .note-card li:last-child { margin-bottom: 0; }
+
+  footer {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+  }
+  footer a { color: var(--ink-2); }
+  .src-list { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Adoption comparison · data note · Aug 2026</p>
+    <h1>Claude Code vs Codex, measured from each product's own month one</h1>
+    <p class="lede">
+      The brief was desktop-app MAU. Neither Anthropic nor OpenAI publishes that number, so this
+      chart uses the closest metric both companies actually talk about — <strong>weekly active
+      users</strong> for their coding agents — with every point marked as either a published figure
+      or an estimate.
+    </p>
+    <div class="flags">
+      <span class="flag">Metric: weekly active users</span>
+      <span class="flag">Two x-axis views: month-since-release, calendar</span>
+      <span class="flag">Claude Code · from 24 Feb 2025</span>
+      <span class="flag">Codex · from 16 Apr 2025</span>
+    </div>
+  </header>
+
+  <section class="tiles" aria-label="Headline figures">
+    <div class="card tile">
+      <div class="who"><span class="swatch codex" aria-hidden="true"></span>Codex</div>
+      <div class="value">8.0M</div>
+      <div class="caption">
+        Weekly active users, reported by OpenAI in July 2026 — month 16. Eleven separate
+        figures have been published along the way, so this curve is measured, not modelled.
+      </div>
+    </div>
+    <div class="card tile">
+      <div class="who"><span class="swatch claude" aria-hidden="true"></span>Claude Code</div>
+      <div class="value absent">No absolute figure, ever</div>
+      <div class="caption">
+        Anthropic has published growth <em>multiples</em> only — "10x in three months",
+        "doubled since 1 January" — never a user count. Every point on its line is
+        reconstructed from those multiples plus third-party reporting.
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Adoption chart">
+    <div class="chart-head">
+      <div class="titles">
+        <h2>Weekly active users by month since launch</h2>
+        <p class="sub">Solid line and filled dots are published figures. Dashed line and hollow dots are estimates.</p>
+      </div>
+      <div class="toggle" role="group" aria-label="X-axis mode">
+        <button type="button" id="btn-months" aria-pressed="true">Months since release</button>
+        <button type="button" id="btn-calendar" aria-pressed="false">Calendar time</button>
+      </div>
+    </div>
+
+    <div class="plot-wrap">
+      <svg class="plot" id="plot" viewBox="0 0 960 440" role="img"
+           aria-label="Line chart of weekly active users against months since each product's release. Codex rises from roughly 0.6 million at month 10 to 8 million at month 16. Claude Code, estimated throughout, rises from near zero at month 1 to roughly 3.5 million at month 16."></svg>
+      <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <svg class="legend-key" viewBox="0 0 26 12" aria-hidden="true">
+          <line x1="0" y1="6" x2="26" y2="6" class="series-line line-claude"></line>
+          <circle cx="13" cy="6" r="4" class="dot est-claude"></circle>
+        </svg>
+        Claude Code
+      </div>
+      <div class="legend-item">
+        <svg class="legend-key" viewBox="0 0 26 12" aria-hidden="true">
+          <line x1="0" y1="6" x2="26" y2="6" class="series-line line-codex"></line>
+          <circle cx="13" cy="6" r="4" class="dot official-codex"></circle>
+        </svg>
+        Codex
+      </div>
+      <div class="legend-item">
+        <svg class="legend-key" viewBox="0 0 26 12" aria-hidden="true">
+          <line x1="0" y1="6" x2="26" y2="6" class="series-line" style="stroke: var(--ink-3)"></line>
+          <circle cx="13" cy="6" r="4" style="fill: var(--ink-3); stroke: var(--surface); stroke-width: 2"></circle>
+        </svg>
+        Published by the vendor
+      </div>
+      <div class="legend-item">
+        <svg class="legend-key" viewBox="0 0 26 12" aria-hidden="true">
+          <line x1="0" y1="6" x2="26" y2="6" class="series-line est" style="stroke: var(--ink-3)"></line>
+          <circle cx="13" cy="6" r="4" style="fill: var(--surface); stroke: var(--ink-3); stroke-width: 2"></circle>
+        </svg>
+        Estimated or inferred
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Data provenance">
+    <div class="titles" style="display:flex;flex-direction:column;gap:5px">
+      <h2>Every point, and where it came from</h2>
+      <p class="sub">The table is the chart. Nothing is plotted that isn't listed here.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Weekly active users, listed in calendar order. "Month" counts from each product's own first public release — month 1 is February 2025 for Claude Code and April 2025 for Codex — which is why the month numbers don't run in step.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col">Month</th>
+            <th scope="col">When</th>
+            <th scope="col">WAU</th>
+            <th scope="col">Status</th>
+            <th scope="col">Basis</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="notes" aria-label="Caveats">
+    <div class="card note-card">
+      <h3>Why this isn't a desktop-app MAU chart</h3>
+      <p>
+        The Claude desktop app shipped on 31 October 2024, sixteen months before the Codex desktop
+        app on 2 February 2026 — but Anthropic has never broken out desktop usage, and OpenAI's
+        Codex figures cover every surface at once: CLI, cloud, IDE extension and the desktop app
+        together. There is no month-1-onward MAU series for either app to plot.
+      </p>
+    </div>
+    <div class="card note-card">
+      <h3>Three things that distort the comparison</h3>
+      <ul>
+        <li><strong>Different starting lines.</strong> Claude Code's month 16 is May 2026; Codex's month 16 is July 2026. The same x-position is two months apart in real time.</li>
+        <li><strong>Codex's July spike is partly definitional.</strong> On 9 July 2026 Codex merged into the ChatGPT desktop app, widening who counts as a Codex user.</li>
+        <li><strong>Codex is no longer developer-only.</strong> OpenAI says knowledge workers are about 20% of users and growing three times faster than developers.</li>
+      </ul>
+    </div>
+    <div class="card note-card">
+      <h3>Numbers to treat with suspicion</h3>
+      <p>
+        Aggregator sites quote "4.2M Claude Code WAU in Q1 2026" with no source, and several
+        attribute Codex's 1.6M February figure to Claude Code. Claude's headline totals — 245M,
+        56M, 18.9M — are different metrics for different surfaces from different vendors, and are
+        not comparable to anything here.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Compiled 12 August 2026. Published figures come from OpenAI announcements and newsroom posts,
+      Anthropic's Series G announcement, and press reporting of executive statements. Estimated
+      points are interpolations between published figures or are derived from published growth
+      multiples and run-rate revenue; they carry real uncertainty and should not be quoted as fact.
+    </p>
+    <div class="src-list">
+      <a href="https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation">Anthropic Series G</a>
+      <a href="https://openai.com/index/codex-for-knowledge-work/">OpenAI: Codex for knowledge work</a>
+      <a href="https://openai.com/index/introducing-the-codex-app/">OpenAI: Introducing the Codex app</a>
+      <a href="https://en.wikipedia.org/wiki/OpenAI_Codex_(AI_agent)">Codex release timeline</a>
+      <a href="https://www.constellationr.com/insights/news/openai-touts-broadening-codex-usage-5-million-weekly-active-users">Constellation Research</a>
+      <a href="https://thenewstack.io/gpt-5-6-codex-user-surge/">The New Stack</a>
+      <a href="https://www.latent.space/p/ainews-codex-usage-up-10x-in-6-months">Latent Space</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- data -------------------------------------------------------------
+  // v = weekly active users, millions. t = decimal year-month for calendar mode.
+  var claude = {
+    key: "claude",
+    name: "Claude Code",
+    release: "24 Feb 2025",
+    points: [
+      { m: 1,  when: "Feb 2025", t: 2025 +  1/12, v: 0.02, official: false, note: "Research preview ships alongside Claude 3.7 Sonnet. No usage figure given." },
+      { m: 4,  when: "May 2025", t: 2025 +  4/12, v: 0.10, official: false, note: "General availability, 22 May 2025. Base for Anthropic's later '10x' claim, which was never given an absolute value." },
+      { m: 7,  when: "Aug 2025", t: 2025 +  7/12, v: 0.60, official: false, note: "Anthropic: grown more than 10x in the three months since GA. Scaled from the estimated GA base." },
+      { m: 8,  when: "Sep 2025", t: 2025 +  8/12, v: 0.70, official: false, note: "Run-rate revenue passes $500M (published). User count inferred from it." },
+      { m: 10, when: "Nov 2025", t: 2025 + 10/12, v: 0.90, official: false, note: "Run-rate revenue passes $1B (published). User count inferred from it." },
+      { m: 12, when: "Jan 2026", t: 2026 +  0/12, v: 1.00, official: false, note: "Back-derived: Anthropic said WAU doubled between 1 Jan and 12 Feb 2026." },
+      { m: 13, when: "Feb 2026", t: 2026 +  1/12, v: 2.00, official: false, note: "About 2M WAU, widely reported around the Series G. Anthropic itself published only the doubling, not the number." },
+      { m: 16, when: "May 2026", t: 2026 +  4/12, v: 3.50, official: false, note: "Run-rate revenue reaches $8B (published). Users inferred, and deliberately scaled below revenue growth. Last point with any basis." }
+    ]
+  };
+
+  var codex = {
+    key: "codex",
+    name: "Codex",
+    release: "16 Apr 2025",
+    points: [
+      { m: 1,  when: "Apr 2025", t: 2025 +  3/12, v: 0.01, official: false, note: "Codex CLI open-sourced, 16 Apr 2025. No usage figure given." },
+      { m: 2,  when: "May 2025", t: 2025 +  4/12, v: 0.03, official: false, note: "Codex cloud agent research preview, 16 May 2025." },
+      { m: 5,  when: "Aug 2025", t: 2025 +  7/12, v: 0.05, official: false, note: "Implied baseline for OpenAI's November 2025 statement that Codex usage was up 10x since August." },
+      { m: 8,  when: "Nov 2025", t: 2025 + 10/12, v: 0.45, official: false, note: "Derived from the same 10x-since-August statement in OpenAI's November business update." },
+      { m: 10, when: "Jan 2026", t: 2026 +  0/12, v: 0.60, official: true,  note: "About 600k WAU at the start of 2026, stated by OpenAI leadership. Over 1M developers used Codex in the month before the desktop launch." },
+      { m: 11, when: "Feb 2026", t: 2026 +  1/12, v: 1.60, official: true,  note: "1.6M WAU. Desktop app launches on macOS 2 Feb; GPT-5.3-Codex lands 5 Feb." },
+      { m: 12, when: "Mar 2026", t: 2026 +  2/12, v: 2.00, official: true,  note: "Passes 2M WAU, described by OpenAI as 5x growth since the start of 2026. Windows app arrives 4 Mar." },
+      { m: 13, when: "Apr 2026", t: 2026 +  3/12, v: 4.00, official: true,  note: "Over 3M weekly in early April, then 4M by mid-April after adding 1M in two weeks." },
+      { m: 14, when: "May 2026", t: 2026 +  4/12, v: 4.50, official: false, note: "Interpolated between the published 4M (April) and 5M (2 June) figures." },
+      { m: 15, when: "Jun 2026", t: 2026 +  5/12, v: 5.00, official: true,  note: "Over 5M WAU, OpenAI newsroom, 2 June 2026 — more than 6x since the desktop app launched." },
+      { m: 16, when: "Jul 2026", t: 2026 +  6/12, v: 8.00, official: true,  note: "6M on 12 Jul, 7M a day later, 8M by 19 Jul, after GPT-5.6 and the merge into the ChatGPT desktop app." }
+    ]
+  };
+
+  var series = [claude, codex];
+
+  // Codex desktop app launch, annotated on both axes.
+  var anno = { m: 11, t: 2026 + 1/12, label: "Codex desktop app" };
+
+  // ---- geometry ---------------------------------------------------------
+  var W = 960, H = 440;
+  var M = { top: 26, right: 96, bottom: 62, left: 62 };
+  var PW = W - M.left - M.right;
+  var PH = H - M.top - M.bottom;
+
+  var Y_MAX = 8.5;
+  var X_MONTH = [0.5, 16.8];
+  var X_CAL = [2025 + 1/12 - 0.06, 2026 + 6/12 + 0.06];
+
+  var mode = "months";
+
+  function yScale(v) { return M.top + PH - (v / Y_MAX) * PH; }
+
+  function xScale(p) {
+    var d = mode === "months" ? X_MONTH : X_CAL;
+    var val = mode === "months" ? p.m : p.t;
+    return M.left + ((val - d[0]) / (d[1] - d[0])) * PW;
+  }
+
+  function xScaleRaw(val) {
+    var d = mode === "months" ? X_MONTH : X_CAL;
+    return M.left + ((val - d[0]) / (d[1] - d[0])) * PW;
+  }
+
+  function fmt(v) { return v < 0.1 ? "<0.1M" : v.toFixed(1) + "M"; }
+
+  var NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) { if (attrs[k] !== null) n.setAttribute(k, attrs[k]); }
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  var svg = document.getElementById("plot");
+  var tooltip = document.getElementById("tooltip");
+
+  function render() {
+    while (svg.firstChild) { svg.removeChild(svg.firstChild); }
+
+    // y grid + labels
+    for (var v = 0; v <= 8; v += 2) {
+      var y = yScale(v);
+      svg.appendChild(el("line", { x1: M.left, y1: y, x2: M.left + PW, y2: y, "class": v === 0 ? "axis-line" : "grid-line" }));
+      svg.appendChild(el("text", { x: M.left - 12, y: y + 4, "text-anchor": "end", "class": "tick-label" }, v === 0 ? "0" : v + "M"));
+    }
+    svg.appendChild(el("text", { x: M.left - 12, y: M.top - 10, "text-anchor": "end", "class": "axis-title" }, "WAU"));
+
+    // x ticks
+    var ticks = [];
+    if (mode === "months") {
+      for (var m = 2; m <= 16; m += 2) { ticks.push({ at: m, label: String(m) }); }
+    } else {
+      var labels = ["Apr", "Jul", "Oct", "Jan", "Apr", "Jul"];
+      var starts = [2025 + 3/12, 2025 + 6/12, 2025 + 9/12, 2026 + 0/12, 2026 + 3/12, 2026 + 6/12];
+      for (var i = 0; i < starts.length; i++) {
+        ticks.push({ at: starts[i], label: labels[i] + (i === 3 ? " '26" : (i === 0 ? " '25" : "")) });
+      }
+    }
+    ticks.forEach(function (t) {
+      var x = xScaleRaw(t.at);
+      svg.appendChild(el("text", { x: x, y: M.top + PH + 22, "text-anchor": "middle", "class": "tick-label" }, t.label));
+    });
+    svg.appendChild(el("text", {
+      x: M.left + PW / 2, y: M.top + PH + 48, "text-anchor": "middle", "class": "axis-title"
+    }, mode === "months" ? "Months since each product's first release" : "Calendar time"));
+
+    // annotation: Codex desktop app launch
+    var ax = xScaleRaw(mode === "months" ? anno.m : anno.t);
+    svg.appendChild(el("line", { x1: ax, y1: M.top + 14, x2: ax, y2: M.top + PH, "class": "anno-line" }));
+    svg.appendChild(el("text", { x: ax + 6, y: M.top + 10, "class": "anno-label" }, anno.label));
+
+    // series
+    series.forEach(function (s) {
+      // Split into runs so that a segment is solid only when both ends are published.
+      for (var i = 0; i < s.points.length - 1; i++) {
+        var a = s.points[i], b = s.points[i + 1];
+        var solid = a.official && b.official;
+        svg.appendChild(el("line", {
+          x1: xScale(a), y1: yScale(a.v), x2: xScale(b), y2: yScale(b.v),
+          "class": "series-line line-" + s.key + (solid ? "" : " est")
+        }));
+      }
+      s.points.forEach(function (p) {
+        svg.appendChild(el("circle", {
+          cx: xScale(p), cy: yScale(p.v), r: 4.5,
+          "class": "dot " + (p.official ? "official-" : "est-") + s.key
+        }));
+      });
+      var last = s.points[s.points.length - 1];
+      svg.appendChild(el("text", {
+        x: xScale(last) + 12, y: yScale(last.v) + 4, "class": "end-label " + s.key
+      }, s.name));
+      svg.appendChild(el("text", {
+        x: xScale(last) + 12, y: yScale(last.v) + 20, "class": "tick-label"
+      }, fmt(last.v) + (last.official ? "" : " est.")));
+    });
+
+    // hover layer
+    var cross = el("line", { x1: 0, y1: M.top, x2: 0, y2: M.top + PH, "class": "crosshair", opacity: 0 });
+    cross.setAttribute("id", "crosshair");
+    svg.appendChild(cross);
+
+    var hit = el("rect", { x: M.left, y: M.top, width: PW, height: PH, "class": "hit" });
+    hit.setAttribute("id", "hit");
+    svg.appendChild(hit);
+  }
+
+  // ---- interaction ------------------------------------------------------
+  function nearest(xUser) {
+    var best = null;
+    series.forEach(function (s) {
+      s.points.forEach(function (p) {
+        var d = Math.abs(xScale(p) - xUser);
+        if (!best || d < best.d) { best = { d: d, p: p, s: s }; }
+      });
+    });
+    return best;
+  }
+
+  function showAt(clientX, clientY) {
+    var rect = svg.getBoundingClientRect();
+    var scale = W / rect.width;
+    var xUser = (clientX - rect.left) * scale;
+    var best = nearest(xUser);
+    if (!best || best.d > 44) { hide(); return; }
+
+    var anchorVal = mode === "months" ? best.p.m : best.p.t;
+    var matches = [];
+    series.forEach(function (s) {
+      s.points.forEach(function (p) {
+        var v = mode === "months" ? p.m : p.t;
+        if (Math.abs(v - anchorVal) < 0.001) { matches.push({ s: s, p: p }); }
+      });
+    });
+
+    var cx = xScaleRaw(anchorVal);
+    var ch = document.getElementById("crosshair");
+    ch.setAttribute("x1", cx); ch.setAttribute("x2", cx);
+    ch.setAttribute("opacity", 1);
+
+    var head = mode === "months"
+      ? "Month " + best.p.m + " · " + best.p.when
+      : best.p.when;
+
+    var html = '<div class="tt-head">' + head + "</div>";
+    matches.forEach(function (mm) {
+      html += '<div class="tt-row">'
+        + '<span class="swatch ' + mm.s.key + '" aria-hidden="true"></span>'
+        + '<span class="tt-name">' + mm.s.name + (mm.p.official ? "" : " (est.)") + "</span>"
+        + '<span class="tt-val">' + fmt(mm.p.v) + "</span>"
+        + "</div>";
+    });
+    html += '<div class="tt-note">' + best.p.note + "</div>";
+    tooltip.innerHTML = html;
+    tooltip.setAttribute("data-open", "true");
+
+    var rectPos = svg.getBoundingClientRect();
+    var px = (cx / W) * rectPos.width;
+    var py = (yScale(best.p.v) / H) * rectPos.height;
+    tooltip.style.left = Math.max(110, Math.min(rectPos.width - 110, px)) + "px";
+    tooltip.style.top = Math.max(tooltip.offsetHeight + 8, py - 14) + "px";
+  }
+
+  function hide() {
+    tooltip.setAttribute("data-open", "false");
+    var ch = document.getElementById("crosshair");
+    if (ch) { ch.setAttribute("opacity", 0); }
+  }
+
+  svg.addEventListener("mousemove", function (e) { showAt(e.clientX, e.clientY); });
+  svg.addEventListener("mouseleave", hide);
+  svg.addEventListener("touchstart", function (e) {
+    if (e.touches.length) { showAt(e.touches[0].clientX, e.touches[0].clientY); }
+  }, { passive: true });
+  svg.addEventListener("touchmove", function (e) {
+    if (e.touches.length) { showAt(e.touches[0].clientX, e.touches[0].clientY); }
+  }, { passive: true });
+  svg.addEventListener("touchend", hide);
+
+  // ---- toggle -----------------------------------------------------------
+  var btnMonths = document.getElementById("btn-months");
+  var btnCal = document.getElementById("btn-calendar");
+
+  function setMode(next) {
+    mode = next;
+    btnMonths.setAttribute("aria-pressed", String(next === "months"));
+    btnCal.setAttribute("aria-pressed", String(next === "calendar"));
+    hide();
+    render();
+  }
+  btnMonths.addEventListener("click", function () { setMode("months"); });
+  btnCal.addEventListener("click", function () { setMode("calendar"); });
+
+  // ---- table ------------------------------------------------------------
+  var rows = [];
+  series.forEach(function (s) {
+    s.points.forEach(function (p) { rows.push({ s: s, p: p }); });
+  });
+  rows.sort(function (a, b) {
+    return a.p.t - b.p.t || a.s.key.localeCompare(b.s.key);
+  });
+
+  var tbody = document.getElementById("tbody");
+  rows.forEach(function (r) {
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td><span class="prod-cell"><span class="swatch ' + r.s.key + '" aria-hidden="true"></span>' + r.s.name + "</span></td>"
+      + '<td class="num">' + r.p.m + "</td>"
+      + '<td class="when">' + r.p.when + "</td>"
+      + '<td class="num">' + fmt(r.p.v) + "</td>"
+      + "<td>" + (r.p.official
+          ? '<span class="pill official">Published</span>'
+          : '<span class="pill">Estimate</span>') + "</td>"
+      + '<td class="note">' + r.p.note + "</td>";
+    tbody.appendChild(tr);
+  });
+
+  render();
+  window.addEventListener("resize", hide);
+})();
+</script>
+
+</body>
+</html>
