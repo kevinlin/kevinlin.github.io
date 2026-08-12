@@ -616,15 +616,6 @@
       "replacements": {}
     },
     {
-      "id": "java-interview-java-fullstack-interview-questions",
-      "source": "java-interview/java-fullstack-interview-questions.md",
-      "destination": "java-interview/java-fullstack-interview-questions/index.html",
-      "title": "Technical Interview: Consolidated Questions and Sample Answers",
-      "collection": "java-interview",
-      "order": 20,
-      "replacements": {}
-    },
-    {
       "id": "star-wars-star-wars-timeline",
       "source": "star-wars/star-wars-timeline.html",
       "destination": "star-wars/star-wars-timeline/index.html",
