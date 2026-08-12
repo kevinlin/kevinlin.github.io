@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Intelligence Index: Score vs. Output Tokens per Task</title>
+<title>Intelligence Index: Score vs. Cost per Task</title>
 <style>
 /* Shared styling for the Artificial Analysis Intelligence Index scatter charts.
    Editorial direction: warm paper ground, serif display, restrained rules,
@@ -283,8 +283,8 @@ td.num, th.num {
 <div class="page">
   <header>
     <p class="kicker">Artificial Analysis Intelligence Index</p>
-    <h1>Score vs. Output Tokens per Task</h1>
-    <p class="subtitle">How much thinking each model spends on one index task, plotted against the score it reaches. Token axis is logarithmic: each step right is roughly a doubling.</p>
+    <h1>Score vs. Cost per Task</h1>
+    <p class="subtitle">What one full run of the index costs at each reasoning-effort setting, plotted against the score it buys. Cost axis is logarithmic: each step right is roughly a doubling.</p>
   </header>
 
   <main id="main">
@@ -292,7 +292,7 @@ td.num, th.num {
 
     <div class="card">
       <figure class="chart-wrap" style="margin:0">
-        <canvas id="chart" role="img" aria-label="Scatter chart of Artificial Analysis Intelligence Index score against output tokens per task, on a logarithmic token axis. Full values are in the data table below."></canvas>
+        <canvas id="chart" role="img" aria-label="Scatter chart of Artificial Analysis Intelligence Index score against cost per task in US dollars, on a logarithmic cost axis. Full values are in the data table below."></canvas>
       </figure>
     </div>
 
@@ -303,7 +303,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>. Output tokens per task counts reasoning plus answer tokens. Connected points are the same model at different reasoning-effort settings.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 12 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Connected points are the same model at different reasoning-effort settings.</p>
   </main>
 </div>
 
@@ -588,54 +588,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     families: [
       { name: 'GPT-5.5', provider: 'OpenAI', points: [
-          { x: 2140, y: 43.46, label: 'GPT-5.5 (low)', al: 'right', ao: 8 },
-          { x: 5132, y: 50.41, label: 'GPT-5.5 (medium)', al: 'left', ao: 8 },
-          { x: 10076, y: 53.13, label: 'GPT-5.5 (high)', al: 'left', ao: 8 },
-          { x: 16064, y: 54.84, label: 'GPT-5.5 (xhigh)', al: 'bottom', ao: 24 } ] },
+          { x: 0.2589, y: 44.50, label: 'GPT-5.5 (low)', al: 'right', ao: 8 },
+          { x: 0.5002, y: 51.42, label: 'GPT-5.5 (medium)', al: 'bottom', ao: 10 },
+          { x: 0.8033, y: 54.67, label: 'GPT-5.5 (high)', al: 'right', ao: 8 },
+          { x: 1.1747, y: 56.31, label: 'GPT-5.5 (xhigh)', al: 'top', ao: 10 } ] },
       { name: 'GPT-5.6 Sol', provider: 'OpenAI', points: [
-          { x: 2508, y: 49.44, label: 'GPT-5.6 Sol (low)', al: 'right', ao: 8 },
-          { x: 4203, y: 53.59, label: 'GPT-5.6 Sol (medium)', al: 'top', ao: 8 },
-          { x: 6690, y: 55.87, label: 'GPT-5.6 Sol (high)', al: 'left', ao: 8 },
-          { x: 9941, y: 57.65, label: 'GPT-5.6 Sol (xhigh)', al: 'left', ao: 8 },
-          { x: 15346, y: 58.89, label: 'GPT-5.6 Sol (max)', al: 'left', ao: 8 } ] },
+          { x: 0.2311, y: 50.73, label: 'GPT-5.6 Sol (low)', al: 'left', ao: 8 },
+          { x: 0.3717, y: 55.57, label: 'GPT-5.6 Sol (medium)', al: 'left', ao: 8 },
+          { x: 0.5477, y: 57.33, label: 'GPT-5.6 Sol (high)', al: 'right', ao: 8 },
+          { x: 0.8072, y: 59.01, label: 'GPT-5.6 Sol (xhigh)', al: 'right', ao: 8 },
+          { x: 1.2312, y: 60.93, label: 'GPT-5.6 Sol (max)', al: 'bottom', ao: 10 } ] },
       { name: 'GPT-5.6 Terra', provider: 'OpenAI', points: [
-          { x: 2258, y: 40.47, label: 'GPT-5.6 Terra (low)', al: 'right', ao: 8 },
-          { x: 3769, y: 45.57, label: 'GPT-5.6 Terra (medium)', al: 'right', ao: 8 },
-          { x: 7738, y: 48.95, label: 'GPT-5.6 Terra (high)', al: 'right', ao: 8 },
-          { x: 11036, y: 51.60, label: 'GPT-5.6 Terra (xhigh)', al: 'right', ao: 8 },
-          { x: 19370, y: 54.95, label: 'GPT-5.6 Terra (max)', al: 'bottom', ao: 8 } ] },
+          { x: 0.0939, y: 41.30, label: 'GPT-5.6 Terra (low)', al: 'right', ao: 8 },
+          { x: 0.1190, y: 46.76, label: 'GPT-5.6 Terra (medium)', al: 'right', ao: 8 },
+          { x: 0.2183, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 10 },
+          { x: 0.3050, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'top', ao: 8 },
+          { x: 0.5080, y: 56.58, label: 'GPT-5.6 Terra (max)', al: 'left', ao: 8 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
-          { x: 6067, y: 50.61, label: 'Claude Opus 5 (low)', al: 'right', ao: 8 },
-          { x: 11564, y: 56.28, label: 'Claude Opus 5 (medium)', al: 'right', ao: 8 },
-          { x: 19692, y: 58.86, label: 'Claude Opus 5 (high)', al: 'right', ao: 8 },
-          { x: 28703, y: 60.07, label: 'Claude Opus 5 (xhigh)', al: 'left', ao: 8 },
-          { x: 36978, y: 60.69, label: 'Claude Opus 5 (max)', al: 'top', ao: 8 } ] },
+          { x: 0.4252, y: 52.46, label: 'Claude Opus 5 (low)', al: 'bottom', ao: 10 },
+          { x: 0.7243, y: 58.64, label: 'Claude Opus 5 (medium)', al: 'left', ao: 8 },
+          { x: 1.2268, y: 61.48, label: 'Claude Opus 5 (high)', al: 'left', ao: 8 },
+          { x: 1.8012, y: 62.52, label: 'Claude Opus 5 (xhigh)', al: 'left', ao: 8 },
+          { x: 2.3369, y: 63.05, label: 'Claude Opus 5 (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Sonnet 5', provider: 'Anthropic', dashed: true, points: [
-          { x: 9709, y: 41.73, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'right', ao: 8 },
-          { x: 68736, y: 53.35, label: 'Claude Sonnet 5 (max)', al: 'right', ao: 8 } ] },
+          { x: 0.4169, y: 42.57, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'right', ao: 8 },
+          { x: 1.7173, y: 55.26, label: 'Claude Sonnet 5 (max)', al: 'right', ao: 8 } ] },
       { name: 'DeepSeek V4 Pro', provider: 'DeepSeek', points: [
-          { x: 27231, y: 43.11, label: 'DeepSeek V4 Pro (high)', al: 'right', ao: 8 },
-          { x: 36963, y: 44.27, label: 'DeepSeek V4 Pro (max)', al: 'right', ao: 8 } ] }
+          { x: 0.0432, y: 43.75, label: 'DeepSeek V4 Pro (high)', al: 'bottom', ao: 10 },
+          { x: 0.0474, y: 45.27, label: 'DeepSeek V4 Pro (max)', al: 'top', ao: 10 } ] }
     ],
 
     singles: [
-      { x: 33127, y: 59.86, label: 'Claude Fable 5 (max)', provider: 'Anthropic', al: 'right', ao: 24 },
-      { x: 22373, y: 45.99, label: 'Qwen3.7 Max', provider: 'Alibaba', al: 'right', ao: 8 },
-      { x: 23632, y: 57.11, label: 'Kimi K3', provider: 'Kimi', al: 'right', ao: 40 },
-      { x: 23964, y: 44.44, label: 'MiniMax-M3', provider: 'MiniMax', al: 'left', ao: 8 },
-      { x: 40910, y: 55.69, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
-      { x: 42791, y: 51.09, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'left', ao: 8 },
-      { x: 46352, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'right', ao: 8 }
+      { x: 3.1396, y: 62.07, label: 'Claude Fable 5 (max)', provider: 'Anthropic', al: 'bottom', ao: 10 },
+      { x: 0.5413, y: 46.71, label: 'Qwen3.7 Max', provider: 'Alibaba', al: 'right', ao: 8 },
+      { x: 0.8375, y: 59.70, label: 'Kimi K3', provider: 'Kimi', al: 'left', ao: 8 },
+      { x: 0.1387, y: 45.40, label: 'MiniMax-M3', provider: 'MiniMax', al: 'bottom', ao: 10 },
+      { x: 2.0315, y: 57.33, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
+      { x: 0.3083, y: 52.64, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'right', ao: 8 },
+      { x: 0.0271, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'right', ao: 8 }
     ],
 
     x: {
-      title: 'Output Tokens per Task',
-      scale: { type: 'logarithmic', min: 2000, max: 110000 },
+      title: 'Cost per Task (USD)',
+      scale: { type: 'logarithmic', min: 0.02, max: 6 },
       tickFormat: function (v) {
-        var allowed = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
-                       20000, 30000, 40000, 50000, 60000, 70000, 80000, 100000];
+        var allowed = [0.02, 0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5];
         if (allowed.indexOf(v) === -1) return null;
-        return (v / 1000) + 'k';
+        return '$' + (v < 1 ? v.toFixed(2) : v.toFixed(0));
       }
     },
 
@@ -646,8 +645,8 @@ document.addEventListener('DOMContentLoaded', function () {
       scale: { min: 40, max: 65 }
     },
 
-    tooltip: function (p) { return p.y.toFixed(2) + ' index  ·  ' + p.x.toLocaleString() + ' tokens per task'; },
-    tableX: function (v) { return v.toLocaleString(); }
+    tooltip: function (p) { return p.y.toFixed(2) + ' index  ·  $' + p.x.toFixed(2) + ' per task'; },
+    tableX: function (v) { return '$' + v.toFixed(3); }
   });
 });
 </script>
