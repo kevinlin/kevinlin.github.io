@@ -214,8 +214,8 @@
     },
     {
       "id": "everything-llm",
-      "title": "Everything Llm",
-      "description": "TODO: describe this collection.",
+      "title": "Everything LLM",
+      "description": "Tracking the LLM landscape through benchmarks, performance, effort, token usage, pricing, and model trends.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 100
