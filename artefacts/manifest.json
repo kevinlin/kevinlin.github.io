@@ -194,6 +194,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 70
+    },
+    {
+      "id": "claude-code-vs-codex-adoption",
+      "title": "Claude Code Vs Codex Adoption",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 80
     }
   ],
   "entries": [
@@ -613,6 +621,15 @@
       "destination": "star-wars/star-wars-timeline/index.html",
       "title": "Star wars timeline",
       "collection": "star-wars",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "claude-code-vs-codex-adoption-index",
+      "source": "claude-code-vs-codex-adoption/index.html",
+      "destination": "claude-code-vs-codex-adoption/index/index.html",
+      "title": "Index",
+      "collection": "claude-code-vs-codex-adoption",
       "order": 10,
       "replacements": {}
     }
