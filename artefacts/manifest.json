@@ -22,14 +22,6 @@
   ],
   "collections": [
     {
-      "id": "ai-buzzword",
-      "title": "AI Buzzword",
-      "description": "Latest AI buzzwords and trends.",
-      "section": "Image collections",
-      "section_order": 0,
-      "order": 0
-    },
-    {
       "id": "product-timeline",
       "title": "Product Timeline",
       "description": "A visual timeline of product release over time.",
@@ -44,6 +36,70 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 20
+    },
+    {
+      "id": "last30days",
+      "title": "Last30Days",
+      "description": "Topic research digests aggregating recent discussions and projects from GitHub, Hacker News, Reddit, and YouTube.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 50
+    },
+    {
+      "id": "java-interview",
+      "title": "Java Interview",
+      "description": "Java, messaging, and Kubernetes interview questions",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 60
+    },
+    {
+      "id": "star-wars",
+      "title": "Star Wars",
+      "description": "Interesting stuff from the Star Wars universe.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 70
+    },
+    {
+      "id": "claude-code-vs-codex-adoption",
+      "title": "Claude Code Vs Codex Adoption",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 80
+    },
+    {
+      "id": "coding-agent-war",
+      "title": "Coding Agent War",
+      "description": "A collection of artefacts tracking the race between Claude Code, Codex, and the next generation of coding agents.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 90
+    },
+    {
+      "id": "everything-llm",
+      "title": "Everything LLM",
+      "description": "Tracking the LLM landscape through benchmarks, performance, effort, token usage, pricing, and model trends.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 100
+    },
+    {
+      "id": "skillops",
+      "title": "SkillOps",
+      "description": "SkillOps is governance layer for AI agent skills.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 110
+    },
+    {
+      "id": "ai-buzzword",
+      "title": "AI Buzzword",
+      "description": "Latest AI buzzwords and trends.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 0
     },
     {
       "id": "gpt-5-6",
@@ -180,62 +236,6 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 40
-    },
-    {
-      "id": "last30days",
-      "title": "Last30Days",
-      "description": "Topic research digests aggregating recent discussions and projects from GitHub, Hacker News, Reddit, and YouTube.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 50
-    },
-    {
-      "id": "java-interview",
-      "title": "Java Interview",
-      "description": "Java, messaging, and Kubernetes interview questions",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 60
-    },
-    {
-      "id": "star-wars",
-      "title": "Star Wars",
-      "description": "Interesting stuff from the Star Wars universe.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 70
-    },
-    {
-      "id": "claude-code-vs-codex-adoption",
-      "title": "Claude Code Vs Codex Adoption",
-      "description": "TODO: describe this collection.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 80
-    },
-    {
-      "id": "coding-agent-war",
-      "title": "Coding Agent War",
-      "description": "A collection of artefacts tracking the race between Claude Code, Codex, and the next generation of coding agents.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 90
-    },
-    {
-      "id": "everything-llm",
-      "title": "Everything LLM",
-      "description": "Tracking the LLM landscape through benchmarks, performance, effort, token usage, pricing, and model trends.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 100
-    },
-    {
-      "id": "skillops",
-      "title": "SkillOps",
-      "description": "SkillOps is governance layer for AI agent skills.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 110
     }
   ],
   "entries": [
