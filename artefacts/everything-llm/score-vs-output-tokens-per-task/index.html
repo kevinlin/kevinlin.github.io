@@ -448,7 +448,7 @@ td.num, th.num {
             cornerRadius: 8,
             displayColors: false,
             callbacks: {
-              title: function (items) { return items[0].raw.label; },
+              title: function (items) { return items[0].raw.tableLabel || items[0].raw.label; },
               label: function (c) { return spec.tooltip(c.raw); }
             }
           }
@@ -528,10 +528,11 @@ td.num, th.num {
 
   function allPoints(spec) {
     var rows = [];
+    // `tableLabel` lets a point carry a short on-chart label and a fuller one in the table.
     spec.families.forEach(function (f) {
-      f.points.forEach(function (p) { rows.push({ label: p.label, x: p.x, y: p.y, provider: f.provider }); });
+      f.points.forEach(function (p) { rows.push({ label: p.tableLabel || p.label, x: p.x, y: p.y, provider: f.provider }); });
     });
-    spec.singles.forEach(function (s) { rows.push({ label: s.label, x: s.x, y: s.y, provider: s.provider }); });
+    spec.singles.forEach(function (s) { rows.push({ label: s.tableLabel || s.label, x: s.x, y: s.y, provider: s.provider }); });
     return rows.sort(function (a, b) { return b.y - a.y; });
   }
 
@@ -618,6 +619,7 @@ document.addEventListener('DOMContentLoaded', function () {
     singles: [
       { x: 35565, y: 62.07, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'right', ao: 8 },
       { x: 25474, y: 59.70, label: 'Kimi K3 (max)', provider: 'Kimi', al: 'top', ao: 8 },
+      { x: 38916, y: 53.00, label: 'DeepSeek V4 Pro 0813 (max)', provider: 'DeepSeek', al: 'left', ao: 8 },
       { x: 46352, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'right', ao: 8 },
       { x: 31400, y: 61.00, label: 'Grok 4.6 (high)', provider: 'SpaceXAI', al: 'bottom', ao: 8 }
     ],
