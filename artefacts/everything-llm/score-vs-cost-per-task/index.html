@@ -303,7 +303,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 13 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Connected points are the same model at different reasoning-effort settings.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 13 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. The two dashed DeepSeek lines are one model at three price points: today's rate, then the off-peak and peak rates from DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a>, which takes effect 16:00 UTC on 16 August 2026. Peak hours are 01:00–04:00 and 06:00–10:00 UTC; off-peak is half the peak rate. Projected points hold the measured token mix constant and reprice it — peak output rises to $3.96/1M for Pro and $1.32/1M for Flash, roughly 4.5× and 4.7× today.</p>
   </main>
 </div>
 
@@ -448,7 +448,7 @@ td.num, th.num {
             cornerRadius: 8,
             displayColors: false,
             callbacks: {
-              title: function (items) { return items[0].raw.label; },
+              title: function (items) { return items[0].raw.tableLabel || items[0].raw.label; },
               label: function (c) { return spec.tooltip(c.raw); }
             }
           }
@@ -528,10 +528,11 @@ td.num, th.num {
 
   function allPoints(spec) {
     var rows = [];
+    // `tableLabel` lets a point carry a short on-chart label and a fuller one in the table.
     spec.families.forEach(function (f) {
-      f.points.forEach(function (p) { rows.push({ label: p.label, x: p.x, y: p.y, provider: f.provider }); });
+      f.points.forEach(function (p) { rows.push({ label: p.tableLabel || p.label, x: p.x, y: p.y, provider: f.provider }); });
     });
-    spec.singles.forEach(function (s) { rows.push({ label: s.label, x: s.x, y: s.y, provider: s.provider }); });
+    spec.singles.forEach(function (s) { rows.push({ label: s.tableLabel || s.label, x: s.x, y: s.y, provider: s.provider }); });
     return rows.sort(function (a, b) { return b.y - a.y; });
   }
 
@@ -613,9 +614,14 @@ document.addEventListener('DOMContentLoaded', function () {
       { name: 'Claude Sonnet 5', provider: 'Anthropic', dashed: true, points: [
           { x: 0.4169, y: 42.57, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'right', ao: 8 },
           { x: 1.7173, y: 55.26, label: 'Claude Sonnet 5 (max)', al: 'right', ao: 8 } ] },
-      { name: 'DeepSeek V4 Pro', provider: 'DeepSeek', points: [
-          { x: 0.0432, y: 43.75, label: 'DeepSeek V4 Pro (high)', al: 'bottom', ao: 10 },
-          { x: 0.0474, y: 45.27, label: 'DeepSeek V4 Pro (max)', al: 'top', ao: 10 } ] }
+      { name: 'DeepSeek V4 Pro 0813', provider: 'DeepSeek', dashed: true, points: [
+          { x: 0.0561, y: 53.00, label: 'DeepSeek V4 Pro 0813 (max)', al: 'left', ao: 8 },
+          { x: 0.1261, y: 53.00, label: 'off-peak', tableLabel: 'DeepSeek V4 Pro 0813 (max) · off-peak from 16 Aug', al: 'top', ao: 16 },
+          { x: 0.2522, y: 53.00, label: 'peak', tableLabel: 'DeepSeek V4 Pro 0813 (max) · peak from 16 Aug', al: 'top', ao: 16 } ] },
+      { name: 'DeepSeek V4 Flash 0731', provider: 'DeepSeek', dashed: true, points: [
+          { x: 0.0271, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', al: 'bottom', ao: 12 },
+          { x: 0.0561, y: 51.77, label: 'off-peak', tableLabel: 'DeepSeek V4 Flash 0731 (max) · off-peak from 16 Aug', al: 'right', ao: 8 },
+          { x: 0.1122, y: 51.77, label: 'peak', tableLabel: 'DeepSeek V4 Flash 0731 (max) · peak from 16 Aug', al: 'right', ao: 8 } ] }
     ],
 
     singles: [
@@ -624,8 +630,7 @@ document.addEventListener('DOMContentLoaded', function () {
       { x: 0.8375, y: 59.70, label: 'Kimi K3', provider: 'Kimi', al: 'left', ao: 8 },
       { x: 0.8400, y: 61.00, label: 'Grok 4.6 (high)', provider: 'SpaceXAI', al: 'top', ao: 10 },
       { x: 2.0315, y: 57.33, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
-      { x: 0.3083, y: 52.64, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'right', ao: 8 },
-      { x: 0.0271, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'right', ao: 8 }
+      { x: 0.3083, y: 52.64, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'right', ao: 8 }
     ],
 
     x: {
