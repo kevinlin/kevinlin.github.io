@@ -16,6 +16,7 @@
     "fde/source-swen-fde.md",
     "fde/structured-content.md",
     "java-interview/java-fullstack-interview-questions.md",
+    "java-interview/java-releases.md",
     "star-wars/README.md",
     "star-wars/star-wars-timeline.src.html"
   ],
@@ -219,6 +220,22 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 100
+    },
+    {
+      "id": "skillops",
+      "title": "SkillOps",
+      "description": "SkillOps is governance layer for AI agent skills.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 110
+    },
+    {
+      "id": "ai-buzzword",
+      "title": "AI Buzzword",
+      "description": "Latest AI buzzwords and trends.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 120
     }
   ],
   "entries": [
@@ -229,15 +246,6 @@
       "title": "Snapdragon 7 Series timeline",
       "collection": "product-timeline",
       "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "claude-gpt-timeline",
-      "source": "product-timeline/claude-gpt-timeline.html",
-      "destination": "product-timeline/claude-gpt-timeline/index.html",
-      "title": "Claude and GPT timeline",
-      "collection": "product-timeline",
-      "order": 20,
       "replacements": {}
     },
     {
@@ -277,29 +285,11 @@
       "replacements": {}
     },
     {
-      "id": "when-ai-gives-you-buzzwords",
-      "source": "ai-trend-slop/TRENDSLOP_When Al Gives You Buzzwords Instead of.png",
-      "destination": "ai-trend-slop/when-ai-gives-you-buzzwords.png",
-      "title": "When AI gives you buzzwords",
-      "collection": "ai-trend-slop",
-      "order": 10,
-      "replacements": {}
-    },
-    {
       "id": "kloburste-gebrauchsanleitung",
       "source": "daily-laughs/Klobürste Gebrauchsanleitung.jpg",
       "destination": "daily-laughs/klobu-rste-gebrauchsanleitung.jpg",
       "title": "Klobürste Gebrauchsanleitung",
       "collection": "daily-laughs",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "loop-engineering-image",
-      "source": "loop-engineering/Loop Engineering.jpeg",
-      "destination": "loop-engineering/loop-engineering.jpeg",
-      "title": "Loop Engineering",
-      "collection": "loop-engineering",
       "order": 10,
       "replacements": {}
     },
@@ -457,87 +447,6 @@
       "replacements": {}
     },
     {
-      "id": "last30days-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
-      "source": "Last30Days/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
-      "destination": "last30days/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
-      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
-      "collection": "last30days",
-      "order": 90,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
-      "source": "Last30Days/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
-      "destination": "last30days/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
-      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
-      "collection": "last30days",
-      "order": 100,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260610-ralph-loop-raw-v3",
-      "source": "Last30Days/20260610_ralph-loop-raw-v3.md",
-      "destination": "last30days/20260610-ralph-loop-raw-v3/index.html",
-      "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
-      "collection": "last30days",
-      "order": 110,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260611-claude-fable-5-raw-v3",
-      "source": "Last30Days/20260611_claude-fable-5-raw-v3.md",
-      "destination": "last30days/20260611-claude-fable-5-raw-v3/index.html",
-      "title": "last30days v3.3.2: Claude Fable 5 (June 11, 2026)",
-      "collection": "last30days",
-      "order": 120,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260617-langchain-raw-v3",
-      "source": "Last30Days/20260617_langchain-raw-v3.md",
-      "destination": "last30days/20260617-langchain-raw-v3/index.html",
-      "title": "last30days v3.3.2: LangChain (June 17, 2026)",
-      "collection": "last30days",
-      "order": 140,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260713-loop-engineering-raw",
-      "source": "Last30Days/20260713_loop-engineering-raw.md",
-      "destination": "last30days/20260713-loop-engineering-raw/index.html",
-      "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
-      "collection": "last30days",
-      "order": 150,
-      "replacements": {}
-    },
-    {
-      "id": "last30days-20260731-skillops-raw",
-      "source": "Last30Days/20260731_skillops-raw.md",
-      "destination": "last30days/20260731-skillops-raw/index.html",
-      "title": "last30days v3.18.4: SkillOps (July 31, 2026)",
-      "collection": "last30days",
-      "order": 160,
-      "replacements": {}
-    },
-    {
-      "id": "product-timeline-java-release-timeline",
-      "source": "product-timeline/java-release-timeline.html",
-      "destination": "product-timeline/java-release-timeline/index.html",
-      "title": "Java release timeline",
-      "collection": "product-timeline",
-      "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "product-timeline-java-releases",
-      "source": "product-timeline/java-releases.md",
-      "destination": "product-timeline/java-releases/index.html",
-      "title": "Java releases",
-      "collection": "product-timeline",
-      "order": 40,
-      "replacements": {}
-    },
-    {
       "id": "java-interview-java-interview-questions",
       "source": "java-interview/java-interview-questions.html",
       "destination": "java-interview/java-interview-questions/index.html",
@@ -652,6 +561,96 @@
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
       }
+    },
+    {
+      "id": "skillops-20260731-skillops-raw",
+      "source": "SkillOps/20260731_skillops-raw.md",
+      "destination": "skillops/20260731-skillops-raw/index.html",
+      "title": "last30days v3.18.4: SkillOps (July 31, 2026)",
+      "collection": "skillops",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "ai-buzzword-loop-engineering",
+      "source": "ai-buzzword/Loop Engineering.jpeg",
+      "destination": "ai-buzzword/loop-engineering.jpeg",
+      "title": "Loop Engineering",
+      "collection": "ai-buzzword",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "ai-buzzword-trendslop-when-al-gives-you-buzzwords-instead-of",
+      "source": "ai-buzzword/TRENDSLOP_When Al Gives You Buzzwords Instead of.png",
+      "destination": "ai-buzzword/trendslop-when-al-gives-you-buzzwords-instead-of.png",
+      "title": "TRENDSLOP When Al Gives You Buzzwords Instead of",
+      "collection": "ai-buzzword",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "everything-llm-20260611-claude-fable-5-raw-v3",
+      "source": "everything-llm/20260611_claude-fable-5-raw-v3.md",
+      "destination": "everything-llm/20260611-claude-fable-5-raw-v3/index.html",
+      "title": "last30days v3.3.2: Claude Fable 5 (June 11, 2026)",
+      "collection": "everything-llm",
+      "order": 100,
+      "replacements": {}
+    },
+    {
+      "id": "everything-llm-claude-gpt-timeline",
+      "source": "everything-llm/claude-gpt-timeline.html",
+      "destination": "everything-llm/claude-gpt-timeline/index.html",
+      "title": "Claude gpt timeline",
+      "collection": "everything-llm",
+      "order": 110,
+      "replacements": {}
+    },
+    {
+      "id": "java-interview-java-release-timeline",
+      "source": "java-interview/java-release-timeline.html",
+      "destination": "java-interview/java-release-timeline/index.html",
+      "title": "Java release timeline",
+      "collection": "java-interview",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "loop-engineering-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
+      "source": "loop-engineering/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
+      "destination": "loop-engineering/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
+      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
+      "collection": "loop-engineering",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "loop-engineering-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
+      "source": "loop-engineering/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
+      "destination": "loop-engineering/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
+      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
+      "collection": "loop-engineering",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "loop-engineering-20260610-ralph-loop-raw-v3",
+      "source": "loop-engineering/20260610_ralph-loop-raw-v3.md",
+      "destination": "loop-engineering/20260610-ralph-loop-raw-v3/index.html",
+      "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
+      "collection": "loop-engineering",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "loop-engineering-20260713-loop-engineering-raw",
+      "source": "loop-engineering/20260713_loop-engineering-raw.md",
+      "destination": "loop-engineering/20260713-loop-engineering-raw/index.html",
+      "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
+      "collection": "loop-engineering",
+      "order": 40,
+      "replacements": {}
     }
   ]
 }
