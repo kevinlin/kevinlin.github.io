@@ -604,12 +604,6 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 8486, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 8 },
           { x: 12107, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'left', ao: 8 },
           { x: 20838, y: 56.58, label: 'GPT-5.6 Terra (max)', al: 'top', ao: 8 } ] },
-      { name: 'GPT-5.6 Luna', provider: 'OpenAI', points: [
-          { x: 2478, y: 33.85, label: 'GPT-5.6 Luna (low)', al: 'bottom', ao: 8 },
-          { x: 3940, y: 38.91, label: 'GPT-5.6 Luna (medium)', al: 'right', ao: 8 },
-          { x: 8727, y: 46.96, label: 'GPT-5.6 Luna (high)', al: 'right', ao: 8 },
-          { x: 13336, y: 50.06, label: 'GPT-5.6 Luna (xhigh)', al: 'right', ao: 8 },
-          { x: 20046, y: 52.32, label: 'GPT-5.6 Luna (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
           { x: 6573, y: 52.46, label: 'Claude Opus 5 (low)', al: 'left', ao: 8 },
           { x: 12459, y: 58.64, label: 'Claude Opus 5 (medium)', al: 'right', ao: 8 },
@@ -643,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 30, max: 65 }
+      scale: { min: 40, max: 65 }
     },
 
     tooltip: function (p) { return p.y.toFixed(2) + ' index  ·  ' + p.x.toLocaleString() + ' tokens per task'; },
