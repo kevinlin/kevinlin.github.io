@@ -22,6 +22,14 @@
   ],
   "collections": [
     {
+      "id": "ai-buzzword",
+      "title": "AI Buzzword",
+      "description": "Latest AI buzzwords and trends.",
+      "section": "Image collections",
+      "section_order": 0,
+      "order": 0
+    },
+    {
       "id": "product-timeline",
       "title": "Product Timeline",
       "description": "A visual timeline of product release over time.",
@@ -84,14 +92,6 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 60
-    },
-    {
-      "id": "ai-buzzword",
-      "title": "AI Buzzword",
-      "description": "Latest AI buzzwords and trends.",
-      "section": "Image collections",
-      "section_order": 10,
-      "order": 65
     },
     {
       "id": "daily-laughs",
