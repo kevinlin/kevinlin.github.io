@@ -86,6 +86,14 @@
       "order": 60
     },
     {
+      "id": "ai-buzzword",
+      "title": "AI Buzzword",
+      "description": "Latest AI buzzwords and trends.",
+      "section": "Image collections",
+      "section_order": 10,
+      "order": 65
+    },
+    {
       "id": "daily-laughs",
       "title": "Daily laughs",
       "description": "Funny finds from daily life.",
@@ -228,14 +236,6 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 110
-    },
-    {
-      "id": "ai-buzzword",
-      "title": "AI Buzzword",
-      "description": "Latest AI buzzwords and trends.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 120
     }
   ],
   "entries": [
