@@ -38,12 +38,12 @@
       "order": 20
     },
     {
-      "id": "last30days",
-      "title": "Last30Days",
-      "description": "Topic research digests aggregating recent discussions and projects from GitHub, Hacker News, Reddit, and YouTube.",
+      "id": "loop-engineering",
+      "title": "Loop Engineering",
+      "description": "Designing a system that keeps prompting an AI toward a verifiable goal, so you stop being the one who has to prompt it.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 50
+      "order": 30
     },
     {
       "id": "java-interview",
@@ -158,14 +158,6 @@
       "order": 70
     },
     {
-      "id": "loop-engineering",
-      "title": "Loop Engineering",
-      "description": "A visual reference for Loop Engineering.",
-      "section": "Image collections",
-      "section_order": 20,
-      "order": 80
-    },
-    {
       "id": "travel",
       "title": "Travel",
       "description": "Maps and visual references from travels.",
@@ -227,7 +219,7 @@
       "description": "Incident reports and write-ups from the Hermes agent.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 30
+      "order": 40
     },
     {
       "id": "product-idea",
@@ -235,7 +227,7 @@
       "description": "Product requirement documents for prototype ideas.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 40
+      "order": 50
     }
   ],
   "entries": [
