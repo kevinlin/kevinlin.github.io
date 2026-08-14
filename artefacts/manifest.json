@@ -46,12 +46,20 @@
       "order": 30
     },
     {
+      "id": "travel",
+      "title": "Travel",
+      "description": "Maps and transportation references for travels.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 40
+    },
+    {
       "id": "java-interview",
       "title": "Java Interview",
       "description": "Java, messaging, and Kubernetes interview questions",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 60
+      "order": 70
     },
     {
       "id": "star-wars",
@@ -59,7 +67,7 @@
       "description": "Interesting stuff from the Star Wars universe.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 70
+      "order": 80
     },
     {
       "id": "claude-code-vs-codex-adoption",
@@ -67,7 +75,7 @@
       "description": "TODO: describe this collection.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 80
+      "order": 90
     },
     {
       "id": "coding-agent-war",
@@ -75,7 +83,7 @@
       "description": "A collection of artefacts tracking the race between Claude Code, Codex, and the next generation of coding agents.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 90
+      "order": 100
     },
     {
       "id": "everything-llm",
@@ -83,7 +91,7 @@
       "description": "Tracking the LLM landscape through benchmarks, performance, effort, token usage, pricing, and model trends.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 100
+      "order": 110
     },
     {
       "id": "skillops",
@@ -91,7 +99,7 @@
       "description": "SkillOps is governance layer for AI agent skills.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 110
+      "order": 120
     },
     {
       "id": "ai-buzzword",
@@ -158,14 +166,6 @@
       "order": 70
     },
     {
-      "id": "travel",
-      "title": "Travel",
-      "description": "Maps and visual references from travels.",
-      "section": "Image collections",
-      "section_order": 20,
-      "order": 90
-    },
-    {
       "id": "fde",
       "title": "Forward Deployed Engineer",
       "description": "Forward Deployed Engineer",
@@ -219,7 +219,7 @@
       "description": "Incident reports and write-ups from the Hermes agent.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 40
+      "order": 50
     },
     {
       "id": "product-idea",
@@ -227,7 +227,7 @@
       "description": "Product requirement documents for prototype ideas.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 50
+      "order": 60
     }
   ],
   "entries": [
