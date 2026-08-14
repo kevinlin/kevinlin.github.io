@@ -286,15 +286,6 @@
       "replacements": {}
     },
     {
-      "id": "china-fuxing-rail-network-map",
-      "source": "travel/China Fuxing High-Speed Rail Network Map.jpeg",
-      "destination": "travel/china-fuxing-high-speed-rail-network-map.jpeg",
-      "title": "China Fuxing High-Speed Rail Network Map",
-      "collection": "travel",
-      "order": 10,
-      "replacements": {}
-    },
-    {
       "id": "fde-04-iceberg-bright-dark-line-en",
       "source": "fde/04-iceberg-bright-dark-line-en.png",
       "destination": "fde/04-iceberg-bright-dark-line-en.png",
@@ -642,6 +633,24 @@
       "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
       "collection": "loop-engineering",
       "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "travel-china-fuxing-high-speed-rail-network-map",
+      "source": "travel/China Fuxing High-Speed Rail Network Map.png",
+      "destination": "travel/china-fuxing-high-speed-rail-network-map.png",
+      "title": "China Fuxing High Speed Rail Network Map",
+      "collection": "travel",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "travel-china-rail-map",
+      "source": "travel/china-rail-map.html",
+      "destination": "travel/china-rail-map/index.html",
+      "title": "China rail map",
+      "collection": "travel",
+      "order": 20,
       "replacements": {}
     }
   ]
