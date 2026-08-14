@@ -303,7 +303,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 13 August 2026. Output tokens per task counts reasoning plus answer tokens. Connected points are the same model at different reasoning-effort settings.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 14 August 2026. Output tokens per task counts reasoning plus answer tokens. Connected points are the same model at different reasoning-effort settings.</p>
   </main>
 </div>
 
@@ -323,6 +323,7 @@ td.num, th.num {
     Anthropic: { light: '#c4622f', dark: '#eda37b' },
     DeepSeek:  { light: '#2b34c8', dark: '#8b98ff' },
     SpaceXAI:  { light: '#1c7a5e', dark: '#5fd0a8' },
+    Google:    { light: '#7a3fb4', dark: '#c39bec' },
     Kimi:      { light: '#0b7fa8', dark: '#5cc6ef' },
     'Z AI':    { light: '#2f6fbd', dark: '#8fbaff' },
     Alibaba:   { light: '#b96406', dark: '#f2a63f' }
@@ -605,6 +606,14 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 8486, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 8 },
           { x: 12107, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'left', ao: 8 },
           { x: 20838, y: 56.58, label: 'GPT-5.6 Terra (max)', al: 'top', ao: 8 } ] },
+      { name: 'GPT-5.6 Luna', provider: 'OpenAI', points: [
+          { x: 8727, y: 46.96, label: 'GPT-5.6 Luna (high)', al: 'bottom', ao: 8 },
+          { x: 13336, y: 50.06, label: 'GPT-5.6 Luna (xhigh)', al: 'bottom', ao: 8 },
+          { x: 20046, y: 52.32, label: 'GPT-5.6 Luna (max)', al: 'bottom', ao: 8 } ] },
+      { name: 'Gemini 3.7 Flash', provider: 'Google', points: [
+          { x: 13955, y: 50.94, label: 'Gemini 3.7 Flash (low)', al: 'top', ao: 8 },
+          { x: 23311, y: 53.42, label: 'Gemini 3.7 Flash (medium)', al: 'top', ao: 8 },
+          { x: 36847, y: 56.03, label: 'Gemini 3.7 Flash (high)', al: 'top', ao: 8 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
           { x: 6573, y: 52.46, label: 'Claude Opus 5 (low)', al: 'left', ao: 8 },
           { x: 12459, y: 58.64, label: 'Claude Opus 5 (medium)', al: 'right', ao: 8 },

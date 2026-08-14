@@ -303,7 +303,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 13 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. The two dashed DeepSeek lines are one model at three price points: today's rate, then the off-peak and peak rates from DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a>, which takes effect 16:00 UTC on 16 August 2026. Peak hours are 01:00–04:00 and 06:00–10:00 UTC; off-peak is half the peak rate. Projected points hold the measured token mix constant and reprice it — peak output rises to $3.96/1M for Pro and $1.32/1M for Flash, roughly 4.5× and 4.7× today.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 14 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. The two dashed DeepSeek lines are one model at three price points: today's rate, then the off-peak and peak rates from DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a>, which takes effect 16:00 UTC on 16 August 2026. Peak hours are 01:00–04:00 and 06:00–10:00 UTC; off-peak is half the peak rate. Projected points hold the measured token mix constant and reprice it — peak output rises to $3.96/1M for Pro and $1.32/1M for Flash, roughly 4.5× and 4.7× today.</p>
   </main>
 </div>
 
@@ -323,6 +323,7 @@ td.num, th.num {
     Anthropic: { light: '#c4622f', dark: '#eda37b' },
     DeepSeek:  { light: '#2b34c8', dark: '#8b98ff' },
     SpaceXAI:  { light: '#1c7a5e', dark: '#5fd0a8' },
+    Google:    { light: '#7a3fb4', dark: '#c39bec' },
     Kimi:      { light: '#0b7fa8', dark: '#5cc6ef' },
     'Z AI':    { light: '#2f6fbd', dark: '#8fbaff' },
     Alibaba:   { light: '#b96406', dark: '#f2a63f' }
@@ -605,6 +606,14 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.2183, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 10 },
           { x: 0.3050, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'top', ao: 8 },
           { x: 0.5080, y: 56.58, label: 'GPT-5.6 Terra (max)', al: 'left', ao: 8 } ] },
+      { name: 'GPT-5.6 Luna', provider: 'OpenAI', points: [
+          { x: 0.0216, y: 46.96, label: 'GPT-5.6 Luna (high)', al: 'left', ao: 8 },
+          { x: 0.0316, y: 50.06, label: 'GPT-5.6 Luna (xhigh)', al: 'top', ao: 10 },
+          { x: 0.0471, y: 52.32, label: 'GPT-5.6 Luna (max)', al: 'top', ao: 10 } ] },
+      { name: 'Gemini 3.7 Flash', provider: 'Google', points: [
+          { x: 0.1648, y: 50.94, label: 'Gemini 3.7 Flash (low)', al: 'left', ao: 8 },
+          { x: 0.2629, y: 53.42, label: 'Gemini 3.7 Flash (medium)', al: 'top', ao: 10 },
+          { x: 0.4022, y: 56.03, label: 'Gemini 3.7 Flash (high)', al: 'left', ao: 8 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
           { x: 0.4252, y: 52.46, label: 'Claude Opus 5 (low)', al: 'bottom', ao: 10 },
           { x: 0.7243, y: 58.64, label: 'Claude Opus 5 (medium)', al: 'left', ao: 8 },
@@ -626,16 +635,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     singles: [
       { x: 3.1396, y: 62.07, label: 'Claude Fable 5 (max)', provider: 'Anthropic', al: 'bottom', ao: 10 },
-      { x: 0.5413, y: 46.71, label: 'Qwen3.7 Max', provider: 'Alibaba', al: 'right', ao: 8 },
       { x: 0.8375, y: 59.70, label: 'Kimi K3', provider: 'Kimi', al: 'left', ao: 8 },
       { x: 0.8400, y: 61.00, label: 'Grok 4.6 (high)', provider: 'SpaceXAI', al: 'top', ao: 10 },
-      { x: 2.0315, y: 57.33, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
-      { x: 0.3083, y: 52.64, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'right', ao: 8 }
+      { x: 2.0315, y: 57.33, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 }
     ],
 
     x: {
       title: 'Cost per Task (USD)',
-      scale: { type: 'logarithmic', min: 0.02, max: 6 },
+      scale: { type: 'logarithmic', min: 0.015, max: 6 },
       tickFormat: function (v) {
         var allowed = [0.02, 0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5];
         if (allowed.indexOf(v) === -1) return null;
