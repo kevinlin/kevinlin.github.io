@@ -437,7 +437,7 @@ td.num, th.num {
         responsive: true,
         maintainAspectRatio: false,
         animation: reducedMotion.matches ? false : { duration: 420, easing: 'easeOutQuart' },
-        layout: { padding: { right: 128, top: 12, left: 4 } },
+        layout: { padding: { right: 96, top: 12, left: 4 } },
         interaction: { mode: 'nearest', intersect: true },
         plugins: {
           legend: { display: false },
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Output Tokens per Task',
-      scale: { type: 'logarithmic', min: 2000, max: 110000 },
+      scale: { type: 'logarithmic', min: 2000, max: 85000 },
       tickFormat: function (v) {
         var allowed = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
                        20000, 30000, 40000, 50000, 60000, 70000, 80000, 100000];

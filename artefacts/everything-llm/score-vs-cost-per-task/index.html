@@ -437,7 +437,7 @@ td.num, th.num {
         responsive: true,
         maintainAspectRatio: false,
         animation: reducedMotion.matches ? false : { duration: 420, easing: 'easeOutQuart' },
-        layout: { padding: { right: 128, top: 12, left: 4 } },
+        layout: { padding: { right: 96, top: 12, left: 4 } },
         interaction: { mode: 'nearest', intersect: true },
         plugins: {
           legend: { display: false },
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Cost per Task (USD)',
-      scale: { type: 'logarithmic', min: 0.015, max: 6 },
+      scale: { type: 'logarithmic', min: 0.015, max: 4 },
       tickFormat: function (v) {
         var allowed = [0.02, 0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5];
         if (allowed.indexOf(v) === -1) return null;
