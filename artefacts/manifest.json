@@ -6,11 +6,9 @@
     "vendor/marked.min.js"
   ],
   "ignored_sources": [
+    "claude-tag/prompts/",
     "fable5-21days/prompts/",
-    "fable5-21days/analysis.md",
-    "fable5-21days/focus-narrative-21days.md",
-    "fable5-21days/source-agent-focus.md",
-    "fable5-21days/structured-content.md",
+    "fable5-21days/narrative/",
     "fde/prompts/",
     "fde/analysis.md",
     "fde/source-swen-fde.md",
@@ -228,6 +226,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 60
+    },
+    {
+      "id": "claude-tag",
+      "title": "Claude Tag",
+      "description": "Anthropic's Slack-native AI coworker: architecture, context layer and memory scopes.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 130
     }
   ],
   "entries": [
@@ -651,6 +657,105 @@
       "title": "China rail map",
       "collection": "travel",
       "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-20260815-claude-tag-raw-v3",
+      "source": "claude-tag/20260815_claude-tag-raw-v3.md",
+      "destination": "claude-tag/20260815-claude-tag-raw-v3/index.html",
+      "title": "Research notes: what people say about Claude Tag",
+      "collection": "claude-tag",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-01-what-it-is",
+      "source": "claude-tag/claude-tag-01-what-it-is.png",
+      "destination": "claude-tag/claude-tag-01-what-it-is.png",
+      "title": "A teammate in the channel",
+      "collection": "claude-tag",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-02-vs-coding-agent",
+      "source": "claude-tag/claude-tag-02-vs-coding-agent.png",
+      "destination": "claude-tag/claude-tag-02-vs-coding-agent.png",
+      "title": "Single-player tool vs. team member",
+      "collection": "claude-tag",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-03-long-horizon",
+      "source": "claude-tag/claude-tag-03-long-horizon.png",
+      "destination": "claude-tag/claude-tag-03-long-horizon.png",
+      "title": "Long-horizon execution",
+      "collection": "claude-tag",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-04-system-architecture",
+      "source": "claude-tag/claude-tag-04-system-architecture.png",
+      "destination": "claude-tag/claude-tag-04-system-architecture.png",
+      "title": "Runtime architecture",
+      "collection": "claude-tag",
+      "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-05-context-layer",
+      "source": "claude-tag/claude-tag-05-context-layer.png",
+      "destination": "claude-tag/claude-tag-05-context-layer.png",
+      "title": "The context layer",
+      "collection": "claude-tag",
+      "order": 60,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-06-memory-layer",
+      "source": "claude-tag/claude-tag-06-memory-layer.png",
+      "destination": "claude-tag/claude-tag-06-memory-layer.png",
+      "title": "Three scopes of memory",
+      "collection": "claude-tag",
+      "order": 70,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-07-request-lifecycle",
+      "source": "claude-tag/claude-tag-07-request-lifecycle.png",
+      "destination": "claude-tag/claude-tag-07-request-lifecycle.png",
+      "title": "One mention, end to end",
+      "collection": "claude-tag",
+      "order": 80,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-08-context-field",
+      "source": "claude-tag/claude-tag-08-context-field.png",
+      "destination": "claude-tag/claude-tag-08-context-field.png",
+      "title": "The context layer (dark variant)",
+      "collection": "claude-tag",
+      "order": 90,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-08-proactive-context",
+      "source": "claude-tag/claude-tag-08-proactive-context.png",
+      "destination": "claude-tag/claude-tag-08-proactive-context.png",
+      "title": "Ambient context, unprompted work",
+      "collection": "claude-tag",
+      "order": 100,
+      "replacements": {}
+    },
+    {
+      "id": "claude-tag-claude-tag-09-memory-core",
+      "source": "claude-tag/claude-tag-09-memory-core.png",
+      "destination": "claude-tag/claude-tag-09-memory-core.png",
+      "title": "Memory core (dark variant)",
+      "collection": "claude-tag",
+      "order": 110,
       "replacements": {}
     }
   ]
