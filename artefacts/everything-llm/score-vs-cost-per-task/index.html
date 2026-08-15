@@ -125,6 +125,34 @@ h1 {
   gap: var(--space-2);
 }
 
+/* Each legend entry doubles as a filter toggle for its provider. */
+.legend button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 140ms var(--ease-out), background-color 140ms var(--ease-out);
+}
+
+.legend button:hover { background: hsl(var(--rule)); }
+
+.legend button[aria-pressed="false"] {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.legend button[aria-pressed="false"] .dot {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
 .legend .dot {
   width: 12px;
   height: 12px;
@@ -335,6 +363,8 @@ td.num, th.num {
   var darkQuery = global.matchMedia('(prefers-color-scheme: dark)');
   var reducedMotion = global.matchMedia('(prefers-reduced-motion: reduce)');
   var registry = [];
+  // Providers the reader has switched off from the legend.
+  var hidden = {};
 
   function isDark() { return darkQuery.matches; }
 
@@ -370,6 +400,10 @@ td.num, th.num {
     formatter: function (v) { return v.label; }
   };
 
+  function visibleSingles(spec) {
+    return spec.singles.filter(function (s) { return !hidden[s.provider]; });
+  }
+
   function buildDatasets(spec) {
     var datasets = spec.families.map(function (f) {
       var color = providerColor(f.provider);
@@ -390,13 +424,14 @@ td.num, th.num {
       };
     });
 
+    var singles = visibleSingles(spec);
     datasets.push({
       label: 'Single models',
       type: 'scatter',
-      data: spec.singles,
+      data: singles,
       showLine: false,
-      pointBackgroundColor: spec.singles.map(function (s) { return providerColor(s.provider); }),
-      pointBorderColor: spec.singles.map(function (s) { return providerColor(s.provider); }),
+      pointBackgroundColor: singles.map(function (s) { return providerColor(s.provider); }),
+      pointBorderColor: singles.map(function (s) { return providerColor(s.provider); }),
       pointRadius: 6,
       pointHoverRadius: 8,
       datalabels: labelConfig
@@ -477,7 +512,8 @@ td.num, th.num {
         ds.pointBackgroundColor = color;
         ds.pointBorderColor = color;
       } else {
-        var colors = spec.singles.map(function (s) { return providerColor(s.provider); });
+        // Colour by the points currently in the dataset — filtering rewrites `ds.data`.
+        var colors = ds.data.map(function (s) { return providerColor(s.provider); });
         ds.pointBackgroundColor = colors;
         ds.pointBorderColor = colors;
       }
@@ -507,16 +543,53 @@ td.num, th.num {
     return seen;
   }
 
+  // Hide or show every point belonging to the providers switched off in the legend.
+  function applyFilters() {
+    registry.forEach(function (entry) {
+      var chart = entry.chart;
+      var spec = entry.spec;
+
+      chart.data.datasets.forEach(function (ds, i) {
+        if (i < spec.families.length) {
+          ds.hidden = !!hidden[spec.families[i].provider];
+        } else {
+          var singles = visibleSingles(spec);
+          var colors = singles.map(function (s) { return providerColor(s.provider); });
+          ds.data = singles;
+          ds.pointBackgroundColor = colors;
+          ds.pointBorderColor = colors;
+        }
+      });
+
+      chart.update();
+    });
+  }
+
+  function toggleProvider(name, button) {
+    hidden[name] = !hidden[name];
+    button.setAttribute('aria-pressed', hidden[name] ? 'false' : 'true');
+    applyFilters();
+  }
+
   function buildLegend(el, spec) {
     el.innerHTML = '';
     usedProviders(spec).forEach(function (name) {
       var li = document.createElement('li');
+      var button = document.createElement('button');
       var dot = document.createElement('span');
+
       dot.className = 'dot';
       dot.dataset.provider = name;
       dot.style.background = providerColor(name);
-      li.appendChild(dot);
-      li.appendChild(document.createTextNode(name));
+
+      button.type = 'button';
+      button.setAttribute('aria-pressed', hidden[name] ? 'false' : 'true');
+      button.title = 'Show or hide ' + name + ' models';
+      button.appendChild(dot);
+      button.appendChild(document.createTextNode(name));
+      button.addEventListener('click', function () { toggleProvider(name, button); });
+
+      li.appendChild(button);
       el.appendChild(li);
     });
   }

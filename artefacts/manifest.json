@@ -241,7 +241,7 @@
       "id": "snapdragon-7-series-timeline",
       "source": "product-timeline/Snapdragon 7 Series Timeline.html",
       "destination": "product-timeline/index.html",
-      "title": "Snapdragon 7 Series timeline",
+      "title": "Qualcomm Snapdragon 7 Series timeline",
       "collection": "product-timeline",
       "order": 10,
       "replacements": {}
@@ -250,7 +250,7 @@
       "id": "the-claude-code-leak",
       "source": "claude-code/The Claude Code Leak.jpeg",
       "destination": "claude-code/the-claude-code-leak.jpeg",
-      "title": "The Claude Code leak",
+      "title": "The Claude Code leak: three release-process gaps",
       "collection": "claude-code",
       "order": 10,
       "replacements": {}
@@ -259,7 +259,7 @@
       "id": "how-claude-code-leaked",
       "source": "claude-code/How Claude Code Leaked.jpeg",
       "destination": "claude-code/how-claude-code-leaked.jpeg",
-      "title": "How Claude Code leaked",
+      "title": "How Claude Code leaked: the safe path vs. what happened",
       "collection": "claude-code",
       "order": 20,
       "replacements": {}
@@ -268,7 +268,7 @@
       "id": "claude-code-shortcuts-cheatsheet",
       "source": "claude-code/Claude Code Shortcuts Cheatsheet.jpeg",
       "destination": "claude-code/shortcuts-cheatsheet.jpeg",
-      "title": "Shortcuts cheatsheet",
+      "title": "Claude Code cheat sheet: commands, shortcuts, workflow",
       "collection": "claude-code",
       "order": 30,
       "replacements": {}
@@ -277,7 +277,7 @@
       "id": "people-lead-lifecycle-activities",
       "source": "people-lead-lifecycle/People Lead Lifecycle Activities.png",
       "destination": "people-lead-lifecycle/activities.png",
-      "title": "Lifecycle activities",
+      "title": "People Lead cycle, onboarding to offboarding",
       "collection": "people-lead-lifecycle",
       "order": 10,
       "replacements": {}
@@ -286,7 +286,7 @@
       "id": "kloburste-gebrauchsanleitung",
       "source": "daily-laughs/Klobürste Gebrauchsanleitung.jpg",
       "destination": "daily-laughs/klobu-rste-gebrauchsanleitung.jpg",
-      "title": "Klobürste Gebrauchsanleitung",
+      "title": "Klobürste Gebrauchsanleitung: ganz falsch bis ganz richtig",
       "collection": "daily-laughs",
       "order": 10,
       "replacements": {}
@@ -295,7 +295,7 @@
       "id": "fde-04-iceberg-bright-dark-line-en",
       "source": "fde/04-iceberg-bright-dark-line-en.png",
       "destination": "fde/04-iceberg-bright-dark-line-en.png",
-      "title": "Iceberg bright dark line en",
+      "title": "What the client says vs. what actually decides the project",
       "collection": "fde",
       "order": 100,
       "replacements": {}
@@ -304,7 +304,7 @@
       "id": "fde-05-four-translation-steps-craft",
       "source": "fde/05-four-translation-steps-craft.png",
       "destination": "fde/05-four-translation-steps-craft.png",
-      "title": "Four translation steps craft",
+      "title": "Business translation: four steps from client words to shippable AI",
       "collection": "fde",
       "order": 110,
       "replacements": {}
@@ -313,7 +313,7 @@
       "id": "fde-06-bento-whole-frame-craft",
       "source": "fde/06-bento-whole-frame-craft.png",
       "destination": "fde/06-bento-whole-frame-craft.png",
-      "title": "Bento whole frame craft",
+      "title": "The hardest part of AI projects isn't technology",
       "collection": "fde",
       "order": 120,
       "replacements": {}
@@ -322,7 +322,7 @@
       "id": "fable5-21days-infographic-craft-handmade",
       "source": "fable5-21days/infographic-craft-handmade.png",
       "destination": "fable5-21days/infographic-craft-handmade.png",
-      "title": "Infographic craft handmade",
+      "title": "21 days of building with agents: project-by-project breakdown",
       "collection": "fable5-21days",
       "order": 20,
       "replacements": {}
@@ -331,7 +331,7 @@
       "id": "fable5-21days-infographic-cyberpunk",
       "source": "fable5-21days/infographic-cyberpunk.png",
       "destination": "fable5-21days/infographic-cyberpunk.png",
-      "title": "Infographic cyberpunk",
+      "title": "21 days of building with agents: effort ranked by project",
       "collection": "fable5-21days",
       "order": 30,
       "replacements": {}
@@ -340,7 +340,7 @@
       "id": "fable5-21days-infographic-densemodules-morandi",
       "source": "fable5-21days/infographic-densemodules-morandi.png",
       "destination": "fable5-21days/infographic-densemodules-morandi.png",
-      "title": "Infographic densemodules morandi",
+      "title": "21 days of building with agents: full report, vitals to top skills",
       "collection": "fable5-21days",
       "order": 40,
       "replacements": {}
@@ -349,7 +349,7 @@
       "id": "fable5-21days-infographic-hubspoke-edu",
       "source": "fable5-21days/infographic-hubspoke-edu.png",
       "destination": "fable5-21days/infographic-hubspoke-edu.png",
-      "title": "Infographic hubspoke edu",
+      "title": "21 days of building with agents: hub-and-spoke map of the work",
       "collection": "fable5-21days",
       "order": 50,
       "replacements": {}
@@ -358,7 +358,7 @@
       "id": "fable5-21days-infographic-roadmap-watercolor",
       "source": "fable5-21days/infographic-roadmap-watercolor.png",
       "destination": "fable5-21days/infographic-roadmap-watercolor.png",
-      "title": "Infographic roadmap watercolor",
+      "title": "21 days of building with agents: the journey, week by week",
       "collection": "fable5-21days",
       "order": 70,
       "replacements": {}
@@ -367,7 +367,7 @@
       "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v1",
       "source": "AI-Native Organisation/The New Engineering Org & The Human Side_v1.png",
       "destination": "ai-native-organisation/the-new-engineering-org-the-human-side-v1.png",
-      "title": "The New Engineering Org & The Human Side v1",
+      "title": "Architect and Operator: the new engineering org and the human side (v1)",
       "collection": "ai-native-organisation",
       "order": 10,
       "replacements": {}
@@ -376,7 +376,7 @@
       "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v2",
       "source": "AI-Native Organisation/The New Engineering Org & The Human Side_v2.png",
       "destination": "ai-native-organisation/the-new-engineering-org-the-human-side-v2.png",
-      "title": "The New Engineering Org & The Human Side v2",
+      "title": "Architect and Operator: the new engineering org and the human side (v2)",
       "collection": "ai-native-organisation",
       "order": 20,
       "replacements": {}
@@ -385,7 +385,7 @@
       "id": "claude-code-prong-my-claude-code-buddy",
       "source": "claude-code/Prong - My Claude Code Buddy.jpg",
       "destination": "claude-code/prong-my-claude-code-buddy.jpg",
-      "title": "Prong My Claude Code Buddy",
+      "title": "Prong, my Claude Code buddy",
       "collection": "claude-code",
       "order": 40,
       "replacements": {}
@@ -394,7 +394,7 @@
       "id": "product-builder-peter-steinberger-on-human-taste-1",
       "source": "product-builder/Peter Steinberger on Human Taste_1.png",
       "destination": "product-builder/peter-steinberger-on-human-taste-1.png",
-      "title": "Peter Steinberger on Human Taste 1",
+      "title": "Peter Steinberger on human taste: taste plus system design",
       "collection": "product-builder",
       "order": 10,
       "replacements": {}
@@ -403,7 +403,7 @@
       "id": "product-builder-peter-steinberger-on-human-taste-2",
       "source": "product-builder/Peter Steinberger on Human Taste_2.png",
       "destination": "product-builder/peter-steinberger-on-human-taste-2.png",
-      "title": "Peter Steinberger on Human Taste 2",
+      "title": "Peter Steinberger on human taste: notes from the AI Engineer keynote",
       "collection": "product-builder",
       "order": 20,
       "replacements": {}
@@ -412,7 +412,7 @@
       "id": "product-builder-jenny-wen-design-process-is-dead",
       "source": "product-builder/jenny-wen-design-process-is-dead.jpeg",
       "destination": "product-builder/jenny-wen-design-process-is-dead.jpeg",
-      "title": "Jenny wen design process is dead",
+      "title": "The design process is dead: Jenny Wen on Lenny's Podcast",
       "collection": "product-builder",
       "order": 30,
       "replacements": {}
@@ -439,7 +439,7 @@
       "id": "java-interview-java-interview-questions",
       "source": "java-interview/java-interview-questions.html",
       "destination": "java-interview/java-interview-questions/index.html",
-      "title": "Java interview questions",
+      "title": "Java fullstack, platform, and AI engineering interview questions",
       "collection": "java-interview",
       "order": 10,
       "replacements": {}
@@ -448,7 +448,7 @@
       "id": "star-wars-star-wars-timeline",
       "source": "star-wars/star-wars-timeline.html",
       "destination": "star-wars/star-wars-timeline/index.html",
-      "title": "Star wars timeline",
+      "title": "Star Wars: the chronological timeline",
       "collection": "star-wars",
       "order": 10,
       "replacements": {}
@@ -457,7 +457,7 @@
       "id": "coding-agent-war-claude-code-vs-codex-adoption",
       "source": "coding-agent-war/claude-code-vs-codex-adoption.html",
       "destination": "coding-agent-war/claude-code-vs-codex-adoption/index.html",
-      "title": "Claude code vs codex adoption",
+      "title": "Claude Code vs. Codex: adoption by month since launch",
       "collection": "coding-agent-war",
       "order": 10,
       "replacements": {}
@@ -466,7 +466,7 @@
       "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
       "source": "everything-llm/4 Best Practices for Claude Opus 4.7.jpg",
       "destination": "everything-llm/4-best-practices-for-claude-opus-4-7.jpg",
-      "title": "Best Practices for Claude Opus 4.7",
+      "title": "Four best practices for Claude Opus 4.7 xhigh mode",
       "collection": "everything-llm",
       "order": 10,
       "replacements": {}
@@ -475,7 +475,7 @@
       "id": "everything-llm-gpt-5-series-pricing-evolution",
       "source": "everything-llm/GPT-5 Series Pricing Evolution.png",
       "destination": "everything-llm/gpt-5-series-pricing-evolution.png",
-      "title": "GPT 5 Series Pricing Evolution",
+      "title": "GPT-5 series pricing evolution, Aug 2025 to Apr 2026",
       "collection": "everything-llm",
       "order": 20,
       "replacements": {}
@@ -484,7 +484,7 @@
       "id": "everything-llm-gpt-5-6-sol-the-first-5-days",
       "source": "everything-llm/GPT-5.6 Sol - The First 5 Days.png",
       "destination": "everything-llm/gpt-5-6-sol-the-first-5-days.png",
-      "title": "GPT 5.6 Sol The First 5 Days",
+      "title": "GPT-5.6 Sol: 11 changes and rollbacks in the first five days",
       "collection": "everything-llm",
       "order": 30,
       "replacements": {}
@@ -493,7 +493,7 @@
       "id": "everything-llm-gpt-5-6-avg-cost-per-task",
       "source": "everything-llm/GPT-5.6-Avg cost per task.png",
       "destination": "everything-llm/gpt-5-6-avg-cost-per-task.png",
-      "title": "GPT 5.6 Avg cost per task",
+      "title": "DeepSWE score vs. cost per task, GPT-5.6 family",
       "collection": "everything-llm",
       "order": 40,
       "replacements": {}
@@ -502,7 +502,7 @@
       "id": "everything-llm-gpt-5-6-avg-output-tokens-per-task",
       "source": "everything-llm/GPT-5.6-Avg output tokens per task.png",
       "destination": "everything-llm/gpt-5-6-avg-output-tokens-per-task.png",
-      "title": "GPT 5.6 Avg output tokens per task",
+      "title": "DeepSWE score vs. output tokens per task, GPT-5.6 family",
       "collection": "everything-llm",
       "order": 50,
       "replacements": {}
@@ -511,7 +511,7 @@
       "id": "everything-llm-sonnet-5-the-effort-dial-truth",
       "source": "everything-llm/Sonnet 5 — The Effort-Dial Truth.png",
       "destination": "everything-llm/sonnet-5-the-effort-dial-truth.png",
-      "title": "Sonnet 5 — The Effort Dial Truth",
+      "title": "Sonnet 5: performance and real cost across reasoning effort",
       "collection": "everything-llm",
       "order": 60,
       "replacements": {}
@@ -520,7 +520,7 @@
       "id": "everything-llm-score-vs-cost-per-task",
       "source": "everything-llm/score-vs-cost-per-task.html",
       "destination": "everything-llm/score-vs-cost-per-task/index.html",
-      "title": "Score vs cost per task",
+      "title": "Intelligence Index: score vs. cost per task",
       "collection": "everything-llm",
       "order": 70,
       "replacements": {
@@ -532,7 +532,7 @@
       "id": "everything-llm-score-vs-output-tokens-per-task",
       "source": "everything-llm/score-vs-output-tokens-per-task.html",
       "destination": "everything-llm/score-vs-output-tokens-per-task/index.html",
-      "title": "Score vs output tokens per task",
+      "title": "Intelligence Index: score vs. output tokens per task",
       "collection": "everything-llm",
       "order": 80,
       "replacements": {
@@ -544,7 +544,7 @@
       "id": "everything-llm-swe-bench-pro-by-lab",
       "source": "everything-llm/swe_bench_pro_by_lab.html",
       "destination": "everything-llm/swe-bench-pro-by-lab/index.html",
-      "title": "Swe bench pro by lab",
+      "title": "Flagship models on SWE-Bench Pro",
       "collection": "everything-llm",
       "order": 90,
       "replacements": {
@@ -555,7 +555,7 @@
       "id": "skillops-20260731-skillops-raw",
       "source": "SkillOps/20260731_skillops-raw.md",
       "destination": "skillops/20260731-skillops-raw/index.html",
-      "title": "last30days v3.18.4: SkillOps (July 31, 2026)",
+      "title": "Research notes: what people say about SkillOps (July 2026)",
       "collection": "skillops",
       "order": 10,
       "replacements": {}
@@ -564,7 +564,7 @@
       "id": "ai-buzzword-loop-engineering",
       "source": "ai-buzzword/Loop Engineering.jpeg",
       "destination": "ai-buzzword/loop-engineering.jpeg",
-      "title": "Loop Engineering",
+      "title": "Loop Engineering: build the loop, stay the engineer",
       "collection": "ai-buzzword",
       "order": 10,
       "replacements": {}
@@ -573,7 +573,7 @@
       "id": "ai-buzzword-trendslop-when-al-gives-you-buzzwords-instead-of",
       "source": "ai-buzzword/TRENDSLOP_When Al Gives You Buzzwords Instead of.png",
       "destination": "ai-buzzword/trendslop-when-al-gives-you-buzzwords-instead-of.png",
-      "title": "TRENDSLOP When Al Gives You Buzzwords Instead of",
+      "title": "Trendslop: when AI gives you buzzwords instead of strategy",
       "collection": "ai-buzzword",
       "order": 20,
       "replacements": {}
@@ -582,7 +582,7 @@
       "id": "everything-llm-20260611-claude-fable-5-raw-v3",
       "source": "everything-llm/20260611_claude-fable-5-raw-v3.md",
       "destination": "everything-llm/20260611-claude-fable-5-raw-v3/index.html",
-      "title": "last30days v3.3.2: Claude Fable 5 (June 11, 2026)",
+      "title": "Research notes: what people say about Claude Fable 5 (June 2026)",
       "collection": "everything-llm",
       "order": 100,
       "replacements": {}
@@ -591,7 +591,7 @@
       "id": "everything-llm-claude-gpt-timeline",
       "source": "everything-llm/claude-gpt-timeline.html",
       "destination": "everything-llm/claude-gpt-timeline/index.html",
-      "title": "Claude gpt timeline",
+      "title": "Claude and GPT release timeline",
       "collection": "everything-llm",
       "order": 110,
       "replacements": {}
@@ -609,7 +609,7 @@
       "id": "loop-engineering-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
       "source": "loop-engineering/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
       "destination": "loop-engineering/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
-      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
+      "title": "Research notes: the ralph loop as a coding-agent technique (June 2026)",
       "collection": "loop-engineering",
       "order": 10,
       "replacements": {}
@@ -618,7 +618,7 @@
       "id": "loop-engineering-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
       "source": "loop-engineering/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
       "destination": "loop-engineering/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
-      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
+      "title": "Research notes: Geoffrey Huntley's ralph loop and Claude Code (June 2026)",
       "collection": "loop-engineering",
       "order": 20,
       "replacements": {}
@@ -627,7 +627,7 @@
       "id": "loop-engineering-20260610-ralph-loop-raw-v3",
       "source": "loop-engineering/20260610_ralph-loop-raw-v3.md",
       "destination": "loop-engineering/20260610-ralph-loop-raw-v3/index.html",
-      "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
+      "title": "Research notes: ralph loop across the wider community (June 2026)",
       "collection": "loop-engineering",
       "order": 30,
       "replacements": {}
@@ -636,7 +636,7 @@
       "id": "loop-engineering-20260713-loop-engineering-raw",
       "source": "loop-engineering/20260713_loop-engineering-raw.md",
       "destination": "loop-engineering/20260713-loop-engineering-raw/index.html",
-      "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
+      "title": "Research notes: what people say about Loop Engineering (July 2026)",
       "collection": "loop-engineering",
       "order": 40,
       "replacements": {}
@@ -645,7 +645,7 @@
       "id": "travel-china-fuxing-high-speed-rail-network-map",
       "source": "travel/China Fuxing High-Speed Rail Network Map.png",
       "destination": "travel/china-fuxing-high-speed-rail-network-map.png",
-      "title": "China Fuxing High Speed Rail Network Map",
+      "title": "China high-speed rail network map, lines in service",
       "collection": "travel",
       "order": 10,
       "replacements": {}
@@ -654,7 +654,7 @@
       "id": "travel-china-rail-map",
       "source": "travel/china-rail-map.html",
       "destination": "travel/china-rail-map/index.html",
-      "title": "China rail map",
+      "title": "China rail map: hubs and major cities",
       "collection": "travel",
       "order": 20,
       "replacements": {}
@@ -663,7 +663,7 @@
       "id": "claude-tag-20260815-claude-tag-raw-v3",
       "source": "claude-tag/20260815_claude-tag-raw-v3.md",
       "destination": "claude-tag/20260815-claude-tag-raw-v3/index.html",
-      "title": "Research notes: what people say about Claude Tag",
+      "title": "Research notes: what people say about Claude Tag (August 2026)",
       "collection": "claude-tag",
       "order": 10,
       "replacements": {}
