@@ -732,15 +732,6 @@
       "replacements": {}
     },
     {
-      "id": "claude-tag-claude-tag-08-context-field",
-      "source": "claude-tag/claude-tag-08-context-field.png",
-      "destination": "claude-tag/claude-tag-08-context-field.png",
-      "title": "The context layer (dark variant)",
-      "collection": "claude-tag",
-      "order": 90,
-      "replacements": {}
-    },
-    {
       "id": "claude-tag-claude-tag-08-proactive-context",
       "source": "claude-tag/claude-tag-08-proactive-context.png",
       "destination": "claude-tag/claude-tag-08-proactive-context.png",
