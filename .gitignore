@@ -44,3 +44,6 @@ jspm_packages/
 
 # Worktrees
 .worktrees/
+
+# AGENTS.md
+AGENTS.md
