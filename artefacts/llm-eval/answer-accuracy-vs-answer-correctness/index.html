@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answer Accuracy vs Answer Correctness</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --ink: #1a1a19;
+    --muted: #6b6b66;
+    --line: #dcdcd6;
+    --aa: #2563eb;
+    --ac: #7c3aed;
+    --sem: #0f9d8f;
+    --fac: #d97706;
+    --grid: #e6e6e0;
+    --good: #0f9d8f;
+    --bad: #c2410c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14141a;
+      --panel: #1c1c24;
+      --ink: #ececf0;
+      --muted: #9a9aa5;
+      --line: #32323d;
+      --aa: #60a5fa;
+      --ac: #a78bfa;
+      --sem: #2dd4bf;
+      --fac: #fbbf24;
+      --grid: #26262f;
+      --good: #2dd4bf;
+      --bad: #fb923c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 28px; max-width: 76ch; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 14px; }
+  .card h2 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .formula { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  button {
+    font: inherit; font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .io { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; margin: 0 0 4px; }
+  .io dt { color: var(--muted); font-family: ui-monospace, monospace; font-size: 12.5px; padding-top: 2px; }
+  .io dd { margin: 0; }
+  .stage { border-left: 2px solid var(--line); padding: 0 0 0 14px; margin-bottom: 16px; }
+  .stage .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: ui-monospace, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .chip.tp { border-color: var(--good); color: var(--good); }
+  .chip.fp { border-color: var(--bad); color: var(--bad); }
+  .chip.fn { border-color: var(--fac); color: var(--fac); }
+  .rating { display: flex; gap: 6px; margin-top: 6px; }
+  .rating span {
+    font-family: ui-monospace, monospace; font-size: 12px;
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 9px; color: var(--muted);
+  }
+  .rating span[data-on="true"] { border-color: var(--aa); color: var(--aa); font-weight: 600; }
+  .bar { height: 7px; border-radius: 4px; background: var(--grid); position: relative; overflow: hidden; margin-top: 7px; }
+  .bar > span { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+  .val { font-family: ui-monospace, monospace; font-size: 15px; font-weight: 600; }
+  .score { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .score .big { font-family: ui-monospace, monospace; font-size: 34px; font-weight: 600; line-height: 1.1; }
+  .score .lbl { color: var(--muted); font-size: 13px; }
+  .steps { margin-top: 14px; font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--muted); line-height: 1.7; overflow-x: auto; }
+  .steps b { color: var(--ink); font-weight: 600; }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  input[type=range] { flex: 1; accent-color: var(--ac); }
+  .verdict { margin: 20px 0 0; }
+  .verdict .delta { font-family: ui-monospace, monospace; font-size: 13px; color: var(--muted); margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  th.aa, td.aa { color: var(--aa); }
+  th.ac, td.ac { color: var(--ac); }
+  td.dim { color: var(--ink); }
+  .note ul { margin: 8px 0 0; padding-left: 20px; }
+  .note li { margin-bottom: 9px; }
+  .stack { display: grid; gap: 20px; }
+  svg.flow { width: 100%; height: auto; display: block; }
+  code { font-family: ui-monospace, monospace; font-size: 0.92em; background: var(--grid); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Answer accuracy vs answer correctness</h1>
+  <p class="sub">Two Ragas metrics that both compare a generated <span class="mono">response</span> against a <span class="mono">reference</span> — and nothing else. Neither touches retrieved context. They differ in how they reach a number: Answer Accuracy asks an LLM twice and averages a coarse rating; Answer Correctness blends embedding similarity with claim-level F1. Pick a scenario below and watch them agree, then disagree.</p>
+
+  <div class="presets" id="presets"></div>
+
+  <div class="card" style="margin-bottom:20px">
+    <h2>Shared inputs</h2>
+    <dl class="io">
+      <dt>user_input</dt><dd id="io-q"></dd>
+      <dt>response</dt><dd id="io-r"></dd>
+      <dt>reference</dt><dd id="io-ref"></dd>
+    </dl>
+  </div>
+
+  <div class="cols">
+
+    <div class="card">
+      <h2><span class="dot" style="background:var(--aa)"></span>Answer Accuracy — dual LLM judge</h2>
+      <div class="formula">score = ½ · ( norm(r<sub>1</sub>) + norm(r<sub>2</sub>) ),&nbsp;&nbsp;norm: 0→0, 2→0.5, 4→1</div>
+
+      <div class="stage" style="margin-top:16px">
+        <div class="lbl">Pass 1 — rate response against reference</div>
+        <div class="rating" id="aa-p1"></div>
+        <div class="steps" id="aa-p1-why" style="margin-top:6px"></div>
+      </div>
+
+      <div class="stage">
+        <div class="lbl">Pass 2 — roles swapped, rate reference against response</div>
+        <div class="rating" id="aa-p2"></div>
+        <div class="steps" id="aa-p2-why" style="margin-top:6px"></div>
+      </div>
+
+      <div class="stage" style="border-color:var(--aa)">
+        <div class="lbl">Normalize, then average</div>
+        <div class="steps" id="aa-math"></div>
+      </div>
+
+      <div class="score">
+        <div class="lbl">AnswerAccuracy(llm=llm)</div>
+        <div class="big" id="aa-score" style="color:var(--aa)">0.00</div>
+        <div class="bar"><span id="aa-bar" style="background:var(--aa)"></span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="dot" style="background:var(--ac)"></span>Answer Correctness — similarity blend</h2>
+      <div class="formula">score = w<sub>s</sub> · semantic + w<sub>f</sub> · F1,&nbsp;&nbsp;F1 = TP / (TP + 0.5 · (FP + FN))</div>
+
+      <div class="stage" style="margin-top:16px;border-color:var(--sem)">
+        <div class="lbl">Semantic similarity — embeddings, cosine, no LLM</div>
+        <div class="val" id="sem-val" style="color:var(--sem)">0.00</div>
+        <div class="bar"><span id="sem-bar" style="background:var(--sem)"></span></div>
+      </div>
+
+      <div class="stage" style="border-color:var(--fac)">
+        <div class="lbl">Factual similarity — claims classified by NLI</div>
+        <div class="chips" id="fac-chips"></div>
+        <div class="steps" id="fac-claims"></div>
+        <div class="val" id="fac-val" style="color:var(--fac);margin-top:8px">0.00</div>
+        <div class="bar"><span id="fac-bar" style="background:var(--fac)"></span></div>
+      </div>
+
+      <div class="stage" style="border-color:var(--ac)">
+        <div class="lbl">Weighted average</div>
+        <div class="slider-row">
+          <label for="w">semantic weight</label>
+          <input type="range" id="w" min="0" max="1" step="0.05" value="0.5">
+          <span class="mono" id="wval">0.50 / 0.50</span>
+        </div>
+        <div class="steps" id="ac-math"></div>
+      </div>
+
+      <div class="score">
+        <div class="lbl">AnswerCorrectness(llm=llm, embeddings=embeddings)</div>
+        <div class="big" id="ac-score" style="color:var(--ac)">0.00</div>
+        <div class="bar"><span id="ac-bar" style="background:var(--ac)"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card verdict">
+    <h2>Where the two land</h2>
+    <svg class="flow" id="gauge" viewBox="0 0 900 120" role="img" aria-label="Both scores on a shared 0 to 1 axis"></svg>
+    <p id="verdict-text" style="margin:12px 0 0"></p>
+    <div class="delta" id="verdict-delta"></div>
+  </div>
+
+  <div class="stack" style="margin-top:20px">
+    <div class="card">
+      <h2>Side by side</h2>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th class="aa">Answer Accuracy</th><th class="ac">Answer Correctness</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="dim">Engine</td><td>LLM judge only</td><td>LLM (claim extraction, NLI) + embedding model</td></tr>
+          <tr><td class="dim">Scale</td><td>discrete 0 / 2 / 4, normalized to [0, 1]</td><td>continuous 0 to 1</td></tr>
+          <tr><td class="dim">Structure</td><td>2 judge passes, roles swapped for fairness</td><td>2 sub-metrics, weighted average</td></tr>
+          <tr><td class="dim">LLM calls and tokens</td><td class="aa">fewer, less</td><td>more</td></tr>
+          <tr><td class="dim">Explainability</td><td>less — a raw rating, no reasoning</td><td class="ac">more — per-claim TP / FP / FN</td></tr>
+          <tr><td class="dim">Robustness</td><td class="aa">more — the swapped pass cancels position bias</td><td>less</td></tr>
+          <tr><td class="dim">Small judge models</td><td class="aa">works well</td><td>depends on claim extraction quality</td></tr>
+          <tr><td class="dim">Tunable</td><td>nothing beyond the judge model</td><td><code>weights</code>, plus atomicity and coverage of claim breakdown</td></tr>
+          <tr><td class="dim">API</td><td><code>AnswerAccuracy(llm=llm)</code></td><td><code>AnswerCorrectness(llm=llm, embeddings=embeddings)</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card note">
+      <h2>Reading the difference</h2>
+      <ul>
+        <li><b>Wording leaks into Answer Correctness.</b> Half the score is cosine similarity between embeddings, which moves with phrasing, length and register. A terse but fully correct answer scores lower than a verbose one that says the same thing. Answer Accuracy has no such term.</li>
+        <li><b>Answer Correctness can be propped up by fluency.</b> A confidently wrong answer that reads like the reference keeps a high semantic component, so a single bad claim only dents the score. Drop the semantic weight to 0 and the metric collapses to factual F1 — that is the honest setting when you care about facts alone.</li>
+        <li><b>Answer Accuracy is coarse by construction.</b> Three rungs per pass, two passes: only five possible scores (0, 0.25, 0.5, 0.75, 1). Useful as a gate, poor as a trend line — small regressions hide inside a rung.</li>
+        <li><b>The swapped pass is the point.</b> LLM judges favour whichever text is presented first or looks more authoritative. Rating the reference against the response, then averaging, cancels much of that. Answer Correctness has no equivalent symmetry.</li>
+        <li><b>Explainability runs the other way.</b> When a score drops, Answer Correctness names the claim that broke. Answer Accuracy gives a number and no reasoning, so debugging means rerunning by hand.</li>
+        <li><b>Practical split:</b> Answer Accuracy for cheap, robust CI gates on small models; Answer Correctness when someone has to explain why a score moved.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS = [
+  {
+    name: "Paraphrase",
+    q: "When did the Apollo 11 crew land on the Moon, and who stepped out first?",
+    response: "Apollo 11 touched down on 20 July 1969, and Neil Armstrong was the first person to walk on the surface.",
+    reference: "Apollo 11 landed on the Moon on 20 July 1969. Neil Armstrong was the first human to step onto the lunar surface.",
+    semantic: 0.94,
+    claims: [
+      {t: "TP", s: "landing date is 20 July 1969"},
+      {t: "TP", s: "mission is Apollo 11"},
+      {t: "TP", s: "Armstrong walked first"}
+    ],
+    r1: 4, r2: 4,
+    why1: "same facts, different words — full credit",
+    why2: "reference is equally covered by the response",
+    verdict: "Both metrics agree and both are near the ceiling. Different wording, identical facts: the semantic term stays high because the sentences embed close together, and every claim lands as a TP."
+  },
+  {
+    name: "Half answered",
+    q: "When did the Apollo 11 crew land on the Moon, and who stepped out first?",
+    response: "Apollo 11 landed on 20 July 1969.",
+    reference: "Apollo 11 landed on the Moon on 20 July 1969. Neil Armstrong was the first human to step onto the lunar surface.",
+    semantic: 0.79,
+    claims: [
+      {t: "TP", s: "landing date is 20 July 1969"},
+      {t: "TP", s: "mission is Apollo 11"},
+      {t: "FN", s: "Armstrong walked first — missing from the response"}
+    ],
+    r1: 2, r2: 2,
+    why1: "partially correct — the second half of the question is unanswered",
+    why2: "reference carries facts the response never states",
+    verdict: "An omission. Answer Correctness charges it precisely — one FN drags F1 to 0.80 — while Answer Accuracy can only reach for the middle rung, 2 out of 4. The half-credit is right in spirit, blunt in resolution."
+  },
+  {
+    name: "Fluent but wrong",
+    q: "When did the Apollo 11 crew land on the Moon, and who stepped out first?",
+    response: "Apollo 11 landed on the Moon on 20 July 1969, and Buzz Aldrin was the first human to step onto the lunar surface.",
+    reference: "Apollo 11 landed on the Moon on 20 July 1969. Neil Armstrong was the first human to step onto the lunar surface.",
+    semantic: 0.96,
+    claims: [
+      {t: "TP", s: "landing date is 20 July 1969"},
+      {t: "TP", s: "mission is Apollo 11"},
+      {t: "FP", s: "Aldrin walked first — not in the reference"},
+      {t: "FN", s: "Armstrong walked first — missing from the response"}
+    ],
+    r1: 0, r2: 2,
+    why1: "contains a factual error about the central subject",
+    why2: "the swapped pass is more forgiving — most of the reference is still covered",
+    verdict: "The failure case for a blended metric. The wrong answer is phrased almost exactly like the reference, so semantic similarity stays at 0.96 and props the blend up well above what the facts deserve. Slide the semantic weight to 0 to see the honest number. The judge, reading meaning rather than distance, is far harsher."
+  },
+  {
+    name: "Terse but right",
+    q: "When did the Apollo 11 crew land on the Moon, and who stepped out first?",
+    response: "20 July 1969; Armstrong.",
+    reference: "Apollo 11 landed on the Moon on 20 July 1969. Neil Armstrong was the first human to step onto the lunar surface.",
+    semantic: 0.52,
+    claims: [
+      {t: "TP", s: "landing date is 20 July 1969"},
+      {t: "TP", s: "Armstrong walked first"}
+    ],
+    r1: 4, r2: 4,
+    why1: "everything asked is answered, style aside",
+    why2: "no reference fact is missing",
+    verdict: "The mirror image. Every fact is right, but the terse phrasing embeds far from the reference, so the semantic half of Answer Correctness punishes style. Answer Accuracy carries no wording term and stays at the ceiling."
+  }
+];
+
+let active = 0;
+let w = 0.5;
+
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt = (n, d = 2) => n.toFixed(d);
+
+function buildPresets() {
+  const host = $("presets");
+  PRESETS.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.textContent = p.name;
+    b.setAttribute("aria-pressed", String(i === active));
+    b.onclick = () => {
+      active = i;
+      [...host.children].forEach((c, j) => c.setAttribute("aria-pressed", String(j === i)));
+      render();
+    };
+    host.appendChild(b);
+  });
+}
+
+function ratingRow(host, r) {
+  host.replaceChildren();
+  [0, 2, 4].forEach(v => {
+    const s = document.createElement("span");
+    s.textContent = v;
+    s.dataset.on = String(v === r);
+    host.appendChild(s);
+  });
+  const norm = document.createElement("span");
+  norm.textContent = "norm " + fmt(r / 4);
+  norm.dataset.on = "false";
+  norm.style.borderStyle = "dashed";
+  host.appendChild(norm);
+}
+
+function svgEl(tag, attrs, text) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function drawGauge(aa, ac) {
+  const g = $("gauge");
+  g.replaceChildren();
+  const X0 = 60, X1 = 840, Y = 62;
+  const x = v => X0 + v * (X1 - X0);
+
+  g.appendChild(svgEl("line", {x1: X0, y1: Y, x2: X1, y2: Y, stroke: css("--grid"), "stroke-width": 6, "stroke-linecap": "round"}));
+  for (let v = 0; v <= 1.0001; v += 0.25) {
+    g.appendChild(svgEl("line", {x1: x(v), y1: Y - 9, x2: x(v), y2: Y + 9, stroke: css("--line"), "stroke-width": 1.5}));
+    g.appendChild(svgEl("text", {x: x(v), y: Y + 28, fill: css("--muted"), "font-size": 11, "text-anchor": "middle", "font-family": "ui-monospace, monospace"}, v.toFixed(2)));
+  }
+
+  const mark = (v, color, label, above) => {
+    const px = x(v), dir = above ? -1 : 1;
+    g.appendChild(svgEl("line", {x1: px, y1: Y, x2: px, y2: Y + dir * 26, stroke: color, "stroke-width": 2}));
+    g.appendChild(svgEl("circle", {cx: px, cy: Y, r: 7, fill: color}));
+    g.appendChild(svgEl("text", {
+      x: px, y: Y + dir * 34 + (above ? 0 : 10), fill: color, "font-size": 13, "font-weight": 600,
+      "text-anchor": px > 780 ? "end" : px < 90 ? "start" : "middle", "font-family": "ui-monospace, monospace"
+    }, `${label} ${fmt(v)}`));
+  };
+  mark(aa, css("--aa"), "accuracy", true);
+  mark(ac, css("--ac"), "correctness", false);
+}
+
+function render() {
+  const p = PRESETS[active];
+
+  $("io-q").textContent = p.q;
+  $("io-r").textContent = p.response;
+  $("io-ref").textContent = p.reference;
+
+  // Answer Accuracy
+  ratingRow($("aa-p1"), p.r1);
+  ratingRow($("aa-p2"), p.r2);
+  $("aa-p1-why").textContent = p.why1;
+  $("aa-p2-why").textContent = p.why2;
+  const aa = (p.r1 / 4 + p.r2 / 4) / 2;
+  $("aa-math").innerHTML = `(${fmt(p.r1 / 4)} + ${fmt(p.r2 / 4)}) / 2 = <b>${fmt(aa)}</b>`;
+  $("aa-score").textContent = fmt(aa);
+  $("aa-bar").style.width = aa * 100 + "%";
+
+  // Answer Correctness
+  $("sem-val").textContent = fmt(p.semantic);
+  $("sem-bar").style.width = p.semantic * 100 + "%";
+
+  const tp = p.claims.filter(c => c.t === "TP").length;
+  const fp = p.claims.filter(c => c.t === "FP").length;
+  const fn = p.claims.filter(c => c.t === "FN").length;
+  const f1 = tp === 0 ? 0 : tp / (tp + 0.5 * (fp + fn));
+
+  const chips = $("fac-chips");
+  chips.replaceChildren();
+  [["TP", tp, "tp"], ["FP", fp, "fp"], ["FN", fn, "fn"]].forEach(([k, n, cls]) => {
+    const c = document.createElement("span");
+    c.className = "chip " + cls;
+    c.textContent = `${k} ${n}`;
+    chips.appendChild(c);
+  });
+
+  $("fac-claims").innerHTML = p.claims
+    .map(c => `<b>${c.t}</b> &nbsp;${c.s}`)
+    .join("<br>") + `<br>F1 = ${tp} / (${tp} + 0.5 · (${fp} + ${fn})) = <b>${fmt(f1)}</b>`;
+  $("fac-val").textContent = fmt(f1);
+  $("fac-bar").style.width = f1 * 100 + "%";
+
+  const ac = w * p.semantic + (1 - w) * f1;
+  $("wval").textContent = `${fmt(w)} / ${fmt(1 - w)}`;
+  $("ac-math").innerHTML =
+    `${fmt(w)} · ${fmt(p.semantic)} &nbsp;+&nbsp; ${fmt(1 - w)} · ${fmt(f1)} = <b>${fmt(ac)}</b>`;
+  $("ac-score").textContent = fmt(ac);
+  $("ac-bar").style.width = ac * 100 + "%";
+
+  drawGauge(aa, ac);
+  $("verdict-text").textContent = p.verdict;
+  const d = ac - aa;
+  $("verdict-delta").textContent =
+    `correctness − accuracy = ${d >= 0 ? "+" : ""}${fmt(d)}` +
+    (Math.abs(d) < 0.06 ? "  — the two agree" : d > 0 ? "  — correctness is the more generous of the two here" : "  — accuracy is the more generous of the two here");
+}
+
+$("w").addEventListener("input", e => { w = +e.target.value; render(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+
+buildPresets();
+render();
+</script>
+</body>
+</html>
