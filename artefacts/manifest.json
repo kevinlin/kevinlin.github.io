@@ -234,6 +234,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 130
+    },
+    {
+      "id": "llm-eval",
+      "title": "LLM Evaluation",
+      "description": "How LLM output quality gets measured: the metrics, the maths behind them, and where the numbers mislead.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 140
     }
   ],
   "entries": [
@@ -747,6 +755,15 @@
       "title": "Memory core (dark variant)",
       "collection": "claude-tag",
       "order": 110,
+      "replacements": {}
+    },
+    {
+      "id": "answer-relevancy-cosine",
+      "source": "llm-eval/answer-relevancy-cosine.html",
+      "destination": "llm-eval/answer-relevancy-cosine/index.html",
+      "title": "Cosine similarity in Ragas answer relevancy",
+      "collection": "llm-eval",
+      "order": 10,
       "replacements": {}
     }
   ]

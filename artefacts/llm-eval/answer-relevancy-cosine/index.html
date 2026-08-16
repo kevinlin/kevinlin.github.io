@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosine Similarity in Ragas Answer Relevancy</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --panel: #ffffff;
+    --ink: #1a1a19;
+    --muted: #6b6b66;
+    --line: #dcdcd6;
+    --eo: #7c3aed;
+    --q1: #0f9d8f;
+    --q2: #d97706;
+    --q3: #2563eb;
+    --grid: #e6e6e0;
+    --good: #0f9d8f;
+    --bad: #c2410c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14141a;
+      --panel: #1c1c24;
+      --ink: #ececf0;
+      --muted: #9a9aa5;
+      --line: #32323d;
+      --eo: #a78bfa;
+      --q1: #2dd4bf;
+      --q2: #fbbf24;
+      --q3: #60a5fa;
+      --grid: #26262f;
+      --good: #2dd4bf;
+      --bad: #fb923c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 28px; max-width: 70ch; }
+  .formula {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .formula .big {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .formula dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 14px 0 0; font-size: 14px; }
+  .formula dt { font-family: ui-monospace, monospace; color: var(--muted); }
+  .formula dd { margin: 0; }
+  .cols { display: grid; grid-template-columns: minmax(320px, 1.05fr) minmax(320px, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .card h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 14px; }
+  svg.plane { width: 100%; height: auto; display: block; touch-action: none; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  button {
+    font: inherit; font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: right; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td.num { font-family: ui-monospace, monospace; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 7px; }
+  .bar { height: 6px; border-radius: 3px; background: var(--grid); position: relative; overflow: hidden; }
+  .bar > span { position: absolute; inset: 0 auto 0 0; border-radius: 3px; }
+  .score { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .score .val { font-family: ui-monospace, monospace; font-size: 32px; font-weight: 600; }
+  .score .lbl { color: var(--muted); font-size: 13px; }
+  .steps { margin-top: 16px; font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--muted); line-height: 1.7; overflow-x: auto; }
+  .steps b { color: var(--ink); font-weight: 600; }
+  .qtext { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+  .qtext strong { color: var(--ink); font-weight: 600; }
+  .note { margin-top: 24px; }
+  .note ul { margin: 8px 0 0; padding-left: 20px; }
+  .note li { margin-bottom: 7px; }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  input[type=range] { flex: 1; accent-color: var(--eo); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cosine similarity inside Ragas answer relevancy</h1>
+  <p class="sub">Ragas asks an LLM to reverse-engineer <em>N</em> questions from the generated answer, embeds them, and measures how far each one points away from the original user input in embedding space. Drag any question vector below to see the score move.</p>
+
+  <div class="formula">
+    <div class="big">answer relevancy = (1 / N) · Σ<sub>i=1..N</sub> cos(E<sub>gi</sub>, E<sub>o</sub>) = (1 / N) · Σ<sub>i=1..N</sub> ( E<sub>gi</sub> · E<sub>o</sub> ) / ( ‖E<sub>gi</sub>‖ ‖E<sub>o</sub>‖ )</div>
+    <dl>
+      <dt>E<sub>o</sub></dt><dd>embedding of the original user input</dd>
+      <dt>E<sub>gi</sub></dt><dd>embedding of the i-th question generated back from the answer</dd>
+      <dt>N</dt><dd>number of generated questions (the <code>strictness</code> parameter, default 3)</dd>
+      <dt>·</dt><dd>dot product — sums the coordinate-wise products, large when the vectors lean the same way</dd>
+      <dt>‖v‖</dt><dd>vector length; dividing by both lengths strips magnitude out, leaving only direction</dd>
+    </dl>
+  </div>
+
+  <div class="presets" id="presets"></div>
+
+  <div class="cols">
+    <div class="card">
+      <h2>Embedding space (2D stand-in for 1536D)</h2>
+      <svg class="plane" id="plane" viewBox="0 0 460 460" role="img" aria-label="Vector plot of the user input embedding and three generated-question embeddings"></svg>
+      <p class="hint">Drag a coloured dot. Only the <strong>angle</strong> to E<sub>o</sub> changes the score — drag a dot straight in or out along its own direction and the cosine holds still.</p>
+      <div class="slider-row">
+        <label for="scale">Scale all E<sub>gi</sub> lengths</label>
+        <input type="range" id="scale" min="0.35" max="1.6" step="0.01" value="1">
+        <span class="num" id="scaleval" style="font-family:ui-monospace,monospace">1.00×</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Per-question cosine</h2>
+      <p class="qtext" id="qcontext"></p>
+      <table>
+        <thead>
+          <tr><th>Vector</th><th>angle θ</th><th>‖v‖</th><th>E·E<sub>o</sub></th><th>cos θ</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="score">
+        <div class="lbl">mean of the N cosines</div>
+        <div class="val" id="score">0.000</div>
+        <div class="bar" style="margin-top:8px"><span id="scorebar"></span></div>
+      </div>
+      <div class="steps" id="steps"></div>
+    </div>
+  </div>
+
+  <div class="card note">
+    <h2>What the geometry tells you</h2>
+    <ul>
+      <li><b>0° means the answer let the LLM rebuild your exact question.</b> cos 0 = 1. The answer covered everything asked, nothing more.</li>
+      <li><b>A wide angle means drift.</b> An answer covering only half the question ("France is in western Europe" for "Where is France and what is its capital?") generates questions that miss the capital, so their vectors tilt away and the mean cosine drops.</li>
+      <li><b>Length is deliberately ignored.</b> Embedding norm tracks things like text length and token count, not meaning. Dividing by ‖E<sub>gi</sub>‖‖E<sub>o</sub>‖ makes a verbose paraphrase score the same as a terse one — that is the whole reason cosine is used here instead of a raw dot product or Euclidean distance.</li>
+      <li><b>The range is [-1, 1], not [0, 1].</b> Ragas notes the score is usually in [0, 1] but is not bounded there — real embedding models rarely produce opposing vectors, yet nothing in the formula forbids a negative cosine.</li>
+      <li><b>Relevancy is not correctness.</b> The metric only compares question to question. A confidently wrong but on-topic answer still scores high. Non-committal answers ("I don't know") get flagged separately by a noncommittal check, not by the cosine.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const PRESETS = [
+  {
+    name: "High relevance",
+    context: 'Input: <strong>"Where is France and what is its capital?"</strong> — Answer: <strong>"France is in western Europe and Paris is its capital."</strong> Generated questions cover both halves, so all three vectors hug Eₒ.',
+    qs: [{a: 6, r: 0.95}, {a: -9, r: 1.05}, {a: 14, r: 0.88}]
+  },
+  {
+    name: "Partial answer",
+    context: 'Answer: <strong>"France is in western Europe."</strong> The capital half is missing, so the reverse-generated questions only ask about location and swing away from Eₒ.',
+    qs: [{a: 38, r: 0.9}, {a: 52, r: 1.0}, {a: 30, r: 0.8}]
+  },
+  {
+    name: "Off topic",
+    context: 'Answer drifts to an unrelated subject. Generated questions land nearly orthogonal to the user input — cos 90° = 0, the "no shared meaning" point.',
+    qs: [{a: 82, r: 0.95}, {a: 96, r: 0.85}, {a: 71, r: 1.05}]
+  },
+  {
+    name: "Mixed bag",
+    context: 'One generated question is on target, two wander. The mean flattens the spread — a single good question cannot rescue the score, and a single bad one drags a good answer down.',
+    qs: [{a: 4, r: 1.0}, {a: 61, r: 0.9}, {a: 88, r: 0.95}]
+  }
+];
+
+const CX = 230, CY = 250, UNIT = 165;
+const EO_ANGLE = -22;          // degrees, screen-up is negative in SVG
+const EO_LEN = 1.0;
+const COLORS = ["--q1", "--q2", "--q3"];
+
+let qs = PRESETS[0].qs.map(q => ({...q}));
+let baseR = qs.map(q => q.r);
+let scale = 1;
+let active = 0;
+
+const plane = document.getElementById("plane");
+const rows = document.getElementById("rows");
+const stepsEl = document.getElementById("steps");
+const scoreEl = document.getElementById("score");
+const scorebar = document.getElementById("scorebar");
+const qcontext = document.getElementById("qcontext");
+const scaleInput = document.getElementById("scale");
+const scaleVal = document.getElementById("scaleval");
+
+const rad = d => d * Math.PI / 180;
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const pt = (angDeg, r) => [CX + Math.cos(rad(angDeg)) * r * UNIT, CY + Math.sin(rad(angDeg)) * r * UNIT];
+const fmt = (n, d = 3) => (n < 0 ? "" : " ") + n.toFixed(d);
+
+function buildPresets() {
+  const host = document.getElementById("presets");
+  PRESETS.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.textContent = p.name;
+    b.setAttribute("aria-pressed", String(i === active));
+    b.onclick = () => {
+      active = i;
+      qs = p.qs.map(q => ({...q}));
+      baseR = qs.map(q => q.r);
+      scale = 1; scaleInput.value = 1;
+      [...host.children].forEach((c, j) => c.setAttribute("aria-pressed", String(j === i)));
+      render();
+    };
+    host.appendChild(b);
+  });
+}
+
+function svgEl(tag, attrs, text) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function arrow(x1, y1, x2, y2, color, width) {
+  const g = svgEl("g", {});
+  const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len, uy = dy / len;
+  const head = 13;
+  const bx = x2 - ux * head, by = y2 - uy * head;
+  g.appendChild(svgEl("line", {x1, y1, x2: bx, y2: by, stroke: color, "stroke-width": width, "stroke-linecap": "round"}));
+  const px = -uy, py = ux;
+  g.appendChild(svgEl("polygon", {
+    points: `${x2},${y2} ${bx + px * 5.5},${by + py * 5.5} ${bx - px * 5.5},${by - py * 5.5}`,
+    fill: color
+  }));
+  return g;
+}
+
+function render() {
+  qcontext.innerHTML = PRESETS[active].context;
+  plane.replaceChildren();
+
+  const gridC = css("--grid"), mutedC = css("--muted"), eoC = css("--eo");
+
+  // rings + axes
+  [0.5, 1].forEach(r => plane.appendChild(svgEl("circle",
+    {cx: CX, cy: CY, r: r * UNIT, fill: "none", stroke: gridC, "stroke-width": 1, "stroke-dasharray": r === 1 ? "" : "3 4"})));
+  plane.appendChild(svgEl("line", {x1: CX - 200, y1: CY, x2: CX + 205, y2: CY, stroke: gridC, "stroke-width": 1}));
+  plane.appendChild(svgEl("line", {x1: CX, y1: CY - 235, x2: CX, y2: CY + 190, stroke: gridC, "stroke-width": 1}));
+  plane.appendChild(svgEl("text", {x: CX + 208, y: CY + 4, fill: mutedC, "font-size": 11}, "dim 1"));
+  plane.appendChild(svgEl("text", {x: CX + 6, y: CY - 240, fill: mutedC, "font-size": 11}, "dim 2"));
+
+  // angle arcs, drawn under the vectors
+  const [eox, eoy] = pt(EO_ANGLE, EO_LEN);
+  qs.forEach((q, i) => {
+    const ang = EO_ANGLE + q.a;
+    const arcR = 44 + i * 15;
+    const [ax, ay] = pt(EO_ANGLE, arcR / UNIT);
+    const [bx, by] = pt(ang, arcR / UNIT);
+    const sweep = q.a > 0 ? 1 : 0;
+    plane.appendChild(svgEl("path", {
+      d: `M ${ax} ${ay} A ${arcR} ${arcR} 0 ${Math.abs(q.a) > 180 ? 1 : 0} ${sweep} ${bx} ${by}`,
+      fill: "none", stroke: css(COLORS[i]), "stroke-width": 1.4, "stroke-dasharray": "2 3", opacity: 0.85
+    }));
+    const [lx, ly] = pt(EO_ANGLE + q.a / 2, (arcR + 12) / UNIT);
+    plane.appendChild(svgEl("text", {
+      x: lx, y: ly + 4, fill: css(COLORS[i]), "font-size": 11, "text-anchor": "middle",
+      "font-family": "ui-monospace, monospace"
+    }, `${Math.abs(q.a).toFixed(0)}°`));
+  });
+
+  // Eo
+  plane.appendChild(arrow(CX, CY, eox, eoy, eoC, 3.2));
+  plane.appendChild(svgEl("text", {x: eox + 8, y: eoy - 6, fill: eoC, "font-size": 14, "font-weight": 600}, "Eₒ"));
+  plane.appendChild(svgEl("text", {x: eox + 8, y: eoy + 10, fill: mutedC, "font-size": 11}, "user input"));
+
+  // Egi
+  qs.forEach((q, i) => {
+    const c = css(COLORS[i]);
+    const [x, y] = pt(EO_ANGLE + q.a, q.r * scale);
+    plane.appendChild(arrow(CX, CY, x, y, c, 2.4));
+    const dot = svgEl("circle", {cx: x, cy: y, r: 9, fill: c, "fill-opacity": 0.22, stroke: c, "stroke-width": 2, cursor: "grab"});
+    dot.dataset.i = i;
+    plane.appendChild(dot);
+    const off = y < CY ? -14 : 20;
+    plane.appendChild(svgEl("text", {
+      x: x + (x < CX ? -12 : 12), y: y + off, fill: c, "font-size": 13, "font-weight": 600,
+      "text-anchor": x < CX ? "end" : "start"
+    }, `E₉${i + 1}`));
+  });
+
+  plane.appendChild(svgEl("circle", {cx: CX, cy: CY, r: 3.5, fill: mutedC}));
+
+  // table + math
+  rows.replaceChildren();
+  const cosines = qs.map(q => Math.cos(rad(q.a)));
+  qs.forEach((q, i) => {
+    const c = css(COLORS[i]);
+    const len = q.r * scale;
+    const dot = len * EO_LEN * cosines[i];
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      `<td><span class="swatch" style="background:${c}"></span>E<sub>g${i + 1}</sub></td>` +
+      `<td class="num">${Math.abs(q.a).toFixed(1)}°</td>` +
+      `<td class="num">${len.toFixed(2)}</td>` +
+      `<td class="num">${fmt(dot)}</td>` +
+      `<td class="num" style="color:${c};font-weight:600">${fmt(cosines[i])}</td>`;
+    rows.appendChild(tr);
+  });
+
+  const mean = cosines.reduce((a, b) => a + b, 0) / cosines.length;
+  scoreEl.textContent = fmt(mean).trim();
+  scoreEl.style.color = mean >= 0.8 ? css("--good") : mean >= 0.45 ? css("--ink") : css("--bad");
+  scorebar.style.width = Math.max(0, Math.min(1, mean)) * 100 + "%";
+  scorebar.style.background = mean >= 0.8 ? css("--good") : mean >= 0.45 ? css("--eo") : css("--bad");
+
+  stepsEl.innerHTML =
+    `<b>N</b> = ${qs.length}<br>` +
+    `score = (${cosines.map(c => fmt(c).trim()).join(" + ")}) / ${qs.length}<br>` +
+    `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <b>${fmt(mean).trim()}</b>`;
+}
+
+// dragging
+let dragging = null;
+plane.addEventListener("pointerdown", e => {
+  const i = e.target.dataset && e.target.dataset.i;
+  if (i === undefined) return;
+  dragging = +i;
+  plane.setPointerCapture(e.pointerId);
+});
+plane.addEventListener("pointermove", e => {
+  if (dragging === null) return;
+  const box = plane.getBoundingClientRect();
+  const sx = 460 / box.width, sy = 460 / box.height;
+  const x = (e.clientX - box.left) * sx - CX;
+  const y = (e.clientY - box.top) * sy - CY;
+  let a = Math.atan2(y, x) * 180 / Math.PI - EO_ANGLE;
+  while (a > 180) a -= 360;
+  while (a < -180) a += 360;
+  qs[dragging].a = a;
+  const r = Math.hypot(x, y) / UNIT;
+  baseR[dragging] = Math.max(0.25, Math.min(1.25, r / scale));
+  qs[dragging].r = baseR[dragging];
+  render();
+});
+["pointerup", "pointercancel"].forEach(ev => plane.addEventListener(ev, () => { dragging = null; }));
+
+scaleInput.addEventListener("input", () => {
+  scale = +scaleInput.value;
+  scaleVal.textContent = scale.toFixed(2) + "×";
+  render();
+});
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+
+buildPresets();
+render();
+</script>
+</body>
+</html>
