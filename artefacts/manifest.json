@@ -498,33 +498,6 @@
       "replacements": {}
     },
     {
-      "id": "everything-llm-gpt-5-6-avg-cost-per-task",
-      "source": "everything-llm/GPT-5.6-Avg cost per task.png",
-      "destination": "everything-llm/gpt-5-6-avg-cost-per-task.png",
-      "title": "DeepSWE score vs. cost per task, GPT-5.6 family",
-      "collection": "everything-llm",
-      "order": 40,
-      "replacements": {}
-    },
-    {
-      "id": "everything-llm-gpt-5-6-avg-output-tokens-per-task",
-      "source": "everything-llm/GPT-5.6-Avg output tokens per task.png",
-      "destination": "everything-llm/gpt-5-6-avg-output-tokens-per-task.png",
-      "title": "DeepSWE score vs. output tokens per task, GPT-5.6 family",
-      "collection": "everything-llm",
-      "order": 50,
-      "replacements": {}
-    },
-    {
-      "id": "everything-llm-sonnet-5-the-effort-dial-truth",
-      "source": "everything-llm/Sonnet 5 — The Effort-Dial Truth.png",
-      "destination": "everything-llm/sonnet-5-the-effort-dial-truth.png",
-      "title": "Sonnet 5: performance and real cost across reasoning effort",
-      "collection": "everything-llm",
-      "order": 60,
-      "replacements": {}
-    },
-    {
       "id": "everything-llm-score-vs-cost-per-task",
       "source": "everything-llm/score-vs-cost-per-task.html",
       "destination": "everything-llm/score-vs-cost-per-task/index.html",
