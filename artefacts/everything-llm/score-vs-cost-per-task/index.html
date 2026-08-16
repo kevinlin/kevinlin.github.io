@@ -331,7 +331,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 14 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. The two dashed DeepSeek lines are one model at three price points: today's rate, then the off-peak and peak rates from DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a>, which takes effect 16:00 UTC on 16 August 2026. Peak hours are 01:00–04:00 and 06:00–10:00 UTC; off-peak is half the peak rate. Projected points hold the measured token mix constant and reprice it — peak output rises to $3.96/1M for Pro and $1.32/1M for Flash, roughly 4.5× and 4.7× today.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 14 August 2026; the two DeepSeek points re-checked 17 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is now in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Peak output is $3.96/1M for Pro and $1.32/1M for Flash. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.252 per task for Pro and $0.112 for Flash.</p>
   </main>
 </div>
 
@@ -697,13 +697,11 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.4169, y: 42.57, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'right', ao: 8 },
           { x: 1.7173, y: 55.26, label: 'Claude Sonnet 5 (max)', al: 'right', ao: 8 } ] },
       { name: 'DeepSeek V4 Pro 0813', provider: 'DeepSeek', dashed: true, points: [
-          { x: 0.0561, y: 53.00, label: 'DeepSeek V4 Pro 0813 (max)', al: 'left', ao: 8 },
-          { x: 0.1261, y: 53.00, label: 'off-peak', tableLabel: 'DeepSeek V4 Pro 0813 (max) · off-peak from 16 Aug', al: 'top', ao: 16 },
-          { x: 0.2522, y: 53.00, label: 'peak', tableLabel: 'DeepSeek V4 Pro 0813 (max) · peak from 16 Aug', al: 'top', ao: 16 } ] },
+          { x: 0.1260, y: 53.20, label: 'DeepSeek V4 Pro 0813 (off-peak)', tableLabel: 'DeepSeek V4 Pro 0813 (max) · off-peak', al: 'left', ao: 8 },
+          { x: 0.2521, y: 53.20, label: 'peak', tableLabel: 'DeepSeek V4 Pro 0813 (max) · peak', al: 'right', ao: 8 } ] },
       { name: 'DeepSeek V4 Flash 0731', provider: 'DeepSeek', dashed: true, points: [
-          { x: 0.0271, y: 51.77, label: 'DeepSeek V4 Flash 0731 (max)', al: 'bottom', ao: 12 },
-          { x: 0.0561, y: 51.77, label: 'off-peak', tableLabel: 'DeepSeek V4 Flash 0731 (max) · off-peak from 16 Aug', al: 'right', ao: 8 },
-          { x: 0.1122, y: 51.77, label: 'peak', tableLabel: 'DeepSeek V4 Flash 0731 (max) · peak from 16 Aug', al: 'right', ao: 8 } ] }
+          { x: 0.0561, y: 51.77, label: 'DeepSeek V4 Flash 0731 (off-peak)', tableLabel: 'DeepSeek V4 Flash 0731 (max) · off-peak', al: 'left', ao: 8 },
+          { x: 0.1122, y: 51.77, label: 'peak', tableLabel: 'DeepSeek V4 Flash 0731 (max) · peak', al: 'bottom', ao: 12 } ] }
     ],
 
     singles: [
