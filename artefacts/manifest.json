@@ -765,6 +765,15 @@
       "collection": "llm-eval",
       "order": 10,
       "replacements": {}
+    },
+    {
+      "id": "answer-accuracy-vs-answer-correctness",
+      "source": "llm-eval/answer-accuracy-vs-answer-correctness.html",
+      "destination": "llm-eval/answer-accuracy-vs-answer-correctness/index.html",
+      "title": "Answer accuracy vs answer correctness",
+      "collection": "llm-eval",
+      "order": 20,
+      "replacements": {}
     }
   ]
 }
