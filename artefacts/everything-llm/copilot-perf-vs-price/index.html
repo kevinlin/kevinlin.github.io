@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Copilot: Coding Score vs. Blended Price</title>
+<style>
+/* Shared styling for the Artificial Analysis Intelligence Index scatter charts.
+   Editorial direction: warm paper ground, serif display, restrained rules,
+   depth from layered shadow rather than borders. */
+
+:root {
+  /* Type */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Spacing scale: 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-card: 16px;
+  --radius-inner: 8px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Light theme tokens */
+  --bg: 40 20% 98%;
+  --surface: 0 0% 100%;
+  --ink: 220 8% 10%;
+  --ink-muted: 40 4% 42%;
+  --rule: 38 18% 88%;
+  --grid: 38 14% 90%;
+  --ring: 18 62% 48%;
+  --shadow-a: 0deg 0% 0% / 0.05;
+  --shadow-b: 0deg 0% 0% / 0.04;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 225 10% 8%;
+    --surface: 225 9% 11%;
+    --ink: 40 12% 92%;
+    --ink-muted: 40 6% 62%;
+    --rule: 225 8% 20%;
+    --grid: 225 8% 20%;
+    --ring: 22 74% 62%;
+    --shadow-a: 0deg 0% 0% / 0.5;
+    --shadow-b: 0deg 0% 0% / 0.4;
+  }
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  padding: var(--space-12) var(--space-8) var(--space-8);
+  background: hsl(var(--bg));
+  color: hsl(var(--ink));
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.page {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --- Header ------------------------------------------------------------ */
+
+.kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--ink-muted));
+  margin: 0 0 var(--space-3);
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin: 0 0 var(--space-3);
+}
+
+.subtitle {
+  font-size: 17px;
+  color: hsl(var(--ink-muted));
+  text-wrap: pretty;
+  max-width: 68ch;
+  margin: 0 0 var(--space-6);
+}
+
+/* --- Legend ------------------------------------------------------------ */
+
+.legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  align-items: center;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Each legend entry doubles as a filter toggle for its provider. */
+.legend button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 140ms var(--ease-out), background-color 140ms var(--ease-out);
+}
+
+.legend button:hover { background: hsl(var(--rule)); }
+
+/* Providers the reader is not currently isolating recede but stay readable. */
+.legend button.is-dim { opacity: 0.38; }
+
+/* A pinned provider keeps its filter on after the pointer leaves. */
+.legend button[aria-pressed="true"] {
+  background: hsl(var(--rule));
+  box-shadow: inset 0 0 0 1px hsl(var(--ink) / 0.22);
+}
+
+.legend button[aria-pressed="true"] .dot {
+  box-shadow: 0 0 0 3px hsl(var(--surface)), 0 0 0 4px currentColor;
+}
+
+.legend .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Static key for the hollow markers; not a filter, so it carries no button. */
+.legend .key {
+  color: hsl(var(--ink-muted));
+  font-weight: 400;
+}
+
+.legend .key .dot {
+  background: hsl(var(--surface));
+  box-shadow: inset 0 0 0 2px hsl(var(--ink-muted));
+}
+
+/* --- Chart card -------------------------------------------------------- */
+
+.card {
+  background: hsl(var(--surface));
+  border-radius: var(--radius-card);
+  padding: var(--space-2);
+  box-shadow:
+    0 1px 2px hsl(var(--shadow-a)),
+    0 2px 6px hsl(var(--shadow-b)),
+    0 8px 24px hsl(var(--shadow-b));
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: clamp(520px, 84vh, 940px);
+  border-radius: var(--radius-inner);
+  padding: var(--space-4) var(--space-2) var(--space-2);
+  box-sizing: border-box;
+}
+
+/* --- Data table (accessible fallback + exact values) ------------------- */
+
+.data-details {
+  margin-top: var(--space-6);
+  border-top: 1px solid hsl(var(--rule));
+  padding-top: var(--space-4);
+}
+
+.data-details summary {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-inner);
+  padding: var(--space-2) var(--space-1);
+  transition: color 140ms var(--ease-out);
+}
+
+.data-details summary:hover { color: hsl(var(--ring)); }
+
+.table-scroll {
+  overflow-x: auto;
+  margin-top: var(--space-4);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+caption {
+  text-align: left;
+  color: hsl(var(--ink-muted));
+  font-size: 13px;
+  padding-bottom: var(--space-2);
+}
+
+th, td {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid hsl(var(--rule));
+  white-space: nowrap;
+}
+
+tbody tr {
+  transition: opacity 140ms var(--ease-out);
+}
+
+tbody tr.is-dim { opacity: 0.38; }
+
+thead th {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: hsl(var(--ink-muted));
+}
+
+td.num, th.num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+/* The credit equivalent rides under its dollar figure rather than claiming
+   a column of its own; three price columns already carry enough width. */
+td.num .cr {
+  display: block;
+  font-size: 11px;
+  color: hsl(var(--ink-muted));
+}
+
+td.src {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--ink-muted));
+}
+
+.swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--space-2);
+  vertical-align: 1px;
+}
+
+/* --- Footnote ---------------------------------------------------------- */
+
+.note {
+  margin-top: var(--space-6);
+  font-size: 13px;
+  color: hsl(var(--ink-muted));
+  text-wrap: pretty;
+  max-width: 78ch;
+}
+
+.note + .note { margin-top: var(--space-3); }
+
+.note a {
+  color: inherit;
+  text-decoration-color: hsl(var(--rule));
+  text-underline-offset: 3px;
+}
+
+.note a:hover { color: hsl(var(--ring)); }
+
+/* --- Focus ------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius-inner);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  background: hsl(var(--surface));
+  color: hsl(var(--ink));
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-inner);
+  font-size: 14px;
+}
+
+.skip-link:focus {
+  left: var(--space-4);
+  z-index: 20;
+}
+
+@media (max-width: 640px) {
+  body { padding: var(--space-8) var(--space-4) var(--space-6); }
+  .chart-wrap { height: 440px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+<script src="../../vendor/chart.umd.min.js"></script>
+<script src="../../vendor/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#data-table">Skip to the data table</a>
+
+<div class="page">
+  <header>
+    <p class="kicker">GitHub Copilot &middot; Models and pricing</p>
+    <h1>Coding Score vs. Blended Price</h1>
+    <p class="subtitle">What a million tokens costs on each Copilot model once its four billing rates are weighted the way an agentic coding session actually uses them, plotted against the share of SWE-Bench Pro tasks that model resolves. Dashed lines join one model to its second published rate: the long-context tier, or Opus 4.8&rsquo;s fast mode.</p>
+  </header>
+
+  <main id="main">
+    <ul class="legend" id="legend" aria-label="Model providers"></ul>
+
+    <div class="card">
+      <figure class="chart-wrap" style="margin:0">
+        <canvas id="chart" role="img" aria-label="Scatter chart of SWE-Bench Pro resolve rate against blended price per million tokens in US dollars for the GitHub Copilot model catalogue. Full values are in the data table below."></canvas>
+      </figure>
+    </div>
+
+    <details class="data-details" id="data-table">
+      <summary>Data table</summary>
+      <div class="table-scroll">
+        <table id="table"></table>
+      </div>
+    </details>
+
+    <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the second point on each dashed line is the long-context tier, priced from the same mix.</p>
+
+    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are vendor-reported at each model&rsquo;s best published configuration. The two are <strong>not like-for-like</strong> &mdash; a hollow point below a filled one may be measuring the scaffold as much as the model, and every Claude model older than Opus 4.7 has only a Scale figure. GPT-5.4 also appears on Scale&rsquo;s board at 59.1% (xHigh, mini-swe-agent); the vendor number is plotted here.</p>
+
+    <p class="note"><strong>Not shown.</strong> Fourteen priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.6 Terra, GPT-5.6 Luna, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Sources: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a> and <a href="https://labs.scale.com/leaderboard/swe_bench_pro_public">Scale SWE-Bench Pro (public dataset)</a>, both retrieved 17 August 2026, plus vendor launch reporting for the filled points. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+  </main>
+</div>
+
+<script>
+/* Shared rendering layer for the Intelligence Index scatter charts, extended here
+ * with hollow markers so an independently measured score never reads as
+ * like-for-like with a vendor-reported one.
+ *
+ * A page supplies only its data and axis config; this module owns provider colours,
+ * theme switching (light/dark), datalabel placement, the legend, and the data table
+ * that backs the canvas for screen readers.
+ */
+(function (global) {
+  'use strict';
+
+  // Provider colours taken from Artificial Analysis' own legend. The dark values
+  // lift the same hue until it clears 3:1 against the dark ground.
+  var PROVIDER_COLORS = {
+    OpenAI:    { light: '#1f1f1f', dark: '#e9e8e5' },
+    Google:    { light: '#34a853', dark: '#5cc97a' },
+    Anthropic: { light: '#cc785c', dark: '#e59a80' },
+    xAI:       { light: '#736cd3', dark: '#a49ee8' },
+    Kimi:      { light: '#047afe', dark: '#4da6ff' }
+  };
+
+  var FONT_UI = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif';
+  var FONT_MONO = '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace';
+
+  // How far a de-emphasised series fades. Points keep a little more presence than
+  // their labels, so the dimmed cloud still reads as context rather than noise.
+  var DIM_POINT = 0.16;
+  var DIM_LABEL = 0.13;
+
+  var darkQuery = global.matchMedia('(prefers-color-scheme: dark)');
+  var reducedMotion = global.matchMedia('(prefers-reduced-motion: reduce)');
+  var registry = [];
+
+  // Filter state. `pinned` are the providers the reader has clicked; `hovered` is a
+  // transient preview of what one more click would add. Empty on both means no filter.
+  var pinned = {};
+  var hovered = null;
+
+  function isDark() { return darkQuery.matches; }
+
+  function providerColor(name) {
+    var entry = PROVIDER_COLORS[name];
+    if (!entry) return isDark() ? '#f0efec' : '#101114';
+    return isDark() ? entry.dark : entry.light;
+  }
+
+  // Hollow markers are filled with the card ground, so they must track the theme.
+  function surfaceColor() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
+    return v ? 'hsl(' + v + ')' : (isDark() ? '#1a1b20' : '#ffffff');
+  }
+
+  function withAlpha(hex, alpha) {
+    if (alpha >= 1) return hex;
+    var h = hex.replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+  }
+
+  function anyPinned() {
+    for (var k in pinned) if (pinned[k]) return true;
+    return false;
+  }
+
+  // A provider is emphasised when it is pinned or currently hovered. With nothing
+  // pinned and nothing hovered every provider is emphasised, i.e. no filter at all.
+  function isEmphasised(name) {
+    if (!anyPinned() && !hovered) return true;
+    return !!pinned[name] || hovered === name;
+  }
+
+  function pointColor(name) {
+    return withAlpha(providerColor(name), isEmphasised(name) ? 1 : DIM_POINT);
+  }
+
+  // Fill for one marker: the provider colour, or the card ground when the score
+  // came from Scale rather than the vendor.
+  function fillColor(name, hollow) {
+    if (!hollow) return pointColor(name);
+    return isEmphasised(name) ? surfaceColor() : withAlpha(providerColor(name), DIM_POINT * 0.4);
+  }
+
+  function tokens() {
+    return isDark()
+      ? { ink: '#ecebe8', muted: '#9d9c98', grid: 'rgba(236,235,232,0.12)', axis: '#b6b5b1' }
+      : { ink: '#16171a', muted: '#6b6a66', grid: 'rgba(22,23,26,0.09)', axis: '#55534f' };
+  }
+
+  // A datum's provider lives on the dataset for tier families and on the point
+  // itself for the mixed "single models" dataset.
+  function datumProvider(ctx) {
+    return ctx.dataset.provider || ctx.dataset.data[ctx.dataIndex].provider;
+  }
+
+  // Point labels are hand-placed per datum (`al` = align, `ao` = pixel offset)
+  // because the clusters are too tight for automatic placement to resolve.
+  var labelConfig = {
+    align: function (ctx) { return ctx.dataset.data[ctx.dataIndex].al || 'right'; },
+    anchor: function (ctx) {
+      var a = ctx.dataset.data[ctx.dataIndex].al;
+      if (a === 'top' || a === 'bottom') return 'center';
+      return a === 'left' ? 'start' : 'end';
+    },
+    offset: function (ctx) {
+      var o = ctx.dataset.data[ctx.dataIndex].ao;
+      return o == null ? 6 : o;
+    },
+    // Below ~720px the labels overlap into noise; the data table carries the values there.
+    display: function (ctx) { return ctx.chart.width >= 720; },
+    font: { family: FONT_UI, size: 12.5, weight: 500 },
+    color: function (ctx) {
+      var name = datumProvider(ctx);
+      return isEmphasised(name) ? tokens().ink : withAlpha(tokens().ink, DIM_LABEL);
+    },
+    formatter: function (v) { return v.label; }
+  };
+
+  function buildDatasets(spec) {
+    var datasets = spec.families.map(function (f) {
+      return {
+        label: f.name,
+        type: 'scatter',
+        provider: f.provider,
+        data: f.points,
+        showLine: true,
+        borderWidth: 1.25,
+        borderDash: f.dashed ? [5, 4] : [],
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointBorderWidth: 2,
+        datalabels: labelConfig
+      };
+    });
+
+    datasets.push({
+      label: 'Single models',
+      type: 'scatter',
+      data: spec.singles,
+      showLine: false,
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      pointBorderWidth: 2,
+      datalabels: labelConfig
+    });
+
+    return datasets;
+  }
+
+  // Paint every dataset from the current theme and filter state.
+  function paint(entry) {
+    var spec = entry.spec;
+    entry.chart.data.datasets.forEach(function (ds, i) {
+      if (i < spec.families.length) {
+        var f = spec.families[i];
+        var c = pointColor(f.provider);
+        ds.borderColor = c;
+        ds.pointBorderColor = c;
+        ds.pointBackgroundColor = ds.data.map(function (p) {
+          return fillColor(f.provider, p.hollow != null ? p.hollow : f.hollow);
+        });
+      } else {
+        ds.pointBorderColor = ds.data.map(function (s) { return pointColor(s.provider); });
+        ds.pointBackgroundColor = ds.data.map(function (s) { return fillColor(s.provider, s.hollow); });
+      }
+    });
+  }
+
+  function axisScale(cfg, t) {
+    return Object.assign({
+      title: {
+        display: true,
+        text: cfg.title,
+        color: t.ink,
+        font: { family: FONT_UI, size: 13, weight: 600 },
+        padding: { top: 12, bottom: 8 }
+      },
+      ticks: {
+        font: { family: FONT_MONO, size: 12 },
+        color: t.axis,
+        padding: 8,
+        stepSize: cfg.tickStep,
+        callback: cfg.tickFormat
+      },
+      grid: { display: !!cfg.grid, color: t.grid, drawTicks: false },
+      border: { display: false }
+    }, cfg.scale);
+  }
+
+  function renderChart(spec) {
+    var t = tokens();
+    var canvas = document.getElementById(spec.canvasId);
+
+    var chart = new global.Chart(canvas, {
+      type: 'scatter',
+      data: { datasets: buildDatasets(spec) },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: reducedMotion.matches ? false : { duration: 420, easing: 'easeOutQuart' },
+        layout: { padding: { right: 96, top: 12, left: 4 } },
+        interaction: { mode: 'nearest', intersect: true },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: isDark() ? 'rgba(20,21,25,0.96)' : 'rgba(22,23,26,0.94)',
+            titleFont: { family: FONT_UI, size: 13, weight: 600 },
+            bodyFont: { family: FONT_MONO, size: 12 },
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              title: function (items) { return items[0].raw.tableLabel || items[0].raw.label; },
+              label: function (c) { return spec.tooltip(c.raw); }
+            }
+          }
+        },
+        scales: {
+          x: axisScale(spec.x, t),
+          y: axisScale(spec.y, t)
+        }
+      }
+    });
+
+    var entry = { chart: chart, spec: spec };
+    paint(entry);
+    chart.update('none');
+    registry.push(entry);
+    return chart;
+  }
+
+  function repaintTheme(entry) {
+    var t = tokens();
+    var chart = entry.chart;
+
+    paint(entry);
+
+    ['x', 'y'].forEach(function (axis) {
+      var s = chart.options.scales[axis];
+      s.ticks.color = t.axis;
+      s.title.color = t.ink;
+      s.grid.color = t.grid;
+    });
+
+    chart.options.plugins.tooltip.backgroundColor =
+      isDark() ? 'rgba(20,21,25,0.96)' : 'rgba(22,23,26,0.94)';
+    chart.update('none');
+  }
+
+  function usedProviders(spec) {
+    var seen = [];
+    spec.families.forEach(function (f) {
+      if (seen.indexOf(f.provider) === -1) seen.push(f.provider);
+    });
+    spec.singles.forEach(function (s) {
+      if (seen.indexOf(s.provider) === -1) seen.push(s.provider);
+    });
+    // Keep the legend order stable regardless of who appears first in the data.
+    var order = Object.keys(PROVIDER_COLORS);
+    return seen.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
+  }
+
+  // Push the current filter state into every chart and every legend button.
+  function applyFilters() {
+    registry.forEach(function (entry) {
+      paint(entry);
+      entry.chart.update('none');
+    });
+
+    document.querySelectorAll('.legend button').forEach(function (button) {
+      var name = button.dataset.provider;
+      button.setAttribute('aria-pressed', pinned[name] ? 'true' : 'false');
+      button.classList.toggle('is-dim', !isEmphasised(name));
+    });
+
+    document.querySelectorAll('tbody tr[data-provider]').forEach(function (row) {
+      row.classList.toggle('is-dim', !isEmphasised(row.dataset.provider));
+    });
+  }
+
+  function buildLegend(el, spec) {
+    el.innerHTML = '';
+    usedProviders(spec).forEach(function (name) {
+      var li = document.createElement('li');
+      var button = document.createElement('button');
+      var dot = document.createElement('span');
+
+      dot.className = 'dot';
+      dot.dataset.provider = name;
+      dot.style.background = providerColor(name);
+
+      button.type = 'button';
+      button.dataset.provider = name;
+      button.setAttribute('aria-pressed', 'false');
+      button.title = 'Highlight ' + name + ' models';
+      button.appendChild(dot);
+      button.appendChild(document.createTextNode(name));
+
+      // Hover and keyboard focus preview the filter; clicking pins it.
+      function enter() { hovered = name; applyFilters(); }
+      function leave() { if (hovered === name) hovered = null; applyFilters(); }
+
+      button.addEventListener('mouseenter', enter);
+      button.addEventListener('mouseleave', leave);
+      button.addEventListener('focus', enter);
+      button.addEventListener('blur', leave);
+      button.addEventListener('click', function () {
+        pinned[name] = !pinned[name];
+        applyFilters();
+      });
+
+      li.appendChild(button);
+      el.appendChild(li);
+    });
+
+    if (spec.hollowKey) {
+      var key = document.createElement('li');
+      key.className = 'key';
+      key.innerHTML = '<span class="dot"></span>' + spec.hollowKey;
+      el.appendChild(key);
+    }
+  }
+
+  function repaintLegend() {
+    document.querySelectorAll('.legend .dot[data-provider]').forEach(function (dot) {
+      dot.style.background = providerColor(dot.dataset.provider);
+    });
+  }
+
+  function allPoints(spec) {
+    var rows = [];
+    // `tableLabel` lets a point carry a short on-chart label and a fuller one in the table.
+    spec.families.forEach(function (f) {
+      f.points.forEach(function (p) {
+        rows.push({
+          label: p.tableLabel || p.label, x: p.x, y: p.y, rates: p.rates,
+          provider: f.provider, hollow: p.hollow != null ? p.hollow : f.hollow
+        });
+      });
+    });
+    spec.singles.forEach(function (s) {
+      rows.push({
+        label: s.tableLabel || s.label, x: s.x, y: s.y, rates: s.rates,
+        provider: s.provider, hollow: s.hollow
+      });
+    });
+    return rows.sort(function (a, b) { return b.y - a.y || a.x - b.x; });
+  }
+
+  // Published rates go as low as $0.175 / 1M, so two decimals would round real
+  // money away. `precise` keeps the third digit on the rates GitHub publishes
+  // and drops it on the blend, which is a derived figure.
+  function money(v, precise) {
+    return '$' + (precise ? v.toFixed(3).replace(/0$/, '') : v.toFixed(2));
+  }
+
+  function credits(v, precise) {
+    var c = v * 100, r = Math.round(c);
+    if (!precise || Math.abs(c - r) < 1e-9) return r.toLocaleString() + ' cr';
+    return c.toFixed(1) + ' cr';
+  }
+
+  // Every price is quoted twice: dollars, and the AI credits GitHub actually
+  // meters (1 credit = $0.01). The credit figure sits in its own muted span so
+  // the dollar column still scans as a column.
+  function rateCell(dollars, precise) {
+    return '<td class="num">' + money(dollars, precise) +
+           '<span class="cr">' + credits(dollars, precise) + '</span></td>';
+  }
+
+  function buildTable(el, spec) {
+    var rows = allPoints(spec);
+    var head =
+      '<caption>' + rows.length + ' priced rates across ' + spec.modelCount +
+      ' scored models, highest resolve rate first. Cached input, input and output are ' +
+      'the published per-token rates; blended weights all four billing rates by the ' +
+      'coding mix. Credits below each figure, at 1 credit = $0.01.</caption>' +
+      '<thead><tr><th scope="col">Model</th><th scope="col">Provider</th>' +
+      '<th scope="col" class="num">' + spec.y.title + '</th>' +
+      '<th scope="col" class="num">Cached in / 1M</th>' +
+      '<th scope="col" class="num">Input / 1M</th>' +
+      '<th scope="col" class="num">Output / 1M</th>' +
+      '<th scope="col" class="num">Blended / 1M</th>' +
+      '<th scope="col">Score from</th></tr></thead>';
+
+    var body = rows.map(function (r) {
+      return '<tr data-provider="' + r.provider + '"><th scope="row"><span class="swatch" data-provider="' + r.provider +
+        '" style="background:' + providerColor(r.provider) + '"></span>' + r.label + '</th>' +
+        '<td>' + r.provider + '</td>' +
+        '<td class="num">' + r.y.toFixed(2) + '%</td>' +
+        rateCell(r.rates.cache, true) +
+        rateCell(r.rates.in, true) +
+        rateCell(r.rates.out, true) +
+        rateCell(r.x) +
+        '<td class="src">' + (r.hollow ? 'Scale' : 'Vendor') + '</td></tr>';
+    }).join('');
+
+    el.innerHTML = head + '<tbody>' + body + '</tbody>';
+  }
+
+  function repaintSwatches() {
+    document.querySelectorAll('td .swatch, th .swatch').forEach(function (s) {
+      s.style.background = providerColor(s.dataset.provider);
+    });
+  }
+
+  function init(spec) {
+    global.Chart.register(global.ChartDataLabels);
+    global.Chart.defaults.font.family = FONT_UI;
+
+    buildLegend(document.getElementById(spec.legendId), spec);
+    buildTable(document.getElementById(spec.tableId), spec);
+    renderChart(spec);
+
+    darkQuery.addEventListener('change', function () {
+      registry.forEach(repaintTheme);
+      repaintLegend();
+      repaintSwatches();
+    });
+  }
+
+  global.ChartKit = { init: init, providerColor: providerColor, money: money, credits: credits };
+})(window);
+</script>
+
+<script>
+/* Copilot pricing, straight from the GitHub reference table in $ per 1M tokens,
+ * blended into one number by the token mix of a long agentic coding session.
+ * Keeping the raw rates here means the blend is auditable rather than magic. */
+
+// Shares of one million billable tokens. They sum to 1, so the result is a true
+// weighted average $/1M. Cached reads dominate: an agent re-sends its whole
+// context every turn, and only the delta is charged at the fresh input rate.
+var MIX = { fresh: 0.14, cache: 0.70, cw: 0.08, out: 0.08 };
+
+// `cw: null` = the vendor charges nothing to write the cache, so that share of
+// the traffic is billed at the fresh input rate instead.
+function blend(r) {
+  var fresh = MIX.fresh, cw = MIX.cw;
+  if (r.cw == null) { fresh += cw; cw = 0; }
+  return fresh * r.in + MIX.cache * r.cache + cw * (r.cw || 0) + MIX.out * r.out;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Expand each entry's raw rate card into the {x, y} the chart plots.
+  function point(p, score) {
+    p.x = blend(p.rates);
+    p.y = score;
+    return p;
+  }
+
+  // Two published rates for one model: default vs long-context tier, or Opus
+  // 4.8 standard vs fast mode. Same score, so each pair draws as a flat run.
+  var families = [
+    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 69.2, points: [
+        { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'left', ao: 8 },
+        { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
+    { name: 'Grok 4.5', provider: 'xAI', dashed: true, score: 64.7, points: [
+        { label: 'Grok 4.5', tableLabel: 'Grok 4.5', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'right', ao: 8 },
+        { label: 'long context', tableLabel: 'Grok 4.5 · long context', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 8 } ] },
+    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 64.6, points: [
+        { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol', rates: { in: 5, cache: 0.50, cw: 6.25, out: 30 }, al: 'top', ao: 8 },
+        { label: 'long context', tableLabel: 'GPT-5.6 Sol · long context', rates: { in: 10, cache: 1.00, cw: 12.50, out: 45 }, al: 'right', ao: 8 } ] },
+    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 58.6, points: [
+        { label: 'GPT-5.5', tableLabel: 'GPT-5.5', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
+        { label: 'long context', tableLabel: 'GPT-5.5 · long context', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
+    { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, points: [
+        { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
+        { label: 'long context', tableLabel: 'GPT-5.4 · long context', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'top', ao: 8 } ] },
+    { name: 'Gemini 3.1 Pro', provider: 'Google', dashed: true, score: 46.10, hollow: true, points: [
+        { label: 'Gemini 3.1 Pro', tableLabel: 'Gemini 3.1 Pro', rates: { in: 2, cache: 0.20, cw: null, out: 12 }, al: 'left', ao: 8 },
+        { label: 'long context', tableLabel: 'Gemini 3.1 Pro · long context', rates: { in: 4, cache: 0.40, cw: null, out: 18 }, al: 'right', ao: 8 } ] }
+  ];
+  families.forEach(function (f) { f.points.forEach(function (p) { point(p, f.score); }); });
+
+  // One published rate each. `hollow` marks a score measured by Scale rather
+  // than reported by the vendor.
+  var singles = [
+    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.3, al: 'left', ao: 8 },
+    { label: 'Claude Opus 5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 79.2, al: 'right', ao: 8 },
+    { label: 'Claude Opus 4.7', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 64.3, al: 'left', ao: 8 },
+    { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, al: 'right', ao: 8 },
+    { label: 'Claude Sonnet 5', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 63.2, al: 'left', ao: 8 },
+    { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, al: 'bottom', ao: 8 },
+    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, hollow: true, al: 'right', ao: 8 },
+    { label: 'Claude Opus 4.5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 45.89, hollow: true, al: 'right', ao: 8 },
+    { label: 'Claude Sonnet 4.5', provider: 'Anthropic', rates: { in: 3, cache: 0.30, cw: 3.75, out: 15 }, score: 43.60, hollow: true, al: 'top', ao: 8 },
+    { label: 'Claude Sonnet 4', provider: 'Anthropic', rates: { in: 3, cache: 0.30, cw: 3.75, out: 15 }, score: 42.70, hollow: true, al: 'bottom', ao: 8 },
+    { label: 'Claude Haiku 4.5', provider: 'Anthropic', rates: { in: 1, cache: 0.10, cw: 1.25, out: 5 }, score: 39.45, hollow: true, al: 'right', ao: 8 }
+  ];
+  singles.forEach(function (s) { point(s, s.score); });
+
+  ChartKit.init({
+    canvasId: 'chart',
+    legendId: 'legend',
+    tableId: 'table',
+    hollowKey: 'Hollow = Scale independent run',
+    modelCount: families.length + singles.length,
+
+    families: families,
+    singles: singles,
+
+    x: {
+      title: 'Blended price per 1M tokens (USD)',
+      scale: { type: 'linear', min: 0.4, max: 7.6 },
+      tickStep: 1,
+      tickFormat: function (v) { return v % 1 === 0 ? '$' + v.toFixed(0) : null; }
+    },
+
+    y: {
+      title: 'SWE-Bench Pro resolve rate',
+      grid: true,
+      tickStep: 10,
+      scale: { min: 35, max: 85 },
+      tickFormat: function (v) { return v + '%'; }
+    },
+
+    // Returning an array gives the tooltip one line per fact: the score, then
+    // the published rates the blend is built from, then the blend itself. The
+    // labels are padded to a common width so the mono body font lines them up.
+    tooltip: function (p) {
+      function rate(v, precise) {
+        return ChartKit.money(v, precise) + ' (' + ChartKit.credits(v, precise) + ') / 1M';
+      }
+      return [
+        p.y.toFixed(2) + '% SWE-Bench Pro',
+        'Cached  ' + rate(p.rates.cache, true),
+        'Input   ' + rate(p.rates.in, true),
+        'Output  ' + rate(p.rates.out, true),
+        'Blended ' + rate(p.x)
+      ];
+    },
+    tableX: function (v) { return '$' + v.toFixed(2); }
+  });
+});
+</script>
+</body>
+</html>

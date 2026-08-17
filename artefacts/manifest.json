@@ -615,6 +615,18 @@
       "replacements": {}
     },
     {
+      "id": "everything-llm-copilot-perf-vs-price",
+      "source": "everything-llm/copilot-perf-vs-price.html",
+      "destination": "everything-llm/copilot-perf-vs-price/index.html",
+      "title": "GitHub Copilot: coding score vs. blended price",
+      "collection": "everything-llm",
+      "order": 120,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      }
+    },
+    {
       "id": "java-interview-java-release-timeline",
       "source": "java-interview/java-release-timeline.html",
       "destination": "java-interview/java-release-timeline/index.html",
