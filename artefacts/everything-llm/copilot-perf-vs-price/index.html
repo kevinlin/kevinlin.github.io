@@ -367,7 +367,7 @@ td.src {
       </div>
     </details>
 
-    <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the second point on each dashed line is the long-context tier, priced from the same mix.</p>
+    <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the second point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over.</p>
 
     <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are vendor-reported at each model&rsquo;s best published configuration. The two are <strong>not like-for-like</strong> &mdash; a hollow point below a filled one may be measuring the scaffold as much as the model, and every Claude model older than Opus 4.7 has only a Scale figure. GPT-5.4 also appears on Scale&rsquo;s board at 59.1% (xHigh, mini-swe-agent); the vendor number is plotted here. Vendors also restate each other&rsquo;s numbers: the GPT-5.6 launch page puts GPT-5.5 at 59.4% and Fable 5 at 80%, against the 58.6% and 80.3% each reported at its own launch. Launch figures are plotted.</p>
 
@@ -836,25 +836,25 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
     { name: 'Grok 4.5', provider: 'xAI', dashed: true, score: 64.7, points: [
         { label: 'Grok 4.5', tableLabel: 'Grok 4.5', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 16 },
-        { label: 'long context', tableLabel: 'Grok 4.5 · long context', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
+        { label: '> 200K', tableLabel: 'Grok 4.5 · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
     { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 64.6, points: [
         { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol', rates: { in: 5, cache: 0.50, cw: 6.25, out: 30 }, al: 'top', ao: 8 },
-        { label: 'long context', tableLabel: 'GPT-5.6 Sol · long context', rates: { in: 10, cache: 1.00, cw: 12.50, out: 45 }, al: 'right', ao: 8 } ] },
+        { label: '> 272K', tableLabel: 'GPT-5.6 Sol · long context > 272K', rates: { in: 10, cache: 1.00, cw: 12.50, out: 45 }, al: 'right', ao: 8 } ] },
     { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 63.4, points: [
         { label: 'GPT-5.6 Terra', tableLabel: 'GPT-5.6 Terra', rates: { in: 2, cache: 0.20, cw: 2.50, out: 12 }, al: 'bottom', ao: 20 },
-        { label: 'long context', tableLabel: 'GPT-5.6 Terra · long context', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
+        { label: '> 272K', tableLabel: 'GPT-5.6 Terra · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
     { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 62.7, points: [
         { label: 'GPT-5.6 Luna', tableLabel: 'GPT-5.6 Luna', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 1.20 }, al: 'top', ao: 8 },
-        { label: 'long context', tableLabel: 'GPT-5.6 Luna · long context', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
+        { label: '> 200K', tableLabel: 'GPT-5.6 Luna · long context > 200K', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
     { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 58.6, points: [
         { label: 'GPT-5.5', tableLabel: 'GPT-5.5', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
-        { label: 'long context', tableLabel: 'GPT-5.5 · long context', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
+        { label: '> 272K', tableLabel: 'GPT-5.5 · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
     { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, points: [
         { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
-        { label: 'long context', tableLabel: 'GPT-5.4 · long context', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] },
+        { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] },
     { name: 'Gemini 3.1 Pro', provider: 'Google', dashed: true, score: 46.10, hollow: true, points: [
         { label: 'Gemini 3.1 Pro', tableLabel: 'Gemini 3.1 Pro', rates: { in: 2, cache: 0.20, cw: null, out: 12 }, al: 'left', ao: 8 },
-        { label: 'long context', tableLabel: 'Gemini 3.1 Pro · long context', rates: { in: 4, cache: 0.40, cw: null, out: 18 }, al: 'top', ao: 8 } ] }
+        { label: '> 200K', tableLabel: 'Gemini 3.1 Pro · long context > 200K', rates: { in: 4, cache: 0.40, cw: null, out: 18 }, al: 'top', ao: 8 } ] }
   ];
   families.forEach(function (f) { f.points.forEach(function (p) { point(p, f.score); }); });
 
