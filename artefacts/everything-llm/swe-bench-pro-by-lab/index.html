@@ -220,31 +220,136 @@
 
 .swep__foot a { color: inherit; text-underline-offset: 2px; }
 
-.swep__sources { margin-top: 0; border-top: 1px solid var(--swep-border); padding-top: 8px; }
+/* --- Score sources listing ---------------------------------------------
+   Same design as the sibling price-vs-score chart: one card per publisher,
+   models as chips inside it, so the fact that a single page carries several
+   scores is visible rather than buried in a repeated table column. */
+
+.swep__sources {
+  flex: none;
+  margin: 10px 0 4px;
+  border-top: 1px solid var(--swep-border);
+  padding-top: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--swep-ink-faint);
+}
+
+.swep__sources > summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--swep-ink-muted);
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: var(--swep-radius-chip);
+  transition: color 120ms var(--swep-ease-out);
+}
+
+.swep__sources > summary:hover { color: var(--swep-ink); }
 
 .swep__srclist {
-  columns: 2 30ch;
-  column-gap: 28px;
   list-style: none;
-  margin: 8px 0 0;
   padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
 }
 
-.swep__srclist li {
-  break-inside: avoid;
-  margin-bottom: 10px;
-  /* Long system-card URLs must wrap rather than widen the column. */
-  overflow-wrap: anywhere;
+/* Radius is concentric with the chips inside: 8px outer, pills on 12px of padding. */
+.swep__srcitem {
+  padding: 12px 14px;
+  border-radius: var(--swep-radius-chip);
+  background: var(--swep-surface);
+  box-shadow: inset 0 0 0 1px var(--swep-border);
 }
 
-.swep__srclist b { color: var(--swep-ink-muted); font-weight: 600; }
+/* No published source for these figures — the dashed edge says so before the
+   label is read. */
+.swep__srcitem.is-none {
+  background: none;
+  box-shadow: none;
+  border: 1px dashed var(--swep-border);
+  padding: 11px 13px;
+}
 
-.swep__srclist a {
+.swep__srchead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--swep-ink-muted);
-  text-decoration-color: var(--swep-border);
 }
 
-.swep__srclist a:hover { color: var(--swep-ink); }
+.swep__srchead a { color: inherit; text-decoration-color: var(--swep-border); }
+
+.swep__srchead a:hover { color: var(--swep-ink); }
+
+/* The URL is provenance, not navigation: it stays quiet and rides the right
+   edge until the line is too narrow to hold both. */
+a.swep__srcurl {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--swep-ink-faint);
+  margin-left: auto;
+  word-break: break-all;
+}
+
+.swep__srccount {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--swep-ink-faint);
+}
+
+.swep__srchead .is-missing { font-style: italic; opacity: 0.8; }
+
+/* Models as chips rather than a comma run-on: each score stays attached to its
+   name, and the lab colour ties the row back to the chart. */
+.swep__srcmodels {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 10px 0 0;
+}
+
+.swep__srcmodel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--swep-surface-inset);
+  font-size: 12px;
+  color: var(--swep-ink-muted);
+  transition: opacity 120ms var(--swep-ease-out);
+}
+
+.swep__srcmodel.is-dim { opacity: 0.38; }
+
+.swep__srcdot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--dot);
+}
+
+/* Same convention as the bars: hollow = Scale's independent run. */
+.swep__srcdot.is-hollow {
+  background: var(--swep-surface);
+  box-shadow: inset 0 0 0 2px var(--dot);
+}
+
+.swep__srcscore {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: var(--swep-ink-faint);
+}
 
 
 .swep [data-numeric] { font-variant-numeric: tabular-nums; }
@@ -269,9 +374,12 @@
     <canvas id="swepChart" role="img" aria-label="Bar chart of SWE-Bench Pro scores for twenty-four flagship models ordered by release date, oldest on the left to newest on the right, colour-coded by lab: orange for Anthropic, green for OpenAI, blue for DeepSeek, purple for Moonshot Kimi, pink for Z.ai GLM, graphite for xAI Grok. Filled bars are vendor-reported; outlined bars are from Scale's independent leaderboard and are not directly comparable. Claude Sonnet 4, May 23 2025, 42.7 percent, Scale. GPT-5 High, August 7 2025, 41.8 percent, Scale. Kimi K2 0905, September 5 2025, 27.7 percent, Scale. Claude Sonnet 4.5, September 30 2025, 43.6 percent, Scale. Claude Opus 4.5, November 1 2025, 45.9 percent, Scale. GPT-5.1, November 12 2025, 50.8 percent. GPT-5.2, December 11 2025, 55.6 percent. Kimi K2.5, January 27 2026, 50.7 percent. Claude Opus 4.6, February 5 2026, 51.9 percent, Scale. GPT-5.3 Codex, February 5 2026, 56.8 percent. GPT-5.4, March 5 2026, 57.7 percent. GLM-5.1, March 27 2026, 58.4 percent. Claude Opus 4.7, April 16 2026, 64.3 percent. Kimi K2.6, April 20 2026, 58.6 percent. GPT-5.5, April 23 2026, 58.6 percent. DeepSeek V4-Pro, April 24 2026, 55.4 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. Claude Fable 5, June 9 2026, 80.0 percent. GLM-5.2, June 13 2026, 62.1 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. Claude Sonnet 5, June 30 2026, 63.2 percent. Grok 4.5, July 8 2026, 64.7 percent. Kimi K3, July 2026, 63.4 percent. Claude Opus 5, July 24 2026, 79.2 percent.">Flagship models on SWE-Bench Pro, oldest to newest. Scale independent runs marked: Sonnet 4 (May 2025) 42.7% Scale, GPT-5 High (Aug 2025) 41.8% Scale, Kimi K2 0905 (Sep 2025) 27.7% Scale, Sonnet 4.5 (Sep 2025) 43.6% Scale, Opus 4.5 (Nov 2025) 45.9% Scale, GPT-5.1 (Nov 2025) 50.8%, GPT-5.2 (Dec 2025) 55.6%, Kimi K2.5 (Jan 2026) 50.7%, Opus 4.6 (Feb 2026) 51.9% Scale, GPT-5.3 Codex (Feb 2026) 56.8%, GPT-5.4 (Mar 2026) 57.7%, GLM-5.1 (Mar 2026) 58.4%, Opus 4.7 (Apr 2026) 64.3%, Kimi K2.6 (Apr 2026) 58.6%, GPT-5.5 (Apr 2026) 58.6%, DeepSeek V4-Pro (Apr 2026) 55.4%, Opus 4.8 (May 2026) 69.2%, Fable 5 (Jun 2026) 80.0%, GLM-5.2 (Jun 2026) 62.1%, GPT-5.6 Sol (Jun 2026) 64.6%, Sonnet 5 (Jun 2026) 63.2%, Grok 4.5 (Jul 2026) 64.7%, Kimi K3 (Jul 2026) 63.4%, Opus 5 (Jul 2026) 79.2%.</canvas>
   </div>
 
-  <figcaption class="swep__foot">Filled bars are vendor-reported at each model&rsquo;s best published configuration (extended thinking and tools where offered). Outlined bars come from Scale&rsquo;s independently run public leaderboard, which uses its own agent scaffold and reports a confidence interval &mdash; treat them as a separate series, not as like-for-like with the filled bars. Claude Sonnet 4 and 4.5, Opus 4.5 and Opus 4.6, GPT-5 and Kimi K2 have no vendor-reported SWE-Bench Pro figure, so Scale is the only source for them. Kimi K3&rsquo;s 63.4 comes from Moonshot&rsquo;s comparison table on the K2.6 blog, not the K3 launch post; their SWE-Bench runs use an in-house framework adapted from SWE-agent, averaged over 10 runs. Models are excluded when no published result exists, and also when a figure was in circulation but could not be traced to a page carrying it &mdash; DeepSeek V3.2 and GLM-4.7 come off on that second test. Preview-only and unreleased models are excluded, as are Haiku, Flash, mini and nano variants.</figcaption>
+  <figcaption class="swep__foot">Filled bars are vendor-reported at each model&rsquo;s best published configuration (extended thinking and tools where offered). Outlined bars come from Scale&rsquo;s independently run public leaderboard, which uses its own agent scaffold and reports a confidence interval &mdash; treat them as a separate series, not as like-for-like with the filled bars. Claude Sonnet 4 and 4.5, Opus 4.5 and Opus 4.6, GPT-5 and Kimi K2 have no vendor-reported SWE-Bench Pro figure, so Scale is the only source for them. Kimi K3&rsquo;s 63.4 comes from Moonshot&rsquo;s comparison table on the K2.6 blog, not the K3 launch post; their SWE-Bench runs use an in-house framework adapted from SWE-agent, averaged over 10 runs. Models are excluded when no published result exists, and also when a figure was in circulation but could not be traced to a page carrying it &mdash; DeepSeek V3.2 and GLM-4.7 come off on that second test. Every score that remains is linked to the page it was read from under <em>Score published by</em>. Preview-only and unreleased models are excluded, as are Haiku, Flash, mini and nano variants.</figcaption>
 
-  <div class="swep__foot swep__sources" id="swepSources"></div>
+  <details class="swep__sources" id="swepSources">
+    <summary>Score published by</summary>
+    <div id="swepSourceList"></div>
+  </details>
 </figure>
 
 <script src="../../vendor/chart.umd.min.js"></script>
@@ -540,46 +648,68 @@
     o.scales.y = isHorizontal ? categoryScale() : valueScale(false);
 
     chart.update(animate === false || reduceMotion ? 'none' : undefined);
+
+    // The source chips carry the same lab colours as the bars, so they follow
+    // the same filter.
+    document.querySelectorAll('.swep__srcmodel[data-lab]').forEach(function (chip) {
+      chip.classList.toggle('is-dim', !active[chip.dataset.lab]);
+    });
   }
 
   build();
 
-  // Source credits, one row per source rather than per model: most of these
-  // pages publish a comparison table, so a single URL carries several scores.
-  // Built from the data so a re-attributed model can never leave a stale line
-  // behind. Models with no `src` get their own row, so an unverified figure
-  // reads as unverified rather than as an omission.
+  // One card per published source, listing the models whose score was read off
+  // it. Grouped this way rather than per-model because most of these pages carry
+  // a comparison table covering several models at once. Built from the data, so
+  // a re-attributed model can never leave a stale line behind; models with no
+  // `src` get their own card rather than silently dropping out of the list.
   (function () {
-    // Full URL in the href; the visible text drops the protocol and elides the
-    // middle of the long system-card paths so the rows still scan as a column.
-    function shorten(url) {
-      var t = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-      return t.length <= 62 ? t : t.slice(0, 34) + '&hellip;' + t.slice(-24);
+    function card(label, url, models) {
+      var count = '<span class="swep__srccount">' + models.length +
+        (models.length === 1 ? ' model' : ' models') + '</span>';
+
+      // Label and URL are both live links to the same page: the URL is there to
+      // be read as provenance, but a reader who aims at it expects it to open.
+      function link(inner, cls) {
+        return '<a class="' + cls + '" href="' + url + '" target="_blank" rel="noopener">' +
+          inner + '</a>';
+      }
+
+      var head = url
+        ? link(label, 'swep__srcname') + count +
+          link(url.replace(/^https:\/\//, ''), 'swep__srcurl')
+        : '<span class="is-missing">' + label + '</span>' + count;
+
+      // The dot is coloured through a CSS variable rather than a resolved hex so
+      // it follows the theme without a repaint, and so the hollow variant can
+      // keep the card ground as its fill.
+      var chips = models.map(function (m) {
+        return '<li class="swep__srcmodel" data-lab="' + m.lab + '">' +
+          '<span class="swep__srcdot' + (m.src === 'scale' ? ' is-hollow' : '') +
+          '" style="--dot:var(' + LABS[m.lab].varName + ')"></span>' + m.name +
+          ' <span class="swep__srcscore">' + m.score.toFixed(2) + '%</span></li>';
+      }).join('');
+
+      return '<li class="swep__srcitem' + (url ? '' : ' is-none') + '">' +
+        '<p class="swep__srchead">' + head + '</p>' +
+        '<ul class="swep__srcmodels">' + chips + '</ul></li>';
     }
 
-    function scored(models) {
-      return models.map(function (m) {
-        return m.name + ' ' + m.score.toFixed(1) + '%';
-      }).join(', ');
+    function withSrc(key) {
+      return MODELS.filter(function (m) { return m.src === key; })
+        .sort(function (a, b) { return b.score - a.score; });
     }
 
-    var rows = Object.keys(SOURCES).map(function (key) {
-      var models = MODELS.filter(function (m) { return m.src === key; });
-      if (!models.length) return '';
-      var s = SOURCES[key];
-      return '<li><b>' + s.label + '</b><br>' +
-        '<a href="' + s.url + '" rel="noopener" target="_blank" title="' + s.url + '">' +
-        shorten(s.url) + '</a><br>' + scored(models) + '</li>';
+    var items = Object.keys(SOURCES).map(function (key) {
+      var models = withSrc(key);
+      return models.length ? card(SOURCES[key].label, SOURCES[key].url, models) : '';
     });
 
-    var orphans = MODELS.filter(function (m) { return !m.src; });
-    if (orphans.length) {
-      rows.push('<li><b>No published source found</b><br>' + scored(orphans) + '</li>');
-    }
+    var orphans = withSrc(undefined);
+    if (orphans.length) items.push(card('no published source found', null, orphans));
 
-    document.getElementById('swepSources').innerHTML =
-      '<strong>Score published by/from.</strong> Each URL was fetched and checked to carry the ' +
-      'exact numbers listed under it. <ul class="swep__srclist">' + rows.join('') + '</ul>';
+    document.getElementById('swepSourceList').innerHTML =
+      '<ul class="swep__srclist">' + items.join('') + '</ul>';
   })();
 
   // Legend doubles as a lab filter.
