@@ -267,21 +267,59 @@ td.num .cr {
   color: hsl(var(--ink-muted));
 }
 
-td.src {
-  font-size: 12px;
-  color: hsl(var(--ink-muted));
+/* --- Score sources listing --------------------------------------------- */
+
+.source-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
 }
 
-td.src a {
+.source-list li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid hsl(var(--rule));
+}
+
+.source-list li:last-child { border-bottom: 0; }
+
+.src-head {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.src-head a {
   color: inherit;
   text-decoration-color: hsl(var(--rule));
   text-underline-offset: 3px;
 }
 
-td.src a:hover { color: hsl(var(--ring)); }
+.src-head a:hover { color: hsl(var(--ring)); }
 
-/* No primary source found for this figure — say so rather than imply one. */
-td.src.is-missing { font-style: italic; opacity: 0.75; }
+.src-url {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: hsl(var(--ink-muted));
+  margin-left: var(--space-2);
+  word-break: break-all;
+}
+
+.src-models {
+  margin: var(--space-1) 0 0;
+  font-size: 13px;
+  color: hsl(var(--ink-muted));
+  text-wrap: pretty;
+}
+
+.src-score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+/* No primary source found for these figures — say so rather than imply one. */
+.src-head .is-missing { font-style: italic; opacity: 0.8; }
 
 .swatch {
   display: inline-block;
@@ -376,11 +414,16 @@ td.src.is-missing { font-style: italic; opacity: 0.75; }
       </div>
     </details>
 
+    <details class="data-details" id="score-sources">
+      <summary>Score published by</summary>
+      <div id="sources"></div>
+    </details>
+
     <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the second point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over.</p>
 
-    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The data table names the publisher of every figure and links to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Opus 4.7, Opus 4.8 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5, Sonnet 5 and Fable 5 are marked in the table as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. Treat any gap under about two points as noise.</p>
+    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The <em>Score published by</em> section below links every figure to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Opus 4.7, Opus 4.8 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5, Sonnet 5 and Fable 5 are listed there as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. Treat any gap under about two points as noise.</p>
 
-    <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4 and Claude Sonnet 4.5 do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Sources: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a> and <a href="https://labs.scale.com/leaderboard/swe_bench_pro_public">Scale SWE-Bench Pro (public dataset)</a>, both retrieved 17 August 2026, plus vendor launch reporting for the filled points &mdash; Terra and Luna come from the coding table on OpenAI&rsquo;s <a href="https://openai.com/index/gpt-5-6/">GPT-5.6 page</a>. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4 and Claude Sonnet 4.5 do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 17 August 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -756,11 +799,31 @@ td.src.is-missing { font-style: italic; opacity: 0.75; }
            '<span class="cr">' + credits(dollars, precise) + '</span></td>';
   }
 
-  // Publisher name over the bare URL: the domain is visible on hover and in the
-  // status bar, and a column of full URLs would swamp the table.
-  function sourceCell(source) {
-    if (!source.url) return '<td class="src is-missing">' + source.label + '</td>';
-    return '<td class="src"><a href="' + source.url + '" rel="noopener">' + source.label + '</a></td>';
+  // One entry per published source, listing the models whose score was read off
+  // it. Grouped this way rather than per-row because most sources carry several
+  // models, and the repetition in a table column obscured that.
+  function buildSources(el, spec) {
+    var models = spec.families
+      .map(function (f) { return { name: f.name, score: f.score, src: f.src }; })
+      .concat(spec.singles.map(function (s) { return { name: s.label, score: s.score, src: s.src }; }))
+      .sort(function (a, b) { return b.score - a.score; });
+
+    var items = Object.keys(spec.sources).map(function (key) {
+      var source = spec.sources[key];
+      var named = models.filter(function (m) { return m.src === key; });
+      if (!named.length) return '';
+
+      var head = source.url
+        ? '<a href="' + source.url + '" rel="noopener">' + source.label + '</a> ' +
+          '<span class="src-url">' + source.url.replace(/^https:\/\//, '') + '</span>'
+        : '<span class="is-missing">' + source.label + '</span>';
+
+      return '<li><p class="src-head">' + head + '</p><p class="src-models">' +
+        named.map(function (m) { return m.name + ' <span class="src-score">' + m.score.toFixed(2) + '%</span>'; })
+             .join(' &middot; ') + '</p></li>';
+    }).join('');
+
+    el.innerHTML = '<ul class="source-list">' + items + '</ul>';
   }
 
   function buildTable(el, spec) {
@@ -775,8 +838,7 @@ td.src.is-missing { font-style: italic; opacity: 0.75; }
       '<th scope="col" class="num">Cached in / 1M</th>' +
       '<th scope="col" class="num">Input / 1M</th>' +
       '<th scope="col" class="num">Output / 1M</th>' +
-      '<th scope="col" class="num">Blended / 1M</th>' +
-      '<th scope="col">Score published by</th></tr></thead>';
+      '<th scope="col" class="num">Blended / 1M</th></tr></thead>';
 
     var body = rows.map(function (r) {
       return '<tr data-provider="' + r.provider + '"><th scope="row"><span class="swatch" data-provider="' + r.provider +
@@ -786,8 +848,7 @@ td.src.is-missing { font-style: italic; opacity: 0.75; }
         rateCell(r.rates.cache, true) +
         rateCell(r.rates.in, true) +
         rateCell(r.rates.out, true) +
-        rateCell(r.x) +
-        sourceCell(spec.sources[r.src] || spec.sources.none) + '</tr>';
+        rateCell(r.x) + '</tr>';
     }).join('');
 
     el.innerHTML = head + '<tbody>' + body + '</tbody>';
@@ -805,6 +866,7 @@ td.src.is-missing { font-style: italic; opacity: 0.75; }
 
     buildLegend(document.getElementById(spec.legendId), spec);
     buildTable(document.getElementById(spec.tableId), spec);
+    buildSources(document.getElementById(spec.sourcesId), spec);
     renderChart(spec);
 
     darkQuery.addEventListener('change', function () {
@@ -910,6 +972,7 @@ document.addEventListener('DOMContentLoaded', function () {
     canvasId: 'chart',
     legendId: 'legend',
     tableId: 'table',
+    sourcesId: 'sources',
     hollowKey: 'Hollow = Scale independent run',
     modelCount: families.length + singles.length,
     sources: SOURCES,
