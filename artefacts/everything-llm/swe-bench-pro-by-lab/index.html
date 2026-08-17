@@ -25,8 +25,10 @@
      absorbs the rest. */
   box-sizing: border-box;
   margin: 0;
-  height: 100vh;
-  height: 100dvh;
+  /* min- rather than a fixed height: the per-model source list at the bottom
+     scrolls the page instead of squeezing the plot. */
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 
@@ -220,6 +222,31 @@
 
 .swep__sources { margin-top: 0; border-top: 1px solid var(--swep-border); padding-top: 8px; }
 
+.swep__srclist {
+  columns: 2 30ch;
+  column-gap: 28px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.swep__srclist li {
+  break-inside: avoid;
+  margin-bottom: 10px;
+  /* Long system-card URLs must wrap rather than widen the column. */
+  overflow-wrap: anywhere;
+}
+
+.swep__srclist b { color: var(--swep-ink-muted); font-weight: 600; }
+
+.swep__srclist a {
+  color: var(--swep-ink-muted);
+  text-decoration-color: var(--swep-border);
+}
+
+.swep__srclist a:hover { color: var(--swep-ink); }
+
+
 .swep [data-numeric] { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -239,12 +266,12 @@
   <div class="swep__legend" id="swepLegend" role="group" aria-label="Filter models by lab"></div>
 
   <div class="swep__plot">
-    <canvas id="swepChart" role="img" aria-label="Bar chart of SWE-Bench Pro scores for twenty-six flagship models ordered by release date, oldest on the left to newest on the right, colour-coded by lab: orange for Anthropic, green for OpenAI, blue for DeepSeek, purple for Moonshot Kimi, pink for Z.ai GLM, graphite for xAI Grok. Filled bars are vendor-reported; outlined bars are from Scale's independent leaderboard and are not directly comparable. Claude Sonnet 4, May 23 2025, 42.7 percent, Scale. GPT-5, August 7 2025, 36.3 percent. Kimi K2 0905, September 5 2025, 27.7 percent. Claude Sonnet 4.5, September 30 2025, 43.6 percent, Scale. Claude Opus 4.5, November 1 2025, 45.9 percent, Scale. GPT-5.1, November 12 2025, 50.8 percent. DeepSeek V3.2, December 1 2025, 40.9 percent. GPT-5.2, December 11 2025, 55.6 percent. GLM-4.7, December 22 2025, 40.6 percent. Kimi K2.5, January 27 2026, 50.7 percent. Claude Opus 4.6, February 5 2026, 51.9 percent, Scale. GPT-5.3 Codex, February 5 2026, 56.8 percent. GPT-5.4, March 5 2026, 57.7 percent. GLM-5.1, March 27 2026, 58.4 percent. Claude Opus 4.7, April 16 2026, 64.3 percent. Kimi K2.6, April 20 2026, 58.6 percent. GPT-5.5, April 23 2026, 58.6 percent. DeepSeek V4-Pro, April 24 2026, 55.4 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. Claude Fable 5, June 9 2026, 80.3 percent. GLM-5.2, June 13 2026, 62.1 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. Claude Sonnet 5, June 30 2026, 63.2 percent. Grok 4.5, July 8 2026, 64.7 percent. Kimi K3, July 2026, 63.4 percent. Claude Opus 5, July 24 2026, 79.2 percent.">Flagship models on SWE-Bench Pro, oldest to newest. Scale independent runs marked: Sonnet 4 (May 2025) 42.7% Scale, GPT-5 (Aug 2025) 36.3%, Kimi K2 0905 (Sep 2025) 27.7%, Sonnet 4.5 (Sep 2025) 43.6% Scale, Opus 4.5 (Nov 2025) 45.9% Scale, GPT-5.1 (Nov 2025) 50.8%, DeepSeek V3.2 (Dec 2025) 40.9%, GPT-5.2 (Dec 2025) 55.6%, GLM-4.7 (Dec 2025) 40.6%, Kimi K2.5 (Jan 2026) 50.7%, Opus 4.6 (Feb 2026) 51.9% Scale, GPT-5.3 Codex (Feb 2026) 56.8%, GPT-5.4 (Mar 2026) 57.7%, GLM-5.1 (Mar 2026) 58.4%, Opus 4.7 (Apr 2026) 64.3%, Kimi K2.6 (Apr 2026) 58.6%, GPT-5.5 (Apr 2026) 58.6%, DeepSeek V4-Pro (Apr 2026) 55.4%, Opus 4.8 (May 2026) 69.2%, Fable 5 (Jun 2026) 80.3%, GLM-5.2 (Jun 2026) 62.1%, GPT-5.6 Sol (Jun 2026) 64.6%, Sonnet 5 (Jun 2026) 63.2%, Grok 4.5 (Jul 2026) 64.7%, Kimi K3 (Jul 2026) 63.4%, Opus 5 (Jul 2026) 79.2%.</canvas>
+    <canvas id="swepChart" role="img" aria-label="Bar chart of SWE-Bench Pro scores for twenty-four flagship models ordered by release date, oldest on the left to newest on the right, colour-coded by lab: orange for Anthropic, green for OpenAI, blue for DeepSeek, purple for Moonshot Kimi, pink for Z.ai GLM, graphite for xAI Grok. Filled bars are vendor-reported; outlined bars are from Scale's independent leaderboard and are not directly comparable. Claude Sonnet 4, May 23 2025, 42.7 percent, Scale. GPT-5 High, August 7 2025, 41.8 percent, Scale. Kimi K2 0905, September 5 2025, 27.7 percent, Scale. Claude Sonnet 4.5, September 30 2025, 43.6 percent, Scale. Claude Opus 4.5, November 1 2025, 45.9 percent, Scale. GPT-5.1, November 12 2025, 50.8 percent. GPT-5.2, December 11 2025, 55.6 percent. Kimi K2.5, January 27 2026, 50.7 percent. Claude Opus 4.6, February 5 2026, 51.9 percent, Scale. GPT-5.3 Codex, February 5 2026, 56.8 percent. GPT-5.4, March 5 2026, 57.7 percent. GLM-5.1, March 27 2026, 58.4 percent. Claude Opus 4.7, April 16 2026, 64.3 percent. Kimi K2.6, April 20 2026, 58.6 percent. GPT-5.5, April 23 2026, 58.6 percent. DeepSeek V4-Pro, April 24 2026, 55.4 percent. Claude Opus 4.8, May 28 2026, 69.2 percent. Claude Fable 5, June 9 2026, 80.0 percent. GLM-5.2, June 13 2026, 62.1 percent. GPT-5.6 Sol, June 26 2026, 64.6 percent. Claude Sonnet 5, June 30 2026, 63.2 percent. Grok 4.5, July 8 2026, 64.7 percent. Kimi K3, July 2026, 63.4 percent. Claude Opus 5, July 24 2026, 79.2 percent.">Flagship models on SWE-Bench Pro, oldest to newest. Scale independent runs marked: Sonnet 4 (May 2025) 42.7% Scale, GPT-5 High (Aug 2025) 41.8% Scale, Kimi K2 0905 (Sep 2025) 27.7% Scale, Sonnet 4.5 (Sep 2025) 43.6% Scale, Opus 4.5 (Nov 2025) 45.9% Scale, GPT-5.1 (Nov 2025) 50.8%, GPT-5.2 (Dec 2025) 55.6%, Kimi K2.5 (Jan 2026) 50.7%, Opus 4.6 (Feb 2026) 51.9% Scale, GPT-5.3 Codex (Feb 2026) 56.8%, GPT-5.4 (Mar 2026) 57.7%, GLM-5.1 (Mar 2026) 58.4%, Opus 4.7 (Apr 2026) 64.3%, Kimi K2.6 (Apr 2026) 58.6%, GPT-5.5 (Apr 2026) 58.6%, DeepSeek V4-Pro (Apr 2026) 55.4%, Opus 4.8 (May 2026) 69.2%, Fable 5 (Jun 2026) 80.0%, GLM-5.2 (Jun 2026) 62.1%, GPT-5.6 Sol (Jun 2026) 64.6%, Sonnet 5 (Jun 2026) 63.2%, Grok 4.5 (Jul 2026) 64.7%, Kimi K3 (Jul 2026) 63.4%, Opus 5 (Jul 2026) 79.2%.</canvas>
   </div>
 
-  <figcaption class="swep__foot">Filled bars are vendor-reported at each model&rsquo;s best published configuration (extended thinking and tools where offered). Outlined bars come from Scale&rsquo;s independently run public leaderboard, which uses its own agent scaffold and reports a confidence interval &mdash; treat them as a separate series, not as like-for-like with the filled bars. Claude Sonnet 4 and 4.5, Opus 4.5 and Opus 4.6 have no vendor-reported SWE-Bench Pro figure, so Scale is the only source for them. Kimi K3&rsquo;s 63.4 comes from Moonshot&rsquo;s comparison table on the K2.6 blog, not the K3 launch post; their SWE-Bench runs use an in-house framework adapted from SWE-agent, averaged over 10 runs. Models with no published result anywhere are excluded. Preview-only and unreleased models are excluded, as are Haiku, Flash, mini and nano variants.</figcaption>
+  <figcaption class="swep__foot">Filled bars are vendor-reported at each model&rsquo;s best published configuration (extended thinking and tools where offered). Outlined bars come from Scale&rsquo;s independently run public leaderboard, which uses its own agent scaffold and reports a confidence interval &mdash; treat them as a separate series, not as like-for-like with the filled bars. Claude Sonnet 4 and 4.5, Opus 4.5 and Opus 4.6, GPT-5 and Kimi K2 have no vendor-reported SWE-Bench Pro figure, so Scale is the only source for them. Kimi K3&rsquo;s 63.4 comes from Moonshot&rsquo;s comparison table on the K2.6 blog, not the K3 launch post; their SWE-Bench runs use an in-house framework adapted from SWE-agent, averaged over 10 runs. Models are excluded when no published result exists, and also when a figure was in circulation but could not be traced to a page carrying it &mdash; DeepSeek V3.2 and GLM-4.7 come off on that second test. Preview-only and unreleased models are excluded, as are Haiku, Flash, mini and nano variants.</figcaption>
 
-  <p class="swep__foot swep__sources" id="swepSources"></p>
+  <div class="swep__foot swep__sources" id="swepSources"></div>
 </figure>
 
 <script src="../../vendor/chart.umd.min.js"></script>
@@ -259,15 +286,23 @@
     grok:      { name: 'Grok',      varName: '--swep-grok' }
   };
 
-  // Where each figure was actually published. A model's own maker is often not
+  // Where each figure was actually published. Every URL here was fetched and
+  // checked to carry the exact number plotted. A model's own maker is often not
   // the publisher: several of these numbers only appear in a rival's comparison
   // table, which is why the source is named per row rather than assumed.
   var SOURCES = {
-    scale:   { label: 'Scale',    url: 'https://labs.scale.com/leaderboard/swe_bench_pro_public' },
-    gpt56:   { label: 'OpenAI',   url: 'https://openai.com/index/gpt-5-6/' },
-    codex53: { label: 'OpenAI',   url: 'https://openai.com/index/introducing-gpt-5-3-codex/' },
-    grok45:  { label: 'xAI',      url: 'https://x.ai/news/grok-4-5' },
-    kimi26:  { label: 'Moonshot', url: 'https://www.kimi.com/blog/kimi-k2-6' }
+    scale:     { label: 'Scale, SWE-Bench Pro public leaderboard', url: 'https://labs.scale.com/leaderboard/swe_bench_pro_public' },
+    gpt52:     { label: 'OpenAI, Introducing GPT-5.2',             url: 'https://openai.com/index/introducing-gpt-5-2/' },
+    codex53:   { label: 'OpenAI, Introducing GPT-5.3-Codex',       url: 'https://openai.com/index/introducing-gpt-5-3-codex/' },
+    gpt56:     { label: 'OpenAI, GPT-5.6',                         url: 'https://openai.com/index/gpt-5-6/' },
+    grok45:    { label: 'xAI, Grok 4.5',                           url: 'https://x.ai/news/grok-4-5' },
+    kimi25:    { label: 'Moonshot, Kimi K2.5 model card',          url: 'https://huggingface.co/moonshotai/Kimi-K2.5' },
+    kimi26:    { label: 'Moonshot, Kimi K2.6 blog',                url: 'https://www.kimi.com/blog/kimi-k2-6' },
+    glm51:     { label: 'Z.ai, GLM-5.1',                           url: 'https://z.ai/blog/glm-5.1' },
+    glm52:     { label: 'Z.ai, GLM-5.2',                           url: 'https://z.ai/blog/glm-5.2' },
+    scFable:   { label: 'Anthropic, Fable 5 / Mythos 5 system card', url: 'https://www-cdn.anthropic.com/d00db56fa754a1b115b6dd7cb2e3c342ee809620.pdf' },
+    scSonnet5: { label: 'Anthropic, Claude Sonnet 5 system card',  url: 'https://www-cdn.anthropic.com/d9bb04416ffe1352af84721476c1fa9994c07fde/Claude%20Sonnet%205%20System%20Card.pdf' },
+    scOpus5:   { label: 'Anthropic, Claude Opus 5 system card',    url: 'https://www-cdn.anthropic.com/c5fbac3f0b1280a933ebd26d3cb8bb9f5bdeaf48/Claude%20Opus%205%20System%20Card.pdf' }
   };
 
   // Flagship lines only, oldest release first (left to right on the x-axis).
@@ -275,35 +310,33 @@
   // published configuration. Entries marked src:'scale' come from Scale's
   // independently run public leaderboard, which uses its own agent scaffold and
   // is NOT directly comparable — they render outlined rather than filled.
-  // No `src` means the vendor's own launch reporting, with no single page
-  // verified to carry the exact number plotted.
+  // Every score below was checked against the `src` page; a model whose figure
+  // could not be traced to a published page is left off the chart entirely.
   var MODELS = [
     { name: 'Claude Sonnet 4',       short: ['Sonnet 4', "May '25"],          score: 42.7, lab: 'anthropic', src: 'scale' },
-    { name: 'GPT-5',                 short: ['GPT-5', "Aug '25"],             score: 36.3, lab: 'openai' },
-    { name: 'Kimi K2 0905',          short: ['Kimi K2', '0905', "Sep '25"],   score: 27.7, lab: 'kimi' },
+    { name: 'GPT-5 (High)',          short: ['GPT-5', "Aug '25"],             score: 41.78, lab: 'openai', src: 'scale' },
+    { name: 'Kimi K2 0905',          short: ['Kimi K2', '0905', "Sep '25"],   score: 27.67, lab: 'kimi', src: 'scale' },
     { name: 'Claude Sonnet 4.5',     short: ['Sonnet 4.5', "Sep '25"],        score: 43.6, lab: 'anthropic', src: 'scale' },
     { name: 'Claude Opus 4.5',       short: ['Opus 4.5', "Nov '25"],          score: 45.9, lab: 'anthropic', src: 'scale' },
-    { name: 'GPT-5.1',               short: ['GPT-5.1', "Nov '25"],           score: 50.8, lab: 'openai' },
-    { name: 'DeepSeek V3.2',         short: ['DeepSeek', 'V3.2', "Dec '25"],  score: 40.9, lab: 'deepseek' },
-    { name: 'GPT-5.2',               short: ['GPT-5.2', "Dec '25"],           score: 55.6, lab: 'openai' },
-    { name: 'GLM-4.7',               short: ['GLM-4.7', "Dec '25"],           score: 40.6, lab: 'glm' },
-    { name: 'Kimi K2.5',             short: ['Kimi K2.5', "Jan '26"],         score: 50.7, lab: 'kimi' },
+    { name: 'GPT-5.1',               short: ['GPT-5.1', "Nov '25"],           score: 50.8, lab: 'openai', src: 'gpt52' },
+    { name: 'GPT-5.2',               short: ['GPT-5.2', "Dec '25"],           score: 55.6, lab: 'openai', src: 'gpt52' },
+    { name: 'Kimi K2.5',             short: ['Kimi K2.5', "Jan '26"],         score: 50.7, lab: 'kimi', src: 'kimi25' },
     { name: 'Claude Opus 4.6',       short: ['Opus 4.6', "Feb '26"],          score: 51.9, lab: 'anthropic', src: 'scale' },
     { name: 'GPT-5.3 Codex',         short: ['GPT-5.3', 'Codex', "Feb '26"],  score: 56.8, lab: 'openai', src: 'codex53' },
     { name: 'GPT-5.4',               short: ['GPT-5.4', "Mar '26"],           score: 57.7, lab: 'openai', src: 'kimi26' },
-    { name: 'GLM-5.1',               short: ['GLM-5.1', "Mar '26"],           score: 58.4, lab: 'glm' },
+    { name: 'GLM-5.1',               short: ['GLM-5.1', "Mar '26"],           score: 58.4, lab: 'glm', src: 'glm51' },
     { name: 'Claude Opus 4.7',       short: ['Opus 4.7', "Apr '26"],          score: 64.3, lab: 'anthropic', src: 'grok45' },
-    { name: 'Kimi K2.6',             short: ['Kimi K2.6', "Apr '26"],         score: 58.6, lab: 'kimi' },
-    { name: 'GPT-5.5',               short: ['GPT-5.5', "Apr '26"],           score: 58.6, lab: 'openai', src: 'grok45' },
-    { name: 'DeepSeek V4-Pro',       short: ['DeepSeek', 'V4-Pro', "Apr '26"], score: 55.4, lab: 'deepseek' },
-    { name: 'Claude Opus 4.8',       short: ['Opus 4.8', "May '26"],          score: 69.2, lab: 'anthropic', src: 'grok45' },
-    { name: 'Claude Fable 5',        short: ['Fable 5', "Jun '26"],           score: 80.3, lab: 'anthropic' },
-    { name: 'GLM-5.2',               short: ['GLM-5.2', "Jun '26"],           score: 62.1, lab: 'glm' },
+    { name: 'Kimi K2.6',             short: ['Kimi K2.6', "Apr '26"],         score: 58.6, lab: 'kimi', src: 'kimi26' },
+    { name: 'GPT-5.5',               short: ['GPT-5.5', "Apr '26"],           score: 58.6, lab: 'openai', src: 'glm52' },
+    { name: 'DeepSeek V4-Pro',       short: ['DeepSeek', 'V4-Pro', "Apr '26"], score: 55.4, lab: 'deepseek', src: 'glm52' },
+    { name: 'Claude Opus 4.8',       short: ['Opus 4.8', "May '26"],          score: 69.2, lab: 'anthropic', src: 'scFable' },
+    { name: 'Claude Fable 5',        short: ['Fable 5', "Jun '26"],           score: 80.0, lab: 'anthropic', src: 'scFable' },
+    { name: 'GLM-5.2',               short: ['GLM-5.2', "Jun '26"],           score: 62.1, lab: 'glm', src: 'glm52' },
     { name: 'GPT-5.6 Sol',           short: ['GPT-5.6', 'Sol', "Jun '26"],    score: 64.6, lab: 'openai', src: 'gpt56' },
-    { name: 'Claude Sonnet 5',       short: ['Sonnet 5', "Jun '26"],          score: 63.2, lab: 'anthropic' },
+    { name: 'Claude Sonnet 5',       short: ['Sonnet 5', "Jun '26"],          score: 63.2, lab: 'anthropic', src: 'scSonnet5' },
     { name: 'Grok 4.5',              short: ['Grok 4.5', "Jul '26"],          score: 64.7, lab: 'grok', src: 'grok45' },
     { name: 'Kimi K3',               short: ['Kimi K3', "Jul '26"],           score: 63.4, lab: 'kimi', src: 'kimi26' },
-    { name: 'Claude Opus 5',         short: ['Opus 5', "Jul '26"],            score: 79.2, lab: 'anthropic' }
+    { name: 'Claude Opus 5',         short: ['Opus 5', "Jul '26"],            score: 79.2, lab: 'anthropic', src: 'scOpus5' }
   ];
 
   var root = document.querySelector('.swep');
@@ -466,7 +499,9 @@
                   row.score.toFixed(1) + '% SWE-Bench Pro · ' + LABS[row.lab].name,
                   row.src === 'scale'
                     ? 'Scale independent run'
-                    : 'Published by ' + (src ? src.label : 'the vendor')
+                    // Publisher only in the tooltip; the full citation is in the
+                    // source list at the bottom of the page.
+                    : src ? 'Published by ' + src.label.split(',')[0] : 'No published source found'
                 ];
               }
             }
@@ -509,27 +544,42 @@
 
   build();
 
-  // Source credits, built from the data so a re-attributed model can never
-  // leave a stale line behind. Models with no `src` are named too, so an
-  // unverified figure reads as unverified rather than as an omission.
+  // Source credits, one row per source rather than per model: most of these
+  // pages publish a comparison table, so a single URL carries several scores.
+  // Built from the data so a re-attributed model can never leave a stale line
+  // behind. Models with no `src` get their own row, so an unverified figure
+  // reads as unverified rather than as an omission.
   (function () {
-    var unsourced = MODELS.filter(function (m) { return !m.src; })
-      .map(function (m) { return m.name; });
+    // Full URL in the href; the visible text drops the protocol and elides the
+    // middle of the long system-card paths so the rows still scan as a column.
+    function shorten(url) {
+      var t = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      return t.length <= 62 ? t : t.slice(0, 34) + '&hellip;' + t.slice(-24);
+    }
 
-    var parts = Object.keys(SOURCES).map(function (key) {
-      var names = MODELS.filter(function (m) { return m.src === key; })
-        .map(function (m) { return m.name; });
-      if (!names.length) return null;
-      return '<a href="' + SOURCES[key].url + '" rel="noopener">' + SOURCES[key].label +
-        '</a> &mdash; ' + names.join(', ');
-    }).filter(Boolean);
+    function scored(models) {
+      return models.map(function (m) {
+        return m.name + ' ' + m.score.toFixed(1) + '%';
+      }).join(', ');
+    }
 
-    if (unsourced.length) {
-      parts.push('Vendor launch reporting, no single page verified &mdash; ' + unsourced.join(', '));
+    var rows = Object.keys(SOURCES).map(function (key) {
+      var models = MODELS.filter(function (m) { return m.src === key; });
+      if (!models.length) return '';
+      var s = SOURCES[key];
+      return '<li><b>' + s.label + '</b><br>' +
+        '<a href="' + s.url + '" rel="noopener" target="_blank" title="' + s.url + '">' +
+        shorten(s.url) + '</a><br>' + scored(models) + '</li>';
+    });
+
+    var orphans = MODELS.filter(function (m) { return !m.src; });
+    if (orphans.length) {
+      rows.push('<li><b>No published source found</b><br>' + scored(orphans) + '</li>');
     }
 
     document.getElementById('swepSources').innerHTML =
-      '<strong>Score published by/from.</strong> ' + parts.join('. ') + '.';
+      '<strong>Score published by/from.</strong> Each URL was fetched and checked to carry the ' +
+      'exact numbers listed under it. <ul class="swep__srclist">' + rows.join('') + '</ul>';
   })();
 
   // Legend doubles as a lab filter.

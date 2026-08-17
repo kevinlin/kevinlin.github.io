@@ -273,16 +273,33 @@ td.num .cr {
   list-style: none;
   padding: 0;
   margin: var(--space-4) 0 0;
+  display: grid;
+  gap: var(--space-2);
 }
 
-.source-list li {
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid hsl(var(--rule));
+/* One card per publisher. Radius is concentric with the chips inside it:
+   8px outer, 999px pills sitting on 12px of padding. */
+.source-item {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-inner);
+  background: hsl(var(--surface));
+  box-shadow: inset 0 0 0 1px hsl(var(--rule));
 }
 
-.source-list li:last-child { border-bottom: 0; }
+/* No primary source found for these figures — the dashed edge says so before
+   the label is read. */
+.source-item.is-none {
+  background: none;
+  box-shadow: none;
+  border: 1px dashed hsl(var(--rule));
+  padding: calc(var(--space-3) - 1px) calc(var(--space-4) - 1px);
+}
 
 .src-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
   margin: 0;
   font-size: 14px;
   font-weight: 600;
@@ -296,29 +313,59 @@ td.num .cr {
 
 .src-head a:hover { color: hsl(var(--ring)); }
 
-.src-url {
+/* The URL is provenance, not navigation: it stays quiet and rides the right
+   edge until the line is too narrow to hold both. */
+a.src-url {
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 400;
   color: hsl(var(--ink-muted));
-  margin-left: var(--space-2);
+  margin-left: auto;
   word-break: break-all;
+  text-decoration-color: hsl(var(--rule));
+  text-underline-offset: 3px;
 }
 
-.src-models {
-  margin: var(--space-1) 0 0;
-  font-size: 13px;
+a.src-url:hover { color: hsl(var(--ring)); }
+
+.src-count {
+  font-size: 12px;
+  font-weight: 400;
   color: hsl(var(--ink-muted));
-  text-wrap: pretty;
+  font-variant-numeric: tabular-nums;
 }
+
+/* Models as chips rather than a middot run-on: each score stays attached to
+   its name, and the provider colour ties the row back to the chart. */
+.src-models {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: var(--space-3) 0 0;
+}
+
+.src-model {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: hsl(var(--rule) / 0.55);
+  font-size: 13px;
+  transition: opacity 140ms var(--ease-out);
+}
+
+.src-model.is-dim { opacity: 0.38; }
 
 .src-score {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 12px;
+  color: hsl(var(--ink-muted));
 }
 
-/* No primary source found for these figures — say so rather than imply one. */
 .src-head .is-missing { font-style: italic; opacity: 0.8; }
 
 .swatch {
@@ -328,6 +375,19 @@ td.num .cr {
   border-radius: 50%;
   margin-right: var(--space-2);
   vertical-align: 1px;
+  flex: none;
+}
+
+.src-model .swatch {
+  margin-right: 0;
+  vertical-align: baseline;
+  background: var(--dot);
+}
+
+/* Same convention as the chart: hollow = Scale's independent run. */
+.src-model .swatch.is-hollow {
+  background: hsl(var(--surface));
+  box-shadow: inset 0 0 0 2px var(--dot);
 }
 
 /* --- Footnote ---------------------------------------------------------- */
@@ -704,7 +764,7 @@ td.num .cr {
       button.classList.toggle('is-dim', !isEmphasised(name));
     });
 
-    document.querySelectorAll('tbody tr[data-provider]').forEach(function (row) {
+    document.querySelectorAll('tbody tr[data-provider], .src-model[data-provider]').forEach(function (row) {
       row.classList.toggle('is-dim', !isEmphasised(row.dataset.provider));
     });
   }
@@ -803,9 +863,15 @@ td.num .cr {
   // it. Grouped this way rather than per-row because most sources carry several
   // models, and the repetition in a table column obscured that.
   function buildSources(el, spec) {
+    function entry(m, provider, hollow) {
+      return { name: m.name, score: m.score, src: m.src, provider: provider, hollow: hollow };
+    }
+
     var models = spec.families
-      .map(function (f) { return { name: f.name, score: f.score, src: f.src }; })
-      .concat(spec.singles.map(function (s) { return { name: s.label, score: s.score, src: s.src }; }))
+      .map(function (f) { return entry({ name: f.name, score: f.score, src: f.src }, f.provider, f.hollow); })
+      .concat(spec.singles.map(function (s) {
+        return entry({ name: s.label, score: s.score, src: s.src }, s.provider, s.hollow);
+      }))
       .sort(function (a, b) { return b.score - a.score; });
 
     var items = Object.keys(spec.sources).map(function (key) {
@@ -813,14 +879,31 @@ td.num .cr {
       var named = models.filter(function (m) { return m.src === key; });
       if (!named.length) return '';
 
-      var head = source.url
-        ? '<a href="' + source.url + '" rel="noopener">' + source.label + '</a> ' +
-          '<span class="src-url">' + source.url.replace(/^https:\/\//, '') + '</span>'
-        : '<span class="is-missing">' + source.label + '</span>';
+      var count = '<span class="src-count">' + named.length +
+        (named.length === 1 ? ' model' : ' models') + '</span>';
 
-      return '<li><p class="src-head">' + head + '</p><p class="src-models">' +
-        named.map(function (m) { return m.name + ' <span class="src-score">' + m.score.toFixed(2) + '%</span>'; })
-             .join(' &middot; ') + '</p></li>';
+      // Label and URL are both live links to the same page: the URL is there to
+      // be read as provenance, but a reader who aims at it expects it to open.
+      var link = function (inner, cls) {
+        return '<a class="' + cls + '" href="' + source.url +
+          '" target="_blank" rel="noopener">' + inner + '</a>';
+      };
+
+      var head = source.url
+        ? link(source.label, 'src-name') + count +
+          link(source.url.replace(/^https:\/\//, ''), 'src-url')
+        : '<span class="is-missing">' + source.label + '</span>' + count;
+
+      var chips = named.map(function (m) {
+        return '<li class="src-model" data-provider="' + m.provider + '">' +
+          '<span class="swatch' + (m.hollow ? ' is-hollow' : '') + '" data-provider="' + m.provider +
+          '" style="--dot:' + providerColor(m.provider) + '"></span>' + m.name +
+          ' <span class="src-score">' + m.score.toFixed(2) + '%</span></li>';
+      }).join('');
+
+      return '<li class="source-item' + (source.url ? '' : ' is-none') + '">' +
+        '<p class="src-head">' + head + '</p>' +
+        '<ul class="src-models">' + chips + '</ul></li>';
     }).join('');
 
     el.innerHTML = '<ul class="source-list">' + items + '</ul>';
@@ -855,8 +938,12 @@ td.num .cr {
   }
 
   function repaintSwatches() {
-    document.querySelectorAll('td .swatch, th .swatch').forEach(function (s) {
-      s.style.background = providerColor(s.dataset.provider);
+    document.querySelectorAll('.swatch[data-provider]').forEach(function (s) {
+      var c = providerColor(s.dataset.provider);
+      // Chips colour their dot through --dot so the hollow variant can keep the
+      // card ground as its fill; table swatches are filled directly.
+      s.style.setProperty('--dot', c);
+      if (!s.classList.contains('is-hollow')) s.style.background = c;
     });
   }
 
