@@ -269,10 +269,19 @@ td.num .cr {
 
 td.src {
   font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   color: hsl(var(--ink-muted));
 }
+
+td.src a {
+  color: inherit;
+  text-decoration-color: hsl(var(--rule));
+  text-underline-offset: 3px;
+}
+
+td.src a:hover { color: hsl(var(--ring)); }
+
+/* No primary source found for this figure — say so rather than imply one. */
+td.src.is-missing { font-style: italic; opacity: 0.75; }
 
 .swatch {
   display: inline-block;
@@ -369,7 +378,7 @@ td.src {
 
     <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the second point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over.</p>
 
-    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are vendor-reported at each model&rsquo;s best published configuration. The two are <strong>not like-for-like</strong> &mdash; a hollow point below a filled one may be measuring the scaffold as much as the model, and every Claude model older than Opus 4.7 has only a Scale figure. GPT-5.4 also appears on Scale&rsquo;s board at 59.1% (xHigh, mini-swe-agent); the vendor number is plotted here. Vendors also restate each other&rsquo;s numbers: the GPT-5.6 launch page puts GPT-5.5 at 59.4% and Fable 5 at 80%, against the 58.6% and 80.3% each reported at its own launch. Launch figures are plotted.</p>
+    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The data table names the publisher of every figure and links to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Opus 4.7, Opus 4.8 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5, Sonnet 5 and Fable 5 are marked in the table as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. Treat any gap under about two points as noise.</p>
 
     <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4 and Claude Sonnet 4.5 do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Sources: <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a> and <a href="https://labs.scale.com/leaderboard/swe_bench_pro_public">Scale SWE-Bench Pro (public dataset)</a>, both retrieved 17 August 2026, plus vendor launch reporting for the filled points &mdash; Terra and Luna come from the coding table on OpenAI&rsquo;s <a href="https://openai.com/index/gpt-5-6/">GPT-5.6 page</a>. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
@@ -712,14 +721,14 @@ td.src {
     spec.families.forEach(function (f) {
       f.points.forEach(function (p) {
         rows.push({
-          label: p.tableLabel || p.label, x: p.x, y: p.y, rates: p.rates,
+          label: p.tableLabel || p.label, x: p.x, y: p.y, rates: p.rates, src: p.src,
           provider: f.provider, hollow: p.hollow != null ? p.hollow : f.hollow
         });
       });
     });
     spec.singles.forEach(function (s) {
       rows.push({
-        label: s.tableLabel || s.label, x: s.x, y: s.y, rates: s.rates,
+        label: s.tableLabel || s.label, x: s.x, y: s.y, rates: s.rates, src: s.src,
         provider: s.provider, hollow: s.hollow
       });
     });
@@ -747,6 +756,13 @@ td.src {
            '<span class="cr">' + credits(dollars, precise) + '</span></td>';
   }
 
+  // Publisher name over the bare URL: the domain is visible on hover and in the
+  // status bar, and a column of full URLs would swamp the table.
+  function sourceCell(source) {
+    if (!source.url) return '<td class="src is-missing">' + source.label + '</td>';
+    return '<td class="src"><a href="' + source.url + '" rel="noopener">' + source.label + '</a></td>';
+  }
+
   function buildTable(el, spec) {
     var rows = allPoints(spec);
     var head =
@@ -760,7 +776,7 @@ td.src {
       '<th scope="col" class="num">Input / 1M</th>' +
       '<th scope="col" class="num">Output / 1M</th>' +
       '<th scope="col" class="num">Blended / 1M</th>' +
-      '<th scope="col">Score from</th></tr></thead>';
+      '<th scope="col">Score published by</th></tr></thead>';
 
     var body = rows.map(function (r) {
       return '<tr data-provider="' + r.provider + '"><th scope="row"><span class="swatch" data-provider="' + r.provider +
@@ -771,7 +787,7 @@ td.src {
         rateCell(r.rates.in, true) +
         rateCell(r.rates.out, true) +
         rateCell(r.x) +
-        '<td class="src">' + (r.hollow ? 'Scale' : 'Vendor') + '</td></tr>';
+        sourceCell(spec.sources[r.src] || spec.sources.none) + '</tr>';
     }).join('');
 
     el.innerHTML = head + '<tbody>' + body + '</tbody>';
@@ -828,49 +844,67 @@ document.addEventListener('DOMContentLoaded', function () {
     return p;
   }
 
+  // Where each SWE-Bench Pro figure was actually published. Every URL here was
+  // fetched and checked to carry the exact number plotted. A model's own maker
+  // is not always the publisher: several of these figures only appear in a
+  // rival's comparison table, which is why the source is named per row.
+  var SOURCES = {
+    scale:   { label: 'Scale',    url: 'https://labs.scale.com/leaderboard/swe_bench_pro_public' },
+    gpt56:   { label: 'OpenAI',   url: 'https://openai.com/index/gpt-5-6/' },
+    codex53: { label: 'OpenAI',   url: 'https://openai.com/index/introducing-gpt-5-3-codex/' },
+    grok45:  { label: 'xAI',      url: 'https://x.ai/news/grok-4-5' },
+    kimi26:  { label: 'Moonshot', url: 'https://www.kimi.com/blog/kimi-k2-6' },
+    none:    { label: 'no primary source found', url: null }
+  };
+
   // Two published rates for one model: default vs long-context tier, or Opus
   // 4.8 standard vs fast mode. Same score, so each pair draws as a flat run.
   var families = [
-    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 69.2, points: [
+    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 69.2, src: 'grok45', points: [
         { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'left', ao: 8 },
         { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
-    { name: 'Grok 4.5', provider: 'xAI', dashed: true, score: 64.7, points: [
+    { name: 'Grok 4.5', provider: 'xAI', dashed: true, score: 64.7, src: 'grok45', points: [
         { label: 'Grok 4.5', tableLabel: 'Grok 4.5', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 16 },
         { label: '> 200K', tableLabel: 'Grok 4.5 · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
-    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 64.6, points: [
+    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 64.6, src: 'gpt56', points: [
         { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol', rates: { in: 5, cache: 0.50, cw: 6.25, out: 30 }, al: 'top', ao: 8 },
         { label: '> 272K', tableLabel: 'GPT-5.6 Sol · long context > 272K', rates: { in: 10, cache: 1.00, cw: 12.50, out: 45 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 63.4, points: [
+    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 63.4, src: 'gpt56', points: [
         { label: 'GPT-5.6 Terra', tableLabel: 'GPT-5.6 Terra', rates: { in: 2, cache: 0.20, cw: 2.50, out: 12 }, al: 'bottom', ao: 20 },
         { label: '> 272K', tableLabel: 'GPT-5.6 Terra · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
-    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 62.7, points: [
+    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 62.7, src: 'gpt56', points: [
         { label: 'GPT-5.6 Luna', tableLabel: 'GPT-5.6 Luna', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 1.20 }, al: 'top', ao: 8 },
         { label: '> 200K', tableLabel: 'GPT-5.6 Luna · long context > 200K', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 58.6, points: [
+    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 58.6, src: 'grok45', points: [
         { label: 'GPT-5.5', tableLabel: 'GPT-5.5', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
         { label: '> 272K', tableLabel: 'GPT-5.5 · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, points: [
+    { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, src: 'kimi26', points: [
         { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
         { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] },
-    { name: 'Gemini 3.1 Pro', provider: 'Google', dashed: true, score: 46.10, hollow: true, points: [
+    { name: 'Gemini 3.1 Pro', provider: 'Google', dashed: true, score: 46.10, src: 'scale', points: [
         { label: 'Gemini 3.1 Pro', tableLabel: 'Gemini 3.1 Pro', rates: { in: 2, cache: 0.20, cw: null, out: 12 }, al: 'left', ao: 8 },
         { label: '> 200K', tableLabel: 'Gemini 3.1 Pro · long context > 200K', rates: { in: 4, cache: 0.40, cw: null, out: 18 }, al: 'top', ao: 8 } ] }
   ];
-  families.forEach(function (f) { f.points.forEach(function (p) { point(p, f.score); }); });
+  // A hollow marker means exactly one thing: the score came from Scale's own
+  // run rather than from anyone's published figure. Derive it so the source and
+  // the marker style can never drift apart.
+  families.forEach(function (f) {
+    f.hollow = f.src === 'scale';
+    f.points.forEach(function (p) { p.src = f.src; point(p, f.score); });
+  });
 
-  // One published rate each. `hollow` marks a score measured by Scale rather
-  // than reported by the vendor.
+  // One published rate each.
   var singles = [
-    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.3, al: 'right', ao: 8 },
-    { label: 'Claude Opus 5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 79.2, al: 'right', ao: 8 },
-    { label: 'Claude Opus 4.7', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 64.3, al: 'bottom', ao: 8 },
-    { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, al: 'top', ao: 8 },
-    { label: 'Claude Sonnet 5', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 63.2, al: 'left', ao: 20 },
-    { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, al: 'bottom', ao: 8 },
-    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, hollow: true, al: 'right', ao: 8 },
-    { label: 'Claude Opus 4.5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 45.89, hollow: true, al: 'right', ao: 8 }
+    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.3, src: 'none', al: 'right', ao: 8 },
+    { label: 'Claude Opus 5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 79.2, src: 'none', al: 'right', ao: 8 },
+    { label: 'Claude Opus 4.7', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 64.3, src: 'grok45', al: 'bottom', ao: 8 },
+    { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, src: 'kimi26', al: 'top', ao: 8 },
+    { label: 'Claude Sonnet 5', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 63.2, src: 'none', al: 'left', ao: 20 },
+    { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, src: 'codex53', al: 'bottom', ao: 8 },
+    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, src: 'scale', al: 'right', ao: 8 },
+    { label: 'Claude Opus 4.5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 45.89, src: 'scale', al: 'right', ao: 8 }
   ];
-  singles.forEach(function (s) { point(s, s.score); });
+  singles.forEach(function (s) { s.hollow = s.src === 'scale'; point(s, s.score); });
 
   ChartKit.init({
     canvasId: 'chart',
@@ -878,6 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
     tableId: 'table',
     hollowKey: 'Hollow = Scale independent run',
     modelCount: families.length + singles.length,
+    sources: SOURCES,
 
     families: families,
     singles: singles,
