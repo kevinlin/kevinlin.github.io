@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Developer Productivity for the AI Native — STACK Meetup</title>
+<style>
+  :root { --bg:#0e0f13; --fg:#f2f3f5; --dim:#9aa0aa; --accent:#7b3fe4; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+  #stage { height:100%; display:flex; flex-direction:column; }
+  #slide { flex:1; display:flex; align-items:center; justify-content:center; padding:2vh 2vw; min-height:0; }
+  #slide img { max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; }
+  .cover { max-width:900px; padding:0 4vw; }
+  .cover h1 { font-size:clamp(28px,5vw,56px); line-height:1.1; margin:0 0 .3em; }
+  .cover .kicker { color:var(--accent); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:13px; }
+  .cover p { color:var(--dim); font-size:clamp(14px,1.6vw,19px); }
+  .cover ul { color:var(--dim); }
+  .section { text-align:center; }
+  .section .kicker { color:var(--accent); font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:13px; }
+  .section h2 { font-size:clamp(30px,6vw,64px); margin:.2em 0 0; }
+  #bar { display:flex; align-items:center; gap:16px; padding:10px 18px; border-top:1px solid #22242b; font-size:13px; color:var(--dim); }
+  #title { flex:1; color:var(--fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #bar button { background:#1a1c22; color:var(--fg); border:1px solid #2b2e37; border-radius:6px;
+    padding:4px 10px; cursor:pointer; font-size:14px; }
+  #bar button:hover { border-color:var(--accent); }
+  #progress { position:fixed; top:0; left:0; height:3px; background:var(--accent); transition:width .15s; }
+  a { color:#b79bff; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="stage">
+  <div id="slide"></div>
+  <div id="bar">
+    <span id="title"></span>
+    <button id="prev">&larr;</button>
+    <span id="count"></span>
+    <button id="next">&rarr;</button>
+    <button id="full">Fullscreen</button>
+  </div>
+</div>
+<script>
+const DIR = "slides/";
+const img = (file, title) => ({ title, html: `<img src="${DIR + encodeURIComponent(file)}" alt="${title}">` });
+const section = (kicker, h2) => ({ title: h2, html:
+  `<div class="section"><div class="kicker">${kicker}</div><h2>${h2}</h2></div>` });
+
+const slides = [
+  { title: "Developer Productivity for the AI Native", html: `
+    <div class="cover">
+      <div class="kicker">STACK Meetup [Engineering] &middot; GovTech Singapore</div>
+      <h1>Developer Productivity for the AI&nbsp;Native</h1>
+      <p>AI is changing how software gets built, and no one has a clean map for what comes next.
+         A look inside GovTech's Developer Productivity &amp; Services team: how they build
+         secure, standardised, adaptable environments for developers and agents working side by side.</p>
+      <p style="font-size:14px">Session notes &amp; slide captures &middot; 13 Aug 2026 &middot;
+         <a href="https://www.developer.tech.gov.sg/communities/events/stack-meetups/developer-productivity-for-the-ai-native">event page</a></p>
+    </div>` },
+
+  section("Part 0", "Overview"),
+  img("airlift-title-slide-1.png", "Airlift: Building ephemeral sandbox environments for developers and agents"),
+  img("overview-slide-08-1.png", "Developer Productivity &amp; Services"),
+  img("overview-slide-10-1.png", "So how DO we navigate disruption?"),
+  img("overview-slide-12-1.png", "Building to the right outcomes"),
+  img("overview-slide-13-1.png", "More formally &mdash; building to the right outcomes"),
+  img("overview-slide-14-1.png", "What we built: Airlift &mdash; hypothesis"),
+  img("overview-slide-15-1.png", "What we built: Iter &mdash; hypothesis"),
+
+  section("Part 1", "Airlift"),
+  img("airlift-slide-18-1.png", "The Three Boxes"),
+  img("airlift-slide-20-1.png", "How we got here"),
+  img("airlift-slide-24-1.png", "Reducing developer friction"),
+  img("airlift-slide-27-1.png", "Some runtime offerings"),
+  img("airlift-slide-28-1.png", "Standing on the shoulders"),
+  img("airlift-slide-29-1.png", "Primitives introduce constraints"),
+  img("airlift-slide-31-1.png", "Know when it's time to say goodbye"),
+  img("airlift-slide-33-1.png", "Workspace with secrets injection"),
+  img("airlift-slide-35-1.png", "Into the details"),
+  img("airlift-slide-36-1.png", "What about Airbase?"),
+  img("airlift-slide-37-1.png", "s/airbase/airlift"),
+  img("airlift-slide-38-1.png", "How to test?"),
+  img("airlift-slide-40-1.png", "Food for thought"),
+  img("airlift-slide-42-1.png", "Airlift tech preview"),
+
+  section("Part 2", "Iter"),
+  img("iter-slide-45-1.png", "What does this primitive look like when it's well supported?"),
+  img("iter-slide-46-1.png", "Can we provide a multi-model primitive for all our use cases?"),
+  img("iter-slide-46-2.png", "MCP integration"),
+  img("iter-slide-48-1.png", "Iter.. iterates"),
+  img("iter-slide-49-1.png", "Iter is API first"),
+  img("iter-slide-55-1.png", "Iter is an experiment on foundational building blocks"),
+  img("iter-slide-56-1.png", "Iter (code) integrated into agentic use cases"),
+];
+
+const el = { slide: s("slide"), title: s("title"), count: s("count"), progress: s("progress") };
+function s(id) { return document.getElementById(id); }
+
+let i = Math.min(Number(location.hash.slice(1)) || 0, slides.length - 1);
+function render() {
+  el.slide.innerHTML = slides[i].html;
+  el.title.innerHTML = slides[i].title;
+  el.count.textContent = (i + 1) + " / " + slides.length;
+  el.progress.style.width = ((i + 1) / slides.length * 100) + "%";
+  history.replaceState(null, "", "#" + i);
+}
+function go(d) { i = Math.max(0, Math.min(slides.length - 1, i + d)); render(); }
+
+s("prev").onclick = () => go(-1);
+s("next").onclick = () => go(1);
+s("full").onclick = () => document.fullscreenElement
+  ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+document.addEventListener("keydown", e => {
+  const k = { ArrowRight:1, ArrowDown:1, PageDown:1, " ":1, ArrowLeft:-1, ArrowUp:-1, PageUp:-1 }[e.key];
+  if (k) { e.preventDefault(); go(k); }
+  else if (e.key === "Home") { i = 0; render(); }
+  else if (e.key === "End") { i = slides.length - 1; render(); }
+});
+// tap left/right third of the stage to navigate
+s("slide").addEventListener("click", e => go(e.clientX < innerWidth / 3 ? -1 : 1));
+
+render();
+</script>
+</body>
+</html>
