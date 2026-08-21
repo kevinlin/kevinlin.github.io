@@ -279,6 +279,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 140
+    },
+    {
+      "id": "agent-harness",
+      "title": "Agent Harness",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 160
     }
   ],
   "entries": [
@@ -636,42 +644,6 @@
       "replacements": {}
     },
     {
-      "id": "loop-engineering-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
-      "source": "loop-engineering/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
-      "destination": "loop-engineering/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
-      "title": "Research notes: the ralph loop as a coding-agent technique (June 2026)",
-      "collection": "loop-engineering",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "loop-engineering-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
-      "source": "loop-engineering/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
-      "destination": "loop-engineering/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
-      "title": "Research notes: Geoffrey Huntley's ralph loop and Claude Code (June 2026)",
-      "collection": "loop-engineering",
-      "order": 20,
-      "replacements": {}
-    },
-    {
-      "id": "loop-engineering-20260610-ralph-loop-raw-v3",
-      "source": "loop-engineering/20260610_ralph-loop-raw-v3.md",
-      "destination": "loop-engineering/20260610-ralph-loop-raw-v3/index.html",
-      "title": "Research notes: ralph loop across the wider community (June 2026)",
-      "collection": "loop-engineering",
-      "order": 30,
-      "replacements": {}
-    },
-    {
-      "id": "loop-engineering-20260713-loop-engineering-raw",
-      "source": "loop-engineering/20260713_loop-engineering-raw.md",
-      "destination": "loop-engineering/20260713-loop-engineering-raw/index.html",
-      "title": "Research notes: what people say about Loop Engineering (July 2026)",
-      "collection": "loop-engineering",
-      "order": 40,
-      "replacements": {}
-    },
-    {
       "id": "travel-china-fuxing-high-speed-rail-network-map",
       "source": "travel/China Fuxing High-Speed Rail Network Map.png",
       "destination": "travel/china-fuxing-high-speed-rail-network-map.png",
@@ -804,6 +776,60 @@
       "title": "Developer Productivity for the AI Native (STACK Meetup, 13 Aug 2026)",
       "collection": "developer-productivity-ai-native",
       "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "skillops-20260821-skillops-agent-skills-raw-v3",
+      "source": "SkillOps/20260821_skillops-agent-skills-raw-v3.md",
+      "destination": "skillops/20260821-skillops-agent-skills-raw-v3/index.html",
+      "title": "last30days v3.21.1: SkillOps agent skills",
+      "collection": "skillops",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "agent-harness-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
+      "source": "agent-harness/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
+      "destination": "agent-harness/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
+      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
+      "collection": "agent-harness",
+      "order": 10,
+      "replacements": {}
+    },
+    {
+      "id": "agent-harness-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
+      "source": "agent-harness/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
+      "destination": "agent-harness/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
+      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
+      "collection": "agent-harness",
+      "order": 20,
+      "replacements": {}
+    },
+    {
+      "id": "agent-harness-20260610-ralph-loop-raw-v3",
+      "source": "agent-harness/20260610_ralph-loop-raw-v3.md",
+      "destination": "agent-harness/20260610-ralph-loop-raw-v3/index.html",
+      "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
+      "collection": "agent-harness",
+      "order": 30,
+      "replacements": {}
+    },
+    {
+      "id": "agent-harness-20260713-loop-engineering-raw",
+      "source": "agent-harness/20260713_loop-engineering-raw.md",
+      "destination": "agent-harness/20260713-loop-engineering-raw/index.html",
+      "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
+      "collection": "agent-harness",
+      "order": 40,
+      "replacements": {}
+    },
+    {
+      "id": "agent-harness-20260821-agent-gauntlet-pipeline-raw-v3",
+      "source": "agent-harness/20260821_agent-gauntlet-pipeline-raw-v3.md",
+      "destination": "agent-harness/20260821-agent-gauntlet-pipeline-raw-v3/index.html",
+      "title": "last30days v3.21.1: Agent Gauntlet Pipeline",
+      "collection": "agent-harness",
+      "order": 50,
       "replacements": {}
     }
   ]
