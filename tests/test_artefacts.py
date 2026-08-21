@@ -801,7 +801,56 @@ class DesiredTreeTests(unittest.TestCase):
 
         self.assertEqual(
             desired[PurePosixPath("charts/chart/index.html")],
-            b'<script src="../../vendor/chart.js"></script>\n<p>Chart</p>\n',
+            artefacts_cli.FAVICON_LINK.encode("utf-8")
+            + b'\n<script src="../../vendor/chart.js"></script>\n<p>Chart</p>\n',
+        )
+
+    def test_transform_html_injects_favicon_when_page_has_none(self):
+        root, manifest, source_path = self.make_source_and_manifest(
+            "Charts/Chart.html", "charts/chart/index.html"
+        )
+        source_path.write_text(
+            "<!DOCTYPE html>\n<html>\n<head>\n<title>Chart</title>\n</head>\n</html>\n",
+            encoding="utf-8",
+        )
+
+        desired = artefacts_cli.build_desired_files(manifest, root)
+        page = desired[PurePosixPath("charts/chart/index.html")].decode("utf-8")
+
+        self.assertIn(artefacts_cli.FAVICON_LINK, page)
+        self.assertEqual(page.count('rel="icon"'), 1)
+        self.assertLess(page.index("rel=\"icon\""), page.index("<title>"))
+
+    def test_transform_html_injects_favicon_after_doctype_without_head(self):
+        root, manifest, source_path = self.make_source_and_manifest(
+            "Charts/Chart.html", "charts/chart/index.html"
+        )
+        source_path.write_text("<!DOCTYPE html>\n<p>Chart</p>\n", encoding="utf-8")
+
+        desired = artefacts_cli.build_desired_files(manifest, root)
+
+        self.assertEqual(
+            desired[PurePosixPath("charts/chart/index.html")],
+            b"<!DOCTYPE html>\n"
+            + artefacts_cli.FAVICON_LINK.encode("utf-8")
+            + b"\n<p>Chart</p>\n",
+        )
+
+    def test_transform_html_keeps_existing_favicon(self):
+        root, manifest, source_path = self.make_source_and_manifest(
+            "Charts/Chart.html", "charts/chart/index.html"
+        )
+        original = (
+            "<!DOCTYPE html>\n<html>\n<head>\n"
+            '<link rel="shortcut icon" href="own.ico">\n</head>\n</html>\n'
+        )
+        source_path.write_text(original, encoding="utf-8")
+
+        desired = artefacts_cli.build_desired_files(manifest, root)
+
+        self.assertEqual(
+            desired[PurePosixPath("charts/chart/index.html")],
+            original.encode("utf-8"),
         )
 
     def test_transform_html_rejects_missing_declared_replacement(self):
@@ -826,7 +875,8 @@ class DesiredTreeTests(unittest.TestCase):
         desired = artefacts_cli.build_desired_files(manifest, root)
 
         self.assertEqual(
-            desired[PurePosixPath("charts/chart/index.html")], b"<p>Chart</p>\n"
+            desired[PurePosixPath("charts/chart/index.html")],
+            artefacts_cli.FAVICON_LINK.encode("utf-8") + b"\n<p>Chart</p>\n",
         )
 
     def test_transform_html_rejects_remaining_cdnjs_reference(self):

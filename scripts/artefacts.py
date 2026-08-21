@@ -566,13 +566,28 @@ MARKDOWN_VENDOR_NAME = "marked.min.js"
 # back-link to the catalogue. The CSS is inline because every other published page
 # is self-contained; a shared stylesheet would add a cross-file reference for
 # `validate` to resolve on every document.
+# Inlined rather than referenced from /favicons/ because the publish validator
+# resolves local references against a tree containing only `artefacts/`.
+FAVICON_LINK = (
+    '<link rel="icon" type="image/svg+xml" '
+    "href='data:image/svg+xml,"
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+    '<rect width="100" height="100" rx="20" fill="%230063a3"/>'
+    '<text x="50" y="75" font-size="60" text-anchor="middle" fill="white" '
+    'font-family="sans-serif" font-weight="bold">K</text></svg>\'>'
+)
+EXISTING_ICON_LINK = re.compile(r"""<link\b[^>]*\brel=["']?[^"'>]*\bicon\b""", re.IGNORECASE)
+HEAD_OPEN = re.compile(r"<head\b[^>]*>", re.IGNORECASE)
+DOCTYPE = re.compile(r"^\s*<!doctype[^>]*>", re.IGNORECASE)
+
+
 MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} | Artefacts</title>
-    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    {favicon}
     <meta name="theme-color" content="#0063a3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -818,6 +833,7 @@ def render_markdown_page(
     prefix = "../" * len(entry.destination.parent.parts)
     document = MARKDOWN_PAGE_TEMPLATE.format(
         title=html.escape(entry.title),
+        favicon=FAVICON_LINK,
         prefix=prefix,
         vendor=vendor_path.as_posix(),
         block_start=MARKDOWN_BLOCK_START,
@@ -1186,6 +1202,21 @@ def reconcile_inventory(
     return SourceReconciliation(next_manifest=next_manifest, missing_entries=missing)
 
 
+def ensure_favicon(text: str) -> str:
+    """Give a source page the site favicon when it declares none of its own."""
+    if EXISTING_ICON_LINK.search(text):
+        return text
+    head = HEAD_OPEN.search(text)
+    if head is not None:
+        return f"{text[: head.end()]}\n    {FAVICON_LINK}{text[head.end() :]}"
+    # Fragment with no explicit <head>: the parser hoists a leading <link> into the
+    # head it synthesises, so prepending works — but never before the doctype.
+    doctype = DOCTYPE.match(text)
+    prefix = f"{text[: doctype.end()]}\n" if doctype else ""
+    rest = text[doctype.end() :] if doctype else text
+    return f"{prefix}{FAVICON_LINK}\n{rest.lstrip()}"
+
+
 def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
     try:
         text = source_bytes.decode("utf-8")
@@ -1199,6 +1230,7 @@ def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
             )
         text = new.join(parts)
     text = TRAILING_SPACE.sub("", text)
+    text = ensure_favicon(text)
     if has_cdnjs_reference(text):
         remaining = ", ".join(dict.fromkeys(CDNJS_REFERENCE.findall(text))) or CDNJS_HOST
         raise TransformationError(

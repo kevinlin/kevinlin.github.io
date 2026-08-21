@@ -41,7 +41,7 @@ There is no linter, formatter, or JS test runner. The site itself has no automat
 Flow inside `scripts/artefacts.py`:
 
 - `scan_source` walks the source root; `apply_source_ignores` drops `ignored_sources` rules. Any remaining file with no manifest entry raises `UnlistedSourceError`, which `main` catches and turns into an interactive proposal (`propose_manifest_additions` → `merge_manifest_proposal`).
-- `build_desired_files` renders the whole intended `artefacts/` tree in memory: byte copies for images, `transform_html` for `.html` (applies per-entry `replacements`, strips trailing spaces, hard-bans any cdnjs reference), `render_markdown_page` for `.md`.
+- `build_desired_files` renders the whole intended `artefacts/` tree in memory: byte copies for images, `transform_html` for `.html` (applies per-entry `replacements`, strips trailing spaces, injects `FAVICON_LINK` when the source declares no icon, hard-bans any cdnjs reference), `render_markdown_page` for `.md`.
 - `create_sync_plan` diffs that tree against what is on disk and produces a `SyncPlan` of add/update/delete/orphan `Change`s. Nothing is written until the user confirms.
 - `publish` runs preflight (clean tree, `gh auth`), branches, applies, runs the unit tests and `validate` locally, commits, opens a PR, waits for the `validate` check, squash-merges, waits for the GitHub Pages build, then fetches every public URL to confirm it is live. Any failure aborts.
 
