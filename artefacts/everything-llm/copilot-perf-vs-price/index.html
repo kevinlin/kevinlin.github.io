@@ -484,7 +484,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
     <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The <em>Score published by</em> section below links every figure to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Opus 4.7, Opus 4.8 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5, Sonnet 5 and Fable 5 are listed there as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. Treat any gap under about two points as noise.</p>
 
-    <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4 and Claude Sonnet 4.5 do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 17 August 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4, Claude Sonnet 4.5, Claude Opus 4.5 and Gemini 3.1 Pro do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 17 August 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -1030,10 +1030,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: '> 272K', tableLabel: 'GPT-5.5 · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
     { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, src: 'kimi26', points: [
         { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
-        { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] },
-    { name: 'Gemini 3.1 Pro', provider: 'Google', dashed: true, score: 46.10, src: 'scale', points: [
-        { label: 'Gemini 3.1 Pro', tableLabel: 'Gemini 3.1 Pro', rates: { in: 2, cache: 0.20, cw: null, out: 12 }, al: 'left', ao: 8 },
-        { label: '> 200K', tableLabel: 'Gemini 3.1 Pro · long context > 200K', rates: { in: 4, cache: 0.40, cw: null, out: 18 }, al: 'top', ao: 8 } ] }
+        { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] }
   ];
   // A hollow marker means exactly one thing: the score came from Scale's own
   // run rather than from anyone's published figure. Derive it so the source and
@@ -1051,8 +1048,7 @@ document.addEventListener('DOMContentLoaded', function () {
     { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, src: 'kimi26', al: 'top', ao: 8 },
     { label: 'Claude Sonnet 5', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 63.2, src: 'none', al: 'left', ao: 20 },
     { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, src: 'codex53', al: 'bottom', ao: 8 },
-    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, src: 'scale', al: 'right', ao: 8 },
-    { label: 'Claude Opus 4.5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 45.89, src: 'scale', al: 'right', ao: 8 }
+    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, src: 'scale', al: 'right', ao: 8 }
   ];
   singles.forEach(function (s) { s.hollow = s.src === 'scale'; point(s, s.score); });
 
@@ -1084,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'SWE-Bench Pro resolve rate',
       grid: true,
       tickStep: 10,
-      scale: { min: 40, max: 85 },
+      scale: { min: 50, max: 85 },
       tickFormat: function (v) { return v + '%'; }
     },
 
