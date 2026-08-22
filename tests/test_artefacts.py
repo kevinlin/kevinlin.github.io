@@ -1178,6 +1178,66 @@ class CatalogueTests(unittest.TestCase):
         self.assertIn("Image &lt;references&gt;.", rendered)
         self.assertIn("Card &lt;image&gt;", rendered)
 
+    def test_render_catalogue_puts_the_showcase_link_in_the_image_heading(self):
+        manifest = artefacts_cli.manifest_from_dict(
+            {
+                "version": 1,
+                "protected_files": [],
+                "collections": [
+                    {
+                        "id": "images",
+                        "title": "Images",
+                        "description": "Images.",
+                        "section": artefacts_cli.IMAGE_SECTION,
+                        "section_order": 20,
+                        "order": 10,
+                    },
+                    {
+                        "id": "charts",
+                        "title": "Charts",
+                        "description": "Data charts.",
+                        "section": artefacts_cli.PRESENTATION_SECTION,
+                        "section_order": 10,
+                        "order": 10,
+                    },
+                ],
+                "entries": [
+                    {
+                        "id": "image",
+                        "source": "Images/Card.png",
+                        "destination": "images/card.png",
+                        "title": "Card",
+                        "collection": "images",
+                        "order": 10,
+                        "replacements": {},
+                    },
+                    {
+                        "id": "chart",
+                        "source": "Charts/Chart.html",
+                        "destination": "charts/chart/index.html",
+                        "title": "Chart",
+                        "collection": "charts",
+                        "order": 10,
+                        "replacements": {},
+                    },
+                ],
+            }
+        )
+
+        rendered = artefacts_cli.render_catalogue(manifest)
+
+        self.assertEqual(rendered.count('class="showcase-link"'), 1)
+        image_heading = rendered[
+            rendered.index('<h2 id="image-collections-heading">') :
+        ].split("</h2>", 1)[0]
+        self.assertIn('href="showcase/"', image_heading)
+        self.assertIn("Walk the image artefacts in 3D", image_heading)
+
+    def test_render_catalogue_omits_the_showcase_link_without_an_image_section(self):
+        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
+
+        self.assertNotIn("showcase-link", rendered)
+
     def test_render_catalogue_links_html_directories_and_images_once(self):
         rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
 

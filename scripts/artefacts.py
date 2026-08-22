@@ -913,6 +913,20 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
 PRESENTATION_SECTION = "Presentations and analysis"
 IMAGE_SECTION = "Image collections"
 PLACEHOLDER_DESCRIPTION = "TODO: describe this collection."
+# The 3D showcase walks every published image, including the ones filed under
+# PRESENTATION_SECTION, but its link rides the IMAGE_SECTION heading because that
+# is where a reader goes looking for pictures. Renaming that section in the
+# manifest drops the link, so rename this constant with it.
+SHOWCASE_LINK = """\
+                <a class="showcase-link" href="showcase/">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" \
+stroke="currentColor" stroke-width="2" stroke-linecap="round" \
+stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 2 2 7l10 5 10-5-10-5Z"/>
+                        <path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>Walk the image artefacts in 3D</span>
+                </a>"""
 CDNJS_REFERENCE = re.compile(rf"https://{re.escape(CDNJS_HOST)}/[^\s\"'<>)]+")
 
 
@@ -1333,10 +1347,13 @@ def render_catalogue(
     lines: list[str] = []
     for (_, section_title), collections in sorted(sections.items()):
         heading_id = f"{_slug(section_title)}-heading"
+        heading = html.escape(section_title)
+        if section_title == IMAGE_SECTION:
+            heading += f"\n{SHOWCASE_LINK}\n            "
         lines.extend(
             [
                 f'        <section aria-labelledby="{heading_id}">',
-                f'            <h2 id="{heading_id}">{html.escape(section_title)}</h2>',
+                f'            <h2 id="{heading_id}">{heading}</h2>',
                 '            <div class="card-grid">',
             ]
         )
