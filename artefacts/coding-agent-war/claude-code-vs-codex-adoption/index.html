@@ -4,7 +4,7 @@
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Adoption curves for Claude Code and Codex aligned to each product's month one, with every data point marked as published or estimated.">
+<meta name="description" content="Adoption curves for Claude Code and Codex through August 2026, aligned to each product's month one, with every data point marked as published or estimated.">
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>
 </head>
 <body>
@@ -303,6 +303,18 @@
   .dot.est-claude { fill: var(--surface); stroke: var(--claude); }
   .dot.est-codex  { fill: var(--surface); stroke: var(--codex); }
 
+  .pt-label {
+    font-size: 10px;
+    font-family: var(--font-ui);
+    font-variant-numeric: tabular-nums;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+  .pt-label.claude { fill: var(--claude); }
+  .pt-label.codex  { fill: var(--codex); }
+
   .end-label { font-size: 12px; font-weight: 650; font-family: var(--font-ui); }
   .end-label.claude { fill: var(--claude); }
   .end-label.codex  { fill: var(--codex); }
@@ -452,7 +464,7 @@
 <div class="wrap">
 
   <header>
-    <p class="eyebrow">Adoption comparison · data note · Aug 2026</p>
+    <p class="eyebrow">Adoption comparison · data note · 22 Aug 2026</p>
     <h1>Claude Code vs Codex, measured from each product's own month one</h1>
     <p class="lede">
       The brief was desktop-app MAU. Neither Anthropic nor OpenAI publishes that number, so this
@@ -461,7 +473,8 @@
       or an estimate.
     </p>
     <div class="flags">
-      <span class="flag">Metric: weekly active users</span>
+      <span class="flag">Metric: weekly active users · log scale</span>
+      <span class="flag">Through Aug 2026</span>
       <span class="flag">Two x-axis views: month-since-release, calendar</span>
       <span class="flag">Claude Code · from 24 Feb 2025</span>
       <span class="flag">Codex · from 16 Apr 2025</span>
@@ -471,19 +484,22 @@
   <section class="tiles" aria-label="Headline figures">
     <div class="card tile">
       <div class="who"><span class="swatch codex" aria-hidden="true"></span>Codex</div>
-      <div class="value">8.0M</div>
+      <div class="value">6.0M</div>
       <div class="caption">
-        Weekly active users, reported by OpenAI in July 2026 — month 16. Eleven separate
-        figures have been published along the way, so this curve is measured, not modelled.
+        The last figure that is unambiguously Codex alone: 6M weekly active users on 12 July 2026,
+        month 16. Seven earlier figures were published too, so most of this curve is measured
+        rather than modelled — but from mid-July OpenAI began reporting Codex and ChatGPT Work
+        as one number, and August's widely quoted 15M has no published methodology at all.
       </div>
     </div>
     <div class="card tile">
       <div class="who"><span class="swatch claude" aria-hidden="true"></span>Claude Code</div>
       <div class="value absent">No absolute figure, ever</div>
       <div class="caption">
-        Anthropic has published growth <em>multiples</em> only — "10x in three months",
-        "doubled since 1 January" — never a user count. Every point on its line is
-        reconstructed from those multiples plus third-party reporting.
+        Eighteen months in, Anthropic has published growth <em>multiples</em> only — "10x in
+        three months", "doubled since 1 January" — and revenue run-rates, never a user count.
+        Every point on its line is reconstructed from those multiples plus third-party reporting,
+        so treat the whole curve as an order-of-magnitude sketch.
       </div>
     </div>
   </section>
@@ -492,7 +508,7 @@
     <div class="chart-head">
       <div class="titles">
         <h2>Weekly active users by month since launch</h2>
-        <p class="sub">Solid line and filled dots are published figures. Dashed line and hollow dots are estimates.</p>
+        <p class="sub">Log scale — each gridline is 10x the one below, so equal slopes mean equal growth <em>rates</em>. Solid line and filled dots are published figures; dashed line and hollow dots are estimates.</p>
       </div>
       <div class="toggle" role="group" aria-label="X-axis mode">
         <button type="button" id="btn-months" aria-pressed="true">Months since release</button>
@@ -502,7 +518,7 @@
 
     <div class="plot-wrap">
       <svg class="plot" id="plot" viewBox="0 0 960 440" role="img"
-           aria-label="Line chart of weekly active users against months since each product's release. Codex rises from roughly 0.6 million at month 10 to 8 million at month 16. Claude Code, estimated throughout, rises from near zero at month 1 to roughly 3.5 million at month 16."></svg>
+           aria-label="Line chart of weekly active users on a logarithmic scale against months since each product's release. Codex rises from about 10 thousand users at month 1 through a published 600 thousand at month 10 and 6 million at month 16, to an unverified 15 million at month 17. Claude Code, estimated throughout, rises from about 20 thousand at month 1 to roughly 4 million at month 19, on a visibly flatter late curve than Codex."></svg>
       <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
     </div>
 
@@ -545,7 +561,7 @@
     </div>
     <div class="table-scroll">
       <table>
-        <caption>Weekly active users, listed in calendar order. "Month" counts from each product's own first public release — month 1 is February 2025 for Claude Code and April 2025 for Codex — which is why the month numbers don't run in step.</caption>
+        <caption>Weekly active users, listed in calendar order. "Month" counts from each product's own first public release — month 1 is February 2025 for Claude Code and April 2025 for Codex — which is why August 2026 is month 19 on one line and month 17 on the other.</caption>
         <thead>
           <tr>
             <th scope="col">Product</th>
@@ -575,27 +591,31 @@
       <h3>Three things that distort the comparison</h3>
       <ul>
         <li><strong>Different starting lines.</strong> Claude Code's month 16 is May 2026; Codex's month 16 is July 2026. The same x-position is two months apart in real time.</li>
-        <li><strong>Codex's July spike is partly definitional.</strong> On 9 July 2026 Codex merged into the ChatGPT desktop app, widening who counts as a Codex user.</li>
-        <li><strong>Codex is no longer developer-only.</strong> OpenAI says knowledge workers are about 20% of users and growing three times faster than developers.</li>
+        <li><strong>From July, Codex stops being one product.</strong> ChatGPT Work launched on 9 July 2026, the same day GPT-5.6 Sol went GA, and OpenAI began quoting the two agents as a single figure — 10M combined on 21 July, per Bloomberg. Only the 12 July 6M count is Codex on its own.</li>
+        <li><strong>Both sides are shedding the developer-only frame.</strong> OpenAI says knowledge workers are about 20% of Codex users and the fastest-growing slice; Anthropic launched Cowork in January 2026 to carry the same non-coding demand away from Claude Code.</li>
       </ul>
     </div>
     <div class="card note-card">
       <h3>Numbers to treat with suspicion</h3>
-      <p>
-        Aggregator sites quote "4.2M Claude Code WAU in Q1 2026" with no source, and several
-        attribute Codex's 1.6M February figure to Claude Code. Claude's headline totals — 245M,
-        56M, 18.9M — are different metrics for different surfaces from different vendors, and are
-        not comparable to anything here.
-      </p>
+      <ul>
+        <li><strong>Codex "15M", 13 August.</strong> One OpenAI engineer's post on X, no methodology, no statement of whether it covers Codex alone or Codex plus ChatGPT Work. It is plotted, as an estimate, only because it is the sole August datum that exists.</li>
+        <li><strong>"4.2M Claude Code WAU in Q1 2026".</strong> Quoted by aggregators with no source. Several also attribute Codex's 1.6M February figure to Claude Code.</li>
+        <li><strong>Anthropic's $47B and $65B run-rates.</strong> Company-wide, not Claude Code. The last Claude Code-specific run-rate is $2.5B, from February 2026.</li>
+        <li><strong>Claude's headline totals — 245M, 56M, 18.9M.</strong> Different metrics for different surfaces from different vendors. Not comparable to anything here.</li>
+      </ul>
     </div>
   </section>
 
   <footer>
     <p>
-      Compiled 12 August 2026. Published figures come from OpenAI announcements and newsroom posts,
-      Anthropic's Series G announcement, and press reporting of executive statements. Estimated
-      points are interpolations between published figures or are derived from published growth
-      multiples and run-rate revenue; they carry real uncertainty and should not be quoted as fact.
+      Compiled 22 August 2026, revised after re-checking every point against its source. Published
+      figures come from OpenAI announcements and newsroom posts, Anthropic's Series G announcement,
+      and press reporting of executive statements. Estimated points are interpolations between
+      published figures or are derived from published growth multiples and run-rate revenue; they
+      carry real uncertainty and should not be quoted as fact. The Codex figures for July and
+      August 2026 additionally carry a scope problem: OpenAI stopped separating Codex from
+      ChatGPT Work, so the two lines are less comparable at the right-hand edge than anywhere else
+      on this chart.
     </p>
     <div class="src-list">
       <a href="https://www.anthropic.com/news/anthropic-raises-30-billion-series-g-funding-380-billion-post-money-valuation">Anthropic Series G</a>
@@ -605,6 +625,9 @@
       <a href="https://www.constellationr.com/insights/news/openai-touts-broadening-codex-usage-5-million-weekly-active-users">Constellation Research</a>
       <a href="https://thenewstack.io/gpt-5-6-codex-user-surge/">The New Stack</a>
       <a href="https://www.latent.space/p/ainews-codex-usage-up-10x-in-6-months">Latent Space</a>
+      <a href="https://thenextweb.com/news/openai-agents-10-million-chatgpt-work">TNW: agents hit 10M combined</a>
+      <a href="https://www.reuters.com/technology/anthropic-revenue-run-rate-tops-65-billion-source-says-2026-08-17/">Reuters: Anthropic $65B run-rate</a>
+      <a href="https://www.gradually.ai/en/codex-statistics/">Codex figure-by-figure timeline</a>
     </div>
   </footer>
 
@@ -625,10 +648,11 @@
       { m: 4,  when: "May 2025", t: 2025 +  4/12, v: 0.10, official: false, note: "General availability, 22 May 2025. Base for Anthropic's later '10x' claim, which was never given an absolute value." },
       { m: 7,  when: "Aug 2025", t: 2025 +  7/12, v: 0.60, official: false, note: "Anthropic: grown more than 10x in the three months since GA. Scaled from the estimated GA base." },
       { m: 8,  when: "Sep 2025", t: 2025 +  8/12, v: 0.70, official: false, note: "Run-rate revenue passes $500M (published). User count inferred from it." },
-      { m: 10, when: "Nov 2025", t: 2025 + 10/12, v: 0.90, official: false, note: "Run-rate revenue passes $1B (published). User count inferred from it." },
-      { m: 12, when: "Jan 2026", t: 2026 +  0/12, v: 1.00, official: false, note: "Back-derived: Anthropic said WAU doubled between 1 Jan and 12 Feb 2026." },
-      { m: 13, when: "Feb 2026", t: 2026 +  1/12, v: 2.00, official: false, note: "About 2M WAU, widely reported around the Series G. Anthropic itself published only the doubling, not the number." },
-      { m: 16, when: "May 2026", t: 2026 +  4/12, v: 3.50, official: false, note: "Run-rate revenue reaches $8B (published). Users inferred, and deliberately scaled below revenue growth. Last point with any basis." }
+      { m: 10, when: "Nov 2025", t: 2025 + 10/12, v: 0.90, official: false, note: "Claude Code run-rate revenue passes $1B, about six months after GA (published). User count inferred from it." },
+      { m: 12, when: "Jan 2026", t: 2026 +  0/12, v: 1.00, official: false, note: "Back-derived: Anthropic said Claude Code WAU doubled between 1 Jan and 12 Feb 2026. This is the base that doubling implies, not a published count." },
+      { m: 13, when: "Feb 2026", t: 2026 +  1/12, v: 2.00, official: false, note: "The published doubling applied to the January base. Anthropic's Series G post gave the multiple and a $2.5B Claude Code run-rate, never a user count." },
+      { m: 16, when: "May 2026", t: 2026 +  4/12, v: 3.20, official: false, note: "Anthropic company-wide run-rate reaches $47B (published) and Series H closes. No Claude Code-specific figure since February, so users are scaled well below company revenue growth." },
+      { m: 19, when: "Aug 2026", t: 2026 +  7/12, v: 4.00, official: false, note: "Anthropic run-rate topped $65B by end of July (Reuters, 17 Aug 2026) — company-wide, not Claude Code. Cowork now absorbs much non-coding use, so Claude Code WAU is scaled far below revenue. Weakest point on either line." }
     ]
   };
 
@@ -642,19 +666,24 @@
       { m: 5,  when: "Aug 2025", t: 2025 +  7/12, v: 0.05, official: false, note: "Implied baseline for OpenAI's November 2025 statement that Codex usage was up 10x since August." },
       { m: 8,  when: "Nov 2025", t: 2025 + 10/12, v: 0.45, official: false, note: "Derived from the same 10x-since-August statement in OpenAI's November business update." },
       { m: 10, when: "Jan 2026", t: 2026 +  0/12, v: 0.60, official: true,  note: "About 600k WAU at the start of 2026, stated by OpenAI leadership. Over 1M developers used Codex in the month before the desktop launch." },
-      { m: 11, when: "Feb 2026", t: 2026 +  1/12, v: 1.60, official: true,  note: "1.6M WAU. Desktop app launches on macOS 2 Feb; GPT-5.3-Codex lands 5 Feb." },
+      { m: 11, when: "Feb 2026", t: 2026 +  1/12, v: 1.60, official: true,  note: "1.6M WAU (Fortune, after GPT-5.3-Codex). Desktop app launches on macOS 2 Feb; GPT-5.3-Codex lands 5 Feb." },
       { m: 12, when: "Mar 2026", t: 2026 +  2/12, v: 2.00, official: true,  note: "Passes 2M WAU, described by OpenAI as 5x growth since the start of 2026. Windows app arrives 4 Mar." },
-      { m: 13, when: "Apr 2026", t: 2026 +  3/12, v: 4.00, official: true,  note: "Over 3M weekly in early April, then 4M by mid-April after adding 1M in two weeks." },
-      { m: 14, when: "May 2026", t: 2026 +  4/12, v: 4.50, official: false, note: "Interpolated between the published 4M (April) and 5M (2 June) figures." },
-      { m: 15, when: "Jun 2026", t: 2026 +  5/12, v: 5.00, official: true,  note: "Over 5M WAU, OpenAI newsroom, 2 June 2026 — more than 6x since the desktop app launched." },
-      { m: 16, when: "Jul 2026", t: 2026 +  6/12, v: 8.00, official: true,  note: "6M on 12 Jul, 7M a day later, 8M by 19 Jul, after GPT-5.6 and the merge into the ChatGPT desktop app." }
+      { m: 13, when: "Apr 2026", t: 2026 +  3/12, v: 4.00, official: true,  note: "3M weekly on 8 Apr, confirmed by Sam Altman, then over 4M weekly developers by 21 Apr." },
+      { m: 14, when: "May 2026", t: 2026 +  4/12, v: 4.50, official: false, note: "Interpolated between the published 4M (21 Apr) and 5M (2 Jun) figures." },
+      { m: 15, when: "Jun 2026", t: 2026 +  5/12, v: 5.00, official: true,  note: "Over 5M WAU, OpenAI newsroom, 2 June 2026, with knowledge workers about 20% of users. Last unambiguously Codex-only figure." },
+      { m: 16, when: "Jul 2026", t: 2026 +  6/12, v: 6.00, official: true,  note: "6M on 12 Jul, per an OpenAI executive post. The larger July numbers are not Codex alone: roughly 8M by mid-month and 10M on 21 Jul (Bloomberg) count Codex and ChatGPT Work together, so they are not plotted here." },
+      { m: 17, when: "Aug 2026", t: 2026 +  7/12, v: 15.00, official: false, note: "Widely circulated as '15M users crossed on 13 Aug', but it traces to one OpenAI engineer's post on X with no methodology, and it is unclear whether it covers Codex alone or Codex plus ChatGPT Work. Plotted as an estimate; treat the level, not just the point, as uncertain." }
     ]
   };
 
   var series = [claude, codex];
 
-  // Codex desktop app launch, annotated on both axes.
-  var anno = { m: 11, t: 2026 + 1/12, label: "Codex desktop app" };
+  // Codex milestones that change who gets counted, annotated on both axes.
+  // m is the Codex month number, so these sit under the Codex line in either view.
+  var annos = [
+    { m: 11, t: 2026 + 1/12, label: "Codex desktop app" },
+    { m: 16, t: 2026 + 6/12, label: "ChatGPT Work \u2192 combined counting" }
+  ];
 
   // ---- geometry ---------------------------------------------------------
   var W = 960, H = 440;
@@ -662,13 +691,20 @@
   var PW = W - M.left - M.right;
   var PH = H - M.top - M.bottom;
 
-  var Y_MAX = 8.5;
-  var X_MONTH = [0.5, 16.8];
-  var X_CAL = [2025 + 1/12 - 0.06, 2026 + 6/12 + 0.06];
+  // Log y-axis: the series span three and a half decades, from tens of thousands
+  // of users to fifteen million, which a linear axis flattens into a hockey stick.
+  var Y_MIN = 0.005, Y_MAX = 20;
+  var LOG_MIN = Math.log(Y_MIN) / Math.LN10;
+  var LOG_SPAN = Math.log(Y_MAX) / Math.LN10 - LOG_MIN;
+  var X_MONTH = [0.5, 19.9];
+  var X_CAL = [2025 + 1/12 - 0.06, 2026 + 7/12 + 0.10];
 
   var mode = "months";
 
-  function yScale(v) { return M.top + PH - (v / Y_MAX) * PH; }
+  function yScale(v) {
+    var lg = Math.log(Math.max(v, Y_MIN)) / Math.LN10;
+    return M.top + PH - ((lg - LOG_MIN) / LOG_SPAN) * PH;
+  }
 
   function xScale(p) {
     var d = mode === "months" ? X_MONTH : X_CAL;
@@ -681,7 +717,9 @@
     return M.left + ((val - d[0]) / (d[1] - d[0])) * PW;
   }
 
-  function fmt(v) { return v < 0.1 ? "<0.1M" : v.toFixed(1) + "M"; }
+  function fmt(v) {
+    return v >= 1 ? v.toFixed(1) + "M" : Math.round(v * 1000) + "k";
+  }
 
   var NS = "http://www.w3.org/2000/svg";
   function el(name, attrs, text) {
@@ -694,24 +732,80 @@
   var svg = document.getElementById("plot");
   var tooltip = document.getElementById("tooltip");
 
+  // ---- point labels ---------------------------------------------------
+  // Every dot carries its own value, with "est." on the ones that were never
+  // published. Twenty-one labels on this plot collide freely, so each one is
+  // placed greedily: try above the dot first, then below, then further out,
+  // taking the first slot that no earlier label (or annotation) has claimed.
+  function labelFor(p) { return fmt(p.v) + (p.official ? "" : " est."); }
+
+  var LBL_H = 13;
+  var LBL_OFFSETS = [-11, 16, -24, 29, -37, 42];
+  var placedBoxes = [];
+
+  function boxWidth(text) { return text.length * 5.4 + 5; }
+
+  function overlaps(box) {
+    return placedBoxes.some(function (b) {
+      return box.x1 < b.x2 && box.x2 > b.x1 && box.y1 < b.y2 && box.y2 > b.y1;
+    });
+  }
+
+  // Reserve space for text that is drawn regardless of crowding (axis
+  // annotations, series names) so point labels route around it.
+  function reserve(x1, y1, x2, y2) { placedBoxes.push({ x1: x1, y1: y1, x2: x2, y2: y2 }); }
+
+  // Returns the baseline y for a centred label at cx, or the first offset as a
+  // fallback so a crowded point still gets its number rather than losing it.
+  function placeLabel(cx, cy, text) {
+    var w = boxWidth(text);
+    for (var i = 0; i < LBL_OFFSETS.length; i++) {
+      var y = cy + LBL_OFFSETS[i];
+      if (y - LBL_H < M.top - 8 || y > M.top + PH + 2) { continue; }
+      var box = { x1: cx - w / 2, y1: y - LBL_H, x2: cx + w / 2, y2: y };
+      if (!overlaps(box)) { placedBoxes.push(box); return y; }
+    }
+    var fy = cy + LBL_OFFSETS[0];
+    reserve(cx - w / 2, fy - LBL_H, cx + w / 2, fy);
+    return fy;
+  }
+
   function render() {
     while (svg.firstChild) { svg.removeChild(svg.firstChild); }
+    placedBoxes = [];
 
     // y grid + labels
-    for (var v = 0; v <= 8; v += 2) {
-      var y = yScale(v);
-      svg.appendChild(el("line", { x1: M.left, y1: y, x2: M.left + PW, y2: y, "class": v === 0 ? "axis-line" : "grid-line" }));
-      svg.appendChild(el("text", { x: M.left - 12, y: y + 4, "text-anchor": "end", "class": "tick-label" }, v === 0 ? "0" : v + "M"));
-    }
-    svg.appendChild(el("text", { x: M.left - 12, y: M.top - 10, "text-anchor": "end", "class": "axis-title" }, "WAU"));
+    var decades = [0.01, 0.1, 1, 10];
+    // Minor lines at 2x..9x within each decade — a log axis is hard to read off without them.
+    decades.forEach(function (d) {
+      for (var k = 2; k <= 9; k++) {
+        var mv = d * k;
+        if (mv > Y_MAX) { break; }
+        var my = yScale(mv);
+        svg.appendChild(el("line", {
+          x1: M.left, y1: my, x2: M.left + PW, y2: my, "class": "grid-line", opacity: 0.45
+        }));
+      }
+    });
+    decades.forEach(function (d) {
+      var y = yScale(d);
+      svg.appendChild(el("line", { x1: M.left, y1: y, x2: M.left + PW, y2: y, "class": "grid-line" }));
+      svg.appendChild(el("text", { x: M.left - 12, y: y + 4, "text-anchor": "end", "class": "tick-label" }, d >= 1 ? d + "M" : Math.round(d * 1000) + "k"));
+    });
+    svg.appendChild(el("line", {
+      x1: M.left, y1: M.top + PH, x2: M.left + PW, y2: M.top + PH, "class": "axis-line"
+    }));
+    svg.appendChild(el("text", { x: 0, y: M.top - 10, "text-anchor": "start", "class": "axis-title" }, "WAU · log"));
 
     // x ticks
     var ticks = [];
     if (mode === "months") {
-      for (var m = 2; m <= 16; m += 2) { ticks.push({ at: m, label: String(m) }); }
+      for (var m = 2; m <= 18; m += 2) { ticks.push({ at: m, label: String(m) }); }
     } else {
       var labels = ["Apr", "Jul", "Oct", "Jan", "Apr", "Jul"];
       var starts = [2025 + 3/12, 2025 + 6/12, 2025 + 9/12, 2026 + 0/12, 2026 + 3/12, 2026 + 6/12];
+      // Aug 2026 is the last month plotted; it gets its own tick so the edge isn't unlabelled.
+      labels.push("Aug"); starts.push(2026 + 7/12);
       for (var i = 0; i < starts.length; i++) {
         ticks.push({ at: starts[i], label: labels[i] + (i === 3 ? " '26" : (i === 0 ? " '25" : "")) });
       }
@@ -724,12 +818,22 @@
       x: M.left + PW / 2, y: M.top + PH + 48, "text-anchor": "middle", "class": "axis-title"
     }, mode === "months" ? "Months since each product's first release" : "Calendar time"));
 
-    // annotation: Codex desktop app launch
-    var ax = xScaleRaw(mode === "months" ? anno.m : anno.t);
-    svg.appendChild(el("line", { x1: ax, y1: M.top + 14, x2: ax, y2: M.top + PH, "class": "anno-line" }));
-    svg.appendChild(el("text", { x: ax + 6, y: M.top + 10, "class": "anno-label" }, anno.label));
+    // annotations: the two moments that change who counts as a Codex user
+    annos.forEach(function (a, i) {
+      var ax = xScaleRaw(mode === "months" ? a.m : a.t);
+      svg.appendChild(el("line", { x1: ax, y1: M.top + 14 + i * 16, x2: ax, y2: M.top + PH, "class": "anno-line" }));
+      // The later label is right-anchored so it doesn't run off the plot edge.
+      var last = i === annos.length - 1;
+      var lx = ax + (last ? -6 : 6), ly = M.top + 10 + i * 16;
+      svg.appendChild(el("text", {
+        x: lx, y: ly, "text-anchor": last ? "end" : "start", "class": "anno-label"
+      }, a.label));
+      var aw = a.label.length * 6.2;
+      reserve(last ? lx - aw : lx, ly - 12, last ? lx : lx + aw, ly + 2);
+    });
 
-    // series
+    // series — lines, dots and the series name first, so the name labels are
+    // reserved before any point label competes for the same space.
     series.forEach(function (s) {
       // Split into runs so that a segment is solid only when both ends are published.
       for (var i = 0; i < s.points.length - 1; i++) {
@@ -746,13 +850,23 @@
           "class": "dot " + (p.official ? "official-" : "est-") + s.key
         }));
       });
+      // The value now sits on the dot itself, so the end label is just the name.
       var last = s.points[s.points.length - 1];
-      svg.appendChild(el("text", {
-        x: xScale(last) + 12, y: yScale(last.v) + 4, "class": "end-label " + s.key
-      }, s.name));
-      svg.appendChild(el("text", {
-        x: xScale(last) + 12, y: yScale(last.v) + 20, "class": "tick-label"
-      }, fmt(last.v) + (last.official ? "" : " est.")));
+      var nx = xScale(last) + 12, ny = yScale(last.v) + 4;
+      svg.appendChild(el("text", { x: nx, y: ny, "class": "end-label " + s.key }, s.name));
+      reserve(nx, ny - 12, nx + s.name.length * 7.2, ny + 3);
+    });
+
+    // Second pass: one value label per point, "est." where unpublished.
+    series.forEach(function (s) {
+      s.points.forEach(function (p) {
+        var text = labelFor(p);
+        var cx = xScale(p);
+        svg.appendChild(el("text", {
+          x: cx, y: placeLabel(cx, yScale(p.v), text),
+          "text-anchor": "middle", "class": "pt-label " + s.key
+        }, text));
+      });
     });
 
     // hover layer

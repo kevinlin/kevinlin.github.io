@@ -287,6 +287,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 160
+    },
+    {
+      "id": "skillops-agent-skills-raw-v3",
+      "title": "Skillops Agent Skills Raw V3",
+      "description": "TODO: describe this collection.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 170
     }
   ],
   "entries": [
@@ -779,33 +787,6 @@
       "replacements": {}
     },
     {
-      "id": "skillops-20260821-skillops-agent-skills-raw-v3",
-      "source": "SkillOps/20260821_skillops-agent-skills-raw-v3.md",
-      "destination": "skillops/20260821-skillops-agent-skills-raw-v3/index.html",
-      "title": "last30days v3.21.1: SkillOps agent skills",
-      "collection": "skillops",
-      "order": 20,
-      "replacements": {}
-    },
-    {
-      "id": "agent-harness-20260610-ralph-loop-ai-coding-agent-technique-raw-v1",
-      "source": "agent-harness/20260610_ralph-loop-ai-coding-agent-technique-raw-v1.md",
-      "destination": "agent-harness/20260610-ralph-loop-ai-coding-agent-technique-raw-v1/index.html",
-      "title": "last30days v3.3.2: ralph loop AI coding agent technique (June 10, 2026)",
-      "collection": "agent-harness",
-      "order": 10,
-      "replacements": {}
-    },
-    {
-      "id": "agent-harness-20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2",
-      "source": "agent-harness/20260610_ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2.md",
-      "destination": "agent-harness/20260610-ralph-loop-geoffreyhuntley-ai-agent-technique-claude-code-raw-v2/index.html",
-      "title": "last30days v3.3.2: ralph loop GeoffreyHuntley AI agent technique claude code (June 10, 2026)",
-      "collection": "agent-harness",
-      "order": 20,
-      "replacements": {}
-    },
-    {
       "id": "agent-harness-20260610-ralph-loop-raw-v3",
       "source": "agent-harness/20260610_ralph-loop-raw-v3.md",
       "destination": "agent-harness/20260610-ralph-loop-raw-v3/index.html",
@@ -830,6 +811,15 @@
       "title": "last30days v3.21.1: Agent Gauntlet Pipeline",
       "collection": "agent-harness",
       "order": 50,
+      "replacements": {}
+    },
+    {
+      "id": "skillops-agent-skills-raw-v3",
+      "source": "skillops-agent-skills-raw-v3.md",
+      "destination": "skillops-agent-skills-raw-v3/index.html",
+      "title": "last30days v3.21.1: SkillOps agent skills",
+      "collection": "skillops-agent-skills-raw-v3",
+      "order": 10,
       "replacements": {}
     }
   ]
