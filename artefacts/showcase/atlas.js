@@ -265,26 +265,13 @@ export default {
    ]
   },
   {
-   "id": "kloburste-gebrauchsanleitung",
-   "href": "daily-laughs/klobu-rste-gebrauchsanleitung.jpg",
-   "title": "Klobürste Gebrauchsanleitung: ganz falsch bis ganz richtig",
-   "collection": "Daily laughs",
-   "aspect": 1.419446,
-   "uv": [
-    0.333496,
-    0.52474,
-    0.166341,
-    0.117188
-   ]
-  },
-  {
    "id": "fde-04-iceberg-bright-dark-line-en",
    "href": "fde/04-iceberg-bright-dark-line-en.png",
    "title": "What the client says vs. what actually decides the project",
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.500163,
+    0.333496,
     0.536621,
     0.166341,
     0.093424
@@ -297,7 +284,7 @@ export default {
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.666829,
+    0.500163,
     0.536621,
     0.166341,
     0.093424
@@ -310,7 +297,7 @@ export default {
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.833496,
+    0.666829,
     0.536621,
     0.166341,
     0.093424
@@ -323,8 +310,8 @@ export default {
    "collection": "Fable5 21Days",
    "aspect": 0.5625,
    "uv": [
-    0.036621,
-    0.666829,
+    0.869954,
+    0.500163,
     0.093424,
     0.166341
    ]
@@ -336,7 +323,7 @@ export default {
    "collection": "Fable5 21Days",
    "aspect": 1.776833,
    "uv": [
-    0.166829,
+    0.000163,
     0.703288,
     0.166341,
     0.093424
@@ -349,7 +336,7 @@ export default {
    "collection": "Fable5 21Days",
    "aspect": 0.562799,
    "uv": [
-    0.369954,
+    0.203288,
     0.666829,
     0.093424,
     0.166341
@@ -362,7 +349,7 @@ export default {
    "collection": "Fable5 21Days",
    "aspect": 1.777778,
    "uv": [
-    0.500163,
+    0.333496,
     0.703288,
     0.166341,
     0.093424
@@ -375,7 +362,7 @@ export default {
    "collection": "Fable5 21Days",
    "aspect": 1.776833,
    "uv": [
-    0.666829,
+    0.500163,
     0.703288,
     0.166341,
     0.093424
@@ -388,7 +375,7 @@ export default {
    "collection": "AI Native Organisation",
    "aspect": 1.791667,
    "uv": [
-    0.833496,
+    0.666829,
     0.703613,
     0.166341,
     0.092773
@@ -401,8 +388,8 @@ export default {
    "collection": "AI Native Organisation",
    "aspect": 1.791667,
    "uv": [
-    0.000163,
-    0.87028,
+    0.833496,
+    0.703613,
     0.166341,
     0.092773
    ]
@@ -414,7 +401,7 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.707579,
    "uv": [
-    0.191243,
+    0.024577,
     0.833496,
     0.117513,
     0.166341
@@ -427,7 +414,7 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.666667,
    "uv": [
-    0.361328,
+    0.194661,
     0.833496,
     0.110677,
     0.166341
@@ -440,7 +427,7 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.750293,
    "uv": [
-    0.520996,
+    0.354329,
     0.833496,
     0.124674,
     0.166341

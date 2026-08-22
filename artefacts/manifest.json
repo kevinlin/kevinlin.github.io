@@ -349,15 +349,6 @@
       "replacements": {}
     },
     {
-      "id": "kloburste-gebrauchsanleitung",
-      "source": "daily-laughs/Klobürste Gebrauchsanleitung.jpg",
-      "destination": "daily-laughs/klobu-rste-gebrauchsanleitung.jpg",
-      "title": "Klobürste Gebrauchsanleitung: ganz falsch bis ganz richtig",
-      "collection": "daily-laughs",
-      "order": 10,
-      "replacements": {}
-    },
-    {
       "id": "fde-04-iceberg-bright-dark-line-en",
       "source": "fde/04-iceberg-bright-dark-line-en.png",
       "destination": "fde/04-iceberg-bright-dark-line-en.png",
