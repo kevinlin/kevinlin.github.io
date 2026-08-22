@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A 3D gallery wall of every published image artefact by Kevin Lin, grouped by collection.">
+    <title>Artefact Gallery in 3D | Kevin Lin</title>
+    <!-- Inlined copy of /favicons/favicon.svg: the publish validator resolves local
+         references against a tree that contains only the artefacts directory. -->
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.1);
+            --tint: rgba(0, 99, 163, 0.1);
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.35);
+            --tint: rgba(67, 137, 185, 0.16);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-underline-offset: 0.2em;
+            transition: color 160ms ease;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        :focus-visible {
+            border-radius: 4px;
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -48px;
+            left: 8px;
+            z-index: 100;
+            padding: 8px 12px;
+            background: var(--primary-color);
+            border-radius: 4px;
+            color: #ffffff;
+            text-decoration: none;
+            transition: top 200ms var(--ease-out);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+            color: #ffffff;
+        }
+
+        header,
+        footer,
+        .wrap {
+            width: min(1120px, calc(100% - 48px));
+            margin-inline: auto;
+        }
+
+        main {
+            width: 100%;
+        }
+
+        header {
+            padding: 56px 0 24px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-link svg {
+            transition: transform 160ms var(--ease-out);
+        }
+
+        .back-link:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .back-link span {
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: text-decoration-color 160ms ease;
+        }
+
+        .back-link:hover span {
+            text-decoration-color: currentColor;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            background: var(--tint);
+            border: none;
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: background-color 200ms ease, color 200ms ease, transform 200ms var(--ease-out);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.94);
+        }
+
+        #light-icon {
+            display: none;
+        }
+
+        [data-theme="dark"] #dark-icon {
+            display: none;
+        }
+
+        [data-theme="dark"] #light-icon {
+            display: block;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-wrap: balance;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 16px;
+            color: var(--text-color);
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        header p {
+            max-width: 62ch;
+            margin-bottom: 0;
+            color: var(--light-text);
+            font-size: 1.2rem;
+        }
+
+        h2 {
+            position: relative;
+            margin: 0 0 28px;
+            padding-bottom: 14px;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        main {
+            padding-bottom: 40px;
+        }
+
+        section {
+            margin-bottom: 72px;
+        }
+
+        /* --- Stage ------------------------------------------------------- */
+
+        .stage {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: clamp(440px, 76vh, 900px);
+            background: var(--background-color);
+            border-block: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .stage canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            /* pan-y, not none: a vertical swipe must still scroll the page rather
+               than trap the reader behind a full-bleed canvas. Horizontal drags and
+               two-finger pinch stay with the gallery. */
+            touch-action: pan-y;
+        }
+
+        .stage-status {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: var(--light-text);
+            text-align: center;
+        }
+
+        .stage-status[hidden] {
+            display: none;
+        }
+
+        /* Hover/focus readout. Sits above the canvas, never intercepts a pointer. */
+        .readout {
+            position: absolute;
+            bottom: 16px;
+            left: max(24px, calc(50% - 560px));
+            max-width: min(560px, calc(100% - 48px));
+            padding: 12px 18px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 6px;
+            box-shadow: var(--card-shadow);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 200ms ease, transform 200ms var(--ease-out);
+            transform: translateY(6px);
+        }
+
+        .readout.is-shown {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .readout-collection {
+            display: block;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .readout-title {
+            display: block;
+            font-size: 1.05rem;
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .readout-hint {
+            display: block;
+            margin-top: 2px;
+            color: var(--light-text);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* --- Controls ----------------------------------------------------- */
+
+        .controls {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+            padding-inline: 24px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scrollbar-width: thin;
+        }
+
+        .bay-button {
+            flex: none;
+            min-height: 40px;
+            padding: 6px 16px;
+            background: var(--tint);
+            border: none;
+            border-radius: 20px;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 200ms ease, color 200ms ease, transform 200ms var(--ease-out);
+        }
+
+        .bay-button:hover {
+            background: var(--accent-color);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .bay-button[aria-current="true"] {
+            background: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .hint {
+            width: 100%;
+            margin: 14px 0 0;
+            padding-inline: 24px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        @media (min-width: 720px) {
+            .hint {
+                white-space: nowrap;
+            }
+        }
+
+        /* --- Full-screen preview -------------------------------------------- */
+        /* Native <dialog>: Esc-to-close, the focus trap and the backdrop are the
+           platform's job, so this only has to lay the panel out. */
+
+        .lightbox {
+            width: min(1500px, 96vw);
+            max-width: none;
+            max-height: 94vh;
+            padding: 0;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        .lightbox[open] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lightbox::backdrop {
+            background: rgba(0, 0, 0, 0.74);
+        }
+
+        .lightbox-stage {
+            position: relative;
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            padding: 12px;
+            background: var(--section-bg);
+        }
+
+        .lightbox-stage img {
+            display: block;
+            max-width: 100%;
+            max-height: calc(94vh - 128px);
+            object-fit: contain;
+        }
+
+        .lightbox-loading {
+            position: absolute;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            box-shadow: var(--card-shadow);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 200ms ease, color 200ms ease, transform 200ms var(--ease-out);
+        }
+
+        .lightbox-close:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .lightbox-caption {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 20px;
+            align-items: baseline;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .lightbox-collection {
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .lightbox-title {
+            flex: 1;
+            min-width: 200px;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .lightbox-original {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* --- Fallback / full list ------------------------------------------ */
+
+        .listing {
+            margin-top: 8px;
+            padding: 24px 28px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .listing > summary {
+            cursor: pointer;
+            font-weight: 600;
+            list-style-position: inside;
+        }
+
+        .listing > summary::marker {
+            color: var(--primary-color);
+        }
+
+        .listing h3 {
+            margin: 28px 0 8px;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .listing ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .listing li {
+            margin-bottom: 4px;
+        }
+
+        footer {
+            padding: 32px 0 56px;
+            border-top: 1px solid var(--border-color);
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header>
+        <div class="header-top">
+            <a class="back-link" href="../">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                <span>Back to Artefacts</span>
+            </a>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle between dark and light theme" title="Toggle dark/light mode">
+                <svg id="dark-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg id="light-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                </svg>
+            </button>
+        </div>
+        <div class="wrap">
+            <h2 id="gallery-heading">Artefact Gallery</h2>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section aria-labelledby="gallery-heading">
+            <div class="stage" id="stage">
+                <p class="stage-status" id="stage-status">Loading the gallery&hellip;</p>
+                <div class="readout" id="readout" aria-hidden="true">
+                    <span class="readout-collection" id="readout-collection"></span>
+                    <span class="readout-title" id="readout-title"></span>
+                    <span class="readout-hint">Click to open the full-resolution artefact</span>
+                </div>
+            </div>
+
+            <div class="controls" id="bay-controls"></div>
+            <p class="hint">Drag to walk the wall, scroll to change your distance, and click a panel to preview it full screen. Every panel is listed as a plain link below.</p>
+        </section>
+
+        <section aria-labelledby="listing-heading" class="wrap">
+            <h2 id="listing-heading">Every artefact as a list</h2>
+            <details class="listing" id="listing">
+                <summary>All 34 published image artefacts, grouped by collection</summary>
+                <div id="listing-body"></div>
+            </details>
+        </section>
+    </main>
+
+    <dialog class="lightbox" id="lightbox" aria-label="Artefact preview">
+        <div class="lightbox-stage">
+            <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close preview (Esc)" title="Close preview (Esc)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            <p class="lightbox-loading" id="lightbox-loading">Loading the full-resolution artefact&hellip;</p>
+            <img id="lightbox-image" alt="">
+        </div>
+        <div class="lightbox-caption">
+            <span class="lightbox-collection" id="lightbox-collection"></span>
+            <span class="lightbox-title" id="lightbox-title"></span>
+            <a class="lightbox-original" id="lightbox-original" target="_blank" rel="noopener">Open the original in a new tab</a>
+        </div>
+    </dialog>
+
+    <footer>
+        <p>All files listed here are public and downloadable. Built with procedural Three.js geometry and a single generated texture atlas &mdash; no external assets.</p>
+    </footer>
+
+    <script>
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            var root = document.documentElement;
+            var dark = root.getAttribute('data-theme') === 'dark';
+            if (dark) {
+                root.removeAttribute('data-theme');
+            } else {
+                root.setAttribute('data-theme', 'dark');
+            }
+            try {
+                localStorage.setItem('theme', dark ? 'light' : 'dark');
+            } catch (e) {}
+            window.dispatchEvent(new CustomEvent('themechange'));
+        });
+    </script>
+
+    <script type="module">
+        import atlasData from './atlas.js';
+
+        // The plain list is the page's floor: it is built from the same data as the
+        // 3D wall and stays in the DOM whether or not WebGL ever starts.
+        const listingBody = document.getElementById('listing-body');
+        const byCollection = [];
+        for (const panel of atlasData.panels) {
+            let group = byCollection[byCollection.length - 1];
+            if (!group || group.name !== panel.collection) {
+                group = { name: panel.collection, panels: [] };
+                byCollection.push(group);
+            }
+            group.panels.push(panel);
+        }
+        for (const group of byCollection) {
+            const heading = document.createElement('h3');
+            heading.textContent = group.name;
+            const list = document.createElement('ul');
+            for (const panel of group.panels) {
+                const item = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '../' + panel.href;
+                link.textContent = panel.title;
+                item.append(link);
+                list.append(item);
+            }
+            listingBody.append(heading, list);
+        }
+
+        const stage = document.getElementById('stage');
+        const status = document.getElementById('stage-status');
+
+        function fail(message) {
+            status.hidden = false;
+            status.textContent = message;
+            document.getElementById('listing').open = true;
+        }
+
+        let THREE;
+        try {
+            THREE = await import('../vendor/three.module.min.js');
+        } catch (error) {
+            fail('The 3D gallery could not load. Every artefact is listed as a link below.');
+            throw error;
+        }
+
+        // --- Layout constants ------------------------------------------------
+        // A bay per collection: ROWS panels tall, as many columns as it needs. The
+        // arc radius is derived from the total run so the wall always closes at the
+        // same sweep however many artefacts get published.
+        const ROWS = 3;
+        const CELL_W = 2.4;
+        const CELL_H = 1.7;
+        const PITCH_X = CELL_W + 0.38;
+        const PITCH_Y = CELL_H + 0.34;
+        const BAY_GAP = 0.9;
+        const ARC_SPAN = 3.32;          // radians of wall the run is bent around
+        const WALL_MID_Y = 3.3;
+        const PANEL_LIFT = 0.12;        // panel stand-off from the wall surface
+        const HOVER_LIFT = 0.28;        // Rise-On-Hover, in 3D
+
+        const bayColumns = byCollection.map((group) => Math.ceil(group.panels.length / ROWS));
+        const totalColumns = bayColumns.reduce((sum, n) => sum + n, 0);
+        const runLength = totalColumns * PITCH_X + (byCollection.length - 1) * BAY_GAP;
+        const RADIUS = runLength / ARC_SPAN;
+
+        // --- Palette ----------------------------------------------------------
+        const PALETTE = {
+            light: {
+                background: 0xf8f9fa, wall: 0xffffff, floor: 0xeef0f2,
+                grid: 0x0063a3, plate: 0xe6e6e6, label: '#666666',
+                accent: 0xff5a5f, primary: 0x0063a3, shadow: 0.16,
+            },
+            dark: {
+                background: 0x121212, wall: 0x1e1e1e, floor: 0x171717,
+                grid: 0x4389b9, plate: 0x3a3a3a, label: '#cccccc',
+                accent: 0xff8085, primary: 0x4389b9, shadow: 0.42,
+            },
+        };
+        const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+        let theme = isDark() ? PALETTE.dark : PALETTE.light;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        // --- Renderer, scene, camera ------------------------------------------
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        stage.append(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(theme.background);
+        scene.fog = new THREE.Fog(theme.background, RADIUS * 1.1, RADIUS * 2.6);
+
+        const camera = new THREE.PerspectiveCamera(46, 16 / 10, 0.1, 200);
+
+        const root = new THREE.Group();
+        root.name = 'showcase-root';
+        scene.add(root);
+
+        // --- Lighting ----------------------------------------------------------
+        const ambient = new THREE.AmbientLight(0xffffff, 2.15);
+        ambient.name = 'ambient-light';
+        const key = new THREE.DirectionalLight(0xffffff, 0.55);
+        key.name = 'key-light';
+        key.position.set(0, 12, 0);
+        const fill = new THREE.HemisphereLight(0xffffff, 0xc7ccd1, 1.1);
+        fill.name = 'fill-light';
+        scene.add(ambient, key, fill);
+
+        // --- Wall and floor ------------------------------------------------------
+        const wallHeight = ROWS * PITCH_Y + 11.0;
+        const WALL_MARGIN = 1.35;       // rad of wall beyond the run, so no edge shows
+                                        // even on an ultrawide, fully zoomed-out stage
+        const wallMaterial = new THREE.MeshStandardMaterial({
+            color: theme.wall, roughness: 0.94, metalness: 0.0, side: THREE.BackSide,
+        });
+        const wall = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                RADIUS + 0.06, RADIUS + 0.06, wallHeight, 192, 1, true,
+                -ARC_SPAN / 2 - WALL_MARGIN, ARC_SPAN + WALL_MARGIN * 2,
+            ),
+            wallMaterial,
+        );
+        wall.name = 'wall-surface';
+        wall.position.y = WALL_MID_Y + 1.6;
+        root.add(wall);
+
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            color: theme.floor, roughness: 1.0, metalness: 0.0,
+        });
+        const floor = new THREE.Mesh(new THREE.CircleGeometry(RADIUS + 0.4, 96), floorMaterial);
+        floor.name = 'floor';
+        floor.rotation.x = -Math.PI / 2;
+        root.add(floor);
+
+        function wallBand(y, height, color, opacity) {
+            const band = new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    RADIUS + 0.05, RADIUS + 0.05, height, 192, 1, true,
+                    -ARC_SPAN / 2 - WALL_MARGIN, ARC_SPAN + WALL_MARGIN * 2,
+                ),
+                new THREE.MeshBasicMaterial({
+                    color, side: THREE.BackSide, transparent: true,
+                    opacity, depthWrite: false, toneMapped: false,
+                }),
+            );
+            band.position.y = y;
+            return band;
+        }
+
+        const railY = WALL_MID_Y + ((ROWS - 1) / 2) * PITCH_Y + CELL_H / 2 + 1.0;
+        const rail = wallBand(railY, 0.02, theme.grid, 0.45);
+        rail.name = 'picture-rail';
+        const baseboard = wallBand(0.09, 0.18, theme.plate, 0.9);
+        baseboard.name = 'baseboard';
+        root.add(rail, baseboard);
+
+        // Blue carries structure, here as the floor grid.
+        const grid = new THREE.PolarGridHelper(RADIUS + 0.4, 16, 6, 96, theme.grid, theme.grid);
+        grid.name = 'floor-grid';
+        grid.position.y = 0.01;
+        grid.material.opacity = 0.16;
+        grid.material.transparent = true;
+        root.add(grid);
+
+        // --- Atlas texture --------------------------------------------------------
+        // One image, one GPU upload. Each panel clones the texture so it can carry its
+        // own UV rect; a clone shares the same source, so it does not re-upload.
+        const atlasTexture = await new THREE.TextureLoader()
+            .loadAsync('./atlas.jpg')
+            .catch(() => null);
+        if (!atlasTexture) {
+            fail('The gallery texture could not load. Every artefact is listed as a link below.');
+            throw new Error('atlas texture failed to load');
+        }
+        atlasTexture.colorSpace = THREE.SRGBColorSpace;
+        atlasTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        atlasTexture.generateMipmaps = true;
+        atlasTexture.minFilter = THREE.LinearMipmapLinearFilter;
+
+        // Soft contact shadow, drawn once and shared by every panel.
+        function shadowTexture() {
+            const size = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const context = canvas.getContext('2d');
+            const gradient = context.createRadialGradient(
+                size / 2, size / 2, size * 0.1, size / 2, size / 2, size / 2,
+            );
+            gradient.addColorStop(0, 'rgba(0,0,0,0.85)');
+            gradient.addColorStop(0.55, 'rgba(0,0,0,0.35)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        }
+        const shadowMap = shadowTexture();
+
+        const LABEL_FONT = '600 64px Inter, system-ui, sans-serif';
+        const LABEL_PAD = 24;
+        const LABEL_HEIGHT = 0.34;      // world units; every bay label matches
+
+        function labelTexture(text) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = LABEL_FONT;
+            canvas.width = Math.ceil(context.measureText(text).width) + LABEL_PAD * 2;
+            canvas.height = 96;
+            // Resizing the canvas resets the 2D state, so the font is set twice.
+            context.font = LABEL_FONT;
+            context.fillStyle = theme.label;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, canvas.width / 2, canvas.height / 2 + 2);
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        function sizeLabel(mesh) {
+            const image = mesh.material.map.image;
+            mesh.scale.set(LABEL_HEIGHT * (image.width / image.height), LABEL_HEIGHT, 1);
+        }
+
+        // --- Build the bays ----------------------------------------------------
+        const unitPlane = new THREE.PlaneGeometry(1, 1);
+        const panels = [];
+        const bays = [];
+        let columnCursor = 0;
+
+        byCollection.forEach((group, bayIndex) => {
+            const columns = bayColumns[bayIndex];
+            const bayStart = columnCursor * PITCH_X + bayIndex * BAY_GAP;
+            const bayCentre = bayStart + (columns * PITCH_X) / 2 - PITCH_X / 2;
+            const bayAngle = ARC_SPAN / 2 - bayCentre / RADIUS;
+
+            const bay = new THREE.Group();
+            bay.name = 'bay-' + group.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            root.add(bay);
+            bays.push({ name: group.name, angle: bayAngle, group: bay });
+
+            const rowsUsed = Math.ceil(group.panels.length / columns);
+            const rowOffset = ((ROWS - rowsUsed) * PITCH_Y) / 2;
+
+            group.panels.forEach((data, index) => {
+                const row = Math.floor(index / columns);
+                const column = index % columns;
+                const distance = (columnCursor + column) * PITCH_X + bayIndex * BAY_GAP;
+                const angle = ARC_SPAN / 2 - distance / RADIUS;
+                const y = WALL_MID_Y + ((ROWS - 1) / 2 - row) * PITCH_Y - rowOffset;
+
+                // Contain-fit the true aspect into the cell: never crop an artefact.
+                let width = Math.min(CELL_W, CELL_H * data.aspect);
+                let height = width / data.aspect;
+                if (height > CELL_H) {
+                    height = CELL_H;
+                    width = height * data.aspect;
+                }
+
+                const holder = new THREE.Group();
+                holder.name = 'panel-' + data.id;
+                holder.position.set(
+                    Math.sin(angle) * RADIUS, y, Math.cos(angle) * RADIUS,
+                );
+                holder.rotation.y = angle + Math.PI;
+                holder.userData = { data, angle, restLift: PANEL_LIFT, lift: PANEL_LIFT };
+                bay.add(holder);
+
+                const shadow = new THREE.Mesh(unitPlane, new THREE.MeshBasicMaterial({
+                    map: shadowMap, transparent: true, opacity: theme.shadow,
+                    depthWrite: false, color: 0x000000,
+                }));
+                shadow.name = holder.name + '-shadow';
+                shadow.scale.set(width * 1.5, height * 1.5, 1);
+                shadow.position.set(0, -height * 0.10, -PANEL_LIFT + 0.02);
+                shadow.userData.explodeWithParent = true;
+                holder.add(shadow);
+
+                // Hairline border plate. Blue at rest is too loud behind a photo, so
+                // the plate stays neutral and only turns coral on contact.
+                const plate = new THREE.Mesh(unitPlane, new THREE.MeshStandardMaterial({
+                    color: theme.plate, roughness: 0.85, metalness: 0.0,
+                }));
+                plate.name = holder.name + '-plate';
+                plate.scale.set(width + 0.07, height + 0.07, 1);
+                plate.position.z = -0.006;
+                plate.userData.explodeWithParent = true;
+                holder.add(plate);
+
+                // Unlit face: the published pixels render exactly as published, with
+                // no light or tone mapping tinting an artefact's own colours.
+                const texture = atlasTexture.clone();
+                texture.needsUpdate = true;
+                texture.offset.set(data.uv[0], 1 - data.uv[1] - data.uv[3]);
+                texture.repeat.set(data.uv[2], data.uv[3]);
+                const face = new THREE.Mesh(unitPlane, new THREE.MeshBasicMaterial({
+                    map: texture, toneMapped: false,
+                }));
+                face.name = holder.name + '-face';
+                face.scale.set(width, height, 1);
+                holder.add(face);
+
+                holder.position.add(
+                    new THREE.Vector3(-Math.sin(angle), 0, -Math.cos(angle))
+                        .multiplyScalar(PANEL_LIFT),
+                );
+                holder.userData.basePosition = holder.position.clone();
+                holder.userData.inward = new THREE.Vector3(
+                    -Math.sin(angle), 0, -Math.cos(angle),
+                );
+                holder.userData.plate = plate;
+                holder.userData.shadow = shadow;
+                holder.userData.face = face;
+                panels.push(holder);
+            });
+
+            const label = new THREE.Mesh(unitPlane, new THREE.MeshBasicMaterial({
+                map: labelTexture(group.name), transparent: true, toneMapped: false,
+            }));
+            label.name = bay.name + '-label';
+            sizeLabel(label);
+            label.position.set(
+                Math.sin(bayAngle) * (RADIUS - PANEL_LIFT),
+                WALL_MID_Y + ((ROWS - 1) / 2) * PITCH_Y + CELL_H / 2 + 0.55,
+                Math.cos(bayAngle) * (RADIUS - PANEL_LIFT),
+            );
+            label.rotation.y = bayAngle + Math.PI;
+            label.userData.isLabel = true;
+            bay.add(label);
+
+            columnCursor += columns;
+        });
+
+        // --- Camera rig ---------------------------------------------------------
+        // Azimuth walks the wall, distance steps toward it, height raises the eye.
+        // Constrained on purpose: the camera can never lose the wall.
+        const bayAngles = bays.map((bay) => bay.angle);
+        const LIMITS = {
+            azimuth: [Math.min(...bayAngles), Math.max(...bayAngles)],
+            distance: [4.2, 11.5],
+            height: [0.9, 6.6],
+        };
+        // Open mid-wall and pulled back: an end bay leaves a third of a wide frame
+        // empty, and the point of the page is the breadth of the collection.
+        const view = {
+            azimuth: (LIMITS.azimuth[0] + LIMITS.azimuth[1]) / 2,
+            distance: 11.0,
+            height: WALL_MID_Y,
+        };
+        const target = { ...view };
+        const clamp = (value, [min, max]) => Math.min(max, Math.max(min, value));
+
+        function applyCamera() {
+            const ring = RADIUS - view.distance;
+            camera.position.set(
+                Math.sin(view.azimuth) * ring, view.height, Math.cos(view.azimuth) * ring,
+            );
+            camera.lookAt(
+                Math.sin(view.azimuth) * RADIUS, WALL_MID_Y, Math.cos(view.azimuth) * RADIUS,
+            );
+        }
+
+        // --- Render on demand ------------------------------------------------------
+        let needsRender = true;
+        let settling = true;
+        const invalidate = () => { needsRender = true; };
+
+        function resize() {
+            const rect = stage.getBoundingClientRect();
+            if (rect.width < 1 || rect.height < 1) return;
+            renderer.setSize(rect.width, rect.height, false);
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+            invalidate();
+        }
+        new ResizeObserver(resize).observe(stage);
+        resize();
+
+        function tick() {
+            const ease = reduceMotion.matches ? 1 : 0.16;
+            let moving = false;
+            for (const key of ['azimuth', 'distance', 'height']) {
+                const delta = target[key] - view[key];
+                if (Math.abs(delta) > 1e-4) {
+                    view[key] += delta * ease;
+                    moving = true;
+                } else {
+                    view[key] = target[key];
+                }
+            }
+
+            for (const panel of panels) {
+                const wanted = panel === hovered
+                    ? panel.userData.restLift + HOVER_LIFT
+                    : panel.userData.restLift;
+                const delta = wanted - panel.userData.lift;
+                if (Math.abs(delta) > 1e-4) {
+                    panel.userData.lift += delta * (reduceMotion.matches ? 1 : 0.2);
+                    panel.position.copy(panel.userData.basePosition).addScaledVector(
+                        panel.userData.inward, panel.userData.lift - panel.userData.restLift,
+                    );
+                    const spread = 1 + (panel.userData.lift - panel.userData.restLift) * 0.6;
+                    panel.userData.shadow.scale.setX(
+                        panel.userData.face.scale.x * 1.5 * spread,
+                    );
+                    panel.userData.shadow.scale.setY(
+                        panel.userData.face.scale.y * 1.5 * spread,
+                    );
+                    moving = true;
+                }
+            }
+
+            if (moving || needsRender) {
+                applyCamera();
+                renderer.render(scene, camera);
+                needsRender = false;
+            }
+            settling = moving;
+            requestAnimationFrame(tick);
+        }
+
+        // --- Pointer input -----------------------------------------------------
+        const pointers = new Map();
+        let dragged = false;
+        let pinchDistance = 0;
+
+        const canvas = renderer.domElement;
+        canvas.style.cursor = 'grab';
+
+        canvas.addEventListener('pointerdown', (event) => {
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            dragged = false;
+            // Capture is an optimisation, not a requirement. It throws when the
+            // pointer is already gone, and that must not strand the drag state.
+            try {
+                canvas.setPointerCapture(event.pointerId);
+            } catch (error) { /* drag works, just not outside the canvas */ }
+            if (pointers.size === 2) pinchDistance = spanOf(pointers);
+            canvas.style.cursor = 'grabbing';
+        });
+
+
+        function spanOf(map) {
+            const [a, b] = [...map.values()];
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        canvas.addEventListener('pointermove', (event) => {
+            const previous = pointers.get(event.pointerId);
+            if (!previous) {
+                hoverTest(event);
+                return;
+            }
+            const dx = event.clientX - previous.x;
+            const dy = event.clientY - previous.y;
+            pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (Math.hypot(dx, dy) > 2) dragged = true;
+
+            if (pointers.size === 2) {
+                const span = spanOf(pointers);
+                target.distance = clamp(
+                    target.distance - (span - pinchDistance) * 0.02, LIMITS.distance,
+                );
+                pinchDistance = span;
+                return;
+            }
+            const rect = canvas.getBoundingClientRect();
+            target.azimuth = clamp(
+                target.azimuth - (dx / rect.width) * 1.9, LIMITS.azimuth,
+            );
+            target.height = clamp(
+                target.height + (dy / rect.height) * 7.0, LIMITS.height,
+            );
+            invalidate();
+        });
+
+        function endPointer(event) {
+            pointers.delete(event.pointerId);
+            canvas.style.cursor = 'grab';
+        }
+        canvas.addEventListener('pointerup', (event) => {
+            if (!dragged) pick(event);
+            endPointer(event);
+        });
+        canvas.addEventListener('pointercancel', endPointer);
+        canvas.addEventListener('pointerleave', (event) => {
+            endPointer(event);
+            setHovered(null);
+        });
+
+        canvas.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            target.distance = clamp(target.distance + event.deltaY * 0.006, LIMITS.distance);
+            invalidate();
+        }, { passive: false });
+
+        // --- Hover and pick ------------------------------------------------------
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const faces = panels.map((panel) => panel.userData.face);
+        let hovered = null;
+
+        const readout = document.getElementById('readout');
+        const readoutCollection = document.getElementById('readout-collection');
+        const readoutTitle = document.getElementById('readout-title');
+
+        function setHovered(panel) {
+            if (hovered === panel) return;
+            if (hovered) hovered.userData.plate.material.color.setHex(theme.plate);
+            hovered = panel;
+            if (hovered) {
+                // Coral-On-Contact: the accent exists only in response to a pointer.
+                hovered.userData.plate.material.color.setHex(theme.accent);
+                readoutCollection.textContent = hovered.userData.data.collection;
+                readoutTitle.textContent = hovered.userData.data.title;
+                readout.classList.add('is-shown');
+                canvas.style.cursor = pointers.size ? 'grabbing' : 'pointer';
+            } else {
+                readout.classList.remove('is-shown');
+                canvas.style.cursor = pointers.size ? 'grabbing' : 'grab';
+            }
+            invalidate();
+        }
+
+        function panelAt(event) {
+            const rect = canvas.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const hit = raycaster.intersectObjects(faces, false)[0];
+            return hit ? hit.object.parent : null;
+        }
+
+        const hoverTest = (event) => setHovered(panelAt(event));
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxLoading = document.getElementById('lightbox-loading');
+        const lightboxCollection = document.getElementById('lightbox-collection');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxOriginal = document.getElementById('lightbox-original');
+
+        function openPreview(data) {
+            const href = '../' + data.href;
+            lightboxImage.removeAttribute('src');
+            lightboxImage.alt = data.title;
+            lightboxLoading.hidden = false;
+            lightboxImage.src = href;
+            lightboxOriginal.href = href;
+            lightboxCollection.textContent = data.collection;
+            lightboxTitle.textContent = data.title;
+            // The canvas never sees a pointerleave once the dialog is up, so the
+            // panel would otherwise stay lifted and coral behind it.
+            setHovered(null);
+            lightbox.showModal();
+        }
+
+        lightboxImage.addEventListener('load', () => { lightboxLoading.hidden = true; });
+        lightboxImage.addEventListener('error', () => {
+            lightboxLoading.hidden = false;
+            lightboxLoading.textContent = 'That artefact could not be loaded.';
+        });
+
+        document.getElementById('lightbox-close').addEventListener('click', () => lightbox.close());
+        // Clicking the backdrop targets the dialog element itself.
+        lightbox.addEventListener('click', (event) => {
+            if (event.target === lightbox) lightbox.close();
+        });
+        // Drop the decoded full-resolution bitmap rather than hold it open.
+        lightbox.addEventListener('close', () => {
+            lightboxImage.removeAttribute('src');
+            lightboxLoading.textContent = 'Loading the full-resolution artefact\u2026';
+        });
+
+        function pick(event) {
+            const panel = panelAt(event);
+            if (panel) openPreview(panel.userData.data);
+        }
+
+        // --- Bay navigation --------------------------------------------------------
+        const bayControls = document.getElementById('bay-controls');
+        bays.forEach((bay) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'bay-button';
+            button.textContent = bay.name;
+            button.addEventListener('click', () => {
+                target.azimuth = clamp(bay.angle, LIMITS.azimuth);
+                target.distance = 9.5;
+                target.height = WALL_MID_Y;
+                for (const other of bayControls.children) {
+                    other.removeAttribute('aria-current');
+                }
+                button.setAttribute('aria-current', 'true');
+                invalidate();
+            });
+            bayControls.append(button);
+        });
+
+        // --- Theme ------------------------------------------------------------------
+        window.addEventListener('themechange', () => {
+            theme = isDark() ? PALETTE.dark : PALETTE.light;
+            scene.background.setHex(theme.background);
+            scene.fog.color.setHex(theme.background);
+            wallMaterial.color.setHex(theme.wall);
+            floorMaterial.color.setHex(theme.floor);
+            grid.material.color.setHex(theme.grid);
+            rail.material.color.setHex(theme.grid);
+            baseboard.material.color.setHex(theme.plate);
+            for (const panel of panels) {
+                panel.userData.plate.material.color.setHex(
+                    panel === hovered ? theme.accent : theme.plate,
+                );
+                panel.userData.shadow.material.opacity = theme.shadow;
+            }
+            for (const bay of bays) {
+                const label = bay.group.children.find((child) => child.userData.isLabel);
+                if (label) {
+                    label.material.map.dispose();
+                    label.material.map = labelTexture(bay.name);
+                    label.material.needsUpdate = true;
+                    sizeLabel(label);
+                }
+            }
+            invalidate();
+        });
+
+        // Runtime handle for anything that wants to drive the scene later.
+        root.userData.sculptRuntime = {
+            scene, camera, root, panels, bays, view, target,
+            limits: LIMITS, radius: RADIUS, invalidate, openPreview,
+            focusBay: (name) => {
+                const bay = bays.find((item) => item.name === name);
+                if (!bay) return false;
+                target.azimuth = clamp(bay.angle, LIMITS.azimuth);
+                target.distance = 9.5;
+                target.height = WALL_MID_Y;
+                invalidate();
+                return true;
+            },
+        };
+        window.artefactShowcase = root.userData.sculptRuntime;
+
+        status.hidden = true;
+        applyCamera();
+        tick();
+    </script>
+</body>
+</html>

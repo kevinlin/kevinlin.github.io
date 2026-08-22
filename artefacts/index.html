@@ -211,6 +211,33 @@
             text-wrap: pretty;
         }
 
+        .showcase-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0, 99, 163, 0.2);
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 300ms var(--ease-out), transform 300ms var(--ease-out);
+        }
+
+        .showcase-link:hover {
+            background: var(--accent-color);
+            color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        .showcase-link svg {
+            flex: none;
+        }
+
         section {
             margin-top: 56px;
         }
@@ -360,6 +387,13 @@
         </div>
         <h1>Artefacts</h1>
         <p>Presentations, charts, illustrations, and visual references collected by topic.</p>
+        <a class="showcase-link" href="showcase/">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2 2 7l10 5 10-5-10-5Z"/>
+                <path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <span>Walk the image artefacts in 3D</span>
+        </a>
     </header>
 
     <main id="main-content">
