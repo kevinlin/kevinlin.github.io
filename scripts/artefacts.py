@@ -31,6 +31,9 @@ IGNORED_METADATA_NAME = ".DS_Store"
 DELETION_KINDS = frozenset({"delete", "orphan"})
 WRITE_KINDS = frozenset({"add", "update"})
 HOMEPAGE_FILES = ("index.html", "styles.css", "script.js")
+# The 3D showcase reads a generated texture atlas built from the published images.
+ATLAS_SCRIPT = "scripts/build_showcase_atlas.py"
+ATLAS_OUTPUT = PurePosixPath("showcase/atlas.js")
 
 
 def has_cdnjs_reference(text: str) -> bool:
@@ -1845,6 +1848,27 @@ def _run_checked(
     return result.stdout
 
 
+def rebuild_showcase_atlas(
+    manifest: Manifest, repo_root: Path, runner: CommandRunner = subprocess_runner
+) -> None:
+    """Repack the showcase atlas so its panels match the manifest just applied.
+
+    The atlas is generated from the published images and carries each panel's
+    title and order, so any applied change can stale it. Manifests that do not
+    protect an atlas have no showcase to rebuild and skip this.
+    """
+    if ATLAS_OUTPUT not in manifest.protected_files:
+        return
+    print(
+        _run_checked(
+            runner,
+            [sys.executable, ATLAS_SCRIPT, "--repo", str(repo_root)],
+            repo_root,
+            "cannot rebuild the showcase atlas",
+        ).strip()
+    )
+
+
 def _parse_json(output: str, description: str) -> Any:
     """Decode a `gh --json` payload, reporting a parse failure as a `PublishError`."""
     try:
@@ -2044,6 +2068,7 @@ def publish(
     branch = f"agent/sync-artefacts-{now().strftime('%Y%m%d-%H%M%S')}"
     _run_checked(runner, ["git", "switch", "-c", branch], repo_root, "cannot create branch")
     apply_plan(plan, artefacts_root)
+    rebuild_showcase_atlas(plan.next_manifest, repo_root, runner)
     _run_checked(
         runner,
         [sys.executable, "-B", "-m", "unittest", "tests/test_artefacts.py", "-v"],
@@ -2176,6 +2201,7 @@ def confirm_and_apply(plan: SyncPlan, artefacts_root: Path, confirm) -> bool:
     if answer != "yes":
         return False
     apply_plan(plan, artefacts_root)
+    rebuild_showcase_atlas(plan.next_manifest, artefacts_root.parent)
     return True
 
 

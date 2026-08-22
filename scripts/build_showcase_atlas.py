@@ -19,11 +19,15 @@ or removing a published image.
 Needs ffmpeg and ffprobe on PATH. Everything else is stdlib, per the repo's
 no-pip-dependencies rule.
 
+`scripts/artefacts.py` runs this automatically after it applies a sync plan, so a
+manual run is only needed when the showcase itself changes.
+
     python3 scripts/build_showcase_atlas.py
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import shutil
@@ -33,8 +37,7 @@ from pathlib import Path
 
 CELL = 512
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg")
-REPO_ROOT = Path(__file__).resolve().parent.parent
-ARTEFACTS_ROOT = REPO_ROOT / "artefacts"
+DEFAULT_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 class AtlasError(Exception):
@@ -77,7 +80,7 @@ def probe_size(path: Path) -> tuple[int, int]:
     return int(stream["width"]), int(stream["height"])
 
 
-def build(items: list[dict]) -> tuple[list[str], list[str], int, int]:
+def build(items: list[dict], artefacts_root: Path) -> tuple[list[str], list[str], int, int]:
     """Measure every image and lay out its cell. Returns ffmpeg inputs and filters."""
     columns = math.ceil(math.sqrt(len(items)))
     rows = math.ceil(len(items) / columns)
@@ -86,7 +89,7 @@ def build(items: list[dict]) -> tuple[list[str], list[str], int, int]:
     inputs: list[str] = []
     filters: list[str] = []
     for index, item in enumerate(items):
-        source = ARTEFACTS_ROOT / item["href"]
+        source = artefacts_root / item["href"]
         if not source.is_file():
             raise AtlasError(f"published image is missing: {item['href']}")
         width, height = probe_size(source)
@@ -121,18 +124,20 @@ def build(items: list[dict]) -> tuple[list[str], list[str], int, int]:
     return inputs, filters, columns, rows
 
 
-def main() -> int:
+def build_atlas(repo_root: Path) -> str:
+    """Repack the atlas from the manifest at `repo_root`. Returns a summary line."""
     for tool in ("ffmpeg", "ffprobe"):
         if shutil.which(tool) is None:
             raise AtlasError(f"{tool} is required and was not found on PATH")
 
-    manifest = json.loads((ARTEFACTS_ROOT / "manifest.json").read_text("utf-8"))
+    artefacts_root = repo_root / "artefacts"
+    manifest = json.loads((artefacts_root / "manifest.json").read_text("utf-8"))
     items = published_images(manifest)
     if not items:
         raise AtlasError("no published images found in the manifest")
 
-    inputs, filters, columns, rows = build(items)
-    out_dir = ARTEFACTS_ROOT / "showcase"
+    inputs, filters, columns, rows = build(items, artefacts_root)
+    out_dir = artefacts_root / "showcase"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_image = out_dir / "atlas.jpg"
 
@@ -152,10 +157,17 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    print(
+    return (
         f"{len(items)} panels packed {columns}x{rows} at {CELL}px "
         f"-> artefacts/showcase/atlas.jpg ({out_image.stat().st_size / 1024:.0f} KB)"
     )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--repo", type=Path, default=DEFAULT_REPO_ROOT)
+    args = parser.parse_args(argv)
+    print(build_atlas(args.repo.expanduser().resolve()))
     return 0
 
 

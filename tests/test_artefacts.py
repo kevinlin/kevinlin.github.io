@@ -1660,6 +1660,38 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertFalse(applied)
         self.assertEqual(self.snapshot(repo), before)
 
+    def test_atlas_rebuild_runs_only_when_the_manifest_protects_an_atlas(self):
+        calls = []
+
+        def runner(args, cwd):
+            calls.append(args)
+            return artefacts_cli.CommandResult("2 panels packed\n", "", 0)
+
+        manifest = artefacts_cli.manifest_from_dict(valid_payload())
+        artefacts_cli.rebuild_showcase_atlas(manifest, Path("/repo"), runner)
+        self.assertEqual(calls, [])
+
+        payload = valid_payload()
+        payload["protected_files"].append("showcase/atlas.js")
+        with contextlib.redirect_stdout(io.StringIO()):
+            artefacts_cli.rebuild_showcase_atlas(
+                artefacts_cli.manifest_from_dict(payload), Path("/repo"), runner
+            )
+        self.assertEqual(len(calls), 1)
+        self.assertIn(artefacts_cli.ATLAS_SCRIPT, calls[0])
+
+    def test_atlas_rebuild_failure_stops_the_run(self):
+        payload = valid_payload()
+        payload["protected_files"].append("showcase/atlas.js")
+        manifest = artefacts_cli.manifest_from_dict(payload)
+
+        with self.assertRaises(artefacts_cli.ArtefactError):
+            artefacts_cli.rebuild_showcase_atlas(
+                manifest,
+                Path("/repo"),
+                lambda args, cwd: artefacts_cli.CommandResult("", "no ffmpeg", 1),
+            )
+
     def test_format_plan_lists_each_change_kind_and_excluded_types(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         (source / "notes.txt").write_text("private", encoding="utf-8")
