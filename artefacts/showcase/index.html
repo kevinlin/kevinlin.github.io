@@ -36,6 +36,7 @@
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.1);
             --tint: rgba(0, 99, 163, 0.1);
+            --chrome-bg: rgba(255, 255, 255, 0.88);
             --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
         }
 
@@ -51,6 +52,7 @@
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.35);
             --tint: rgba(67, 137, 185, 0.16);
+            --chrome-bg: rgba(18, 18, 18, 0.88);
         }
 
         *,
@@ -84,6 +86,11 @@
             color: var(--accent-color);
         }
 
+        ::selection {
+            background: var(--tint);
+            color: var(--text-color);
+        }
+
         :focus-visible {
             border-radius: 4px;
             outline: 2px solid var(--primary-color);
@@ -108,6 +115,18 @@
             color: #ffffff;
         }
 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
         header,
         footer,
         .wrap {
@@ -123,12 +142,41 @@
             padding: 56px 0 24px;
         }
 
-        .header-top {
+        /* Floating chrome over the room: only the two controls that must stay
+           reachable, in the translucent treatment the nav bar already uses. */
+        .stage-chrome {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 5;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 32px;
+            padding: 20px max(20px, env(safe-area-inset-left, 0px));
+            pointer-events: none;
+        }
+
+        .stage-chrome > * {
+            pointer-events: auto;
+            background: var(--chrome-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .stage-chrome .back-link {
+            padding: 0 18px 0 14px;
+            border-radius: 30px;
+            color: var(--primary-color);
+        }
+
+        /* .theme-toggle clears its own border, so the chrome copy states it again:
+           against a near-black wall the edge is the only thing making it a control. */
+        .stage-chrome .theme-toggle {
+            background: var(--chrome-bg);
+            border: 1px solid var(--border-color);
         }
 
         .back-link {
@@ -252,10 +300,56 @@
             position: relative;
             overflow: hidden;
             width: 100%;
-            height: clamp(440px, 76vh, 900px);
+            height: 100vh;
+            height: 100svh;
             background: var(--background-color);
-            border-block: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* The canvas takes focus, but an outline on it would be clipped by the
+           stage's overflow, so the stage draws the ring inward instead. */
+        .stage:has(canvas:focus-visible) {
+            box-shadow: inset 0 0 0 2px var(--primary-color);
+        }
+
+        /* A room that fills the viewport hides everything under it, so the page
+           says so once and stops as soon as the reader moves. */
+        .scroll-cue {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--chrome-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            color: var(--light-text);
+            font-size: 0.85rem;
+            pointer-events: none;
+            transition: opacity 400ms ease, transform 400ms var(--ease-out);
+            transform: translateX(-50%);
+        }
+
+        .scroll-cue svg {
+            animation: nudge 2.4s var(--ease-out) infinite;
+        }
+
+        @keyframes nudge {
+            0%, 60%, 100% { transform: translateY(0); }
+            75% { transform: translateY(3px); }
+        }
+
+        .scroll-cue[data-gone="true"] {
+            opacity: 0;
+            transform: translateX(-50%) translateY(8px);
+        }
+
+        .stage canvas:focus-visible {
+            outline: none;
         }
 
         .stage canvas {
@@ -286,13 +380,12 @@
         /* Hover/focus readout. Sits above the canvas, never intercepts a pointer. */
         .readout {
             position: absolute;
-            bottom: 16px;
-            left: max(24px, calc(50% - 560px));
-            max-width: min(560px, calc(100% - 48px));
+            bottom: 18px;
+            left: 20px;
+            max-width: min(520px, calc(100% - 40px));
             padding: 12px 18px;
             background: var(--background-color);
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--primary-color);
             border-radius: 6px;
             box-shadow: var(--card-shadow);
             opacity: 0;
@@ -337,11 +430,12 @@
             gap: 10px;
             align-items: center;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 32px;
             padding-inline: 24px;
             overflow-x: auto;
             overscroll-behavior-x: contain;
             scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
         }
 
         .bay-button {
@@ -372,16 +466,22 @@
 
         .hint {
             width: 100%;
+            max-width: 96ch;
             margin: 14px 0 0;
             padding-inline: 24px;
             color: var(--light-text);
             font-size: 0.9rem;
+            text-wrap: pretty;
         }
 
-        @media (min-width: 720px) {
-            .hint {
-                white-space: nowrap;
-            }
+        .hint kbd {
+            padding: 1px 5px;
+            background: var(--tint);
+            border-radius: 4px;
+            color: var(--primary-color);
+            font-family: inherit;
+            font-size: 0.85em;
+            font-weight: 500;
         }
 
         /* --- Full-screen preview -------------------------------------------- */
@@ -461,12 +561,56 @@
             transform: translateY(-2px);
         }
 
+        /* Walk the wall without leaving the preview. These mirror the arrow keys so
+           touch and mouse get the same reach a keyboard already has, and they live in
+           the caption strip rather than over the artefact: nothing should sit on top
+           of the work. */
+        .lightbox-pager {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .lightbox-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+
+        .lightbox-nav:hover:not(:disabled) {
+            background: var(--tint);
+            color: var(--accent-color);
+        }
+
+        .lightbox-nav:disabled {
+            color: var(--light-text);
+            cursor: default;
+            opacity: 0.4;
+        }
+
+        .lightbox-count {
+            min-width: 6ch;
+            color: var(--light-text);
+            font-size: 0.85rem;
+            font-variant-numeric: tabular-nums;
+            text-align: center;
+        }
+
         .lightbox-caption {
             display: flex;
             flex-wrap: wrap;
             gap: 4px 20px;
-            align-items: baseline;
-            padding: 14px 20px;
+            align-items: center;
+            padding: 8px 20px;
             border-top: 1px solid var(--border-color);
         }
 
@@ -550,42 +694,50 @@
 <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <header>
-        <div class="header-top">
-            <a class="back-link" href="../">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                <span>Back to Artefacts</span>
-            </a>
-            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle between dark and light theme" title="Toggle dark/light mode">
-                <svg id="dark-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg id="light-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="4"/>
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-                </svg>
-            </button>
-        </div>
+    <header id="page-header">
         <div class="wrap">
-            <h2 id="gallery-heading">Artefact Gallery</h2>
+            <h1 id="gallery-heading">Artefact Gallery</h1>
+            <p>Every published image artefact hung on one wall, grouped by collection. Walk it, or read the plain list underneath.</p>
         </div>
     </header>
 
     <main id="main-content">
         <section aria-labelledby="gallery-heading">
             <div class="stage" id="stage">
+            <div class="stage-chrome">
+                <a class="back-link" href="../">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Back to Artefacts</span>
+                </a>
+                <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle between dark and light theme" title="Toggle dark/light mode">
+                    <svg id="dark-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <svg id="light-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                    </svg>
+                </button>
+            </div>
                 <p class="stage-status" id="stage-status">Loading the gallery&hellip;</p>
                 <div class="readout" id="readout" aria-hidden="true">
                     <span class="readout-collection" id="readout-collection"></span>
                     <span class="readout-title" id="readout-title"></span>
                     <span class="readout-hint">Click to open the full-resolution artefact</span>
                 </div>
+                <p class="sr-only" id="announcer" role="status" aria-live="polite"></p>
+                <p class="scroll-cue" id="scroll-cue" aria-hidden="true">
+                    <span>Every artefact as a list below</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M19 12l-7 7-7-7"/>
+                    </svg>
+                </p>
             </div>
 
             <div class="controls" id="bay-controls"></div>
-            <p class="hint">Drag to walk the wall, scroll to change your distance, and click a panel to preview it full screen. Every panel is listed as a plain link below.</p>
+            <p class="hint" id="stage-hint">Drag to walk the wall, scroll to change your distance, click a panel to preview it. Or walk it from the keyboard: <kbd>&larr;</kbd> <kbd>&rarr;</kbd> step along, <kbd>&uarr;</kbd> <kbd>&darr;</kbd> change row, <kbd>+</kbd> <kbd>&minus;</kbd> change distance, <kbd>Enter</kbd> opens whatever you are standing in front of. Every panel is also a plain link below.</p>
         </section>
 
         <section aria-labelledby="listing-heading" class="wrap">
@@ -610,6 +762,19 @@
         <div class="lightbox-caption">
             <span class="lightbox-collection" id="lightbox-collection"></span>
             <span class="lightbox-title" id="lightbox-title"></span>
+            <div class="lightbox-pager">
+                <button class="lightbox-nav" id="lightbox-prev" type="button" aria-label="Previous artefact along the wall (Left arrow)" title="Previous artefact (Left arrow)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+                <span class="lightbox-count" id="lightbox-count"></span>
+                <button class="lightbox-nav" id="lightbox-next" type="button" aria-label="Next artefact along the wall (Right arrow)" title="Next artefact (Right arrow)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 6l6 6-6 6"/>
+                    </svg>
+                </button>
+            </div>
             <a class="lightbox-original" id="lightbox-original" target="_blank" rel="noopener">Open the original in a new tab</a>
         </div>
     </dialog>
@@ -705,13 +870,21 @@
         const PALETTE = {
             light: {
                 background: 0xf8f9fa, wall: 0xffffff, floor: 0xeef0f2,
-                grid: 0x0063a3, plate: 0xe6e6e6, label: '#666666',
+                grid: 0x0063a3, plate: 0xe6e6e6,
                 accent: 0xff5a5f, primary: 0x0063a3, shadow: 0.16,
+                haze: 0xb9bcbf, spot: 0xfff2e2, spotRest: 1.7, spotFound: 2.6,
+                lettering: '#333333', pillInk: '#0063a3',
+                pillBg: 'rgba(255,255,255,0.94)', pillBorder: 'rgba(0,99,163,0.32)',
+                pillHoverBg: '#ff5a5f', pillCurrentBg: '#0063a3',
             },
             dark: {
                 background: 0x121212, wall: 0x1e1e1e, floor: 0x171717,
-                grid: 0x4389b9, plate: 0x3a3a3a, label: '#cccccc',
+                grid: 0x4389b9, plate: 0x3a3a3a,
                 accent: 0xff8085, primary: 0x4389b9, shadow: 0.42,
+                haze: 0x0a0a0a, spot: 0xeaf2fa, spotRest: 24.0, spotFound: 38.0,
+                lettering: '#f8f9fa', pillInk: '#4389b9',
+                pillBg: 'rgba(18,18,18,0.92)', pillBorder: 'rgba(67,137,185,0.45)',
+                pillHoverBg: '#ff8085', pillCurrentBg: '#4389b9',
             },
         };
         const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
@@ -727,7 +900,7 @@
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(theme.background);
-        scene.fog = new THREE.Fog(theme.background, RADIUS * 1.1, RADIUS * 2.6);
+        scene.fog = new THREE.Fog(theme.haze, RADIUS * 1.1, RADIUS * 2.6);
 
         const camera = new THREE.PerspectiveCamera(46, 16 / 10, 0.1, 200);
 
@@ -736,17 +909,33 @@
         scene.add(root);
 
         // --- Lighting ----------------------------------------------------------
-        const ambient = new THREE.AmbientLight(0xffffff, 2.15);
+        // A gallery is a dim room holding lit art. Room light lands the wall around
+        // 60% of its colour, which leaves the spot real range to work in and keeps
+        // the panels — unlit, so untouched by any of this — the brightest thing in
+        // the frame. The bay labels sit in Ink rather than Muted Ink to hold well
+        // past 4.5:1 against the dimmer wall.
+        const ambient = new THREE.AmbientLight(0xffffff, 1.35);
         ambient.name = 'ambient-light';
-        const key = new THREE.DirectionalLight(0xffffff, 0.55);
+        const key = new THREE.DirectionalLight(0xffffff, 0.1);
         key.name = 'key-light';
         key.position.set(0, 12, 0);
-        const fill = new THREE.HemisphereLight(0xffffff, 0xc7ccd1, 1.1);
+        const fill = new THREE.HemisphereLight(0xffffff, 0xc7ccd1, 0.68);
         fill.name = 'fill-light';
         scene.add(ambient, key, fill);
 
+        // The one moving light in the room. It rests on the wall wherever the reader
+        // is standing and slides to whatever they point at, so attention and
+        // illumination end up being the same gesture. Its strength is per-theme
+        // because it is multiplied by the wall's own colour: near-black reflects
+        // roughly a tenth of what off-white does, so matching the two by eye means
+        // very different numbers.
+        const SPOT_STANDOFF = 1.35;     // how far the spot floats off the wall
+        const spot = new THREE.PointLight(theme.spot, theme.spotRest, 9.0, 2);
+        spot.name = 'gallery-spot';
+        scene.add(spot);
+
         // --- Wall and floor ------------------------------------------------------
-        const wallHeight = ROWS * PITCH_Y + 11.0;
+        const wallHeight = ROWS * PITCH_Y + 15.0;
         const WALL_MARGIN = 1.35;       // rad of wall beyond the run, so no edge shows
                                         // even on an ultrawide, fully zoomed-out stage
         const wallMaterial = new THREE.MeshStandardMaterial({
@@ -771,25 +960,32 @@
         floor.rotation.x = -Math.PI / 2;
         root.add(floor);
 
-        function wallBand(y, height, color, opacity) {
+        function wallBand(y, height, color, opacity, lit) {
+            const material = lit
+                ? new THREE.MeshStandardMaterial({
+                    color, side: THREE.BackSide, roughness: 0.92, metalness: 0.0,
+                    transparent: true, opacity, depthWrite: false,
+                })
+                : new THREE.MeshBasicMaterial({
+                    color, side: THREE.BackSide, transparent: true,
+                    opacity, depthWrite: false, toneMapped: false,
+                });
             const band = new THREE.Mesh(
                 new THREE.CylinderGeometry(
                     RADIUS + 0.05, RADIUS + 0.05, height, 192, 1, true,
                     -ARC_SPAN / 2 - WALL_MARGIN, ARC_SPAN + WALL_MARGIN * 2,
                 ),
-                new THREE.MeshBasicMaterial({
-                    color, side: THREE.BackSide, transparent: true,
-                    opacity, depthWrite: false, toneMapped: false,
-                }),
+                material,
             );
             band.position.y = y;
             return band;
         }
 
+        const PILL_Y = WALL_MID_Y + ((ROWS - 1) / 2) * PITCH_Y + CELL_H / 2 + 0.55;
         const railY = WALL_MID_Y + ((ROWS - 1) / 2) * PITCH_Y + CELL_H / 2 + 1.0;
         const rail = wallBand(railY, 0.02, theme.grid, 0.45);
         rail.name = 'picture-rail';
-        const baseboard = wallBand(0.09, 0.18, theme.plate, 0.9);
+        const baseboard = wallBand(0.09, 0.18, theme.plate, 0.9, true);
         baseboard.name = 'baseboard';
         root.add(rail, baseboard);
 
@@ -834,36 +1030,86 @@
         }
         const shadowMap = shadowTexture();
 
-        const LABEL_FONT = '600 64px Inter, system-ui, sans-serif';
-        const LABEL_PAD = 24;
-        const LABEL_HEIGHT = 0.34;      // world units; every bay label matches
+        // --- Painted wall type -------------------------------------------------
+        // Everything the room says is painted on the wall: the exhibition title, the
+        // lead under it, and the collection pills that double as the wall's own
+        // navigation. All of it is canvas, so it lives in the scene rather than
+        // floating over it in a layer the reader can tell is separate.
+        const TYPE_FACE = 'Inter, system-ui, sans-serif';
+        const PILL_HEIGHT = 0.44;       // world units; every pill matches
+        const PILL_FONT_PX = 60;
+        const PILL_PAD_X = 46;
+        const PILL_CANVAS_H = 128;
 
-        function labelTexture(text) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            context.font = LABEL_FONT;
-            canvas.width = Math.ceil(context.measureText(text).width) + LABEL_PAD * 2;
-            canvas.height = 96;
-            // Resizing the canvas resets the 2D state, so the font is set twice.
-            context.font = LABEL_FONT;
-            context.fillStyle = theme.label;
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(text, canvas.width / 2, canvas.height / 2 + 2);
+        function canvasTexture(canvas) {
             const texture = new THREE.CanvasTexture(canvas);
             texture.colorSpace = THREE.SRGBColorSpace;
+            texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
             return texture;
         }
 
-        function sizeLabel(mesh) {
+        // Pill states mirror .bay-button exactly: tinted at rest, coral on contact,
+        // solid brand blue for the bay you are standing in.
+        function pillTexture(text, state) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = '500 ' + PILL_FONT_PX + 'px ' + TYPE_FACE;
+            canvas.width = Math.ceil(context.measureText(text).width) + PILL_PAD_X * 2;
+            canvas.height = PILL_CANVAS_H;
+            // Resizing the canvas resets the 2D state, so the font is set twice.
+            context.font = '500 ' + PILL_FONT_PX + 'px ' + TYPE_FACE;
+
+            const fill = state === 'current' ? theme.pillCurrentBg
+                : state === 'hover' ? theme.pillHoverBg
+                : theme.pillBg;
+            const ink = state === 'rest' ? theme.pillInk : '#ffffff';
+            const radius = canvas.height / 2;
+            context.beginPath();
+            context.roundRect(2, 2, canvas.width - 4, canvas.height - 4, radius);
+            context.fillStyle = fill;
+            context.fill();
+            if (state === 'rest') {
+                context.lineWidth = 3;
+                context.strokeStyle = theme.pillBorder;
+                context.stroke();
+            }
+            context.fillStyle = ink;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, canvas.width / 2, canvas.height / 2 + 3);
+            return canvasTexture(canvas);
+        }
+
+        // Vinyl lettering: no background, one colour, hierarchy from size and weight.
+        function letteringTexture(lines, sizePx, weight) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const font = weight + ' ' + sizePx + 'px ' + TYPE_FACE;
+            context.font = font;
+            const width = Math.max(...lines.map((line) => context.measureText(line).width));
+            const leading = sizePx * 1.28;
+            canvas.width = Math.ceil(width) + 8;
+            canvas.height = Math.ceil(leading * lines.length) + 8;
+            context.font = font;
+            context.fillStyle = theme.lettering;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            lines.forEach((line, index) => {
+                context.fillText(line, canvas.width / 2, (index + 0.5) * leading + 4);
+            });
+            return canvasTexture(canvas);
+        }
+
+        function fitToWidth(mesh, worldWidth) {
             const image = mesh.material.map.image;
-            mesh.scale.set(LABEL_HEIGHT * (image.width / image.height), LABEL_HEIGHT, 1);
+            mesh.scale.set(worldWidth, worldWidth * (image.height / image.width), 1);
         }
 
         // --- Build the bays ----------------------------------------------------
         const unitPlane = new THREE.PlaneGeometry(1, 1);
         const panels = [];
         const bays = [];
+        const pills = [];
         let columnCursor = 0;
 
         byCollection.forEach((group, bayIndex) => {
@@ -874,6 +1120,7 @@
 
             const bay = new THREE.Group();
             bay.name = 'bay-' + group.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            bay.userData.bayName = group.name;
             root.add(bay);
             bays.push({ name: group.name, angle: bayAngle, group: bay });
 
@@ -952,40 +1199,169 @@
                 panels.push(holder);
             });
 
-            const label = new THREE.Mesh(unitPlane, new THREE.MeshBasicMaterial({
-                map: labelTexture(group.name), transparent: true, toneMapped: false,
+            // The bay's own sign is the filter: one pill per collection, hanging
+            // over the work it selects. Nothing is duplicated, and clicking a name
+            // takes you to the bay it names.
+            const pill = new THREE.Mesh(unitPlane, new THREE.MeshBasicMaterial({
+                map: pillTexture(group.name, 'rest'), transparent: true, toneMapped: false,
             }));
-            label.name = bay.name + '-label';
-            sizeLabel(label);
-            label.position.set(
-                Math.sin(bayAngle) * (RADIUS - PANEL_LIFT),
-                WALL_MID_Y + ((ROWS - 1) / 2) * PITCH_Y + CELL_H / 2 + 0.55,
-                Math.cos(bayAngle) * (RADIUS - PANEL_LIFT),
+            pill.name = bay.name + '-pill';
+            pill.userData.states = {
+                rest: pill.material.map,
+                hover: pillTexture(group.name, 'hover'),
+                current: pillTexture(group.name, 'current'),
+            };
+            pill.userData.isPill = true;
+            pill.userData.bayName = group.name;
+            pill.userData.angle = bayAngle;
+            fitToWidth(pill, PILL_HEIGHT * (pill.userData.states.rest.image.width
+                / pill.userData.states.rest.image.height));
+            pill.position.set(
+                Math.sin(bayAngle) * (RADIUS - PANEL_LIFT - 0.06),
+                PILL_Y,
+                Math.cos(bayAngle) * (RADIUS - PANEL_LIFT - 0.06),
             );
-            label.rotation.y = bayAngle + Math.PI;
-            label.userData.isLabel = true;
-            bay.add(label);
+            pill.rotation.y = bayAngle + Math.PI;
+            bay.add(pill);
+            pills.push(pill);
 
             columnCursor += columns;
         });
 
+        // --- Wall signage ------------------------------------------------------
+        // Painted at the centre of the run, above the rail, where a gallery puts the
+        // exhibition title. It is scaled to the frame on every resize so a phone gets
+        // readable lettering rather than a title running off both edges.
+        const SIGN_TITLE = ['Artefact Gallery'];
+        const SIGN_LEAD_WIDE = ['Every published image artefact,', 'hung on one wall by collection.'];
+        const SIGN_LEAD_NARROW = ['Every published image', 'artefact, hung on one', 'wall by collection.'];
+        const OPENING_DISTANCE = 11.5;
+        const bayAngles = bays.map((bay) => bay.angle);
+        const OPENING_AZIMUTH = (Math.min(...bayAngles) + Math.max(...bayAngles)) / 2;
+        const signAngle = OPENING_AZIMUTH;
+        const signRadius = RADIUS - 0.02;
+
+        // Wall type is wide enough that a flat plane would push its own corners
+        // through the curve and get clipped by the wall, so the lettering is painted
+        // onto a segment of the same cylinder instead.
+        function signGeometry(worldWidth, worldHeight) {
+            const arc = worldWidth / signRadius;
+            return new THREE.CylinderGeometry(
+                signRadius, signRadius, worldHeight, 96, 1, true,
+                signAngle - arc / 2, arc,
+            );
+        }
+
+        function signMesh(name) {
+            const mesh = new THREE.Mesh(signGeometry(1, 1), new THREE.MeshBasicMaterial({
+                transparent: true, toneMapped: false,
+                side: THREE.BackSide, depthWrite: false,
+            }));
+            mesh.name = name;
+            root.add(mesh);
+            return mesh;
+        }
+
+        function setSignTexture(mesh, texture) {
+            if (mesh.material.map) mesh.material.map.dispose();
+            // Read from inside the cylinder, rising theta runs right to left, so the
+            // lettering is mirrored back to the direction it was painted in.
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.repeat.x = -1;
+            texture.offset.x = 1;
+            mesh.material.map = texture;
+            mesh.material.needsUpdate = true;
+        }
+
+        function fitSign(mesh, worldWidth) {
+            const image = mesh.material.map.image;
+            const worldHeight = worldWidth * (image.height / image.width);
+            mesh.geometry.dispose();
+            mesh.geometry = signGeometry(worldWidth, worldHeight);
+            return worldHeight;
+        }
+
+        const signTitle = signMesh('sign-title');
+        const signLead = signMesh('sign-lead');
+
+        const SIGN_RAIL_GAP = 0.45;     // between the picture rail and the lead
+        const SIGN_GAP = 0.18;          // between the lead and the title
+        const SIGN_TITLE_CAP = 5.6;     // widest the title is allowed to be painted
+        const CHROME_PX = 96;           // the floating controls, plus breathing room
+        let signNarrow = false;
+        let signTop = railY;
+        let openingHeight = null;
+
+        // A portrait frame cannot hold a single-line lead at a readable size, so the
+        // narrow variant re-wraps it and steps the type up relative to the title.
+        function renderSignage() {
+            signNarrow = camera.aspect < 1;
+            setSignTexture(signTitle, letteringTexture(SIGN_TITLE, 150, 700));
+            setSignTexture(signLead, letteringTexture(
+                signNarrow ? SIGN_LEAD_NARROW : SIGN_LEAD_WIDE, signNarrow ? 82 : 54, 400,
+            ));
+        }
+        renderSignage();
+
+        // One world-units-per-canvas-pixel factor drives both meshes, so the size
+        // relationship baked into the two canvases survives every viewport.
+        function layoutSignage() {
+            if (signNarrow !== (camera.aspect < 1)) renderSignage();
+            const visibleH = 2 * OPENING_DISTANCE
+                * Math.tan((camera.fov * Math.PI) / 360);
+            const visibleW = visibleH * camera.aspect;
+            const titleImage = signTitle.material.map.image;
+            const unit = Math.min(SIGN_TITLE_CAP, visibleW * 0.74) / titleImage.width;
+            const titleH = fitSign(signTitle, titleImage.width * unit);
+            const leadH = fitSign(signLead, signLead.material.map.image.width * unit);
+            signLead.position.y = railY + SIGN_RAIL_GAP + leadH / 2;
+            signTitle.position.y = signLead.position.y + leadH / 2 + SIGN_GAP + titleH / 2;
+            signTop = signTitle.position.y + titleH / 2;
+            // The opening frame hangs off the lettering: enough headroom that the
+            // floating controls never sit on the title, and the wall left to run past
+            // the bottom edge, because a wall that ends inside the frame stops
+            // reading as a room.
+            const chromeWorld = (CHROME_PX / Math.max(1, stage.clientHeight)) * visibleH;
+            OPENING.height = clamp(signTop + chromeWorld - visibleH / 2, LIMITS.height);
+            // Only move the reader if they have not chosen a height themselves.
+            if (openingHeight === null || target.height === openingHeight) {
+                target.height = OPENING.height;
+            }
+            openingHeight = OPENING.height;
+        }
+
         // --- Camera rig ---------------------------------------------------------
         // Azimuth walks the wall, distance steps toward it, height raises the eye.
-        // Constrained on purpose: the camera can never lose the wall.
-        const bayAngles = bays.map((bay) => bay.angle);
+        // The gaze is level rather than pinned to the middle of the wall, so raising
+        // your eye actually raises what you are looking at — which is what lets the
+        // reader look up at the signage and down at the bottom row. Height is capped
+        // below the wall's top edge, so the room can never be seen out of.
         const LIMITS = {
             azimuth: [Math.min(...bayAngles), Math.max(...bayAngles)],
-            distance: [4.2, 11.5],
-            height: [0.9, 6.6],
+            distance: [4.2, OPENING_DISTANCE],
+            height: [0.9, 9.4],
         };
-        // Open mid-wall and pulled back: an end bay leaves a third of a wide frame
-        // empty, and the point of the page is the breadth of the collection.
-        const view = {
-            azimuth: (LIMITS.azimuth[0] + LIMITS.azimuth[1]) / 2,
-            distance: 11.0,
+        // Open mid-wall and pulled all the way back: the establishing frame holds the
+        // signage and the whole run at once. layoutSignage sets the height from where
+        // the lettering actually lands.
+        const OPENING = {
+            azimuth: OPENING_AZIMUTH,
+            distance: OPENING_DISTANCE,
             height: WALL_MID_Y,
         };
-        const target = { ...view };
+        const target = { ...OPENING };
+
+        // Arrival. The camera starts high, pulled back and off to one side, then
+        // glides down into the opening view. It reads the length of the wall on the
+        // way in, which is the one thing a still first frame cannot say. Any input
+        // during the glide just retargets it, so nothing needs interrupting, and a
+        // reader who asked for reduced motion simply starts where it lands.
+        const view = reduceMotion.matches ? { ...OPENING } : {
+            azimuth: OPENING.azimuth + (LIMITS.azimuth[0] - OPENING.azimuth) * 0.3,
+            distance: LIMITS.distance[1] + 1.9,
+            height: 8.9,        // eye on the signage, before it drops to the work
+        };
+        let arriving = !reduceMotion.matches;
         const clamp = (value, [min, max]) => Math.min(max, Math.max(min, value));
 
         function applyCamera() {
@@ -994,13 +1370,57 @@
                 Math.sin(view.azimuth) * ring, view.height, Math.cos(view.azimuth) * ring,
             );
             camera.lookAt(
-                Math.sin(view.azimuth) * RADIUS, WALL_MID_Y, Math.cos(view.azimuth) * RADIUS,
+                Math.sin(view.azimuth) * RADIUS, view.height, Math.cos(view.azimuth) * RADIUS,
             );
+        }
+
+        // --- The moving spot ---------------------------------------------------
+        // One aim for both cases: a panel under the pointer or keyboard, or failing
+        // that the stretch of wall the reader is standing in front of. Because it
+        // lerps, it trails the camera slightly while the room is moving, which is
+        // what makes it read as a light being carried along the wall.
+        const spotAim = new THREE.Vector3();
+
+        function aimSpot() {
+            const angle = hovered ? hovered.userData.angle : view.azimuth;
+            const y = hovered
+                ? hovered.userData.basePosition.y
+                : clamp(view.height, [1.2, railY]);
+            const reach = RADIUS - SPOT_STANDOFF;
+            spotAim.set(Math.sin(angle) * reach, y, Math.cos(angle) * reach);
+        }
+
+        // --- Idle drift --------------------------------------------------------
+        // Left alone the room keeps walking, so the page is never a still frame.
+        // It only runs when the stage is actually on screen, the tab is visible, no
+        // preview is open, nothing is under the pointer or keyboard, and the reader
+        // has been still a while. It never runs under reduced motion.
+        const IDLE_DELAY = 8000;        // ms of stillness before the room drifts
+        const DRIFT_SPEED = 0.026;      // rad/s, roughly two minutes end to end
+        let lastInput = performance.now();
+        let driftSign = -1;
+        let stageOnScreen = true;
+
+        const noteInput = () => { lastInput = performance.now(); };
+
+        new IntersectionObserver(([entry]) => {
+            stageOnScreen = entry.isIntersecting;
+            noteInput();
+        }, { threshold: 0.3 }).observe(stage);
+        document.addEventListener('visibilitychange', noteInput);
+
+        function drift(now, dt) {
+            if (reduceMotion.matches || document.hidden || !stageOnScreen) return;
+            if (hovered || lightbox.open || pointers.size) return;
+            if (now - lastInput < IDLE_DELAY) return;
+            const next = target.azimuth + driftSign * DRIFT_SPEED * dt;
+            if (next <= LIMITS.azimuth[0] || next >= LIMITS.azimuth[1]) driftSign *= -1;
+            target.azimuth = clamp(next, LIMITS.azimuth);
+            invalidate();
         }
 
         // --- Render on demand ------------------------------------------------------
         let needsRender = true;
-        let settling = true;
         const invalidate = () => { needsRender = true; };
 
         function resize() {
@@ -1009,13 +1429,23 @@
             renderer.setSize(rect.width, rect.height, false);
             camera.aspect = rect.width / rect.height;
             camera.updateProjectionMatrix();
+            layoutSignage();
             invalidate();
         }
         new ResizeObserver(resize).observe(stage);
         resize();
 
-        function tick() {
-            const ease = reduceMotion.matches ? 1 : 0.16;
+        let lastFrame = 0;
+
+        function tick(now) {
+            // Clamped so a tab that was parked for a minute does not lurch on return.
+            const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+            lastFrame = now;
+            drift(now, dt);
+
+            // The arrival glides on a longer tail than an ordinary bay jump, then
+            // hands the shorter easing back for the rest of the session.
+            const ease = reduceMotion.matches ? 1 : arriving ? 0.09 : 0.16;
             let moving = false;
             for (const key of ['azimuth', 'distance', 'height']) {
                 const delta = target[key] - view[key];
@@ -1025,6 +1455,19 @@
                 } else {
                     view[key] = target[key];
                 }
+            }
+            if (arriving && !moving) arriving = false;
+
+            aimSpot();
+            const spotEase = reduceMotion.matches ? 1 : 0.12;
+            if (spot.position.distanceToSquared(spotAim) > 1e-5) {
+                spot.position.lerp(spotAim, spotEase);
+                moving = true;
+            }
+            const wantedGlow = hovered ? theme.spotFound : theme.spotRest;
+            if (Math.abs(spot.intensity - wantedGlow) > 1e-4) {
+                spot.intensity += (wantedGlow - spot.intensity) * spotEase;
+                moving = true;
             }
 
             for (const panel of panels) {
@@ -1053,7 +1496,6 @@
                 renderer.render(scene, camera);
                 needsRender = false;
             }
-            settling = moving;
             requestAnimationFrame(tick);
         }
 
@@ -1066,6 +1508,7 @@
         canvas.style.cursor = 'grab';
 
         canvas.addEventListener('pointerdown', (event) => {
+            noteInput();
             pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
             dragged = false;
             // Capture is an optimisation, not a requirement. It throws when the
@@ -1084,6 +1527,7 @@
         }
 
         canvas.addEventListener('pointermove', (event) => {
+            noteInput();
             const previous = pointers.get(event.pointerId);
             if (!previous) {
                 hoverTest(event);
@@ -1104,7 +1548,7 @@
             }
             const rect = canvas.getBoundingClientRect();
             target.azimuth = clamp(
-                target.azimuth - (dx / rect.width) * 1.9, LIMITS.azimuth,
+                target.azimuth + (dx / rect.width) * 1.9, LIMITS.azimuth,
             );
             target.height = clamp(
                 target.height + (dy / rect.height) * 7.0, LIMITS.height,
@@ -1124,52 +1568,123 @@
         canvas.addEventListener('pointerleave', (event) => {
             endPointer(event);
             setHovered(null);
+            setHoveredPill(null);
         });
 
         canvas.addEventListener('wheel', (event) => {
+            // The canvas keeps the wheel only while the zoom can still use it. Once
+            // it is against a limit the event goes back to the page, so a reader
+            // scrolling past a full-bleed stage is never held there.
+            const next = clamp(target.distance + event.deltaY * 0.006, LIMITS.distance);
+            if (next === target.distance) return;
             event.preventDefault();
-            target.distance = clamp(target.distance + event.deltaY * 0.006, LIMITS.distance);
+            noteInput();
+            target.distance = next;
             invalidate();
         }, { passive: false });
 
         // --- Hover and pick ------------------------------------------------------
+        const bayControls = document.getElementById('bay-controls');
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
         const faces = panels.map((panel) => panel.userData.face);
+        const pickable = faces.concat(pills);
         let hovered = null;
+        let hoveredPill = null;
+        let currentBay = null;
+        let focused = null;      // the panel the keyboard is standing in front of
 
         const readout = document.getElementById('readout');
         const readoutCollection = document.getElementById('readout-collection');
         const readoutTitle = document.getElementById('readout-title');
+        const readoutHint = document.querySelector('.readout-hint');
+        const PANEL_HINT = 'Click to open the full-resolution artefact';
+        const PILL_HINT = 'Click to walk to this collection';
+
+        const pointerCursor = () => (pointers.size ? 'grabbing' : 'pointer');
+        const restCursor = () => (pointers.size ? 'grabbing' : 'grab');
 
         function setHovered(panel) {
             if (hovered === panel) return;
             if (hovered) hovered.userData.plate.material.color.setHex(theme.plate);
             hovered = panel;
             if (hovered) {
+                setHoveredPill(null);
                 // Coral-On-Contact: the accent exists only in response to a pointer.
                 hovered.userData.plate.material.color.setHex(theme.accent);
                 readoutCollection.textContent = hovered.userData.data.collection;
                 readoutTitle.textContent = hovered.userData.data.title;
+                readoutHint.textContent = PANEL_HINT;
                 readout.classList.add('is-shown');
-                canvas.style.cursor = pointers.size ? 'grabbing' : 'pointer';
+                canvas.style.cursor = pointerCursor();
             } else {
-                readout.classList.remove('is-shown');
-                canvas.style.cursor = pointers.size ? 'grabbing' : 'grab';
+                if (!hoveredPill) readout.classList.remove('is-shown');
+                canvas.style.cursor = hoveredPill ? pointerCursor() : restCursor();
             }
             invalidate();
         }
 
-        function panelAt(event) {
+        // A pill's resting texture depends on whether it is the bay you are in, so
+        // both state changes route through here.
+        function paintPill(pill) {
+            const state = pill === hoveredPill ? 'hover'
+                : pill.userData.bayName === currentBay ? 'current'
+                : 'rest';
+            pill.material.map = pill.userData.states[state];
+            pill.material.needsUpdate = true;
+        }
+
+        function setHoveredPill(pill) {
+            if (hoveredPill === pill) return;
+            const previous = hoveredPill;
+            hoveredPill = pill;
+            if (previous) paintPill(previous);
+            if (hoveredPill) {
+                paintPill(hoveredPill);
+                readoutCollection.textContent = hoveredPill.userData.bayName;
+                readoutTitle.textContent = '';
+                readoutHint.textContent = PILL_HINT;
+                readout.classList.add('is-shown');
+                canvas.style.cursor = pointerCursor();
+            } else {
+                if (!hovered) readout.classList.remove('is-shown');
+                canvas.style.cursor = hovered ? pointerCursor() : restCursor();
+            }
+            invalidate();
+        }
+
+        function setCurrentBay(name) {
+            if (currentBay === name) return;
+            currentBay = name;
+            for (const pill of pills) paintPill(pill);
+            for (const button of bayControls.children) {
+                if (button.textContent === name) {
+                    button.setAttribute('aria-current', 'true');
+                } else {
+                    button.removeAttribute('aria-current');
+                }
+            }
+            invalidate();
+        }
+
+        function targetAt(event) {
             const rect = canvas.getBoundingClientRect();
             pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-            const hit = raycaster.intersectObjects(faces, false)[0];
-            return hit ? hit.object.parent : null;
+            return raycaster.intersectObjects(pickable, false)[0]?.object ?? null;
         }
 
-        const hoverTest = (event) => setHovered(panelAt(event));
+        function hoverTest(event) {
+            const hit = targetAt(event);
+            if (hit && hit.userData.isPill) {
+                setHovered(null);
+                setHoveredPill(hit);
+            } else {
+                setHoveredPill(null);
+                setHovered(hit ? hit.parent : null);
+            }
+        }
 
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightbox-image');
@@ -1178,25 +1693,69 @@
         const lightboxTitle = document.getElementById('lightbox-title');
         const lightboxOriginal = document.getElementById('lightbox-original');
 
-        function openPreview(data) {
+        const lightboxCount = document.getElementById('lightbox-count');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+        const LOADING_COPY = 'Loading the full-resolution artefact\u2026';
+        let previewIndex = -1;
+
+        // Panel order is wall order, so stepping the index is stepping along the run.
+        function showPreview() {
+            const panel = panels[previewIndex];
+            const data = panel.userData.data;
             const href = '../' + data.href;
             lightboxImage.removeAttribute('src');
             lightboxImage.alt = data.title;
             lightboxLoading.hidden = false;
+            lightboxLoading.textContent = LOADING_COPY;
             lightboxImage.src = href;
             lightboxOriginal.href = href;
             lightboxCollection.textContent = data.collection;
             lightboxTitle.textContent = data.title;
+            lightboxCount.textContent = (previewIndex + 1) + ' of ' + panels.length;
+            lightboxPrev.disabled = previewIndex === 0;
+            lightboxNext.disabled = previewIndex === panels.length - 1;
+            // The camera walks to match behind the dialog, so closing the preview
+            // leaves the reader standing in front of whatever they stopped on.
+            focused = panel;
+            target.azimuth = clamp(panel.userData.angle, LIMITS.azimuth);
             // The canvas never sees a pointerleave once the dialog is up, so the
             // panel would otherwise stay lifted and coral behind it.
             setHovered(null);
-            lightbox.showModal();
+            invalidate();
         }
+
+        function openPreview(data) {
+            const index = panels.findIndex((panel) => panel.userData.data === data);
+            if (index < 0) return;
+            previewIndex = index;
+            showPreview();
+            if (!lightbox.open) lightbox.showModal();
+        }
+
+        function stepPreview(delta) {
+            const next = previewIndex + delta;
+            if (next < 0 || next >= panels.length) return;
+            previewIndex = next;
+            showPreview();
+        }
+
+        lightboxPrev.addEventListener('click', () => stepPreview(-1));
+        lightboxNext.addEventListener('click', () => stepPreview(1));
+        lightbox.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                stepPreview(1);
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                stepPreview(-1);
+            }
+        });
 
         lightboxImage.addEventListener('load', () => { lightboxLoading.hidden = true; });
         lightboxImage.addEventListener('error', () => {
             lightboxLoading.hidden = false;
-            lightboxLoading.textContent = 'That artefact could not be loaded.';
+            lightboxLoading.textContent = 'That artefact could not be loaded. The original link below still points at the file.';
         });
 
         document.getElementById('lightbox-close').addEventListener('click', () => lightbox.close());
@@ -1207,31 +1766,165 @@
         // Drop the decoded full-resolution bitmap rather than hold it open.
         lightbox.addEventListener('close', () => {
             lightboxImage.removeAttribute('src');
-            lightboxLoading.textContent = 'Loading the full-resolution artefact\u2026';
+            lightboxLoading.textContent = LOADING_COPY;
+            noteInput();
         });
 
         function pick(event) {
-            const panel = panelAt(event);
-            if (panel) openPreview(panel.userData.data);
+            const hit = targetAt(event);
+            if (!hit) return;
+            if (hit.userData.isPill) {
+                walkToBay(hit.userData.bayName);
+            } else {
+                openPreview(hit.parent.userData.data);
+            }
         }
 
+        // --- Keyboard ----------------------------------------------------------
+        // The wall is walkable without a pointer. Rather than steering the camera in
+        // the abstract, the keys move a selection from panel to neighbouring panel
+        // and the camera follows, so Enter always opens the one that is lit.
+        const announcer = document.getElementById('announcer');
+
+        canvas.tabIndex = 0;
+        canvas.setAttribute('aria-label',
+            'Artefact wall. Arrow keys walk it, Enter opens the artefact in front of '
+            + 'you, plus and minus change your distance. Every artefact is also a '
+            + 'plain link in the list after the wall.');
+
+        // Neighbours are spatial, not array order: bays hold different numbers of
+        // rows and are vertically centred, so a row is its height on the wall rather
+        // than an index. Sideways walks the whole run and settles for the nearest
+        // height when the next bay has no panel at this one. Vertical stays inside
+        // the bay, because a bay is the grid the reader can see, and crossing one on
+        // an up or down press reads as the selection teleporting.
+        function neighbour(from, dRow, dColumn) {
+            const fromY = from.userData.basePosition.y;
+            const fromAngle = from.userData.angle;
+            let best = null;
+            let bestScore = Infinity;
+            for (const panel of panels) {
+                if (panel === from) continue;
+                const dy = panel.userData.basePosition.y - fromY;
+                const arc = (fromAngle - panel.userData.angle) * (dColumn || 1) * RADIUS;
+                let score;
+                if (dColumn) {
+                    if (arc <= 1e-4) continue;
+                    score = arc + Math.abs(dy) * 3;
+                } else {
+                    if (panel.parent !== from.parent) continue;
+                    if (dy * dRow <= 1e-4) continue;
+                    score = Math.abs(dy) * 10 + Math.abs(arc);
+                }
+                if (score < bestScore) {
+                    bestScore = score;
+                    best = panel;
+                }
+            }
+            return best;
+        }
+
+        function nearestToView() {
+            let best = null;
+            let bestGap = Infinity;
+            for (const panel of panels) {
+                const gap = Math.abs(panel.userData.angle - target.azimuth) * RADIUS
+                    + Math.abs(panel.userData.basePosition.y
+                        - clamp(target.height, [1.26, 5.34]));
+                if (gap < bestGap) {
+                    bestGap = gap;
+                    best = panel;
+                }
+            }
+            return best;
+        }
+
+        function focusPanel(panel) {
+            if (!panel) return;
+            focused = panel;
+            setHovered(panel);
+            target.azimuth = clamp(panel.userData.angle, LIMITS.azimuth);
+            // A level gaze can follow a row, so walking up and down the wall frames
+            // the panel you are on rather than tilting past it.
+            target.height = clamp(panel.userData.basePosition.y, LIMITS.height);
+            setCurrentBay(panel.parent.userData.bayName ?? currentBay);
+            announcer.textContent = panel.userData.data.collection + ': '
+                + panel.userData.data.title;
+            invalidate();
+        }
+
+        canvas.addEventListener('focus', () => {
+            // A click focuses the canvas as well, and a mouse reader has not asked
+            // to be moved anywhere, so only a keyboard arrival takes a position.
+            if (!canvas.matches(':focus-visible')) return;
+            focusPanel(focused || nearestToView());
+        });
+
+        canvas.addEventListener('blur', () => {
+            if (hovered === focused) setHovered(null);
+            announcer.textContent = '';
+        });
+
+        canvas.addEventListener('keydown', (event) => {
+            const walk = {
+                ArrowRight: [0, 1],
+                ArrowLeft: [0, -1],
+                ArrowUp: [1, 0],
+                ArrowDown: [-1, 0],
+            }[event.key];
+
+            if (walk) {
+                event.preventDefault();
+                noteInput();
+                focusPanel(neighbour(focused || nearestToView(), walk[0], walk[1]) || focused);
+                return;
+            }
+
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                noteInput();
+                const panel = focused || nearestToView();
+                if (panel) openPreview(panel.userData.data);
+                return;
+            }
+
+            const zoom = { '+': -1, '=': -1, '-': 1, '_': 1 }[event.key];
+            if (zoom) {
+                event.preventDefault();
+                noteInput();
+                target.distance = clamp(target.distance + zoom * 1.4, LIMITS.distance);
+                invalidate();
+                return;
+            }
+
+            if (event.key === 'Home' || event.key === 'End') {
+                event.preventDefault();
+                noteInput();
+                const end = event.key === 'Home' ? panels[0] : panels[panels.length - 1];
+                focusPanel(end);
+            }
+        });
+
         // --- Bay navigation --------------------------------------------------------
-        const bayControls = document.getElementById('bay-controls');
+        function walkToBay(name) {
+            const bay = bays.find((item) => item.name === name);
+            if (!bay) return false;
+            noteInput();
+            focused = null;
+            target.azimuth = clamp(bay.angle, LIMITS.azimuth);
+            target.distance = 9.5;
+            target.height = WALL_MID_Y;
+            setCurrentBay(name);
+            invalidate();
+            return true;
+        }
+
         bays.forEach((bay) => {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'bay-button';
             button.textContent = bay.name;
-            button.addEventListener('click', () => {
-                target.azimuth = clamp(bay.angle, LIMITS.azimuth);
-                target.distance = 9.5;
-                target.height = WALL_MID_Y;
-                for (const other of bayControls.children) {
-                    other.removeAttribute('aria-current');
-                }
-                button.setAttribute('aria-current', 'true');
-                invalidate();
-            });
+            button.addEventListener('click', () => walkToBay(bay.name));
             bayControls.append(button);
         });
 
@@ -1239,7 +1932,8 @@
         window.addEventListener('themechange', () => {
             theme = isDark() ? PALETTE.dark : PALETTE.light;
             scene.background.setHex(theme.background);
-            scene.fog.color.setHex(theme.background);
+            scene.fog.color.setHex(theme.haze);
+            spot.color.setHex(theme.spot);
             wallMaterial.color.setHex(theme.wall);
             floorMaterial.color.setHex(theme.floor);
             grid.material.color.setHex(theme.grid);
@@ -1251,15 +1945,15 @@
                 );
                 panel.userData.shadow.material.opacity = theme.shadow;
             }
-            for (const bay of bays) {
-                const label = bay.group.children.find((child) => child.userData.isLabel);
-                if (label) {
-                    label.material.map.dispose();
-                    label.material.map = labelTexture(bay.name);
-                    label.material.needsUpdate = true;
-                    sizeLabel(label);
+            for (const pill of pills) {
+                for (const state of ['rest', 'hover', 'current']) {
+                    pill.userData.states[state].dispose();
+                    pill.userData.states[state] = pillTexture(pill.userData.bayName, state);
                 }
+                paintPill(pill);
             }
+            renderSignage();
+            layoutSignage();
             invalidate();
         });
 
@@ -1267,21 +1961,25 @@
         root.userData.sculptRuntime = {
             scene, camera, root, panels, bays, view, target,
             limits: LIMITS, radius: RADIUS, invalidate, openPreview,
-            focusBay: (name) => {
-                const bay = bays.find((item) => item.name === name);
-                if (!bay) return false;
-                target.azimuth = clamp(bay.angle, LIMITS.azimuth);
-                target.distance = 9.5;
-                target.height = WALL_MID_Y;
-                invalidate();
-                return true;
-            },
+            focusBay: walkToBay,
+            pills,
         };
         window.artefactShowcase = root.userData.sculptRuntime;
 
+        // The wall says the heading in paint now, so the DOM copy stays for
+        // assistive tech and for the case where WebGL never starts.
+        document.getElementById('page-header').classList.add('sr-only');
+
+        const scrollCue = document.getElementById('scroll-cue');
+        const dropCue = () => scrollCue.setAttribute('data-gone', 'true');
+        addEventListener('scroll', dropCue, { once: true, passive: true });
+        canvas.addEventListener('pointerdown', dropCue, { once: true });
+
         status.hidden = true;
+        aimSpot();
+        spot.position.copy(spotAim);
         applyCamera();
-        tick();
+        tick(performance.now());
     </script>
 </body>
 </html>
