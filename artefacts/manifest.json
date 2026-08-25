@@ -58,6 +58,10 @@
     "fde/structured-content.md",
     "java-interview/java-fullstack-interview-questions.md",
     "java-interview/java-releases.md",
+    "mingpt-vs-toy-transformer/analysis.md",
+    "mingpt-vs-toy-transformer/infographic-prompt.md",
+    "mingpt-vs-toy-transformer/source-mingpt-vs-toy-transformer.md",
+    "mingpt-vs-toy-transformer/structured-content.md",
     "star-wars/README.md",
     "star-wars/star-wars-timeline.src.html"
   ],
@@ -309,6 +313,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 170
+    },
+    {
+      "id": "mingpt-vs-toy-transformer",
+      "title": "minGPT vs toy-transformer",
+      "description": "Infographic comparing minGPT and toy-transformer.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 160
     }
   ],
   "entries": [
@@ -882,6 +894,16 @@
       "order": 10,
       "replacements": {},
       "date": "2026-08-21"
+    },
+    {
+      "id": "mingpt-vs-toy-transformer-infographic",
+      "source": "mingpt-vs-toy-transformer/infographic.png",
+      "destination": "mingpt-vs-toy-transformer/infographic.png",
+      "title": "Infographic",
+      "collection": "mingpt-vs-toy-transformer",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-07-23"
     }
   ]
 }
