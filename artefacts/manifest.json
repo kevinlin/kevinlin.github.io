@@ -307,14 +307,6 @@
       "order": 160
     },
     {
-      "id": "skillops-agent-skills-raw-v3",
-      "title": "Skillops Agent Skills Raw V3",
-      "description": "A month of public discussion on agent skills, gathered from nine sources.",
-      "section": "Presentations and analysis",
-      "section_order": 10,
-      "order": 170
-    },
-    {
       "id": "mingpt-vs-toy-transformer",
       "title": "minGPT vs toy-transformer",
       "description": "Infographic comparing minGPT and toy-transformer.",
@@ -882,16 +874,6 @@
       "title": "last30days v3.21.1: Agent Gauntlet Pipeline",
       "collection": "agent-harness",
       "order": 50,
-      "replacements": {},
-      "date": "2026-08-21"
-    },
-    {
-      "id": "skillops-agent-skills-raw-v3",
-      "source": "skillops-agent-skills-raw-v3.md",
-      "destination": "skillops-agent-skills-raw-v3/index.html",
-      "title": "last30days v3.21.1: SkillOps agent skills",
-      "collection": "skillops-agent-skills-raw-v3",
-      "order": 10,
       "replacements": {},
       "date": "2026-08-21"
     },
