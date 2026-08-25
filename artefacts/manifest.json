@@ -1,5 +1,13 @@
 {
   "version": 1,
+  "site": {
+    "base_url": "https://kevinlin.github.io/artefacts/",
+    "favicon": "<link rel=\"icon\" type=\"image/svg+xml\" href='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"%230063a3\"/><text x=\"50\" y=\"75\" font-size=\"60\" text-anchor=\"middle\" fill=\"white\" font-family=\"sans-serif\" font-weight=\"bold\">K</text></svg>'>",
+    "catalogue": {
+      "mode": "inject",
+      "page": "index.html"
+    }
+  },
   "protected_files": [
     "vendor/chart.umd.min.js",
     "vendor/chartjs-plugin-datalabels.min.js",
@@ -39,6 +47,7 @@
     "developer-productivity-ai-native/slides/overview-slide-15-1.png"
   ],
   "ignored_sources": [
+    ".*",
     "20260813 - STACK Meetup - Developer Productivity for the AI Native/slides/",
     "claude-tag/prompts/",
     "fable5-21days/narrative/",
@@ -310,7 +319,8 @@
       "title": "Qualcomm Snapdragon 7 Series timeline",
       "collection": "product-timeline",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-27"
     },
     {
       "id": "the-claude-code-leak",
@@ -319,7 +329,8 @@
       "title": "The Claude Code leak: three release-process gaps",
       "collection": "claude-code",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-02"
     },
     {
       "id": "how-claude-code-leaked",
@@ -328,7 +339,8 @@
       "title": "How Claude Code leaked: the safe path vs. what happened",
       "collection": "claude-code",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-01"
     },
     {
       "id": "claude-code-shortcuts-cheatsheet",
@@ -337,7 +349,8 @@
       "title": "Claude Code cheat sheet: commands, shortcuts, workflow",
       "collection": "claude-code",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-03-22"
     },
     {
       "id": "people-lead-lifecycle-activities",
@@ -346,7 +359,8 @@
       "title": "People Lead cycle, onboarding to offboarding",
       "collection": "people-lead-lifecycle",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-10"
     },
     {
       "id": "fde-04-iceberg-bright-dark-line-en",
@@ -355,7 +369,8 @@
       "title": "What the client says vs. what actually decides the project",
       "collection": "fde",
       "order": 100,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "fde-05-four-translation-steps-craft",
@@ -364,7 +379,8 @@
       "title": "Business translation: four steps from client words to shippable AI",
       "collection": "fde",
       "order": 110,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "fde-06-bento-whole-frame-craft",
@@ -373,7 +389,8 @@
       "title": "The hardest part of AI projects isn't technology",
       "collection": "fde",
       "order": 120,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "fable5-21days-infographic-craft-handmade",
@@ -382,7 +399,8 @@
       "title": "21 days of building with agents: project-by-project breakdown",
       "collection": "fable5-21days",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-22"
     },
     {
       "id": "fable5-21days-infographic-cyberpunk",
@@ -391,7 +409,8 @@
       "title": "21 days of building with agents: effort ranked by project",
       "collection": "fable5-21days",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-22"
     },
     {
       "id": "fable5-21days-infographic-densemodules-morandi",
@@ -400,7 +419,8 @@
       "title": "21 days of building with agents: full report, vitals to top skills",
       "collection": "fable5-21days",
       "order": 40,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-22"
     },
     {
       "id": "fable5-21days-infographic-hubspoke-edu",
@@ -409,7 +429,8 @@
       "title": "21 days of building with agents: hub-and-spoke map of the work",
       "collection": "fable5-21days",
       "order": 50,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-22"
     },
     {
       "id": "fable5-21days-infographic-roadmap-watercolor",
@@ -418,7 +439,8 @@
       "title": "21 days of building with agents: the journey, week by week",
       "collection": "fable5-21days",
       "order": 70,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-22"
     },
     {
       "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v1",
@@ -427,7 +449,8 @@
       "title": "Architect and Operator: the new engineering org and the human side (v1)",
       "collection": "ai-native-organisation",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "ai-native-organisation-the-new-engineering-org-the-human-side-v2",
@@ -436,7 +459,8 @@
       "title": "Architect and Operator: the new engineering org and the human side (v2)",
       "collection": "ai-native-organisation",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "claude-code-prong-my-claude-code-buddy",
@@ -445,7 +469,8 @@
       "title": "Prong, my Claude Code buddy",
       "collection": "claude-code",
       "order": 40,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "product-builder-peter-steinberger-on-human-taste-1",
@@ -454,7 +479,8 @@
       "title": "Peter Steinberger on human taste: taste plus system design",
       "collection": "product-builder",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-27"
     },
     {
       "id": "product-builder-peter-steinberger-on-human-taste-2",
@@ -463,7 +489,8 @@
       "title": "Peter Steinberger on human taste: notes from the AI Engineer keynote",
       "collection": "product-builder",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-27"
     },
     {
       "id": "product-builder-jenny-wen-design-process-is-dead",
@@ -472,7 +499,8 @@
       "title": "The design process is dead: Jenny Wen on Lenny's Podcast",
       "collection": "product-builder",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "hermes-agent-hermes-whatsapp-bridge-incident-report",
@@ -481,7 +509,8 @@
       "title": "Hermes WhatsApp Bridge Phantom Messages — Incident Report",
       "collection": "hermes-agent",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-24"
     },
     {
       "id": "product-idea-prd-the-donation-map",
@@ -490,7 +519,8 @@
       "title": "PRD: The Donation Map",
       "collection": "product-idea",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-06-29"
     },
     {
       "id": "java-interview-java-interview-questions",
@@ -499,7 +529,8 @@
       "title": "Java fullstack, platform, and AI engineering interview questions",
       "collection": "java-interview",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-07"
     },
     {
       "id": "star-wars-star-wars-timeline",
@@ -508,7 +539,8 @@
       "title": "Star Wars: the chronological timeline",
       "collection": "star-wars",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-11"
     },
     {
       "id": "coding-agent-war-claude-code-vs-codex-adoption",
@@ -517,7 +549,8 @@
       "title": "Claude Code vs. Codex: adoption by month since launch",
       "collection": "coding-agent-war",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-22"
     },
     {
       "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
@@ -526,7 +559,8 @@
       "title": "Four best practices for Claude Opus 4.7 xhigh mode",
       "collection": "everything-llm",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "everything-llm-gpt-5-series-pricing-evolution",
@@ -535,7 +569,8 @@
       "title": "GPT-5 series pricing evolution, Aug 2025 to Apr 2026",
       "collection": "everything-llm",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-28"
     },
     {
       "id": "everything-llm-gpt-5-6-sol-the-first-5-days",
@@ -544,7 +579,8 @@
       "title": "GPT-5.6 Sol: 11 changes and rollbacks in the first five days",
       "collection": "everything-llm",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-14"
     },
     {
       "id": "everything-llm-score-vs-cost-per-task",
@@ -556,7 +592,8 @@
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      }
+      },
+      "date": "2026-08-25"
     },
     {
       "id": "everything-llm-score-vs-output-tokens-per-task",
@@ -568,7 +605,8 @@
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      }
+      },
+      "date": "2026-08-20"
     },
     {
       "id": "everything-llm-swe-bench-pro-by-lab",
@@ -579,7 +617,8 @@
       "order": 90,
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
-      }
+      },
+      "date": "2026-08-17"
     },
     {
       "id": "skillops-20260731-skillops-raw",
@@ -588,7 +627,8 @@
       "title": "Research notes: what people say about SkillOps (July 2026)",
       "collection": "skillops",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-01"
     },
     {
       "id": "ai-buzzword-loop-engineering",
@@ -597,7 +637,8 @@
       "title": "Loop Engineering: build the loop, stay the engineer",
       "collection": "ai-buzzword",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-27"
     },
     {
       "id": "ai-buzzword-trendslop-when-al-gives-you-buzzwords-instead-of",
@@ -606,7 +647,8 @@
       "title": "Trendslop: when AI gives you buzzwords instead of strategy",
       "collection": "ai-buzzword",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-04-27"
     },
     {
       "id": "everything-llm-20260611-claude-fable-5-raw-v3",
@@ -615,7 +657,8 @@
       "title": "Research notes: what people say about Claude Fable 5 (June 2026)",
       "collection": "everything-llm",
       "order": 100,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-01"
     },
     {
       "id": "everything-llm-claude-gpt-timeline",
@@ -624,7 +667,8 @@
       "title": "Claude and GPT release timeline",
       "collection": "everything-llm",
       "order": 110,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-07-27"
     },
     {
       "id": "everything-llm-copilot-perf-vs-price",
@@ -636,7 +680,8 @@
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      }
+      },
+      "date": "2026-08-25"
     },
     {
       "id": "java-interview-java-release-timeline",
@@ -645,7 +690,8 @@
       "title": "Java release timeline",
       "collection": "java-interview",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-06"
     },
     {
       "id": "travel-china-fuxing-high-speed-rail-network-map",
@@ -654,7 +700,8 @@
       "title": "China high-speed rail network map, lines in service",
       "collection": "travel",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-14"
     },
     {
       "id": "travel-china-rail-map",
@@ -663,7 +710,8 @@
       "title": "China rail map: hubs and major cities",
       "collection": "travel",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-14"
     },
     {
       "id": "claude-tag-20260815-claude-tag-raw-v3",
@@ -672,7 +720,8 @@
       "title": "Research notes: what people say about Claude Tag (August 2026)",
       "collection": "claude-tag",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-01-what-it-is",
@@ -681,7 +730,8 @@
       "title": "A teammate in the channel",
       "collection": "claude-tag",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-02-vs-coding-agent",
@@ -690,7 +740,8 @@
       "title": "Single-player tool vs. team member",
       "collection": "claude-tag",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-03-long-horizon",
@@ -699,7 +750,8 @@
       "title": "Long-horizon execution",
       "collection": "claude-tag",
       "order": 40,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-04-system-architecture",
@@ -708,7 +760,8 @@
       "title": "Runtime architecture",
       "collection": "claude-tag",
       "order": 50,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-05-context-layer",
@@ -717,7 +770,8 @@
       "title": "The context layer",
       "collection": "claude-tag",
       "order": 60,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-06-memory-layer",
@@ -726,7 +780,8 @@
       "title": "Three scopes of memory",
       "collection": "claude-tag",
       "order": 70,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-07-request-lifecycle",
@@ -735,7 +790,8 @@
       "title": "One mention, end to end",
       "collection": "claude-tag",
       "order": 80,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-08-proactive-context",
@@ -744,7 +800,8 @@
       "title": "Ambient context, unprompted work",
       "collection": "claude-tag",
       "order": 100,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "claude-tag-claude-tag-09-memory-core",
@@ -753,7 +810,8 @@
       "title": "Memory core (dark variant)",
       "collection": "claude-tag",
       "order": 110,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-15"
     },
     {
       "id": "answer-relevancy-cosine",
@@ -762,7 +820,8 @@
       "title": "Cosine similarity in Ragas answer relevancy",
       "collection": "llm-eval",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-16"
     },
     {
       "id": "answer-accuracy-vs-answer-correctness",
@@ -771,7 +830,8 @@
       "title": "Answer accuracy vs answer correctness",
       "collection": "llm-eval",
       "order": 20,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-16"
     },
     {
       "id": "developer-productivity-ai-native-deck",
@@ -780,7 +840,8 @@
       "title": "Developer Productivity for the AI Native (STACK Meetup, 13 Aug 2026)",
       "collection": "developer-productivity-ai-native",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-17"
     },
     {
       "id": "agent-harness-20260610-ralph-loop-raw-v3",
@@ -789,7 +850,8 @@
       "title": "last30days v3.3.2: ralph loop (June 10, 2026)",
       "collection": "agent-harness",
       "order": 30,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-01"
     },
     {
       "id": "agent-harness-20260713-loop-engineering-raw",
@@ -798,7 +860,8 @@
       "title": "last30days v3.14.0: Loop Engineering (July 13, 2026)",
       "collection": "agent-harness",
       "order": 40,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-01"
     },
     {
       "id": "agent-harness-20260821-agent-gauntlet-pipeline-raw-v3",
@@ -807,7 +870,8 @@
       "title": "last30days v3.21.1: Agent Gauntlet Pipeline",
       "collection": "agent-harness",
       "order": 50,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-21"
     },
     {
       "id": "skillops-agent-skills-raw-v3",
@@ -816,7 +880,8 @@
       "title": "last30days v3.21.1: SkillOps agent skills",
       "collection": "skillops-agent-skills-raw-v3",
       "order": 10,
-      "replacements": {}
+      "replacements": {},
+      "date": "2026-08-21"
     }
   ]
 }
