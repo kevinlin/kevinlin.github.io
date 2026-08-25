@@ -28,6 +28,9 @@ PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
 IGNORED_METADATA_NAME = ".DS_Store"
+# Control file for the artefact-sync skill. It sits in artefacts/ but is a template,
+# not a published page, so it is neither an orphan nor link-checked.
+CONTROL_FILE_NAMES = frozenset({"page-template.html"})
 DELETION_KINDS = frozenset({"delete", "orphan"})
 WRITE_KINDS = frozenset({"add", "update"})
 HOMEPAGE_FILES = ("index.html", "styles.css", "script.js")
@@ -1488,7 +1491,10 @@ def scan_published_tree(artefacts_root: Path) -> tuple[set[PurePosixPath], int]:
         if path.name == IGNORED_METADATA_NAME:
             ignored_metadata += 1
             continue
-        published.add(PurePosixPath(path.relative_to(artefacts_root).as_posix()))
+        relative = PurePosixPath(path.relative_to(artefacts_root).as_posix())
+        if relative.as_posix() in CONTROL_FILE_NAMES:
+            continue
+        published.add(relative)
     return published, ignored_metadata
 
 

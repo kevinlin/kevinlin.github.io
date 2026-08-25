@@ -1659,6 +1659,22 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertFalse(renamed.exists())
         self.assertEqual((artefacts_root / "charts/existing.png").read_bytes(), b"updated")
 
+    def test_scan_skips_the_sync_control_file(self):
+        """page-template.html is a template, not a published page, so it is neither
+        an orphan nor link-checked."""
+        repo, source, manifest_path, head_manifest = self.make_fixture()
+        artefacts_root = repo / "artefacts"
+        (artefacts_root / "page-template.html").write_text("$title $prefix", encoding="utf-8")
+        nested = artefacts_root / "charts" / "page-template.html"
+        nested.write_text("$title", encoding="utf-8")
+
+        published, _ = artefacts_cli.scan_published_tree(artefacts_root)
+
+        self.assertNotIn(PurePosixPath("page-template.html"), published)
+        # Only the control file at the root is exempt; a nested one is still a file
+        # the manifest has to explain.
+        self.assertIn(PurePosixPath("charts/page-template.html"), published)
+
     def test_orphan_set_matches_repository_validation_rejection(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         artefacts_root = repo / "artefacts"
