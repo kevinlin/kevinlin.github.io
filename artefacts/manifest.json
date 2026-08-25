@@ -117,7 +117,7 @@
     {
       "id": "claude-code-vs-codex-adoption",
       "title": "Claude Code Vs Codex Adoption",
-      "description": "TODO: describe this collection.",
+      "description": "Adoption numbers for Claude Code and Codex, side by side.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 90
@@ -301,7 +301,7 @@
     {
       "id": "agent-harness",
       "title": "Agent Harness",
-      "description": "TODO: describe this collection.",
+      "description": "Monthly research digests on agent loops, loop engineering, and agent pipelines.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 160
@@ -309,7 +309,7 @@
     {
       "id": "skillops-agent-skills-raw-v3",
       "title": "Skillops Agent Skills Raw V3",
-      "description": "TODO: describe this collection.",
+      "description": "A month of public discussion on agent skills, gathered from nine sources.",
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 170
