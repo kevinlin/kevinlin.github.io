@@ -22,10 +22,37 @@ assert SPEC.loader is not None
 sys.modules[SPEC.name] = artefacts_cli
 SPEC.loader.exec_module(artefacts_cli)
 
+# The repository's own page template. Rendering tests assert against the real one,
+# because a stub would prove nothing about the pages this repository publishes.
+PAGE_TEMPLATE_PATH = ROOT / "artefacts" / "page-template.html"
+PAGE_TEMPLATE = artefacts_cli.load_template(ROOT / "artefacts")
+
+
+def install_page_template(artefacts_root: Path) -> None:
+    """Give a fixture tree the control file `load_template` reads."""
+    artefacts_root.mkdir(parents=True, exist_ok=True)
+    (artefacts_root / "page-template.html").write_bytes(PAGE_TEMPLATE_PATH.read_bytes())
+
+
+def test_site() -> "artefacts_cli.Site":
+    return artefacts_cli.site_from_dict(valid_site())
+
+
+TEST_FAVICON = '<link rel="icon" href="data:,">'
+
+
+def valid_site() -> dict:
+    return {
+        "base_url": "https://example.test/artefacts/",
+        "favicon": TEST_FAVICON,
+        "catalogue": {"mode": "inject", "page": "index.html"},
+    }
+
 
 def valid_payload() -> dict:
     return {
         "version": 1,
+        "site": valid_site(),
         "protected_files": ["vendor/chart.umd.min.js"],
         "ignored_sources": [],
         "collections": [
@@ -149,8 +176,8 @@ class ManifestTests(unittest.TestCase):
 
     def test_rejects_unsupported_destination_extension(self):
         payload = valid_payload()
-        payload["entries"][0]["source"] = "Charts/Cost.pdf"
-        payload["entries"][0]["destination"] = "charts/cost.pdf"
+        payload["entries"][0]["source"] = "Charts/Cost.docx"
+        payload["entries"][0]["destination"] = "charts/cost.docx"
 
         self.assert_manifest_error(payload, "unsupported source extension")
 
@@ -328,6 +355,10 @@ class SourceInventoryTests(unittest.TestCase):
         (root / "topic").mkdir()
         return root
 
+    def scan(self, root: Path):
+        """Scan with the destination repository placed where the fixtures put it."""
+        return artefacts_cli.scan_source(root, root / "topic" / "kevinlin.github.io")
+
     def manifest_for(self, *sources: str):
         payload = valid_payload()
         payload["entries"] = []
@@ -355,10 +386,10 @@ class SourceInventoryTests(unittest.TestCase):
         (root / "topic" / "notes.txt").write_text("private", encoding="utf-8")
         (root / ".DS_Store").write_bytes(b"metadata")
 
-        inventory = artefacts_cli.scan_source(root)
+        inventory = self.scan(root)
 
         self.assertEqual(inventory.approved, (PurePosixPath("topic/Chart.PNG"),))
-        self.assertEqual(inventory.excluded_suffixes, (".txt",))
+        self.assertEqual(inventory.excluded, ((".txt", 1),))
 
     def test_scan_prunes_nested_repository_copy(self):
         root = self.make_source()
@@ -367,23 +398,27 @@ class SourceInventoryTests(unittest.TestCase):
         (nested / "private.png").write_bytes(b"private")
         (root / "topic" / "public.png").write_bytes(b"public")
 
-        inventory = artefacts_cli.scan_source(root)
+        inventory = self.scan(root)
 
         self.assertEqual(inventory.approved, (PurePosixPath("topic/public.png"),))
 
-    def test_scan_rejects_symbolic_links(self):
+    def test_scan_skips_symbolic_links(self):
+        # A source folder is a working directory someone keeps shortcuts in. One
+        # shortcut must not stop every command; the file it points at is scanned
+        # under its real name anyway.
         root = self.make_source()
         target = root / "topic" / "target.png"
         target.write_bytes(b"png")
         (root / "topic" / "linked.png").symlink_to(target)
 
-        with self.assertRaisesRegex(artefacts_cli.InventoryError, "symbolic link"):
-            artefacts_cli.scan_source(root)
+        inventory = self.scan(root)
+
+        self.assertEqual(inventory.approved, (PurePosixPath("topic/target.png"),))
 
     def test_reconcile_rejects_unlisted_approved_source_and_carries_it(self):
         root = self.make_source()
         (root / "topic" / "New Chart.PNG").write_bytes(b"png")
-        inventory = artefacts_cli.scan_source(root)
+        inventory = self.scan(root)
         manifest = self.manifest_for()
 
         with self.assertRaises(artefacts_cli.UnlistedSourceError) as caught:
@@ -394,7 +429,7 @@ class SourceInventoryTests(unittest.TestCase):
 
     def test_reconcile_turns_missing_source_into_deletion_candidate(self):
         root = self.make_source()
-        inventory = artefacts_cli.scan_source(root)
+        inventory = self.scan(root)
         manifest = self.manifest_for("topic/Missing.png")
 
         result = artefacts_cli.reconcile_inventory(manifest, inventory)
@@ -408,14 +443,14 @@ class SourceInventoryTests(unittest.TestCase):
             (root / "Notes").mkdir()
             (root / "Notes" / "Report.md").write_text("# Report\n", encoding="utf-8")
             (root / "Notes" / "Draft.docx").write_bytes(b"binary")
-            inventory = artefacts_cli.scan_source(root)
+            inventory = self.scan(root)
         self.assertEqual(inventory.approved, (PurePosixPath("Notes/Report.md"),))
-        self.assertEqual(inventory.excluded_suffixes, (".docx",))
+        self.assertEqual(inventory.excluded, ((".docx", 1),))
 
     def inventory_of(self, *paths: str) -> "artefacts_cli.SourceInventory":
         return artefacts_cli.SourceInventory(
             approved=tuple(PurePosixPath(path) for path in paths),
-            excluded_suffixes=(),
+            excluded=(),
         )
 
     def test_a_file_rule_ignores_only_that_file(self):
@@ -452,11 +487,11 @@ class SourceInventoryTests(unittest.TestCase):
 
     def test_excluded_suffixes_are_left_alone(self):
         inventory = artefacts_cli.SourceInventory(
-            approved=(PurePosixPath("fde/report.md"),), excluded_suffixes=(".docx",)
+            approved=(PurePosixPath("fde/report.md"),), excluded=((".docx", 1),)
         )
         filtered, _ = artefacts_cli.apply_source_ignores(inventory, ("fde/",))
         self.assertEqual(filtered.approved, ())
-        self.assertEqual(filtered.excluded_suffixes, (".docx",))
+        self.assertEqual(filtered.excluded, ((".docx", 1),))
 
     def test_ignored_sources_never_reach_the_unlisted_set(self):
         manifest = artefacts_cli.manifest_from_dict(
@@ -521,7 +556,7 @@ class ManifestProposalTests(unittest.TestCase):
         self.assertEqual(collection.id, "travel")
         self.assertEqual(collection.title, "Travel")
         self.assertEqual(collection.section, "Analysis")
-        self.assertEqual(collection.description, artefacts_cli.PLACEHOLDER_DESCRIPTION)
+        self.assertIsNone(collection.description)
         self.assertEqual(collection.section_order, 10)
         self.assertEqual(collection.order, 20)
 
@@ -780,7 +815,7 @@ class DesiredTreeTests(unittest.TestCase):
         payload = b"\x89PNG\r\n\x1a\ncontent"
         source_path.write_bytes(payload)
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         copied = desired[PurePosixPath("images/card.png")]
         self.assertEqual(copied, payload)
@@ -797,11 +832,11 @@ class DesiredTreeTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         self.assertEqual(
             desired[PurePosixPath("charts/chart/index.html")],
-            artefacts_cli.FAVICON_LINK.encode("utf-8")
+            test_site().favicon.encode("utf-8")
             + b'\n<script src="../../vendor/chart.js"></script>\n<p>Chart</p>\n',
         )
 
@@ -814,10 +849,10 @@ class DesiredTreeTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
         page = desired[PurePosixPath("charts/chart/index.html")].decode("utf-8")
 
-        self.assertIn(artefacts_cli.FAVICON_LINK, page)
+        self.assertIn(test_site().favicon, page)
         self.assertEqual(page.count('rel="icon"'), 1)
         self.assertLess(page.index("rel=\"icon\""), page.index("<title>"))
 
@@ -827,12 +862,12 @@ class DesiredTreeTests(unittest.TestCase):
         )
         source_path.write_text("<!DOCTYPE html>\n<p>Chart</p>\n", encoding="utf-8")
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         self.assertEqual(
             desired[PurePosixPath("charts/chart/index.html")],
             b"<!DOCTYPE html>\n"
-            + artefacts_cli.FAVICON_LINK.encode("utf-8")
+            + test_site().favicon.encode("utf-8")
             + b"\n<p>Chart</p>\n",
         )
 
@@ -846,7 +881,7 @@ class DesiredTreeTests(unittest.TestCase):
         )
         source_path.write_text(original, encoding="utf-8")
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         self.assertEqual(
             desired[PurePosixPath("charts/chart/index.html")],
@@ -864,7 +899,7 @@ class DesiredTreeTests(unittest.TestCase):
         with self.assertRaisesRegex(
             artefacts_cli.TransformationError, "expected replacement not found"
         ):
-            artefacts_cli.build_desired_files(manifest, root)
+            artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
     def test_transform_html_adds_final_newline(self):
         root, manifest, source_path = self.make_source_and_manifest(
@@ -872,14 +907,17 @@ class DesiredTreeTests(unittest.TestCase):
         )
         source_path.write_text("<p>Chart</p>", encoding="utf-8")
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         self.assertEqual(
             desired[PurePosixPath("charts/chart/index.html")],
-            artefacts_cli.FAVICON_LINK.encode("utf-8") + b"\n<p>Chart</p>\n",
+            test_site().favicon.encode("utf-8") + b"\n<p>Chart</p>\n",
         )
 
-    def test_transform_html_rejects_remaining_cdnjs_reference(self):
+    def test_a_remaining_external_reference_is_published_and_reported(self):
+        # Generalised from a cdnjs-only ban: any external host is the same
+        # fragility, and refusing outright would block a page whose font or
+        # analytics endpoint is a deliberate choice.
         root, manifest, source_path = self.make_source_and_manifest(
             "Charts/Chart.html", "charts/chart/index.html"
         )
@@ -888,18 +926,20 @@ class DesiredTreeTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        with self.assertRaisesRegex(
-            artefacts_cli.TransformationError,
-            "forbidden cdnjs reference remains in .*: https://cdnjs.cloudflare.com/chart.js",
-        ):
-            artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
+        page = desired[PurePosixPath("charts/chart/index.html")].decode("utf-8")
+
+        self.assertEqual(
+            artefacts_cli.external_references(page),
+            ((2, "https://cdnjs.cloudflare.com/chart.js"),),
+        )
 
     def test_build_desired_files_omits_missing_sources(self):
         root, manifest, _ = self.make_source_and_manifest(
             "Images/Missing.png", "images/missing.png"
         )
 
-        desired = artefacts_cli.build_desired_files(manifest, root)
+        desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
         self.assertEqual(desired, {})
 
@@ -912,11 +952,12 @@ class DesiredTreeTests(unittest.TestCase):
             )
             manifest = artefacts_cli.Manifest(
                 version=1,
+                site=test_site(),
                 protected_files=(PurePosixPath("vendor/marked.min.js"),),
                 collections=(),
                 entries=(markdown_entry(),),
             )
-            desired = artefacts_cli.build_desired_files(manifest, root)
+            desired = artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
         page = desired[PurePosixPath("notes/report/index.html")].decode("utf-8")
         self.assertEqual(artefacts_cli.extract_markdown(page), "# Report\n\nBody.\n")
         self.assertIn('src="../../vendor/marked.min.js"', page)
@@ -928,6 +969,7 @@ class DesiredTreeTests(unittest.TestCase):
             (root / "Notes" / "Report.md").write_text("# R\n", encoding="utf-8")
             manifest = artefacts_cli.Manifest(
                 version=1,
+                site=test_site(),
                 protected_files=(),
                 collections=(),
                 entries=(markdown_entry(),),
@@ -935,7 +977,7 @@ class DesiredTreeTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 artefacts_cli.TransformationError, "marked.min.js"
             ):
-                artefacts_cli.build_desired_files(manifest, root)
+                artefacts_cli.build_desired_files(manifest, root, PAGE_TEMPLATE)
 
 
 class MarkdownEscapingTests(unittest.TestCase):
@@ -1005,7 +1047,11 @@ class MarkdownRenderTests(unittest.TestCase):
 
     def render(self, text: str, destination: str = "notes/report/index.html") -> str:
         return artefacts_cli.render_markdown_page(
-            markdown_entry(destination), text.encode("utf-8"), self.VENDOR
+            markdown_entry(destination),
+            text.encode("utf-8"),
+            self.VENDOR,
+            test_site(),
+            PAGE_TEMPLATE,
         ).decode("utf-8")
 
     def test_page_embeds_the_source_and_extraction_recovers_it(self):
@@ -1028,9 +1074,10 @@ class MarkdownRenderTests(unittest.TestCase):
         page = self.render("# R\n", "notes/report/index.html")
         self.assertIn('href="../../"', page)
 
-    def test_page_has_no_cdnjs_reference(self):
-        self.assertFalse(
-            artefacts_cli.has_cdnjs_reference(self.render("# R\n"))
+    def test_page_loads_the_parser_from_the_repository_not_a_cdn(self):
+        references = artefacts_cli.external_references(self.render("# R\n"))
+        self.assertNotIn(
+            "cdnjs", " ".join(url for _, url in references)
         )
 
     def test_render_is_deterministic(self):
@@ -1042,7 +1089,11 @@ class MarkdownRenderTests(unittest.TestCase):
             artefacts_cli.TransformationError, "not UTF-8"
         ):
             artefacts_cli.render_markdown_page(
-                markdown_entry(), b"\xff\xfe not utf-8", self.VENDOR
+                markdown_entry(),
+                b"\xff\xfe not utf-8",
+                self.VENDOR,
+                test_site(),
+                PAGE_TEMPLATE,
             )
 
     def test_page_drops_a_lead_heading_that_repeats_the_title(self):
@@ -1068,6 +1119,7 @@ class MarkdownRenderTests(unittest.TestCase):
     def test_vendor_lookup_finds_the_registered_parser(self):
         manifest = artefacts_cli.Manifest(
             version=1,
+            site=test_site(),
             protected_files=(
                 PurePosixPath("vendor/chart.umd.min.js"),
                 PurePosixPath("vendor/marked.min.js"),
@@ -1080,6 +1132,7 @@ class MarkdownRenderTests(unittest.TestCase):
     def test_vendor_lookup_reports_an_unregistered_parser(self):
         manifest = artefacts_cli.Manifest(
             version=1,
+            site=test_site(),
             protected_files=(PurePosixPath("vendor/chart.umd.min.js"),),
             collections=(),
             entries=(),
@@ -1093,12 +1146,16 @@ class MarkdownRenderTests(unittest.TestCase):
 class MarkdownDiffTests(unittest.TestCase):
     def page(self, text: str) -> bytes:
         return artefacts_cli.render_markdown_page(
-            markdown_entry(), text.encode("utf-8"), PurePosixPath("vendor/marked.min.js")
+            markdown_entry(),
+            text.encode("utf-8"),
+            PurePosixPath("vendor/marked.min.js"),
+            test_site(),
+            PAGE_TEMPLATE,
         )
 
     def test_diff_reports_changed_lines_only(self):
         diff = artefacts_cli.markdown_diff(
-            self.page("# Title\n\nOld body.\n"), b"# Title\n\nNew body.\n"
+            self.page("# Title\n\nOld body.\n"), self.page("# Title\n\nNew body.\n")
         )
         self.assertIn("-Old body.", diff)
         self.assertIn("+New body.", diff)
@@ -1106,28 +1163,31 @@ class MarkdownDiffTests(unittest.TestCase):
 
     def test_identical_markdown_produces_no_diff(self):
         text = "# Title\n\nBody.\n"
-        self.assertEqual(artefacts_cli.markdown_diff(self.page(text), text.encode()), "")
+        self.assertEqual(artefacts_cli.markdown_diff(self.page(text), self.page(text)), "")
 
     def test_diff_is_truncated_with_the_remaining_count(self):
         old = "# Title\n\n" + "".join(f"old line {n}\n" for n in range(60))
         new = "# Title\n\n" + "".join(f"new line {n}\n" for n in range(60))
-        diff = artefacts_cli.markdown_diff(self.page(old), new.encode("utf-8"), limit=10)
+        diff = artefacts_cli.markdown_diff(self.page(old), self.page(new), limit=10)
         lines = diff.splitlines()
         self.assertEqual(len(lines), 11)
         self.assertRegex(lines[-1], r"^… truncated, \d+ more lines$")
 
     def test_unextractable_page_reports_the_diff_as_unavailable(self):
-        diff = artefacts_cli.markdown_diff(b"<html>hand written</html>", b"# New\n")
+        diff = artefacts_cli.markdown_diff(
+            b"<html>hand written</html>", self.page("# New\n")
+        )
         self.assertIn("diff unavailable", diff)
 
     def test_missing_published_page_produces_no_diff(self):
-        self.assertEqual(artefacts_cli.markdown_diff(None, b"# New\n"), "")
+        self.assertEqual(artefacts_cli.markdown_diff(None, self.page("# New\n")), "")
 
 
 class CatalogueTests(unittest.TestCase):
-    def catalogue_manifest(self):
-        payload = {
+    def catalogue_payload(self):
+        return {
             "version": 1,
+            "site": valid_site(),
             "protected_files": ["vendor/chart.umd.min.js"],
             "collections": [
                 {
@@ -1168,7 +1228,9 @@ class CatalogueTests(unittest.TestCase):
                 },
             ],
         }
-        return artefacts_cli.manifest_from_dict(payload)
+
+    def catalogue_manifest(self):
+        return artefacts_cli.manifest_from_dict(self.catalogue_payload())
 
     def test_render_catalogue_orders_sections_and_escapes_text(self):
         rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
@@ -1178,77 +1240,12 @@ class CatalogueTests(unittest.TestCase):
         self.assertIn("Image &lt;references&gt;.", rendered)
         self.assertIn("Card &lt;image&gt;", rendered)
 
-    def test_render_catalogue_puts_the_showcase_link_in_the_image_heading(self):
-        manifest = artefacts_cli.manifest_from_dict(
+    def dated_manifest(self, **dates: str):
+        """One collection whose entries carry the given manifest dates."""
+        return artefacts_cli.manifest_from_dict(
             {
                 "version": 1,
-                "protected_files": [],
-                "collections": [
-                    {
-                        "id": "images",
-                        "title": "Images",
-                        "description": "Images.",
-                        "section": artefacts_cli.IMAGE_SECTION,
-                        "section_order": 20,
-                        "order": 10,
-                    },
-                    {
-                        "id": "charts",
-                        "title": "Charts",
-                        "description": "Data charts.",
-                        "section": artefacts_cli.PRESENTATION_SECTION,
-                        "section_order": 10,
-                        "order": 10,
-                    },
-                ],
-                "entries": [
-                    {
-                        "id": "image",
-                        "source": "Images/Card.png",
-                        "destination": "images/card.png",
-                        "title": "Card",
-                        "collection": "images",
-                        "order": 10,
-                        "replacements": {},
-                    },
-                    {
-                        "id": "chart",
-                        "source": "Charts/Chart.html",
-                        "destination": "charts/chart/index.html",
-                        "title": "Chart",
-                        "collection": "charts",
-                        "order": 10,
-                        "replacements": {},
-                    },
-                ],
-            }
-        )
-
-        rendered = artefacts_cli.render_catalogue(manifest)
-
-        self.assertEqual(rendered.count('class="showcase-link"'), 1)
-        image_heading = rendered[
-            rendered.index('<h2 id="image-collections-heading">') :
-        ].split("</h2>", 1)[0]
-        self.assertIn('href="showcase/"', image_heading)
-        self.assertIn("Walk the image artefacts in 3D", image_heading)
-
-    def test_render_catalogue_omits_the_showcase_link_without_an_image_section(self):
-        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
-
-        self.assertNotIn("showcase-link", rendered)
-
-    def test_render_catalogue_links_html_directories_and_images_once(self):
-        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
-
-        self.assertEqual(rendered.count('href="charts/chart/"'), 1)
-        self.assertEqual(rendered.count('href="images/card.png"'), 1)
-        self.assertNotIn("vendor/chart.umd.min.js", rendered)
-
-    def test_render_catalogue_shows_the_newest_source_date_per_card(self):
-        manifest = artefacts_cli.manifest_from_dict(
-            {
-                "version": 1,
+                "site": valid_site(),
                 "protected_files": [],
                 "collections": [
                     {
@@ -1262,36 +1259,37 @@ class CatalogueTests(unittest.TestCase):
                 ],
                 "entries": [
                     {
-                        "id": "old",
-                        "source": "Images/Old.png",
-                        "destination": "images/old.png",
-                        "title": "Old",
+                        "id": identifier,
+                        "source": f"Images/{identifier}.png",
+                        "destination": f"images/{identifier}.png",
+                        "title": identifier.title(),
                         "collection": "images",
-                        "order": 10,
+                        "order": order,
                         "replacements": {},
-                    },
-                    {
-                        "id": "new",
-                        "source": "Images/New.png",
-                        "destination": "images/new.png",
-                        "title": "New",
-                        "collection": "images",
-                        "order": 20,
-                        "replacements": {},
-                    },
+                        **({"date": dates[identifier]} if identifier in dates else {}),
+                    }
+                    for identifier, order in (("old", 10), ("new", 20))
                 ],
             }
         )
 
+    def test_render_catalogue_links_html_directories_and_images_once(self):
+        rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
+
+        self.assertEqual(rendered.count('href="charts/chart/"'), 1)
+        self.assertEqual(rendered.count('href="images/card.png"'), 1)
+        self.assertNotIn("vendor/chart.umd.min.js", rendered)
+
+    def test_render_catalogue_shows_the_newest_entry_date_per_card(self):
         rendered = artefacts_cli.render_catalogue(
-            manifest, {"old": "2026-01-05", "new": "2026-03-11"}
+            self.dated_manifest(old="2026-01-05", new="2026-03-11")
         )
 
         self.assertEqual(rendered.count('class="card-updated"'), 1)
         self.assertIn('<time datetime="2026-03-11">2026-03-11</time>', rendered)
         self.assertNotIn("2026-01-05", rendered)
 
-    def sorting_manifest(self):
+    def sorting_manifest(self, **dates: str):
         collections = [
             {
                 "id": identifier,
@@ -1312,12 +1310,14 @@ class CatalogueTests(unittest.TestCase):
                 "collection": identifier,
                 "order": 10,
                 "replacements": {},
+                **({"date": dates[identifier]} if identifier in dates else {}),
             }
-            for identifier, _ in (("first", 10), ("second", 20), ("third", 30))
+            for identifier in ("first", "second", "third")
         ]
         return artefacts_cli.manifest_from_dict(
             {
                 "version": 1,
+                "site": valid_site(),
                 "protected_files": [],
                 "collections": collections,
                 "entries": entries,
@@ -1326,44 +1326,54 @@ class CatalogueTests(unittest.TestCase):
 
     def test_render_catalogue_sorts_cards_by_newest_date_first(self):
         rendered = artefacts_cli.render_catalogue(
-            self.sorting_manifest(),
-            {"first": "2026-01-05", "second": "2026-06-30", "third": "2026-03-11"},
+            self.sorting_manifest(
+                first="2026-01-05", second="2026-06-30", third="2026-03-11"
+            )
         )
 
         self.assertLess(rendered.index("Second"), rendered.index("Third"))
         self.assertLess(rendered.index("Third"), rendered.index("First"))
 
     def test_render_catalogue_sorts_undated_cards_last_by_declared_order(self):
-        rendered = artefacts_cli.render_catalogue(
-            self.sorting_manifest(), {"third": "2026-03-11"}
-        )
+        rendered = artefacts_cli.render_catalogue(self.sorting_manifest(third="2026-03-11"))
 
         self.assertLess(rendered.index("Third"), rendered.index("First"))
         self.assertLess(rendered.index("First"), rendered.index("Second"))
 
-    def test_render_catalogue_omits_the_date_without_timestamps(self):
+    def test_render_catalogue_omits_the_date_without_entry_dates(self):
         rendered = artefacts_cli.render_catalogue(self.catalogue_manifest())
 
         self.assertNotIn("card-updated", rendered)
 
-    def test_collect_source_timestamps_reads_mtime_and_skips_missing_sources(self):
+    def test_render_catalogue_omits_a_card_description_it_does_not_have(self):
+        payload = json.loads(json.dumps(self.catalogue_payload()))
+        for collection in payload["collections"]:
+            collection.pop("description")
+        rendered = artefacts_cli.render_catalogue(
+            artefacts_cli.manifest_from_dict(payload)
+        )
+
+        self.assertNotIn("<p>", rendered)
+        self.assertIn("<h3>Charts</h3>", rendered)
+
+    def test_stamp_missing_dates_reads_mtime_once_and_leaves_a_set_date(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         source = Path(directory.name)
         (source / "Images").mkdir()
-        (source / "Images" / "Card.png").write_bytes(b"png")
-        os.utime(source / "Images" / "Card.png", (1767225600, 1767225600))
+        (source / "Images" / "old.png").write_bytes(b"png")
+        (source / "Images" / "new.png").write_bytes(b"png")
+        os.utime(source / "Images" / "old.png", (1767225600, 1767225600))
 
-        timestamps = artefacts_cli.collect_source_timestamps(
-            self.catalogue_manifest(), source
+        stamped = artefacts_cli.stamp_missing_dates(
+            self.dated_manifest(new="2026-03-11"), source
         )
 
+        dates = {entry.id: entry.date for entry in stamped.entries}
         self.assertEqual(
-            timestamps,
-            {
-                "image": datetime.fromtimestamp(1767225600).strftime("%Y-%m-%d"),
-            },
+            dates["old"], datetime.fromtimestamp(1767225600).strftime("%Y-%m-%d")
         )
+        self.assertEqual(dates["new"], "2026-03-11")
 
     def test_replace_generated_catalogue_changes_only_marker_region(self):
         document = "before\n<!-- ARTEFACTS:START -->\nold\n<!-- ARTEFACTS:END -->\nafter\n"
@@ -1417,6 +1427,7 @@ class ArtefactFixture:
         artefacts = repo / "artefacts"
         source.mkdir(parents=True)
         artefacts.mkdir(parents=True)
+        install_page_template(artefacts)
 
         payload = valid_payload()
         payload["protected_files"] = ["vendor/chart.js"]
@@ -1490,7 +1501,6 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
                 ("update", "charts/existing.png"),
                 ("add", "charts/new.png"),
                 ("delete", "charts/removed.png"),
-                ("orphan", "notes.txt"),
                 ("update", "index.html"),
                 ("update", "manifest.json"),
             },
@@ -1512,7 +1522,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         )
         written = json.loads(plan.desired_files[PurePosixPath("manifest.json")])
         self.assertEqual([entry["order"] for entry in written["entries"]], [10, 20])
-        self.assertIn("  ~ new: 10 -> 20", artefacts_cli.format_plan(plan))
+        self.assertIn("RENUMBERED ORDER (1)\n  new: 10 -> 20", artefacts_cli.format_plan(plan))
 
     def test_plan_calculation_does_not_mutate_repository(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -1527,6 +1537,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
     def test_destination_change_deletes_previous_public_path(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"][0]["id"] = "renamed"
         payload["entries"][0]["destination"] = "charts/renamed.png"
         manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
@@ -1562,6 +1573,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         payload["protected_files"].append("charts/existing.png")
+        payload["entries"][0]["id"] = "renamed"
         payload["entries"][0]["destination"] = "charts/renamed.png"
         manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
@@ -1581,6 +1593,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         payload["entries"][0].update(
             {
+                "id": "existing-page",
                 "source": "Charts/Existing.html",
                 "destination": "charts/existing/index.html",
             }
@@ -1611,7 +1624,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertEqual((repo / "artefacts/charts/new.png").read_bytes(), b"new")
         self.assertFalse((repo / "artefacts/charts/removed.png").exists())
         self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
-        self.assertFalse((repo / "artefacts/notes.txt").exists())
+        self.assertEqual((repo / "artefacts/notes.txt").read_text(), "keep")
         applied_manifest = artefacts_cli.load_manifest(manifest_path)
         self.assertEqual([entry.id for entry in applied_manifest.entries], ["existing", "new"])
         catalogue = (repo / "artefacts/index.html").read_text()
@@ -1619,7 +1632,9 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         self.assertNotIn("Removed", catalogue)
         self.assertFalse(any(repo.rglob("*.tmp")))
 
-    def test_orphan_sweep_spares_protected_files_and_ignored_metadata(self):
+    def test_orphans_are_warned_about_and_never_deleted(self):
+        # An unmanaged file may be a hand-written page or a redirect. Protected files
+        # and editor droppings are not orphans at all.
         repo, source, manifest_path, head_manifest = self.make_fixture()
         (repo / "artefacts" / ".DS_Store").write_bytes(b"metadata")
 
@@ -1627,15 +1642,16 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
             manifest_path, source, repo / "artefacts", head_manifest
         )
 
-        orphans = {
-            change.destination.as_posix()
-            for change in plan.changes
-            if change.kind == "orphan"
-        }
-        self.assertEqual(orphans, {"notes.txt"})
+        orphans = {note.where for note in plan.notes if note.kind == "orphan"}
+        self.assertEqual(orphans, {"artefacts/notes.txt"})
+        self.assertEqual(
+            [change for change in plan.changes if change.kind not in {"add", "update", "delete"}],
+            [],
+        )
 
         artefacts_cli.apply_plan(plan, repo / "artefacts")
 
+        self.assertEqual((repo / "artefacts/notes.txt").read_text(), "keep")
         self.assertEqual((repo / "artefacts/.DS_Store").read_bytes(), b"metadata")
         self.assertEqual((repo / "artefacts/vendor/chart.js").read_bytes(), b"vendor")
 
@@ -1650,30 +1666,34 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         )
 
         changes = {(change.kind, change.destination.as_posix()) for change in plan.changes}
+        orphans = {note.where for note in plan.notes if note.kind == "orphan"}
         self.assertIn(("add", "charts/existing.png"), changes)
-        self.assertIn(("orphan", "renamed/existing.png"), changes)
-        self.assertIn(("orphan", "renamed/removed.png"), changes)
+        self.assertIn("artefacts/renamed/existing.png", orphans)
+        self.assertIn("artefacts/renamed/removed.png", orphans)
 
         artefacts_cli.apply_plan(plan, artefacts_root)
 
-        self.assertFalse(renamed.exists())
+        # The published tree reconverges on the manifest; the hand-renamed copies are
+        # reported and left for a person to remove.
         self.assertEqual((artefacts_root / "charts/existing.png").read_bytes(), b"updated")
+        self.assertTrue((renamed / "existing.png").is_file())
 
-    def test_scan_skips_the_sync_control_file(self):
-        """page-template.html is a template, not a published page, so it is neither
-        an orphan nor link-checked."""
+    def test_the_sync_control_file_is_neither_an_orphan_nor_link_checked(self):
+        """page-template.html steers the sync instead of being published by it."""
         repo, source, manifest_path, head_manifest = self.make_fixture()
         artefacts_root = repo / "artefacts"
-        (artefacts_root / "page-template.html").write_text("$title $prefix", encoding="utf-8")
         nested = artefacts_root / "charts" / "page-template.html"
         nested.write_text("$title", encoding="utf-8")
 
-        published, _ = artefacts_cli.scan_published_tree(artefacts_root)
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, artefacts_root, head_manifest
+        )
 
-        self.assertNotIn(PurePosixPath("page-template.html"), published)
+        orphans = {note.where for note in plan.notes if note.kind == "orphan"}
+        self.assertNotIn("artefacts/page-template.html", orphans)
         # Only the control file at the root is exempt; a nested one is still a file
         # the manifest has to explain.
-        self.assertIn(PurePosixPath("charts/page-template.html"), published)
+        self.assertIn("artefacts/charts/page-template.html", orphans)
 
     def test_orphan_set_matches_repository_validation_rejection(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -1684,8 +1704,7 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         published, _ = artefacts_cli.scan_published_tree(artefacts_root)
         manifest = artefacts_cli.load_manifest(manifest_path)
         expected = {
-            PurePosixPath("index.html"),
-            PurePosixPath("manifest.json"),
+            *(PurePosixPath(name) for name in artefacts_cli.CONTROL_FILES),
             *manifest.protected_files,
             *(entry.destination for entry in manifest.entries),
         }
@@ -1693,8 +1712,8 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         unexpected = artefacts_cli.unexpected_published_files(published, expected)
 
         self.assertEqual(
-            [change.destination for change in plan.changes if change.kind == "orphan"],
-            unexpected,
+            [note.where for note in plan.notes if note.kind == "orphan"],
+            [f"artefacts/{path.as_posix()}" for path in unexpected],
         )
 
     def test_apply_sweeps_orphan_without_touching_published_files(self):
@@ -1708,12 +1727,19 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         report = artefacts_cli.validate_repository(repo, None)
 
         self.assertEqual(report.entry_count, 2)
+        # The orphan survives apply and validate, and is reported by both.
+        self.assertEqual(
+            {note.where for note in report.notes if note.kind == "orphan"},
+            {"artefacts/notes.txt"},
+        )
         applied = self.snapshot(artefacts_root)
         self.assertEqual(
             set(applied),
             {
                 "manifest.json",
                 "index.html",
+                "page-template.html",
+                "notes.txt",
                 "vendor/chart.js",
                 "charts/existing.png",
                 "charts/new.png",
@@ -1777,11 +1803,15 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
 
         output = artefacts_cli.format_plan(plan)
 
-        self.assertIn("Add (1)\n  + charts/new.png", output)
-        self.assertIn("Update (3)", output)
-        self.assertIn("Delete (1)\n  - charts/removed.png", output)
-        self.assertIn("Delete (orphaned) (1)\n  - notes.txt", output)
-        self.assertIn("Excluded source types: .txt", output)
+        self.assertIn("NEW PUBLIC URLS (1)", output)
+        self.assertIn("https://example.test/artefacts/charts/new.png", output)
+        self.assertIn("CHANGED (3)", output)
+        self.assertIn("WILL START 404-ING (1)", output)
+        self.assertIn("https://example.test/artefacts/charts/removed.png", output)
+        self.assertIn(".txt           1 file, unsupported type", output)
+        # The orphaned file in the published tree is reported, never deleted.
+        self.assertIn("orphan    artefacts/notes.txt", output)
+        self.assertTrue((repo / "artefacts" / "notes.txt").is_file())
 
     def test_plan_diffs_a_changed_markdown_document(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -1820,27 +1850,34 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
                 ),
                 b"# Report\n\nFirst version.\n",
                 PurePosixPath("vendor/marked.min.js"),
+                test_site(),
+                PAGE_TEMPLATE,
             )
         )
         plan = artefacts_cli.create_sync_plan(
             manifest_path, source, artefacts, manifest_path.read_bytes()
         )
-        diffs = dict(plan.markdown_diffs)
+        diffs = {
+            change.destination: change.diff
+            for change in plan.changes
+            if change.diff is not None
+        }
         self.assertIn(PurePosixPath("charts/report/index.html"), diffs)
         body = diffs[PurePosixPath("charts/report/index.html")]
         self.assertIn("-First version.", body)
         self.assertIn("+Second version.", body)
         rendered = artefacts_cli.format_plan(plan)
-        self.assertIn("Markdown changes (1)", rendered)
-        self.assertIn("charts/report/index.html", rendered)
+        self.assertIn("-First version.", rendered)
+        self.assertIn("https://example.test/artefacts/charts/report/", rendered)
 
     def test_plan_without_markdown_reports_no_markdown_changes(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         plan = artefacts_cli.create_sync_plan(
             manifest_path, source, repo / "artefacts", head_manifest
         )
-        self.assertEqual(plan.markdown_diffs, ())
-        self.assertNotIn("Markdown changes", artefacts_cli.format_plan(plan))
+        self.assertEqual(
+            tuple(change for change in plan.changes if change.diff is not None), ()
+        )
 
     def test_an_ignored_source_neither_blocks_nor_publishes(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -1861,19 +1898,19 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
             manifest_path, source, repo / "artefacts", head_manifest
         )
 
-        self.assertEqual(plan.ignored_sources, (("Notes/", 1),))
+        self.assertEqual(plan.ignored, (("Notes/", 1),))
         self.assertNotIn(
             PurePosixPath("notes/working/index.html"), plan.desired_files
         )
         rendered = artefacts_cli.format_plan(plan)
-        self.assertIn("Ignored sources (1)\n  - Notes/ (1 file)", rendered)
+        self.assertIn("Notes/         1 file, matched an ignored source rule", rendered)
 
     def test_a_plan_without_ignore_rules_omits_the_heading(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
         plan = artefacts_cli.create_sync_plan(
             manifest_path, source, repo / "artefacts", head_manifest
         )
-        self.assertEqual(plan.ignored_sources, ())
+        self.assertEqual(plan.ignored, ())
         self.assertNotIn("Ignored sources", artefacts_cli.format_plan(plan))
 
     def test_markdown_add_then_update_cycle_validates(self):
@@ -1910,23 +1947,29 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
         head = manifest_path.read_bytes()
         first = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
         self.assertIn(
-            artefacts_cli.Change("add", PurePosixPath("charts/report/index.html")),
-            first.changes,
+            ("add", PurePosixPath("charts/report/index.html")),
+            [(change.kind, change.destination) for change in first.changes],
         )
-        self.assertEqual(first.markdown_diffs, ())
-        artefacts_cli.apply_plan(first, artefacts)
+        self.assertEqual(
+            tuple(change for change in first.changes if change.diff is not None), ()
+        )
+        artefacts_cli.apply_plan(first, artefacts, source)
         artefacts_cli.validate_repository(repo, None)
 
         report.write_text("# Report\n\nSecond version.\n", encoding="utf-8")
         second = artefacts_cli.create_sync_plan(manifest_path, source, artefacts, head)
         self.assertIn(
-            artefacts_cli.Change("update", PurePosixPath("charts/report/index.html")),
-            second.changes,
+            ("update", PurePosixPath("charts/report/index.html")),
+            [(change.kind, change.destination) for change in second.changes],
         )
-        body = dict(second.markdown_diffs)[PurePosixPath("charts/report/index.html")]
+        body = {
+            change.destination: change.diff
+            for change in second.changes
+            if change.diff is not None
+        }[PurePosixPath("charts/report/index.html")]
         self.assertIn("-First version.", body)
         self.assertIn("+Second version.", body)
-        artefacts_cli.apply_plan(second, artefacts)
+        artefacts_cli.apply_plan(second, artefacts, source)
         artefacts_cli.validate_repository(repo, None)
 
         page = (artefacts / "charts" / "report" / "index.html").read_text(
@@ -2045,8 +2088,10 @@ class RepositoryValidationTests(unittest.TestCase):
         (artefacts / "charts" / "chart").mkdir(parents=True)
         (artefacts / "images").mkdir()
         (artefacts / "vendor").mkdir()
+        install_page_template(artefacts)
         payload = {
             "version": 1,
+            "site": valid_site(),
             "protected_files": ["vendor/chart.umd.min.js"],
             "collections": [
                 {
@@ -2111,14 +2156,17 @@ class RepositoryValidationTests(unittest.TestCase):
         self.assertEqual(report.entry_count, 2)
         self.assertEqual(report.local_link_count, 4)
 
-    def test_validate_rejects_unexpected_published_file(self):
+    def test_validate_reports_an_unexpected_published_file_without_rejecting_it(self):
         repo = self.valid_repository()
         (repo / "artefacts" / "unlisted.png").write_bytes(b"png")
 
-        with self.assertRaisesRegex(
-            artefacts_cli.ValidationError, "unexpected published file"
-        ):
-            artefacts_cli.validate_repository(repo, None)
+        report = artefacts_cli.validate_repository(repo, None)
+
+        self.assertEqual(
+            [note.where for note in report.notes if note.kind == "orphan"],
+            ["artefacts/unlisted.png"],
+        )
+        self.assertTrue((repo / "artefacts" / "unlisted.png").is_file())
 
     def test_validate_rejects_missing_destination(self):
         repo = self.valid_repository()
@@ -2168,7 +2216,7 @@ class RepositoryValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(artefacts_cli.ValidationError, "broken local reference"):
             artefacts_cli.validate_repository(repo, None)
 
-    def test_validate_rejects_cdnjs_reference(self):
+    def test_validate_reports_an_external_reference(self):
         repo = self.valid_repository()
         page = repo / "artefacts" / "charts" / "chart" / "index.html"
         page.write_text(
@@ -2176,8 +2224,15 @@ class RepositoryValidationTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        with self.assertRaisesRegex(artefacts_cli.ValidationError, "forbidden cdnjs"):
-            artefacts_cli.validate_repository(repo, None)
+        report = artefacts_cli.validate_repository(repo, None)
+
+        self.assertIn(
+            artefacts_cli.external_note(
+                "artefacts/charts/chart/index.html:1",
+                "https://cdnjs.cloudflare.com/chart.js",
+            ),
+            report.notes,
+        )
 
     def test_validate_rejects_homepage_commit_diff(self):
         repo = self.valid_repository()
@@ -2284,6 +2339,7 @@ class PublishingTests(unittest.TestCase):
         source = Path(directory.name) / "source"
         (repo / "artefacts" / "images").mkdir(parents=True)
         (source / "Images").mkdir(parents=True)
+        install_page_template(repo / "artefacts")
         payload = valid_payload()
         payload["protected_files"] = []
         payload["entries"][0].update(
@@ -2295,7 +2351,13 @@ class PublishingTests(unittest.TestCase):
         )
         manifest_path = repo / "artefacts" / "manifest.json"
         manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        manifest = artefacts_cli.load_manifest(manifest_path)
+        (source / "Images" / "Card.png").write_bytes(b"seed")
+        # Written the way a sync would leave it — dates stamped, keys in canonical
+        # order — so an unchanged tree really does plan as unchanged.
+        manifest = artefacts_cli.stamp_missing_dates(
+            artefacts_cli.load_manifest(manifest_path), source
+        )
+        manifest_path.write_bytes(artefacts_cli.manifest_to_json(manifest))
         catalogue_shell = (
             '<a href="/">Home</a>\n'
             "<!-- ARTEFACTS:START -->\n"
@@ -2309,7 +2371,7 @@ class PublishingTests(unittest.TestCase):
             artefacts_cli.replace_generated_catalogue(
                 catalogue_shell,
                 artefacts_cli.render_catalogue(
-                    manifest, artefacts_cli.collect_source_timestamps(manifest, source)
+                    artefacts_cli.stamp_missing_dates(manifest, source)
                 ),
             ),
             encoding="utf-8",
@@ -2413,7 +2475,9 @@ class PublishingTests(unittest.TestCase):
         self.assertIsNone(result)
         self.assertFalse(runner.called(["git", "switch"]))
 
-    def test_publish_treats_an_orphan_alone_as_a_change(self):
+    def test_publish_reports_an_orphan_and_stops_when_nothing_else_changed(self):
+        # An orphan is a warning, not a change, so it cannot by itself justify a
+        # branch, a pull request, and a deletion of somebody's hand-written file.
         repo, source, head = self.make_repository(changed=False)
         (repo / "artefacts" / "images" / "stale.png").write_bytes(b"stale")
         runner = RecordingRunner(
@@ -2423,8 +2487,9 @@ class PublishingTests(unittest.TestCase):
 
         result = self.publish(repo, source, runner)
 
-        self.assertEqual(result.merge_commit, "merge123")
-        self.assertFalse((repo / "artefacts" / "images" / "stale.png").exists())
+        self.assertIsNone(result)
+        self.assertFalse(runner.called(["git", "switch"]))
+        self.assertTrue((repo / "artefacts" / "images" / "stale.png").exists())
 
     def test_publish_cancellation_does_not_create_branch(self):
         repo, source, head = self.make_repository()
@@ -2526,7 +2591,7 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(result.merge_commit, "merge123")
         self.assertEqual(result.catalogue_url, "https://kevinlin.github.io/artefacts/")
         self.assertEqual(result.verified_url_count, 3)
-        self.assertIn("Update (1)", runner.pr_body)
+        self.assertIn("CHANGED (1)", runner.pr_body)
         self.assertTrue(runner.called(["git", "switch", "-c", "agent/sync-artefacts-20260726-143000"]))
         self.assertTrue(runner.called(["git", "add", "--all", "--", "artefacts"]))
         self.assertTrue(
@@ -2584,3 +2649,339 @@ class PublishingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IgnoreRuleTests(unittest.TestCase):
+    """Matching used to be exact-string or literal `dir/` prefix, which published the
+    files a seeded glob rule was meant to hide."""
+
+    def assert_ignored(self, source: str, rule: str, expected: bool) -> None:
+        self.assertEqual(
+            artefacts_cli._is_ignored(PurePosixPath(source), (rule,)),
+            expected,
+            f"{rule!r} against {source!r}",
+        )
+
+    def test_a_glob_matches_the_full_path_and_the_file_name(self):
+        self.assert_ignored("fde/report.local.md", "*.local.*", True)
+        self.assert_ignored("fde/notes.md", "fde/*.md", True)
+        self.assert_ignored("fde/notes.md", "*.local.*", False)
+
+    def test_a_leading_dot_glob_covers_hidden_entries_at_the_source_root(self):
+        self.assert_ignored(".firecrawl/page.md", ".*", True)
+        self.assert_ignored("notes/page.md", ".*", False)
+        # A hidden directory nested under a visible one is not covered: the glob is
+        # anchored at the source root. Hide one with an explicit ".cache/" rule.
+        self.assert_ignored("notes/.cache/page.md", ".*", False)
+        self.assert_ignored("notes/.cache/page.md", ".cache/", True)
+
+    def test_a_bare_directory_rule_matches_that_directory_at_any_depth(self):
+        self.assert_ignored("topic/prompts/one.md", "prompts/", True)
+        self.assert_ignored("prompts/one.md", "prompts/", True)
+        self.assert_ignored("topic/prompts.md", "prompts/", False)
+
+    def test_a_nested_directory_rule_still_anchors_at_the_root(self):
+        self.assert_ignored("fde/prompts/one.md", "fde/prompts/", True)
+        self.assert_ignored("other/fde/prompts/one.md", "fde/prompts/", False)
+
+
+class SvgValidationTests(unittest.TestCase):
+    """Rejected and named by line, never sanitised: a stdlib sanitiser that misses
+    foreignObject or a CSS url() is worse than none, because it is then trusted."""
+
+    CLEAN = b'<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg>\n'
+
+    def test_a_clean_svg_passes(self):
+        artefacts_cli.validate_svg(self.CLEAN, "clean.svg")
+
+    def assert_rejected(self, body: str, reason: str, line: int) -> None:
+        data = f'<svg xmlns="http://www.w3.org/2000/svg">\n{body}\n</svg>\n'.encode("utf-8")
+        with self.assertRaises(artefacts_cli.ValidationError) as caught:
+            artefacts_cli.validate_svg(data, "dirty.svg")
+        message = str(caught.exception)
+        self.assertIn(f"dirty.svg:{line}: {reason}", message)
+        self.assertIn("must not contain scripts", message)
+
+    def test_it_names_the_line_of_each_rejected_construct(self):
+        self.assert_rejected("<script>alert(1)</script>", "script element", 2)
+        self.assert_rejected("<foreignObject/>", "foreignObject element", 2)
+        self.assert_rejected('<rect onload="x()"/>', "event handler attribute", 2)
+        self.assert_rejected('<image href="//evil.test/a.png"/>', "external reference", 2)
+        self.assert_rejected('<a xlink:href="javascript:x()"/>', "javascript: url", 2)
+        self.assert_rejected('<image xlink:href="data:image/png;base64,AA"/>', "data: url", 2)
+        self.assert_rejected('<style>@import url(//evil.test/a.css);</style>', "external css url()", 2)
+
+    def test_it_reports_a_non_utf8_file_rather_than_guessing(self):
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "not valid UTF-8"):
+            artefacts_cli.validate_svg(b"\xff\xfe<svg/>", "broken.svg")
+
+
+class SourceTextNormalisationTests(unittest.TestCase):
+    def test_crlf_and_lone_cr_become_lf_with_a_final_newline(self):
+        text = artefacts_cli.normalise_source_text(b"a\r\nb\rc", "notes.md")
+        self.assertEqual(text, "a\nb\nc\n")
+
+    def test_an_already_normalised_source_is_unchanged(self):
+        self.assertEqual(artefacts_cli.normalise_source_text(b"a\nb\n", "x.md"), "a\nb\n")
+
+    def test_a_non_utf8_source_names_the_file(self):
+        with self.assertRaisesRegex(artefacts_cli.TransformationError, "notes.md: not UTF-8"):
+            artefacts_cli.normalise_source_text(b"\xff\xfe", "notes.md")
+
+    def test_a_crlf_markdown_source_still_round_trips(self):
+        # With core.autocrlf=input git stores LF, so a page keeping its CRs is not the
+        # page that gets committed and a fresh clone never converges.
+        entry = markdown_entry()
+        rendered = artefacts_cli.render_markdown_page(
+            entry,
+            b"# Report\r\n\r\nBody.\r\n",
+            PurePosixPath("vendor/marked.min.js"),
+            test_site(),
+            PAGE_TEMPLATE,
+        )
+        artefacts_cli.verify_markdown_round_trip(
+            b"# Report\r\n\r\nBody.\r\n", rendered, "Notes/Report.md"
+        )
+        self.assertEqual(
+            artefacts_cli.extract_markdown(rendered.decode("utf-8")),
+            "# Report\n\nBody.\n",
+        )
+
+    def test_a_page_missing_its_block_fails_the_round_trip(self):
+        with self.assertRaisesRegex(artefacts_cli.ValidationError, "no markdown block"):
+            artefacts_cli.verify_markdown_round_trip(
+                b"# R\n", b"<html>hand written</html>", "Notes/Report.md"
+            )
+
+
+class PublishedInvariantTests(unittest.TestCase):
+    """A destination and a title are frozen once published: a bookmark, an inbound
+    link and a search result all point at the old one."""
+
+    def head_bytes(self, **overrides) -> bytes:
+        payload = valid_payload()
+        payload["entries"][0].update(overrides)
+        return (json.dumps(payload, indent=2) + "\n").encode("utf-8")
+
+    def current(self, **overrides):
+        payload = valid_payload()
+        payload["entries"][0].update(overrides)
+        return artefacts_cli.manifest_from_dict(payload)
+
+    def test_an_unchanged_entry_passes(self):
+        artefacts_cli.check_published_invariants(self.current(), self.head_bytes())
+
+    def test_a_changed_destination_is_refused(self):
+        with self.assertRaisesRegex(artefacts_cli.ManifestError, "would break the published URL"):
+            artefacts_cli.check_published_invariants(
+                self.current(destination="charts/moved.png"), self.head_bytes()
+            )
+
+    def test_a_changed_title_is_refused(self):
+        with self.assertRaisesRegex(artefacts_cli.ManifestError, "never re-titled"):
+            artefacts_cli.check_published_invariants(
+                self.current(title="Cost analysis"), self.head_bytes()
+            )
+
+    def test_a_new_entry_is_not_constrained(self):
+        payload = valid_payload()
+        payload["entries"].append(second_entry())
+        artefacts_cli.check_published_invariants(
+            artefacts_cli.manifest_from_dict(payload), self.head_bytes()
+        )
+
+    def test_a_head_manifest_predating_the_site_block_still_guards(self):
+        # Adoption would be impossible if a missing `site` failed the run, and
+        # returning None would drop the guard on exactly that run.
+        payload = valid_payload()
+        payload.pop("site")
+        head = (json.dumps(payload, indent=2) + "\n").encode("utf-8")
+
+        with self.assertRaisesRegex(artefacts_cli.ManifestError, "would break the published URL"):
+            artefacts_cli.check_published_invariants(
+                self.current(destination="charts/moved.png"), head
+            )
+
+    def test_an_unreadable_head_manifest_is_skipped(self):
+        artefacts_cli.check_published_invariants(
+            self.current(destination="charts/moved.png"), b"not json"
+        )
+        artefacts_cli.check_published_invariants(
+            self.current(destination="charts/moved.png"), None
+        )
+
+
+class SourceWarningTests(unittest.TestCase):
+    def warnings(self, source: str, text: str | None = None):
+        return artefacts_cli.source_warnings(PurePosixPath(source), text)
+
+    def test_a_private_word_is_matched_at_any_word_boundary(self):
+        # The component-prefix rule let all three of these through silently.
+        for name in (
+            "Client Presentation.pdf",
+            "Internal Notes.html",
+            "q1-internal-review.md",
+            "topic/prompts/one.md",
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(
+                    [note.kind for note in self.warnings(name)], ["secret"], name
+                )
+
+    def test_a_word_that_merely_contains_one_is_not_matched(self):
+        self.assertEqual(self.warnings("clientele-survey.md"), [])
+        self.assertEqual(self.warnings("draftsman.md"), [])
+
+    def test_secret_shapes_are_reported_with_their_line(self):
+        notes = self.warnings("notes/report.md", "clean\nAKIAIOSFODNN7EXAMPLE\n")
+        self.assertEqual(
+            [(note.where, note.detail) for note in notes],
+            [("notes/report.md:2", "looks like an AWS access key")],
+        )
+
+    def test_a_binary_source_is_checked_by_name_alone(self):
+        self.assertEqual(self.warnings("charts/cost.png", None), [])
+
+
+class PortedPlanBehaviourTests(ArtefactFixture, unittest.TestCase):
+    def plan(self, repo, source, manifest_path, head):
+        return artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head
+        )
+
+    def test_a_root_level_source_lands_in_a_collection_called_general(self):
+        # Naming it after whichever file sorts first is arbitrary, and the arbitrary
+        # run is the first one a new source folder sees.
+        repo, source, manifest_path, _ = self.make_fixture()
+        (source / "Loose Note.png").write_bytes(b"png")
+        manifest = artefacts_cli.load_manifest(manifest_path)
+
+        proposal = artefacts_cli.propose_manifest_additions(
+            manifest, (PurePosixPath("Loose Note.png"),), source
+        )
+
+        self.assertEqual([c.id for c in proposal.collections], ["general"])
+        self.assertEqual(proposal.collections[0].title, "General")
+
+    def test_a_proposed_collection_carries_no_placeholder_description(self):
+        repo, source, manifest_path, _ = self.make_fixture()
+        (source / "Travel").mkdir()
+        (source / "Travel" / "Map.png").write_bytes(b"map")
+        manifest = artefacts_cli.load_manifest(manifest_path)
+
+        proposal = artefacts_cli.propose_manifest_additions(
+            manifest, (PurePosixPath("Travel/Map.png"),), source
+        )
+
+        self.assertIsNone(proposal.collections[0].description)
+        merged = artefacts_cli.merge_manifest_proposal(manifest, proposal)
+        self.assertNotIn("TODO", artefacts_cli.render_catalogue(merged))
+
+    def test_the_widened_allowlist_publishes_pdf_webp_gif_and_svg(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        for order, suffix in enumerate((".pdf", ".webp", ".gif", ".svg"), start=4):
+            payload["entries"].append(
+                {
+                    "id": f"binary-{suffix.lstrip('.')}",
+                    "source": f"Charts/Binary{suffix}",
+                    "destination": f"charts/binary{suffix}",
+                    "title": f"Binary {suffix.lstrip('.')}",
+                    "collection": "charts",
+                    "order": order * 10,
+                    "replacements": {},
+                }
+            )
+            body = (
+                b'<svg xmlns="http://www.w3.org/2000/svg"/>\n'
+                if suffix == ".svg"
+                else b"binary"
+            )
+            (source / "Charts" / f"Binary{suffix}").write_bytes(body)
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+        plan = self.plan(repo, source, manifest_path, head)
+
+        for suffix in (".pdf", ".webp", ".gif", ".svg"):
+            self.assertIn(
+                PurePosixPath(f"charts/binary{suffix}"), plan.desired_files, suffix
+            )
+
+    def test_a_dirty_svg_blocks_the_plan_by_line_number(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"].append(
+            {
+                "id": "diagram",
+                "source": "Charts/Diagram.svg",
+                "destination": "charts/diagram.svg",
+                "title": "Diagram",
+                "collection": "charts",
+                "order": 40,
+                "replacements": {},
+            }
+        )
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (source / "Charts" / "Diagram.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg">\n<script>x()</script>\n</svg>\n',
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(
+            artefacts_cli.ValidationError, r"Charts/Diagram\.svg:2: script element"
+        ):
+            self.plan(repo, source, manifest_path, head)
+
+    def test_a_missing_protected_file_blocks_the_plan(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        (repo / "artefacts" / "vendor" / "chart.js").unlink()
+
+        with self.assertRaisesRegex(
+            artefacts_cli.ValidationError, "vendor/chart.js: missing protected file"
+        ):
+            self.plan(repo, source, manifest_path, head)
+
+    def test_a_new_file_over_ten_megabytes_is_warned_about(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        (source / "Charts" / "New.png").write_bytes(
+            b"x" * (artefacts_cli.LARGE_FILE_BYTES + 1)
+        )
+
+        plan = self.plan(repo, source, manifest_path, head)
+
+        self.assertIn(
+            artefacts_cli.Note(
+                "size",
+                "https://example.test/artefacts/charts/new.png",
+                "new public file is over 10 MB",
+            ),
+            plan.notes,
+        )
+
+    def test_an_extensionless_source_is_counted_under_its_own_label(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        (source / "Makefile").write_text("all:\n", encoding="utf-8")
+
+        plan = self.plan(repo, source, manifest_path, head)
+
+        self.assertIn(("(no suffix)", 1), plan.excluded)
+        self.assertIn("(no suffix)", artefacts_cli.format_plan(plan))
+
+    def test_a_date_is_stamped_into_the_manifest_once_and_then_left_alone(self):
+        repo, source, manifest_path, head = self.make_fixture()
+        os.utime(source / "Charts" / "Existing.png", (1767225600, 1767225600))
+        stamped = datetime.fromtimestamp(1767225600).strftime("%Y-%m-%d")
+
+        plan = self.plan(repo, source, manifest_path, head)
+        artefacts_cli.apply_plan(plan, repo / "artefacts", source)
+
+        written = {e.id: e.date for e in artefacts_cli.load_manifest(manifest_path).entries}
+        self.assertEqual(written["existing"], stamped)
+
+        # A later touch does not move the date, so the catalogue cannot reorder itself
+        # behind the user's back.
+        os.utime(source / "Charts" / "Existing.png", (1800000000, 1800000000))
+        again = self.plan(repo, source, manifest_path, manifest_path.read_bytes())
+        self.assertEqual(
+            {e.id: e.date for e in again.next_manifest.entries}["existing"], stamped
+        )

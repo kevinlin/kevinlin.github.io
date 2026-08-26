@@ -6,12 +6,14 @@ from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 import difflib
+import fnmatch
 import html
 from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import string
 import subprocess
 import sys
 import tempfile
@@ -23,24 +25,30 @@ from urllib.parse import unquote, urljoin, urlsplit
 # Sources that become a generated page rather than a byte copy. Both publish to a
 # directory index.html so the public URL carries no file extension.
 DIRECTORY_INDEX_EXTENSIONS = frozenset({".html", ".md"})
-APPROVED_EXTENSIONS = frozenset({".html", ".md", ".png", ".jpeg", ".jpg", ".ico"})
+APPROVED_EXTENSIONS = frozenset(
+    {".html", ".md", ".png", ".jpeg", ".jpg", ".ico", ".pdf", ".webp", ".gif", ".svg"}
+)
 PUBLIC_COMPONENT = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+)?$")
 PROTECTED_COMPONENT = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 CDNJS_HOST = "cdnjs.cloudflare.com"
-IGNORED_METADATA_NAME = ".DS_Store"
-# Control file for the artefact-sync skill. It sits in artefacts/ but is a template,
-# not a published page, so it is neither an orphan nor link-checked.
-CONTROL_FILE_NAMES = frozenset({"page-template.html"})
-DELETION_KINDS = frozenset({"delete", "orphan"})
+# Editor and Finder droppings. Present in both trees, published in neither.
+IGNORED_METADATA_NAMES = frozenset({".DS_Store", "Thumbs.db"})
+MANIFEST_NAME = "manifest.json"
+TEMPLATE_NAME = "page-template.html"
+CATALOGUE_NAME = "index.html"
+# Files under artefacts/ that steer the sync rather than being published by it. They
+# are neither orphans nor entry destinations, and the template is not link-checked.
+CONTROL_FILES = frozenset({MANIFEST_NAME, TEMPLATE_NAME, CATALOGUE_NAME})
+# Orphans are warned about, never removed: an unmanaged file may be a hand-written
+# page or a redirect that nothing in the manifest is meant to explain.
+DELETION_KINDS = frozenset({"delete"})
 WRITE_KINDS = frozenset({"add", "update"})
 HOMEPAGE_FILES = ("index.html", "styles.css", "script.js")
+LARGE_FILE_BYTES = 10 * 1024 * 1024
 # The 3D showcase reads a generated texture atlas built from the published images.
 ATLAS_SCRIPT = "scripts/build_showcase_atlas.py"
 ATLAS_OUTPUT = PurePosixPath("showcase/atlas.js")
-
-
-def has_cdnjs_reference(text: str) -> bool:
-    return CDNJS_HOST in text or "https://cdnjs" in text
 
 
 class ArtefactError(Exception):
@@ -103,10 +111,24 @@ def _resolve_within(
 
 
 @dataclass(frozen=True)
+class Site:
+    """Everything about the published site that is not a file: the manifest's `site` block.
+
+    Held in the manifest rather than in the script so the same code publishes any
+    Pages repository, and so a favicon or a catalogue mode is reviewable in a diff.
+    """
+
+    base_url: str
+    favicon: str
+    catalogue_mode: str
+    catalogue_page: PurePosixPath | None
+
+
+@dataclass(frozen=True)
 class Collection:
     id: str
     title: str
-    description: str
+    description: str | None
     section: str
     section_order: int
     order: int
@@ -121,24 +143,31 @@ class Entry:
     collection: str
     order: int
     replacements: dict[str, str] = field(default_factory=dict)
+    description: str | None = None
+    # ISO date the catalogue sorts and stamps cards by. Written once, from the
+    # source's modification time, then left alone: a re-download must not silently
+    # reorder the catalogue, and a hand-set date has to survive the next run.
+    date: str | None = None
 
 
 @dataclass(frozen=True)
 class Manifest:
     version: int
+    site: Site
     protected_files: tuple[PurePosixPath, ...]
     collections: tuple[Collection, ...]
     entries: tuple[Entry, ...]
     # Source paths the scan subtracts before reconciliation. A trailing "/" makes a
-    # rule cover a subtree. Kept as written rather than as PurePosixPath, because
-    # PurePosixPath discards the trailing separator the two forms are told apart by.
+    # rule cover a subtree, and a rule containing *, ? or [ is an fnmatch glob.
+    # Kept as written rather than as PurePosixPath, because PurePosixPath discards
+    # the trailing separator the forms are told apart by.
     ignored_sources: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class SourceInventory:
     approved: tuple[PurePosixPath, ...]
-    excluded_suffixes: tuple[str, ...]
+    excluded: tuple[tuple[str, int], ...]
 
 
 @dataclass(frozen=True)
@@ -158,6 +187,19 @@ class SourceReconciliation:
 class Change:
     kind: str
     destination: PurePosixPath
+    source: PurePosixPath | None = None
+    size: int | None = None
+    url: str = ""
+    diff: str | None = None
+
+
+@dataclass(frozen=True)
+class Note:
+    """Something the run wants read but will not stop for."""
+
+    kind: str
+    where: str
+    detail: str
 
 
 @dataclass(frozen=True)
@@ -167,9 +209,10 @@ class SyncPlan:
     desired_files: dict[PurePosixPath, bytes]
     changes: tuple[Change, ...]
     unchanged: tuple[PurePosixPath, ...]
-    excluded_suffixes: tuple[str, ...]
-    markdown_diffs: tuple[tuple[PurePosixPath, str], ...] = ()
-    ignored_sources: tuple[tuple[str, int], ...] = ()
+    # The closed allowlist's other two outcomes, per suffix and per ignore rule.
+    excluded: tuple[tuple[str, int], ...] = ()
+    ignored: tuple[tuple[str, int], ...] = ()
+    notes: tuple[Note, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -177,6 +220,7 @@ class ValidationReport:
     entry_count: int
     local_link_count: int
     ignored_metadata_count: int
+    notes: tuple[Note, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -195,7 +239,7 @@ class PublishResult:
     merge_commit: str
     catalogue_url: str
     verified_url_count: int
-    excluded_suffixes: tuple[str, ...]
+    excluded: tuple[tuple[str, int], ...]
 
 
 class _ReferenceParser(HTMLParser):
@@ -213,6 +257,31 @@ class _ReferenceParser(HTMLParser):
                 self.references.append(value)
             elif name == "src":
                 self.references.append(value)
+
+
+SCHEME = re.compile(r"^[a-z][a-z0-9+.-]*:", re.IGNORECASE)
+FETCHES_NOTHING = ("data:", "mailto:", "tel:", "#")
+
+
+class _LoadParser(HTMLParser):
+    """Line and URL of every external resource a page fetches while rendering."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.loads: list[tuple[int, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if value is None:
+                continue
+            if name != "src" and not (name == "href" and tag.lower() == "link"):
+                continue
+            url = value.strip()
+            if not (url.startswith("//") or SCHEME.match(url)):
+                continue
+            if url.lower().startswith(FETCHES_NOTHING):
+                continue
+            self.loads.append((self.getpos()[0], url))
 
 
 def _safe_relative_path(value: str, field_name: str) -> PurePosixPath:
@@ -238,10 +307,74 @@ def _require_int(payload: dict[str, Any], name: str) -> int:
     return value
 
 
+def _optional_string(payload: dict[str, Any], name: str) -> str | None:
+    value = payload.get(name)
+    if value is not None and (not isinstance(value, str) or not value.strip()):
+        raise ManifestError(f"{name} must be a non-empty string when present")
+    return value
+
+
+DEFAULT_FAVICON = '<link rel="icon" href="data:,">'
+
+
+def site_from_dict(payload: Any) -> Site:
+    if not isinstance(payload, dict):
+        raise ManifestError("site must be an object")
+    base_url = payload.get("base_url")
+    if not isinstance(base_url, str) or not base_url.endswith("/"):
+        raise ManifestError("site.base_url must be a URL ending in '/'")
+    catalogue = payload.get("catalogue") or {"mode": "standalone"}
+    if not isinstance(catalogue, dict):
+        raise ManifestError("site.catalogue must be an object")
+    mode = catalogue.get("mode", "standalone")
+    if mode not in ("standalone", "inject"):
+        raise ManifestError(
+            f"site.catalogue.mode must be standalone or inject, got {mode!r}"
+        )
+    page = catalogue.get("page")
+    if mode == "inject" and not page:
+        raise ManifestError("site.catalogue.mode 'inject' needs a 'page'")
+    page_path = _safe_relative_path(page, "site.catalogue.page") if page else None
+    favicon = payload.get("favicon", DEFAULT_FAVICON)
+    if not isinstance(favicon, str) or not favicon:
+        raise ManifestError("site.favicon must be a non-empty string")
+    return Site(
+        base_url=base_url,
+        favicon=favicon,
+        catalogue_mode=mode,
+        catalogue_page=page_path,
+    )
+
+
+def site_to_dict(site: Site) -> dict[str, Any]:
+    catalogue: dict[str, Any] = {"mode": site.catalogue_mode}
+    if site.catalogue_page is not None:
+        catalogue["page"] = site.catalogue_page.as_posix()
+    return {
+        "base_url": site.base_url,
+        "favicon": site.favicon,
+        "catalogue": catalogue,
+    }
+
+
+def _entry_date(payload: dict[str, Any]) -> str | None:
+    stamp = payload.get("date")
+    if stamp is None:
+        return None
+    if not isinstance(stamp, str) or not ISO_DATE.match(stamp):
+        raise ManifestError(f"entry {payload.get('id')!r}: date must be YYYY-MM-DD")
+    try:
+        date.fromisoformat(stamp)
+    except ValueError as error:
+        raise ManifestError(f"entry {payload.get('id')!r}: {error}") from error
+    return stamp
+
+
 def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
     if not isinstance(payload, dict):
         raise ManifestError("manifest must be a JSON object")
     try:
+        site_payload = payload["site"]
         protected_payload = payload["protected_files"]
         collections_payload = payload["collections"]
         entries_payload = payload["entries"]
@@ -261,7 +394,7 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
         Collection(
             id=_require_string(item, "id"),
             title=_require_string(item, "title"),
-            description=_require_string(item, "description"),
+            description=_optional_string(item, "description"),
             section=_require_string(item, "section"),
             section_order=_require_int(item, "section_order"),
             order=_require_int(item, "order"),
@@ -296,6 +429,8 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
                 collection=_require_string(item, "collection"),
                 order=_require_int(item, "order"),
                 replacements=dict(replacements),
+                description=_optional_string(item, "description"),
+                date=_entry_date(item),
             )
         )
 
@@ -308,6 +443,7 @@ def manifest_from_dict(payload: dict[str, Any]) -> Manifest:
 
     return Manifest(
         version=payload.get("version"),
+        site=site_from_dict(site_payload),
         protected_files=protected_files,
         collections=collections,
         entries=tuple(entries),
@@ -360,7 +496,7 @@ def validate_manifest(manifest: Manifest) -> None:
             )
 
     collection_ids = {collection.id for collection in manifest.collections}
-    reserved_destinations = {PurePosixPath("index.html"), PurePosixPath("manifest.json")}
+    reserved_destinations = {PurePosixPath(name) for name in CONTROL_FILES}
     managed_destinations = {entry.destination for entry in manifest.entries}
     protected_destinations = set(manifest.protected_files)
     if managed_destinations & reserved_destinations:
@@ -447,53 +583,72 @@ def load_manifest(path: Path) -> Manifest:
     return manifest_from_bytes(content, "manifest")
 
 
-def scan_source(source_root: Path) -> SourceInventory:
+def scan_source(source_root: Path, repo_root: Path) -> SourceInventory:
+    """Inventory approved files without following symlinks or entering the destination repo.
+
+    A symlink is skipped rather than fatal: the source folder is a working
+    directory a person keeps shortcuts in, and one shortcut must not stop every
+    command. The destination repository is pruned by resolved path, so a clone
+    sitting inside the source folder under any name stays out of the inventory.
+    Every non-approved file is counted by suffix instead of being dropped
+    silently — the closed allowlist's other outcome is something `plan` reports.
+    """
     if not source_root.is_dir():
         raise InventoryError(f"source directory does not exist: {source_root}")
     resolved_root = source_root.resolve()
+    pruned = repo_root.resolve()
     approved: list[PurePosixPath] = []
-    excluded_suffixes: set[str] = set()
+    excluded: dict[str, int] = {}
 
-    for current_root, directory_names, file_names in os.walk(source_root):
+    for current_root, directory_names, file_names in os.walk(resolved_root):
         current_path = Path(current_root)
-        for name in (*directory_names, *file_names):
-            candidate = current_path / name
-            if candidate.is_symlink():
-                raise InventoryError(f"symbolic link is not allowed: {candidate}")
-        directory_names[:] = [
+        directory_names[:] = sorted(
             name
             for name in directory_names
-            if not name.startswith(".") and name != "kevinlin.github.io"
-        ]
-        for name in file_names:
-            if name == IGNORED_METADATA_NAME:
-                continue
+            if not (current_path / name).is_symlink()
+            and (current_path / name).resolve() != pruned
+        )
+        for name in sorted(file_names):
             candidate = current_path / name
+            if candidate.is_symlink() or name in IGNORED_METADATA_NAMES:
+                continue
             suffix = candidate.suffix.lower()
             if suffix not in APPROVED_EXTENSIONS:
-                if suffix:
-                    excluded_suffixes.add(suffix)
+                label = suffix or "(no suffix)"
+                excluded[label] = excluded.get(label, 0) + 1
                 continue
-            _resolve_within(
-                resolved_root,
-                candidate,
-                InventoryError,
-                f"source path escapes source directory: {candidate}",
+            approved.append(
+                PurePosixPath(candidate.relative_to(resolved_root).as_posix())
             )
-            approved.append(PurePosixPath(candidate.relative_to(source_root).as_posix()))
 
     return SourceInventory(
         approved=tuple(sorted(approved, key=str)),
-        excluded_suffixes=tuple(sorted(excluded_suffixes)),
+        excluded=tuple(sorted(excluded.items())),
     )
 
 
 def _is_ignored(source: PurePosixPath, rules: tuple[str, ...]) -> bool:
+    """Whether one source matches any ignore rule.
+
+    Three forms, because exact-string-or-literal-prefix matching quietly published
+    the files it was meant to hide: a rule ending in "/" covers a subtree, and a
+    bare directory name covers that directory at any depth; a rule containing *, ?
+    or [ is an fnmatch glob tried against both the full path and the file name;
+    anything else is an exact path.
+    """
     text = source.as_posix()
-    return any(
-        text.startswith(rule) if rule.endswith("/") else text == rule
-        for rule in rules
-    )
+    for rule in rules:
+        if rule.endswith("/"):
+            directory = rule.rstrip("/")
+            if ("/" not in directory and directory in source.parts[:-1]) or text.startswith(rule):
+                return True
+        if any(character in rule for character in "*?[") and (
+            fnmatch.fnmatchcase(text, rule) or fnmatch.fnmatchcase(source.name, rule)
+        ):
+            return True
+        if text == rule:
+            return True
+    return False
 
 
 def apply_source_ignores(
@@ -517,6 +672,57 @@ def apply_source_ignores(
         for rule in rules
     )
     return replace(inventory, approved=approved), counts
+
+
+_SVG_RULES: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("script element", re.compile(r"<\s*script\b", re.IGNORECASE)),
+    ("foreignObject element", re.compile(r"<\s*foreignObject\b", re.IGNORECASE)),
+    ("event handler attribute", re.compile(r"\bon[a-z]+\s*=", re.IGNORECASE)),
+    (
+        "external reference",
+        re.compile(
+            r"\b(?:xlink:)?href\s*=\s*[\"']\s*(?:[a-z][a-z0-9+.-]*:)?//", re.IGNORECASE
+        ),
+    ),
+    ("javascript: url", re.compile(r"[\"'(]\s*javascript\s*:", re.IGNORECASE)),
+    (
+        "data: url",
+        re.compile(r"\b(?:xlink:)?href\s*=\s*[\"']\s*data\s*:", re.IGNORECASE),
+    ),
+    (
+        "external css url()",
+        re.compile(r"url\(\s*[\"']?\s*(?:[a-z][a-z0-9+.-]*:)?//", re.IGNORECASE),
+    ),
+    (
+        "external entity declaration",
+        re.compile(r"<!ENTITY\b[^>]*\b(?:SYSTEM|PUBLIC)\b", re.IGNORECASE),
+    ),
+)
+
+
+def validate_svg(data: bytes, label: str) -> None:
+    """Refuse SVG scripts, handlers, and external references without rewriting bytes.
+
+    Reject and name the line; never sanitise. A standard-library sanitiser that
+    misses `foreignObject`, `xlink:href` or a CSS `url()` is worse than none,
+    because the user then trusts the file it passed.
+    """
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise ValidationError(f"{label}: not valid UTF-8 ({error})") from error
+
+    problems: list[tuple[int, str]] = []
+    for reason, pattern in _SVG_RULES:
+        for match in pattern.finditer(text):
+            number = text.count("\n", 0, match.start()) + 1
+            problems.append((number, f"{label}:{number}: {reason} ({match.group(0).strip()!r})"))
+    if problems:
+        problems.sort()
+        raise ValidationError(
+            "\n".join(message for _, message in problems)
+            + "\nSVG must not contain scripts, event handlers, or external references."
+        )
 
 
 SLUG_SEPARATOR = re.compile(r"[^a-z0-9]+")
@@ -566,246 +772,24 @@ def extract_markdown(document: str) -> str | None:
 
 
 MARKDOWN_VENDOR_NAME = "marked.min.js"
-
-# One self-contained document per Markdown entry, matching artefacts/index.html:
-# same colour tokens and fonts, same pre-paint theme script, a 72rem content column, and a
-# back-link to the catalogue. The CSS is inline because every other published page
-# is self-contained; a shared stylesheet would add a cross-file reference for
-# `validate` to resolve on every document.
-# Inlined rather than referenced from /favicons/ because the publish validator
-# resolves local references against a tree containing only `artefacts/`.
-FAVICON_LINK = (
-    '<link rel="icon" type="image/svg+xml" '
-    "href='data:image/svg+xml,"
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
-    '<rect width="100" height="100" rx="20" fill="%230063a3"/>'
-    '<text x="50" y="75" font-size="60" text-anchor="middle" fill="white" '
-    'font-family="sans-serif" font-weight="bold">K</text></svg>\'>'
-)
 EXISTING_ICON_LINK = re.compile(r"""<link\b[^>]*\brel=["']?[^"'>]*\bicon\b""", re.IGNORECASE)
 HEAD_OPEN = re.compile(r"<head\b[^>]*>", re.IGNORECASE)
 DOCTYPE = re.compile(r"^\s*<!doctype[^>]*>", re.IGNORECASE)
 
 
-MARKDOWN_PAGE_TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} | Artefacts</title>
-    {favicon}
-    <meta name="theme-color" content="#0063a3">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        // Applied before first paint so the page never flashes the wrong theme.
-        (function () {{
-            try {{
-                var stored = localStorage.getItem('theme');
-                var dark = stored ? stored === 'dark'
-                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
-            }} catch (e) {{}}
-        }})();
-    </script>
-    <style>
-        :root {{
-            color-scheme: light;
-            --primary-color: #0063a3;
-            --accent-color: #ff5a5f;
-            --text-color: #333333;
-            --light-text: #666666;
-            --background-color: #ffffff;
-            --section-bg: #f8f9fa;
-            --border-color: #e6e6e6;
-            --tint: rgba(0, 99, 163, 0.1);
-        }}
+def load_template(artefacts_root: Path) -> string.Template:
+    """The Markdown page template, read from the tree it publishes into.
 
-        [data-theme="dark"] {{
-            color-scheme: dark;
-            --primary-color: #4389b9;
-            --accent-color: #ff8085;
-            --text-color: #f8f9fa;
-            --light-text: #cccccc;
-            --background-color: #121212;
-            --section-bg: #1e1e1e;
-            --border-color: #3a3a3a;
-            --tint: rgba(67, 137, 185, 0.16);
-        }}
-
-        *, *::before, *::after {{ box-sizing: border-box; }}
-
-        html {{
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
-        }}
-
-        body {{
-            margin: 0;
-            background: var(--section-bg);
-            color: var(--text-color);
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 1rem;
-            line-height: 1.7;
-        }}
-
-        header, main, footer {{
-            width: min(72rem, calc(100% - 48px));
-            margin-inline: auto;
-        }}
-
-        header {{ padding: 56px 0 8px; }}
-
-        a {{ color: var(--primary-color); text-underline-offset: 0.2em; }}
-        a:hover {{ color: var(--accent-color); }}
-
-        .back-link {{
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 44px;
-            font-weight: 500;
-            text-decoration: none;
-        }}
-
-        .back-link:hover span {{ text-decoration: underline; }}
-
-        h1 {{
-            margin: 24px 0 8px;
-            font-size: clamp(1.9rem, 5vw, 2.6rem);
-            line-height: 1.2;
-            text-wrap: balance;
-        }}
-
-        main {{ padding-bottom: 72px; }}
-
-        article {{
-            padding: 32px;
-            background: var(--background-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-        }}
-
-        article > :first-child {{ margin-top: 0; }}
-        article > :last-child {{ margin-bottom: 0; }}
-
-        article h1, article h2, article h3, article h4 {{
-            margin: 2em 0 0.6em;
-            line-height: 1.3;
-            text-wrap: balance;
-        }}
-
-        article h2 {{
-            padding-bottom: 0.3em;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 1.5rem;
-        }}
-
-        article h3 {{ font-size: 1.2rem; }}
-
-        article img {{ max-width: 100%; height: auto; }}
-
-        article blockquote {{
-            margin: 1.5em 0;
-            padding: 0.2em 1.2em;
-            border-left: 3px solid var(--primary-color);
-            color: var(--light-text);
-        }}
-
-        article code {{
-            padding: 0.15em 0.4em;
-            background: var(--tint);
-            border-radius: 4px;
-            font-size: 0.9em;
-        }}
-
-        article pre {{
-            overflow-x: auto;
-            padding: 16px;
-            background: var(--section-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }}
-
-        article pre code {{ padding: 0; background: none; }}
-
-        .table-scroll, article table {{ display: block; overflow-x: auto; }}
-
-        article table {{ border-collapse: collapse; width: 100%; }}
-
-        article th, article td {{
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-        }}
-
-        article th {{ background: var(--tint); }}
-
-        article hr {{ border: none; border-top: 1px solid var(--border-color); }}
-
-        footer {{
-            padding-bottom: 48px;
-            color: var(--light-text);
-            font-size: 0.9rem;
-        }}
-    </style>
-</head>
-<body>
-    <header>
-        <a class="back-link" href="{prefix}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            <span>Back to Artefacts</span>
-        </a>
-        <h1>{title}</h1>
-    </header>
-
-    <main>
-        <article id="markdown-body"></article>
-    </main>
-
-    <footer>
-        <p>Rendered from Markdown in the browser.</p>
-    </footer>
-
-{block_start}{markdown}{block_end}
-    <script src="{prefix}{vendor}"></script>
-    <script>
-        // The source block carries the Markdown verbatim except for two escaped
-        // sequences; the same substitution runs in reverse here. See
-        // escape_markdown_block in scripts/artefacts.py.
-        (function () {{
-            // textContent starts at the newline that follows the opening tag, which
-            // the Python-side extract_markdown slice does not include. Drop it so
-            // both sides see the same bytes.
-            var raw = document.getElementById('markdown-source').textContent.replace(/^\\n/, '');
-            var text = raw.replace(/<(\\\\+)(\\/script|!--)/gi, function (match, slashes, marker) {{
-                return '<' + slashes.slice(1) + marker;
-            }});
-            var body = document.getElementById('markdown-body');
-            body.innerHTML = marked.parse(text);
-            // Most documents open with their own H1, and the proposal derives the
-            // manifest title from exactly that heading, so the page would print the
-            // title twice. Drop the article's copy when it repeats the header rather
-            // than stripping it from the source, which has to stay byte-exact.
-            // The H1 is not always the first element — several sources open with a
-            // banner line — so match on the first H1 anywhere in the article. Equal
-            // text is the whole test: a heading that differs really does say
-            // something else, and both copies stay.
-            var lead = body.querySelector('h1');
-            var heading = document.querySelector('header h1');
-            if (lead && heading &&
-                lead.textContent.trim() === heading.textContent.trim()) {{
-                lead.remove();
-            }}
-        }})();
-    </script>
-</body>
-</html>
-"""
+    A real file rather than a string in this script: its CSS needs no brace
+    escaping, it previews in a browser, and a restyle is reviewable as a diff of
+    the page it changes. `string.Template` because `$title` does not collide with
+    the braces the template's CSS and JavaScript are full of.
+    """
+    path = artefacts_root / TEMPLATE_NAME
+    try:
+        return string.Template(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError) as error:
+        raise TransformationError(f"cannot read page template {path}: {error}") from error
 
 
 def markdown_vendor_path(manifest: Manifest) -> PurePosixPath:
@@ -817,39 +801,53 @@ def markdown_vendor_path(manifest: Manifest) -> PurePosixPath:
     )
 
 
-def render_markdown_page(
-    entry: Entry, source_bytes: bytes, vendor_path: PurePosixPath
-) -> bytes:
-    """One self-contained page carrying the Markdown verbatim.
+def normalise_source_text(source_bytes: bytes, label: str) -> str:
+    """Decode UTF-8, normalise line endings, and guarantee a final newline.
 
-    The Markdown is embedded rather than converted because this script is
-    standard-library only. Its bytes are preserved exactly: the trailing-space
-    stripping `transform_html` applies would turn a Markdown hard line break into a
-    soft one, and both `apply`'s byte check and the diff preview depend on the
-    embed-extract round trip being lossless.
+    Line endings are normalised because git with `core.autocrlf=input` — a common
+    default — stores LF for a CRLF working-tree file. A page that kept its CRs is
+    not the page that gets committed, so a fresh clone reports the same entry
+    changed on every run, forever.
     """
     try:
         text = source_bytes.decode("utf-8")
     except UnicodeDecodeError as error:
-        raise TransformationError(
-            f"Markdown source is not UTF-8: {entry.source}"
-        ) from error
+        raise TransformationError(f"{label}: not UTF-8 ({error})") from error
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
     if text and not text.endswith("\n"):
         text += "\n"
+    return text
+
+
+def render_markdown_page(
+    entry: Entry,
+    source_bytes: bytes,
+    vendor_path: PurePosixPath,
+    site: Site,
+    template: string.Template,
+) -> bytes:
+    """One self-contained page carrying the Markdown verbatim.
+
+    The Markdown is embedded rather than converted because this script is
+    standard-library only. Its text is preserved exactly after line-ending
+    normalisation: the trailing-space stripping `transform_html` applies would turn
+    a Markdown hard line break into a soft one, and both `apply`'s round-trip check
+    and the diff preview depend on the embed-extract round trip being lossless.
+    """
+    text = normalise_source_text(source_bytes, entry.source.as_posix())
+    # `$prefix` is the `../` climb and `$vendor` the vendor path alone, so a
+    # template composes `src="$prefix$vendor"`. Baking the climb into `$vendor`
+    # would double it for any template that spells both.
     prefix = "../" * len(entry.destination.parent.parts)
-    document = MARKDOWN_PAGE_TEMPLATE.format(
+    document = template.substitute(
         title=html.escape(entry.title),
-        favicon=FAVICON_LINK,
+        favicon=site.favicon,
         prefix=prefix,
         vendor=vendor_path.as_posix(),
         block_start=MARKDOWN_BLOCK_START,
         markdown=escape_markdown_block(text),
         block_end=MARKDOWN_BLOCK_END,
     )
-    if has_cdnjs_reference(document):
-        raise TransformationError(
-            f"forbidden cdnjs reference in generated Markdown page for {entry.id}"
-        )
     return document.encode("utf-8")
 
 
@@ -858,28 +856,27 @@ MARKDOWN_DIFF_LINE_LIMIT = 40
 
 def markdown_diff(
     published: bytes | None,
-    source: bytes,
+    rendered: bytes,
     limit: int = MARKDOWN_DIFF_LINE_LIMIT,
 ) -> str:
-    """Unified diff between the published Markdown and the new source.
+    """Unified diff between the published page's Markdown and the rendered page's.
 
-    The published page is the same basis the byte comparison uses, so the diff
-    cannot disagree with the change classification. Truncation is stated rather
-    than silent: a cut-off diff that looked complete would be worse than no diff.
+    Both sides are read back out of a rendered page, so the diff is computed over
+    exactly the text the byte comparison classified as changed and cannot disagree
+    with it. Truncation is stated rather than silent: a cut-off diff that looked
+    complete would be worse than no diff.
     """
     if published is None:
         return ""
     try:
         document = published.decode("utf-8")
+        current_document = rendered.decode("utf-8")
     except UnicodeDecodeError:
-        return "diff unavailable: published page is not UTF-8"
+        return "diff unavailable: page is not UTF-8"
     previous = extract_markdown(document)
-    if previous is None:
-        return "diff unavailable: published page has no embedded Markdown"
-    try:
-        current = source.decode("utf-8")
-    except UnicodeDecodeError:
-        return "diff unavailable: source is not UTF-8"
+    current = extract_markdown(current_document)
+    if previous is None or current is None:
+        return "diff unavailable: page has no embedded Markdown"
     lines = list(
         difflib.unified_diff(
             previous.splitlines(),
@@ -915,21 +912,10 @@ def suggest_destination(source: PurePosixPath) -> PurePosixPath:
 
 PRESENTATION_SECTION = "Presentations and analysis"
 IMAGE_SECTION = "Image collections"
-PLACEHOLDER_DESCRIPTION = "TODO: describe this collection."
-# The 3D showcase walks every published image, including the ones filed under
-# PRESENTATION_SECTION, but its link rides the IMAGE_SECTION heading because that
-# is where a reader goes looking for pictures. Renaming that section in the
-# manifest drops the link, so rename this constant with it.
-SHOWCASE_LINK = """\
-                <a class="showcase-link" href="showcase/">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" \
-stroke="currentColor" stroke-width="2" stroke-linecap="round" \
-stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 2 2 7l10 5 10-5-10-5Z"/>
-                        <path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                    <span>Walk the image artefacts in 3D</span>
-                </a>"""
+# Root-level sources have no directory to name their collection after. Naming it for
+# whichever file happens to sort first is arbitrary, and the arbitrary run is the
+# first one a new source folder sees.
+ROOT_COLLECTION_LABEL = "General"
 CDNJS_REFERENCE = re.compile(rf"https://{re.escape(CDNJS_HOST)}/[^\s\"'<>)]+")
 
 
@@ -1034,10 +1020,9 @@ def _vendor_replacements(
 
     `CDNJS_REFERENCE` matches raw text because `transform_html` replaces raw
     text; the parsed references from `_parse_references` are HTML-unescaped and
-    would not always be found. Rather than trust the match to be exhaustive, the
-    replacements are applied here exactly as `transform_html` will apply them and
-    the result is put through the same `has_cdnjs_reference` ban check, so a
-    reference this function missed is reported now instead of killing the re-run.
+    would not always be found. The replacements are applied here exactly as
+    `transform_html` will apply them, so a reference this function could not map is
+    reported on the proposal rather than discovered in the published page.
     """
     try:
         text = source_path.read_text(encoding="utf-8")
@@ -1051,7 +1036,7 @@ def _vendor_replacements(
             replacements[url] = prefix + vendor.as_posix()
     for old, new in replacements.items():
         text = text.replace(old, new)
-    return replacements, has_cdnjs_reference(text)
+    return replacements, CDNJS_REFERENCE.search(text) is not None
 
 
 def propose_manifest_additions(
@@ -1090,7 +1075,7 @@ def propose_manifest_additions(
             # second collection beside it under a suffixed id.
             collection_id = _slug(group)
         if collection_id is None:
-            label = group or sources[0].stem
+            label = group or ROOT_COLLECTION_LABEL
             collection_id = _unique_id(_slug(label), collection_ids)
             collection_ids.add(collection_id)
             # Classified on the source extensions that produce a directory
@@ -1114,7 +1099,10 @@ def propose_manifest_additions(
                 Collection(
                     id=collection_id,
                     title=_normalize_words(label).title(),
-                    description=PLACEHOLDER_DESCRIPTION,
+                    # No description. A placeholder string would publish itself to
+                    # the catalogue on the next apply; an absent one prints nothing,
+                    # so the card reads correctly until someone writes one.
+                    description=None,
                     section=section,
                     section_order=section_orders[section],
                     order=order_in_section[section],
@@ -1137,8 +1125,9 @@ def propose_manifest_additions(
                 )
                 if unmapped:
                     warnings[entry_id] = (
-                        "an unmapped cdnjs reference remains; vendor it into "
-                        "protected_files or the next run fails in transform_html"
+                        "an unmapped cdnjs reference remains; the published page "
+                        "will load it from cdnjs unless you vendor it into "
+                        "protected_files"
                     )
             else:
                 # Markdown entries declare no replacements: the generated page owns
@@ -1180,7 +1169,8 @@ def format_proposal(proposal: ManifestProposal) -> str:
             f"  + {collection.id}: {collection.title} "
             f"[{collection.section} {collection.section_order}/{collection.order}]"
         )
-        lines.append(f"      description: {collection.description}")
+        if collection.description is not None:
+            lines.append(f"      description: {collection.description}")
     lines.append(f"Proposed entries ({len(proposal.entries)})")
     for entry in proposal.entries:
         lines.append(f"  + {entry.id}")
@@ -1222,26 +1212,42 @@ def reconcile_inventory(
     return SourceReconciliation(next_manifest=next_manifest, missing_entries=missing)
 
 
-def ensure_favicon(text: str) -> str:
+def ensure_favicon(text: str, favicon: str) -> str:
     """Give a source page the site favicon when it declares none of its own."""
     if EXISTING_ICON_LINK.search(text):
         return text
     head = HEAD_OPEN.search(text)
     if head is not None:
-        return f"{text[: head.end()]}\n    {FAVICON_LINK}{text[head.end() :]}"
+        return f"{text[: head.end()]}\n    {favicon}{text[head.end() :]}"
     # Fragment with no explicit <head>: the parser hoists a leading <link> into the
     # head it synthesises, so prepending works — but never before the doctype.
     doctype = DOCTYPE.match(text)
     prefix = f"{text[: doctype.end()]}\n" if doctype else ""
     rest = text[doctype.end() :] if doctype else text
-    return f"{prefix}{FAVICON_LINK}\n{rest.lstrip()}"
+    return f"{prefix}{favicon}\n{rest.lstrip()}"
 
 
-def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
-    try:
-        text = source_bytes.decode("utf-8")
-    except UnicodeDecodeError as error:
-        raise TransformationError(f"HTML source is not UTF-8: {entry.source}") from error
+def external_references(text: str) -> tuple[tuple[int, str], ...]:
+    """Every line and URL in a page that will be fetched from another host at runtime.
+
+    Generalised from a cdnjs-only ban: any external host is the same fragility —
+    the page stops rendering the day that host does — and the ban only ever named
+    one of them. Reported as a warning per reference rather than a hard refusal,
+    because a font or an analytics endpoint is a decision, not a defect.
+
+    Only what the page *loads* counts: any `src`, and `href` on `<link>`. An `<a href>`
+    to another site is a citation, which is the point of a research artefact and not a
+    dependency — counting those buried the real findings under one warning per footnote.
+    `data:`, `mailto:`, `tel:` and fragments fetch nothing.
+    """
+    parser = _LoadParser()
+    parser.feed(text)
+    parser.close()
+    return tuple(parser.loads)
+
+
+def transform_html(entry: Entry, source_bytes: bytes, site: Site) -> bytes:
+    text = normalise_source_text(source_bytes, entry.source.as_posix())
     for old, new in entry.replacements.items():
         parts = text.split(old)
         if len(parts) == 1:
@@ -1250,19 +1256,12 @@ def transform_html(entry: Entry, source_bytes: bytes) -> bytes:
             )
         text = new.join(parts)
     text = TRAILING_SPACE.sub("", text)
-    text = ensure_favicon(text)
-    if has_cdnjs_reference(text):
-        remaining = ", ".join(dict.fromkeys(CDNJS_REFERENCE.findall(text))) or CDNJS_HOST
-        raise TransformationError(
-            f"forbidden cdnjs reference remains in {entry.id}: {remaining}"
-        )
-    if text and not text.endswith(("\n", "\r")):
-        text += "\n"
+    text = ensure_favicon(text, site.favicon)
     return text.encode("utf-8")
 
 
 def build_desired_files(
-    manifest: Manifest, source_root: Path
+    manifest: Manifest, source_root: Path, template: string.Template
 ) -> dict[PurePosixPath, bytes]:
     resolved_root = source_root.resolve()
     desired: dict[PurePosixPath, bytes] = {}
@@ -1281,12 +1280,16 @@ def build_desired_files(
         source_bytes = source_path.read_bytes()
         suffix = entry.source.suffix.lower()
         if suffix == ".html":
-            output = transform_html(entry, source_bytes)
+            output = transform_html(entry, source_bytes, manifest.site)
         elif suffix == ".md":
             # Looked up per entry on purpose: a manifest with no Markdown must not
             # require the parser to be vendored.
             output = render_markdown_page(
-                entry, source_bytes, markdown_vendor_path(manifest)
+                entry,
+                source_bytes,
+                markdown_vendor_path(manifest),
+                manifest.site,
+                template,
             )
         else:
             output = source_bytes
@@ -1296,35 +1299,40 @@ def build_desired_files(
 
 def public_href(destination: PurePosixPath) -> str:
     if destination.name == "index.html":
-        return destination.parent.as_posix().rstrip("/") + "/"
+        parent = destination.parent.as_posix()
+        return "" if parent == "." else parent.rstrip("/") + "/"
     return destination.as_posix()
 
 
-def collect_source_timestamps(
-    manifest: Manifest, source_root: Path
-) -> dict[str, str]:
-    """Last-modified date per entry id, read from the source file at run time.
+def public_url(site: Site, destination: PurePosixPath) -> str:
+    """The full URL a reader will type. Spelled out, because the plan asks about URLs."""
+    return site.base_url + public_href(destination)
 
-    The date is not manifest content: it is whatever the filesystem reports when
-    the command runs, so a re-downloaded source refreshes its card without a
-    manual edit. A source that is missing (a proposed deletion) contributes
-    nothing and its card falls back to the remaining entries.
+
+def stamp_missing_dates(manifest: Manifest, source_root: Path) -> Manifest:
+    """Fill in `date` from the source's modification time, once, for entries with none.
+
+    Written into the manifest rather than recomputed each run: the catalogue sorts
+    cards by date, so reading the filesystem every time lets a re-download silently
+    reorder the page, and a hand-corrected date would be overwritten on the next
+    sync. An entry whose source is gone keeps whatever it already had.
     """
-    timestamps: dict[str, str] = {}
+    entries: list[Entry] = []
     for entry in manifest.entries:
         source_path = source_root / entry.source.as_posix()
-        try:
-            modified = source_path.stat().st_mtime
-        except OSError:
-            continue
-        timestamps[entry.id] = date.fromtimestamp(modified).isoformat()
-    return timestamps
+        if entry.date is None:
+            try:
+                stamp = date.fromtimestamp(source_path.stat().st_mtime).isoformat()
+            except OSError:
+                stamp = None
+            if stamp is not None:
+                entries.append(replace(entry, date=stamp))
+                continue
+        entries.append(entry)
+    return replace(manifest, entries=tuple(entries))
 
 
-def render_catalogue(
-    manifest: Manifest, timestamps: dict[str, str] | None = None
-) -> str:
-    timestamps = timestamps or {}
+def render_catalogue(manifest: Manifest) -> str:
     entries_by_collection: dict[str, list[Entry]] = {}
     for entry in manifest.entries:
         entries_by_collection.setdefault(entry.collection, []).append(entry)
@@ -1336,13 +1344,12 @@ def render_catalogue(
                 (collection.section_order, collection.section), []
             ).append(collection)
 
-    # ISO dates sort chronologically, so the card carries its newest source and the
-    # section orders its cards by that string. A collection with no readable source
-    # has no date and falls to the bottom on its declared order.
+    # ISO dates sort chronologically, so the card carries its newest entry's date and
+    # the section orders its cards by that string. A collection whose entries are all
+    # undated sorts as "" and falls to the bottom on its declared order.
     latest_by_collection = {
         collection_id: max(
-            (timestamps[entry.id] for entry in entries if entry.id in timestamps),
-            default="",
+            (entry.date for entry in entries if entry.date), default=""
         )
         for collection_id, entries in entries_by_collection.items()
     }
@@ -1351,8 +1358,6 @@ def render_catalogue(
     for (_, section_title), collections in sorted(sections.items()):
         heading_id = f"{_slug(section_title)}-heading"
         heading = html.escape(section_title)
-        if section_title == IMAGE_SECTION:
-            heading += f"\n{SHOWCASE_LINK}\n            "
         lines.extend(
             [
                 f'        <section aria-labelledby="{heading_id}">',
@@ -1371,9 +1376,12 @@ def render_catalogue(
                 [
                     '                <article class="card">',
                     f"                    <h3>{html.escape(collection.title)}</h3>",
-                    f"                    <p>{html.escape(collection.description)}</p>",
                 ]
             )
+            if collection.description is not None:
+                lines.append(
+                    f"                    <p>{html.escape(collection.description)}</p>"
+                )
             latest = latest_by_collection[collection.id]
             if latest:
                 lines.append(
@@ -1411,34 +1419,45 @@ def replace_generated_catalogue(document: str, generated: str) -> str:
     return document[:start] + "\n" + generated + "\n" + indentation + document[end:]
 
 
+def _collection_to_dict(collection: Collection) -> dict[str, Any]:
+    body: dict[str, Any] = {"id": collection.id, "title": collection.title}
+    if collection.description is not None:
+        body["description"] = collection.description
+    body.update(
+        section=collection.section,
+        section_order=collection.section_order,
+        order=collection.order,
+    )
+    return body
+
+
+def _entry_to_dict(entry: Entry) -> dict[str, Any]:
+    body: dict[str, Any] = {
+        "id": entry.id,
+        "source": entry.source.as_posix(),
+        "destination": entry.destination.as_posix(),
+        "title": entry.title,
+        "collection": entry.collection,
+        "order": entry.order,
+        "replacements": dict(entry.replacements),
+    }
+    if entry.description is not None:
+        body["description"] = entry.description
+    if entry.date is not None:
+        body["date"] = entry.date
+    return body
+
+
 def manifest_to_json(manifest: Manifest) -> bytes:
     payload = {
         "version": manifest.version,
+        "site": site_to_dict(manifest.site),
         "protected_files": [path.as_posix() for path in manifest.protected_files],
         "ignored_sources": list(manifest.ignored_sources),
         "collections": [
-            {
-                "id": collection.id,
-                "title": collection.title,
-                "description": collection.description,
-                "section": collection.section,
-                "section_order": collection.section_order,
-                "order": collection.order,
-            }
-            for collection in manifest.collections
+            _collection_to_dict(collection) for collection in manifest.collections
         ],
-        "entries": [
-            {
-                "id": entry.id,
-                "source": entry.source.as_posix(),
-                "destination": entry.destination.as_posix(),
-                "title": entry.title,
-                "collection": entry.collection,
-                "order": entry.order,
-                "replacements": entry.replacements,
-            }
-            for entry in manifest.entries
-        ],
+        "entries": [_entry_to_dict(entry) for entry in manifest.entries],
     }
     return (json.dumps(payload, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
 
@@ -1451,6 +1470,61 @@ def manifest_from_bytes(content: bytes, description: str) -> Manifest:
     manifest = manifest_from_dict(payload)
     validate_manifest(manifest)
     return manifest
+
+
+def published_manifest(content: bytes | None) -> Manifest | None:
+    """The committed manifest, read leniently, for the published-URL guard alone.
+
+    Lenient on purpose. This value only ever feeds `check_published_invariants`,
+    which reads `id`, `destination` and `title`. A repository whose committed
+    manifest predates the `site` block would otherwise fail the whole run on a
+    field the check never touches, while returning None outright would drop the
+    URL-freeze guard on exactly the run where published destinations are at stake.
+    A placeholder keeps the guard alive.
+    """
+    if content is None:
+        return None
+    try:
+        payload = json.loads(content.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError):
+        return None
+    if isinstance(payload, dict):
+        payload.setdefault("site", {"base_url": "https://head.invalid/"})
+    try:
+        return manifest_from_dict(payload)
+    except ManifestError:
+        return None
+
+
+def check_published_invariants(current: Manifest, head: bytes | None) -> None:
+    """Refuse an edit that changes an existing entry's public URL or its title.
+
+    A destination is frozen once published: a reader's bookmark, a link in someone
+    else's page and a search result all point at the old one. A title is frozen with
+    it, because the catalogue link text is how the page is found again.
+    """
+    published = published_manifest(head)
+    if published is None:
+        return
+    previous = {entry.id: entry for entry in published.entries}
+    problems: list[str] = []
+    for entry in current.entries:
+        was = previous.get(entry.id)
+        if was is None:
+            continue
+        if entry.destination != was.destination:
+            problems.append(
+                f"entry {entry.id!r}: destination {was.destination.as_posix()} -> "
+                f"{entry.destination.as_posix()} would break the published URL "
+                f"for {was.destination.as_posix()}"
+            )
+        if entry.title != was.title:
+            problems.append(
+                f"entry {entry.id!r}: title {was.title!r} -> {entry.title!r}; "
+                "an existing entry is never re-titled"
+            )
+    if problems:
+        raise ManifestError("\n".join(problems))
 
 
 def _validate_desired_tree(
@@ -1467,6 +1541,11 @@ def _validate_desired_tree(
                 (planned_repo / name).write_bytes(source.read_bytes())
         planned_artefacts = planned_repo / "artefacts"
         planned_artefacts.mkdir()
+        # A control file steers the sync instead of being produced by it, so it is
+        # in no desired-files map and has to be carried across by hand.
+        template = artefacts_root / TEMPLATE_NAME
+        if template.is_file():
+            (planned_artefacts / TEMPLATE_NAME).write_bytes(template.read_bytes())
         for destination in manifest.protected_files:
             source = artefacts_root / destination.as_posix()
             if not source.is_file() or source.is_symlink():
@@ -1488,13 +1567,10 @@ def scan_published_tree(artefacts_root: Path) -> tuple[set[PurePosixPath], int]:
     for path in artefacts_root.rglob("*"):
         if not path.is_file():
             continue
-        if path.name == IGNORED_METADATA_NAME:
+        if path.name in IGNORED_METADATA_NAMES:
             ignored_metadata += 1
             continue
-        relative = PurePosixPath(path.relative_to(artefacts_root).as_posix())
-        if relative.as_posix() in CONTROL_FILE_NAMES:
-            continue
-        published.add(relative)
+        published.add(PurePosixPath(path.relative_to(artefacts_root).as_posix()))
     return published, ignored_metadata
 
 
@@ -1509,58 +1585,169 @@ def unexpected_published_files(
     return sorted(published - expected, key=str)
 
 
+_SECRET_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "looks like an AWS access key"),
+    (re.compile(r"\bsk-[A-Za-z0-9]{20,}\b"), "looks like an API key"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "contains a private key"),
+    (re.compile(r"\bghp_[A-Za-z0-9]{36}\b"), "looks like a GitHub token"),
+    (re.compile(r"\b[a-fA-F0-9]{40,}\b"), "contains a long hexadecimal secret shape"),
+)
+# Matched at word boundaries, not as a path-component prefix: the component rule let
+# "Client Presentation.pdf", "Internal Notes.html" and "q1-internal-review.md" through
+# silently, and those are the shapes a real source folder holds.
+_PRIVATE_WORD = re.compile(
+    r"(?<![a-z0-9])(?:prompts?|drafts?|internal|client)(?![a-z0-9])", re.IGNORECASE
+)
+# Sources worth reading for secret shapes. A binary is scanned by name only.
+TEXT_SUFFIXES = frozenset({".html", ".md", ".svg"})
+
+
+def external_note(where: str, url: str) -> Note:
+    return Note("external", where, f"loads {url} at runtime")
+
+
+def source_warnings(source: PurePosixPath, text: str | None) -> list[Note]:
+    """Filename heuristics plus secret shapes for one source.
+
+    A public seam rather than an inline loop, because these are the checks that stop
+    a private file going public and they need tests of their own. `text` is None for
+    a binary source, which is checked by name alone.
+    """
+    label = source.as_posix()
+    notes: list[Note] = []
+    match = _PRIVATE_WORD.search(label)
+    if match is not None:
+        notes.append(Note("secret", label, f'filename contains "{match.group(0).lower()}"'))
+    if text is None:
+        return notes
+    for number, line in enumerate(text.splitlines(), start=1):
+        for pattern, detail in _SECRET_RULES:
+            if pattern.search(line):
+                notes.append(Note("secret", f"{label}:{number}", detail))
+    return notes
+
+
+def _source_notes(
+    manifest: Manifest, source_root: Path, desired_files: dict[PurePosixPath, bytes]
+) -> list[Note]:
+    notes: list[Note] = []
+    for entry in manifest.entries:
+        text: str | None = None
+        if entry.source.suffix.lower() in TEXT_SUFFIXES:
+            try:
+                text = (source_root / entry.source.as_posix()).read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                text = None
+        notes.extend(source_warnings(entry.source, text))
+        if entry.source.suffix.lower() != ".html":
+            continue
+        rendered = desired_files.get(entry.destination)
+        if rendered is None:
+            continue
+        try:
+            document = rendered.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        for number, url in external_references(document):
+            notes.append(external_note(f"{entry.source.as_posix()}:{number}", url))
+    return notes
+
+
+def _catalogue_destination(manifest: Manifest) -> PurePosixPath:
+    if manifest.site.catalogue_mode == "standalone":
+        return PurePosixPath(CATALOGUE_NAME)
+    if manifest.site.catalogue_page is None:
+        raise CatalogueError("site.catalogue inject mode needs a page")
+    return manifest.site.catalogue_page
+
+
 def create_sync_plan(
     manifest_path: Path,
     source_root: Path,
     artefacts_root: Path,
     head_manifest: bytes | None,
 ) -> SyncPlan:
+    repo_root = artefacts_root.parent
     declared = load_manifest(manifest_path)
     manifest = normalize_orders(declared)
     inventory, ignored_rules = apply_source_ignores(
-        scan_source(source_root), manifest.ignored_sources
+        scan_source(source_root, repo_root), manifest.ignored_sources
     )
     reconciliation = reconcile_inventory(manifest, inventory)
-    next_manifest = reconciliation.next_manifest
-    desired_files = build_desired_files(next_manifest, source_root)
+    next_manifest = stamp_missing_dates(reconciliation.next_manifest, source_root)
+    check_published_invariants(next_manifest, head_manifest)
 
-    catalogue_path = artefacts_root / "index.html"
+    # Everything that must stop the run, gathered before anything is rendered, so one
+    # run names every problem instead of the first one.
+    problems: list[str] = []
+    for entry in next_manifest.entries:
+        if entry.source.suffix.lower() != ".svg":
+            continue
+        source_path = source_root / entry.source.as_posix()
+        if source_path.is_file():
+            try:
+                validate_svg(source_path.read_bytes(), entry.source.as_posix())
+            except ValidationError as error:
+                problems.append(str(error))
+    for protected in next_manifest.protected_files:
+        path = artefacts_root / protected.as_posix()
+        if not path.is_file() or path.is_symlink():
+            problems.append(f"{protected.as_posix()}: missing protected file")
+    if problems:
+        raise ValidationError("\n".join(problems))
+
+    template = load_template(artefacts_root)
+    desired_files = build_desired_files(next_manifest, source_root, template)
+
+    catalogue_destination = _catalogue_destination(next_manifest)
+    catalogue_path = artefacts_root / catalogue_destination.as_posix()
     try:
         catalogue = catalogue_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
         raise CatalogueError(f"cannot read catalogue: {error}") from error
-    generated_catalogue = replace_generated_catalogue(
-        catalogue,
-        render_catalogue(
-            next_manifest, collect_source_timestamps(next_manifest, source_root)
-        ),
+    desired_files[catalogue_destination] = replace_generated_catalogue(
+        catalogue, render_catalogue(next_manifest)
     ).encode("utf-8")
-    desired_files[PurePosixPath("index.html")] = generated_catalogue
-    desired_files[PurePosixPath("manifest.json")] = manifest_to_json(next_manifest)
+    desired_files[PurePosixPath(MANIFEST_NAME)] = manifest_to_json(next_manifest)
     _validate_desired_tree(
         artefacts_root.parent.resolve(), artefacts_root, next_manifest, desired_files
     )
 
+    source_by_destination = {
+        entry.destination: entry.source for entry in next_manifest.entries
+    }
     changes: list[Change] = []
     unchanged: list[PurePosixPath] = []
     for destination, content in desired_files.items():
         current_path = artefacts_root / destination.as_posix()
-        if destination == PurePosixPath("manifest.json") and head_manifest is not None:
-            current = head_manifest
+        if destination == PurePosixPath(MANIFEST_NAME) and head_manifest is not None:
+            current: bytes | None = head_manifest
             exists = True
         else:
             exists = current_path.is_file()
             current = current_path.read_bytes() if exists else None
-        if not exists:
-            changes.append(Change("add", destination))
-        elif current != content:
-            changes.append(Change("update", destination))
-        else:
+        if exists and current == content:
             unchanged.append(destination)
+            continue
+        source = source_by_destination.get(destination)
+        # Only an update is diffed: an add has nothing to compare against.
+        diff = None
+        if exists and source is not None and source.suffix.lower() == ".md":
+            diff = markdown_diff(current, content) or None
+        changes.append(
+            Change(
+                kind="add" if not exists else "update",
+                destination=destination,
+                source=source,
+                size=len(content),
+                url=public_url(next_manifest.site, destination),
+                diff=diff,
+            )
+        )
 
     deletion_candidates = {entry.destination for entry in reconciliation.missing_entries}
-    if head_manifest is not None:
-        previous_manifest = manifest_from_bytes(head_manifest, "HEAD manifest")
+    previous_manifest = published_manifest(head_manifest)
+    if previous_manifest is not None:
         next_destinations = {entry.destination for entry in next_manifest.entries}
         deletion_candidates.update(
             entry.destination
@@ -1568,41 +1755,41 @@ def create_sync_plan(
             if entry.destination not in next_destinations
         )
     retained_destinations = {
+        *desired_files,
         *next_manifest.protected_files,
-        PurePosixPath("index.html"),
-        PurePosixPath("manifest.json"),
         *(change.destination for change in changes),
     }
     for destination in sorted(deletion_candidates - retained_destinations, key=str):
-        destination_path = artefacts_root / destination.as_posix()
-        if destination_path.exists():
-            changes.append(Change("delete", destination))
+        if (artefacts_root / destination.as_posix()).exists():
+            changes.append(
+                Change(
+                    kind="delete",
+                    destination=destination,
+                    url=public_url(next_manifest.site, destination),
+                )
+            )
 
+    notes = _source_notes(next_manifest, source_root, desired_files)
+    # A destination queued for deletion is managed, not unmanaged. Reporting it as
+    # "left alone" would promise the opposite of what this run does to it.
     published, _ = scan_published_tree(artefacts_root)
-    planned_deletions = {change.destination for change in changes if change.kind == "delete"}
-    expected = {*desired_files, *next_manifest.protected_files}
-    for destination in unexpected_published_files(published, expected):
-        if destination not in planned_deletions:
-            changes.append(Change("orphan", destination))
-
-    # Only updates are diffed. An add has nothing to compare against, and a delete
-    # or orphan has no source left to read.
-    markdown_sources = {
-        entry.destination: entry.source
-        for entry in next_manifest.entries
-        if entry.source.suffix.lower() == ".md"
+    expected = {
+        *desired_files,
+        *next_manifest.protected_files,
+        *(change.destination for change in changes if change.kind in DELETION_KINDS),
+        *(PurePosixPath(name) for name in CONTROL_FILES),
     }
-    updated = {change.destination for change in changes if change.kind == "update"}
-    markdown_diffs: list[tuple[PurePosixPath, str]] = []
-    for destination in sorted(updated & markdown_sources.keys(), key=str):
-        published_path = artefacts_root / destination.as_posix()
-        source_path = source_root / markdown_sources[destination].as_posix()
-        body = markdown_diff(
-            published_path.read_bytes() if published_path.is_file() else None,
-            source_path.read_bytes(),
+    for destination in unexpected_published_files(published, expected):
+        notes.append(
+            Note(
+                "orphan",
+                f"artefacts/{destination.as_posix()}",
+                "in repo, in no manifest, left alone",
+            )
         )
-        if body:
-            markdown_diffs.append((destination, body))
+    for change in changes:
+        if change.kind == "add" and change.size is not None and change.size > LARGE_FILE_BYTES:
+            notes.append(Note("size", change.url, "new public file is over 10 MB"))
 
     return SyncPlan(
         manifest=declared,
@@ -1610,9 +1797,9 @@ def create_sync_plan(
         desired_files=desired_files,
         changes=tuple(sorted(changes, key=lambda item: (item.kind, str(item.destination)))),
         unchanged=tuple(sorted(unchanged, key=str)),
-        excluded_suffixes=inventory.excluded_suffixes,
-        markdown_diffs=tuple(markdown_diffs),
-        ignored_sources=ignored_rules,
+        excluded=inventory.excluded,
+        ignored=tuple((rule, count) for rule, count in ignored_rules if count),
+        notes=tuple(notes),
     )
 
 
@@ -1636,45 +1823,73 @@ def _renumbered_orders(plan: SyncPlan) -> list[str]:
     return labels
 
 
+_PLAN_GROUPS = (
+    ("NEW PUBLIC URLS", ("add",)),
+    ("CHANGED", ("update",)),
+    ("WILL START 404-ING", ("delete",)),
+)
+
+
+def _human_size(count: int) -> str:
+    for unit, step in (("MB", 1024 * 1024), ("KB", 1024)):
+        if count >= step:
+            return f"{count / step:.1f} {unit}"
+    return f"{count} B"
+
+
 def format_plan(plan: SyncPlan) -> str:
-    symbols = {"add": "+", "update": "~", "delete": "-", "orphan": "-"}
-    headings = {
-        "add": "Add",
-        "update": "Update",
-        "delete": "Delete",
-        "orphan": "Delete (orphaned)",
-    }
-    lines: list[str] = []
-    for kind in ("add", "update", "delete", "orphan"):
-        changes = sorted(
-            (change for change in plan.changes if change.kind == kind),
-            key=lambda item: str(item.destination),
-        )
-        lines.append(f"{headings[kind]} ({len(changes)})")
-        lines.extend(
-            f"  {symbols[kind]} {change.destination.as_posix()}" for change in changes
-        )
+    """The plan grouped by consequence, in full public URLs.
+
+    Grouped by what a reader gains or loses rather than by the operation performed,
+    because "this URL will start 404-ing" is the decision being asked for and
+    "delete charts/old.png" is not.
+    """
+    blocks: list[str] = []
+    for heading, kinds in _PLAN_GROUPS:
+        rows = [change for change in plan.changes if change.kind in kinds]
+        if not rows:
+            continue
+        lines = [f"{heading} ({len(rows)})"]
+        for change in sorted(rows, key=lambda item: item.url):
+            detail = ""
+            if change.kind == "add" and change.size is not None:
+                detail = _human_size(change.size)
+            elif change.diff:
+                detail = change.diff
+            elif change.kind == "delete":
+                detail = "source deleted"
+            lines.append(f"  {change.url}{'  ' + detail if detail else ''}")
+        blocks.append("\n".join(lines))
+
     renumbered = _renumbered_orders(plan)
     if renumbered:
-        lines.append(f"Renumbered order ({len(renumbered)})")
-        lines.extend(f"  ~ {label}" for label in renumbered)
-    if plan.markdown_diffs:
-        lines.append(f"Markdown changes ({len(plan.markdown_diffs)})")
-        for destination, body in plan.markdown_diffs:
-            lines.append(f"  ~ {destination.as_posix()}")
-            lines.extend(f"      {line}" for line in body.splitlines())
-    if plan.ignored_sources:
-        # One line per rule, not per file: a long path list on every run trains the
-        # reader to skip the block, and the rule is what they would edit.
-        total = sum(count for _, count in plan.ignored_sources)
-        lines.append(f"Ignored sources ({total})")
-        lines.extend(
-            f"  - {rule} ({count} file{'' if count == 1 else 's'})"
-            for rule, count in plan.ignored_sources
-        )
-    lines.append(f"Unchanged ({len(plan.unchanged)})")
-    lines.append(f"Excluded source types: {', '.join(plan.excluded_suffixes) or 'none'}")
-    return "\n".join(lines)
+        lines = [f"RENUMBERED ORDER ({len(renumbered)})"]
+        lines.extend(f"  {label}" for label in renumbered)
+        blocks.append("\n".join(lines))
+
+    # One row per suffix and per rule, not per file: a long path list on every run
+    # trains the reader to skip the block, and the rule is what they would edit.
+    excluded_rows = [(label, count, "unsupported type") for label, count in plan.excluded]
+    excluded_rows += [
+        (rule, count, "matched an ignored source rule") for rule, count in plan.ignored
+    ]
+    if excluded_rows:
+        lines = [f"EXCLUDED ({sum(count for _, count, _ in excluded_rows)})"]
+        for label, count, reason in excluded_rows:
+            files = "1 file" if count == 1 else f"{count} files"
+            lines.append(f"  {label:<14} {files}, {reason}")
+        blocks.append("\n".join(lines))
+
+    if plan.notes:
+        lines = [f"WARNINGS ({len(plan.notes)})"]
+        for note in sorted(plan.notes, key=lambda item: (item.kind, item.where)):
+            lines.append(f"  {note.kind:<9} {note.where}    {note.detail}")
+        blocks.append("\n".join(lines))
+
+    blocks.append(f"UNCHANGED ({len(plan.unchanged)})")
+    if not plan.changes:
+        blocks.insert(0, "no changes.")
+    return "\n\n".join(blocks) + "\n"
 
 
 def _destination_path(artefacts_root: Path, destination: PurePosixPath) -> Path:
@@ -1710,7 +1925,29 @@ def _atomic_write(path: Path, content: bytes) -> None:
             os.unlink(temporary_name)
 
 
-def apply_plan(plan: SyncPlan, artefacts_root: Path) -> None:
+def verify_markdown_round_trip(source_bytes: bytes, rendered: bytes, label: str) -> None:
+    """Read the Markdown back out of the written page and compare it to the source.
+
+    The real check, not the earlier one: comparing rendered bytes to the rendered
+    bytes just computed proved only that the write landed. Extracting proves the
+    escape, the embed and the extraction agree, which is what the published page
+    depends on.
+    """
+    expected = normalise_source_text(source_bytes, label)
+    try:
+        document = rendered.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise ValidationError(
+            f"{label}: markdown round trip is not UTF-8 ({error})"
+        ) from error
+    found = extract_markdown(document)
+    if found is None:
+        raise ValidationError(f"{label}: rendered page carries no markdown block")
+    if found != expected:
+        raise ValidationError(f"{label}: markdown did not survive the round trip")
+
+
+def apply_plan(plan: SyncPlan, artefacts_root: Path, source_root: Path | None = None) -> None:
     for change in plan.changes:
         if change.kind not in WRITE_KINDS:
             continue
@@ -1742,6 +1979,18 @@ def apply_plan(plan: SyncPlan, artefacts_root: Path) -> None:
             artefacts_root, change.destination
         ).exists():
             raise ArtefactError(f"deleted file remains after apply: {change.destination}")
+
+    if source_root is None:
+        return
+    for entry in plan.next_manifest.entries:
+        if entry.source.suffix.lower() != ".md":
+            continue
+        source = source_root / entry.source.as_posix()
+        rendered = artefacts_root / entry.destination.as_posix()
+        if source.is_file() and rendered.is_file():
+            verify_markdown_round_trip(
+                source.read_bytes(), rendered.read_bytes(), entry.source.as_posix()
+            )
 
 
 def _read_page(path: Path) -> str:
@@ -1780,27 +2029,30 @@ def _resolve_local_reference(repo_root: Path, page: Path, reference: str) -> Pat
 def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationReport:
     repo_root = repo_root.resolve()
     artefacts_root = repo_root / "artefacts"
-    manifest = load_manifest(artefacts_root / "manifest.json")
+    manifest = load_manifest(artefacts_root / MANIFEST_NAME)
     expected = {
-        PurePosixPath("index.html"),
-        PurePosixPath("manifest.json"),
+        *(PurePosixPath(name) for name in CONTROL_FILES),
+        _catalogue_destination(manifest),
         *manifest.protected_files,
         *(entry.destination for entry in manifest.entries),
     }
     actual, ignored_metadata = scan_published_tree(artefacts_root)
     missing = sorted(expected - actual, key=str)
-    unexpected = unexpected_published_files(actual, expected)
     if missing:
         raise ValidationError(
             "missing published file: " + ", ".join(path.as_posix() for path in missing)
         )
-    if unexpected:
-        raise ValidationError(
-            "unexpected published file: "
-            + ", ".join(path.as_posix() for path in unexpected)
-        )
+    # An unmanaged file is reported, never rejected and never removed: it may be a
+    # hand-written page or a redirect that no manifest entry is meant to explain.
+    notes = [
+        Note("orphan", f"artefacts/{path.as_posix()}", "in repo, in no manifest, left alone")
+        for path in unexpected_published_files(actual, expected)
+    ]
 
-    catalogue_parser = _parse_references(_read_page(artefacts_root / "index.html"))
+    catalogue_destination = _catalogue_destination(manifest)
+    catalogue_parser = _parse_references(
+        _read_page(artefacts_root / catalogue_destination.as_posix())
+    )
     href_counts = Counter(catalogue_parser.hrefs)
     for entry in manifest.entries:
         href = public_href(entry.destination)
@@ -1812,12 +2064,19 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
 
     local_targets: set[Path] = set()
     for relative_path in sorted(actual, key=str):
-        if relative_path.suffix != ".html":
+        if relative_path.suffix.lower() == ".svg":
+            validate_svg(
+                (artefacts_root / relative_path.as_posix()).read_bytes(),
+                f"artefacts/{relative_path.as_posix()}",
+            )
+        # The template is a control file, not a page: its `$prefix` placeholders make
+        # every reference in it unresolvable by design.
+        if relative_path.suffix != ".html" or relative_path == PurePosixPath(TEMPLATE_NAME):
             continue
         page = artefacts_root / relative_path.as_posix()
         text = _read_page(page)
-        if has_cdnjs_reference(text):
-            raise ValidationError(f"forbidden cdnjs reference in {relative_path}")
+        for number, url in external_references(text):
+            notes.append(external_note(f"artefacts/{relative_path.as_posix()}:{number}", url))
         parser = _parse_references(text)
         for reference in parser.references:
             target = _resolve_local_reference(repo_root, page, reference)
@@ -1843,6 +2102,7 @@ def validate_repository(repo_root: Path, base_ref: str | None) -> ValidationRepo
         entry_count=len(manifest.entries),
         local_link_count=len(local_targets),
         ignored_metadata_count=ignored_metadata,
+        notes=tuple(notes),
     )
 
 
@@ -2032,6 +2292,12 @@ def _public_urls(base_url: str, manifest: Manifest) -> tuple[str, ...]:
         urljoin(base, "artefacts/" + public_href(entry.destination))
         for entry in manifest.entries
     )
+    # Protected files are reachable URLs too. Every generated Markdown page loads the
+    # vendored parser from one of them, so a green publish that never fetched them
+    # proved nothing about whether those pages render.
+    urls.extend(
+        urljoin(base, "artefacts/" + path.as_posix()) for path in manifest.protected_files
+    )
     return tuple(dict.fromkeys(urls))
 
 
@@ -2090,7 +2356,7 @@ def publish(
 
     branch = f"agent/sync-artefacts-{now().strftime('%Y%m%d-%H%M%S')}"
     _run_checked(runner, ["git", "switch", "-c", branch], repo_root, "cannot create branch")
-    apply_plan(plan, artefacts_root)
+    apply_plan(plan, artefacts_root, source_root)
     rebuild_showcase_atlas(plan.next_manifest, repo_root, runner)
     _run_checked(
         runner,
@@ -2135,8 +2401,9 @@ def publish(
         + format_plan(plan)
         + "\n```\n\n"
         "## Privacy boundary\n\n"
-        "Only manifest-listed HTML, Markdown, PNG, JPEG, JPG, and ICO files are "
-        "published. Excluded document types and local metadata remain private.\n\n"
+        "Only manifest-listed files with an approved extension are published ("
+        + ", ".join(sorted(APPROVED_EXTENSIONS))
+        + "). Everything else, and local metadata, remains private.\n\n"
         "## Verification\n\n"
         "Local unit tests and repository validation passed before push.\n"
     )
@@ -2215,15 +2482,17 @@ def publish(
         merge_commit=merge_commit,
         catalogue_url=urljoin(base_url.rstrip("/") + "/", "artefacts/"),
         verified_url_count=len(urls),
-        excluded_suffixes=plan.excluded_suffixes,
+        excluded=plan.excluded,
     )
 
 
-def confirm_and_apply(plan: SyncPlan, artefacts_root: Path, confirm) -> bool:
+def confirm_and_apply(
+    plan: SyncPlan, artefacts_root: Path, confirm, source_root: Path | None = None
+) -> bool:
     answer = confirm("Apply these changes? Type yes to continue: ")
     if answer != "yes":
         return False
-    apply_plan(plan, artefacts_root)
+    apply_plan(plan, artefacts_root, source_root)
     rebuild_showcase_atlas(plan.next_manifest, artefacts_root.parent)
     return True
 
@@ -2243,7 +2512,8 @@ def handle_unlisted_sources(
     fails validation on a duplicate destination instead of recording the rename.
     """
     inventory, _ = apply_source_ignores(
-        scan_source(source_root), error.manifest.ignored_sources
+        scan_source(source_root, manifest_path.parent.parent),
+        error.manifest.ignored_sources,
     )
     manifest, missing = drop_entries_without_source(
         error.manifest, set(inventory.approved)
@@ -2305,6 +2575,8 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
                 f"Validated {report.entry_count} manifest entries and "
                 f"{report.local_link_count} local links."
             )
+            for note in sorted(report.notes, key=lambda item: (item.kind, item.where)):
+                print(f"  {note.kind:<9} {note.where}    {note.detail}")
             if args.base_ref:
                 print("Homepage files are unchanged.")
             return 0
@@ -2312,7 +2584,10 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
             result = publish(repo_root, args.source, confirm=input_fn)
             if result is None:
                 return 0
-            excluded = ", ".join(result.excluded_suffixes) or "none"
+            excluded = (
+                ", ".join(f"{label} ({count})" for label, count in result.excluded)
+                or "none"
+            )
             print(f"Pull request: {result.pull_request_url}")
             print(f"Merge commit: {result.merge_commit}")
             print(f"Catalogue: {result.catalogue_url}")
@@ -2328,7 +2603,9 @@ def main(argv: list[str] | None = None, input_fn=input) -> int:
         print(format_plan(plan))
         if args.command == "plan":
             return 0
-        if not confirm_and_apply(plan, artefacts_root, input_fn):
+        if not confirm_and_apply(
+            plan, artefacts_root, input_fn, args.source.expanduser()
+        ):
             print("Cancelled.")
             return 2
         return 0

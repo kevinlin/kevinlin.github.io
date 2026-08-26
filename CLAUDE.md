@@ -41,18 +41,21 @@ There is no linter, formatter, or JS test runner. The site itself has no automat
 Flow inside `scripts/artefacts.py`:
 
 - `scan_source` walks the source root; `apply_source_ignores` drops `ignored_sources` rules. Any remaining file with no manifest entry raises `UnlistedSourceError`, which `main` catches and turns into an interactive proposal (`propose_manifest_additions` → `merge_manifest_proposal`).
-- `build_desired_files` renders the whole intended `artefacts/` tree in memory: byte copies for images, `transform_html` for `.html` (applies per-entry `replacements`, strips trailing spaces, injects `FAVICON_LINK` when the source declares no icon, hard-bans any cdnjs reference), `render_markdown_page` for `.md`.
-- `create_sync_plan` diffs that tree against what is on disk and produces a `SyncPlan` of add/update/delete/orphan `Change`s. Nothing is written until the user confirms.
+- `build_desired_files` renders the whole intended `artefacts/` tree in memory: byte copies for images and other binaries, `transform_html` for `.html` (applies per-entry `replacements`, strips trailing spaces, injects `site.favicon` when the source declares no icon), `render_markdown_page` for `.md` against `artefacts/page-template.html`.
+- `create_sync_plan` diffs that tree against what is on disk and produces a `SyncPlan` of add/update/delete `Change`s plus `Note`s for anything worth reading but not worth stopping for. Nothing is written until the user confirms.
 - `publish` runs preflight (clean tree, `gh auth`), branches, applies, runs the unit tests and `validate` locally, commits, opens a PR, waits for the `validate` check, squash-merges, waits for the GitHub Pages build, then fetches every public URL to confirm it is live. Any failure aborts.
 
 Invariants worth knowing before changing this file:
 
 - **Stdlib only.** No pip dependencies, ever. Third-party JS is vendored into `artefacts/vendor/` and listed under `protected_files`.
-- **No cdnjs.** `has_cdnjs_reference` blocks publication of any page referencing it; there is no exemption, including for generated pages.
-- **Markdown round-trips byte-exact.** `render_markdown_page` embeds the source verbatim in a `<script type="text/markdown">` block and `extract_markdown` is its exact inverse; the diff preview and `apply`'s byte verification both depend on this. Never apply trailing-whitespace stripping to Markdown (two trailing spaces are a hard line break).
+- **External references are reported, not banned.** `external_references` warns on every URL a published page fetches from another host, at plan time and at validate time. `propose_manifest_additions` still pre-fills replacements that swap a cdnjs URL for a vendored copy, and says so when it cannot.
+- **Published URLs are frozen.** `check_published_invariants` compares the manifest against `git show HEAD:artefacts/manifest.json` and refuses to change an existing entry's `destination` or `title`. Re-slugging means retiring the old entry id, not editing it.
+- **Orphans are warned about, never deleted.** A file under `artefacts/` that no entry explains may be a hand-written page or a redirect. Both `plan` and `validate` report it and leave it alone.
+- **Markdown round-trips text-exact after `normalise_source_text`** (UTF-8 decode, CRLF/CR → LF, trailing newline). `render_markdown_page` embeds the result verbatim in a `<script type="text/markdown">` block, `extract_markdown` is its exact inverse, and `apply` extracts the written page back to prove it. Without the line-ending normalisation, `core.autocrlf=input` makes an unchanged entry report CHANGED forever. Never apply trailing-whitespace stripping to Markdown (two trailing spaces are a hard line break).
+- **SVG is validated and copied byte-for-byte.** `validate_svg` rejects scripts, event handlers and external references and names the line; it never rewrites.
 - **`.html` and `.md` publish to a directory `index.html`** so public URLs carry no file extension.
 - **`validate --base-ref` fails if `index.html`, `styles.css`, or `script.js` changed** (`HOMEPAGE_FILES`). An artefact sync PR must never touch the homepage; make site changes in a separate PR.
-- Approved extensions: `.html`, `.md`, `.png`, `.jpeg`, `.jpg`, `.ico`. Word docs, PDFs, prompts, and analysis notes in the source directory stay private.
+- Approved extensions: `.html`, `.md`, `.png`, `.jpeg`, `.jpg`, `.ico`, `.pdf`, `.webp`, `.gif`, `.svg`. Everything else in the source directory stays private, and `ignored_sources` rules (exact path, `dir/` subtree, bare `dir/` at any depth, or an fnmatch glob) hide approved files that should not go out.
 
 Design of record for this pipeline: [docs/specs/design_artefact-sync.md](docs/specs/design_artefact-sync.md). If code and that document disagree, the document wins — stop and ask.
 
@@ -70,4 +73,6 @@ The rules that get broken most often:
 
 `script.js` is plain DOM code initialised per feature (`initNavigation`, `initThemeToggle`, `initHeroNet`, `initSkillsGraph`, `initPhotoSlider`, …) from a single `DOMContentLoaded` handler. Projects are fetched live from the GitHub API and rendered by `generateProjectCard`.
 
-`artefacts/index.html` is generated by `render_catalogue`; edit the generator rather than the file. It inlines its own favicon because the publish validator resolves local references against a tree containing only `artefacts/`.
+`artefacts/index.html` is generated by `render_catalogue` between the `ARTEFACTS:START`/`ARTEFACTS:END` markers; edit the generator rather than the region. Anything outside the markers — the showcase link, the page shell — is hand-written and survives a sync. Cards lead with their newest entry's `date` (stamped once from the source's modification time, then left alone) and sort newest first, with `order` as the tie-break.
+
+`artefacts/page-template.html` and `artefacts/manifest.json` are control files: they steer the sync instead of being published by it, so they are neither orphans nor link-checked. The template is a `string.Template` (`$title`, `$favicon`, `$prefix`, `$vendor`, `$markdown`, `$block_start`, `$block_end`), where `$prefix` is the `../` climb and `$vendor` the vendor path alone. The `site` block in the manifest carries `base_url`, the inlined `favicon`, and the catalogue mode.

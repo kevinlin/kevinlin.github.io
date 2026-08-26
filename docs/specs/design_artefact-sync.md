@@ -6,6 +6,28 @@ Provide one repeatable command that synchronizes approved files from `~/Download
 
 The local source directory is authoritative. Removing a managed source file proposes removal of its manifest entry and published file. No file is added, updated, deleted, committed, or published until the user approves a complete preview.
 
+## Superseded Decisions
+
+`scripts/artefacts.py` was brought to functional parity with the standalone
+[`artefact-sync`](https://github.com/kevinlin/artefact-sync) skill, which was extracted from it and
+then hardened against a live publish-adopt-resync gate. Where this document and the sections below
+describe the earlier behaviour, the following decisions replace them. Everything not listed here
+still holds.
+
+| Was | Now | Why |
+| --- | --- | --- |
+| An orphan is deleted, under its own `Delete (orphaned)` heading. | An orphan is a warning. `plan` and `validate` both report it; nothing removes it. | An unmanaged file under `artefacts/` may be a hand-written page or a redirect. Deleting on the strength of "no manifest entry explains it" destroys work the manifest was never meant to explain. |
+| `validate` rejects an unexpected published file. | `validate` reports it and exits 0. | Same reason, and the two must agree: a plan that leaves orphans alone cannot be followed by a validate that rejects them. |
+| Any cdnjs reference surviving `transform_html` is fatal. | Every external reference in a published page is warned about, at plan time and at validate time. | The ban named one host out of all of them, so it was both too narrow to be a real guarantee and too blunt for a deliberate font or analytics endpoint. The cdnjs replacement pre-fill in the proposal stays, and now says so when it cannot map a reference. |
+| A `destination` change is an ordinary public URL migration: one deletion and one addition. | `check_published_invariants` refuses to change an existing entry's `destination` or `title`, checked against `git show HEAD:artefacts/manifest.json`. | A published URL is a bookmark, an inbound link, and a search result. Re-slugging is still possible — it means retiring the entry id and adding a new entry, which makes the migration visible rather than incidental. |
+| Rename detection is out of scope. | Still out of scope for content hashing, but a source rename that keeps its destination is an ordinary `source` edit and no longer trips the invariants. | Unchanged in substance. |
+| The Markdown page template is a format string inside `artefacts.py`. | It is `artefacts/page-template.html`, a `string.Template` control file. | Its CSS needs no brace escaping, it previews in a browser, and a restyle is reviewable as a diff of the page it changes. |
+| Card dates come from the source's modification time on every run. | `date` is a manifest field, stamped once from the modification time and then left alone. | Reading the filesystem every run lets a re-download silently reorder the catalogue, and overwrites a hand-corrected date. |
+| The allowlist is `.html`, `.md`, `.png`, `.jpeg`, `.jpg`, `.ico`. | It also holds `.pdf`, `.webp`, `.gif`, `.svg`. SVG is validated by `validate_svg` and copied byte-for-byte. | The excluded types were excluded for want of a decision, not for a reason. SVG carries scripts, so it is rejected with a line number rather than sanitised: a stdlib sanitiser that misses `foreignObject` or a CSS `url()` is worse than none, because it is then trusted. |
+| `ignored_sources` matches an exact path or a literal `dir/` prefix. | It also matches a bare directory name at any depth and an fnmatch glob. | A seeded `*.local.*` rule matched nothing and published the files it was meant to hide. |
+| Markdown is embedded as decoded UTF-8. | `normalise_source_text` decodes, rewrites CRLF and lone CR to LF, and guarantees a trailing newline; `apply` extracts the written page back and compares. | With `core.autocrlf=input`, git stores bytes that differ from the ones `apply` wrote, so a fresh clone reports the same entry changed on every run, forever. |
+| Site facts (base URL, favicon, catalogue mode) are constants in the script. | They are the manifest's `site` block. | A favicon or a base URL is a publication decision, and every other one already lives in the manifest where it is reviewable in a diff. |
+
 ## Selected Approach
 
 Use a repository-owned JSON manifest and a local Python command. The manifest keeps public paths, titles, collections, and ordering explicit. The command discovers content changes, builds and validates the desired tree in a temporary directory, shows the exact plan, and applies it only after confirmation.
