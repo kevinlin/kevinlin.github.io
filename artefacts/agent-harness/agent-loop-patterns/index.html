@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop Engineering — Pattern Field Guide</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --bg-card: #1a2029;
+    --border: #2a3240;
+    --border-soft: #21262d;
+    --fg: #e6edf3;
+    --fg-dim: #9aa7b4;
+    --fg-faint: #6b7785;
+    --accent: #58d6a3;
+    --accent-2: #6ea8fe;
+    --accent-3: #d29922;
+    --accent-4: #db6d6d;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 80px; }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #11161d 0%, var(--bg) 100%);
+    padding: 46px 0 34px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0 0 14px; font-weight: 700; letter-spacing: -0.5px; }
+  .lede { font-size: 17px; color: var(--fg-dim); max-width: 760px; margin: 0; }
+  .meta-line { font-family: var(--mono); font-size: 12px; color: var(--fg-faint); margin-top: 18px; }
+
+  h2 {
+    font-size: 22px; margin: 52px 0 8px; font-weight: 700; letter-spacing: -0.3px;
+    scroll-margin-top: 20px;
+  }
+  h2 .num { font-family: var(--mono); color: var(--accent); font-size: 16px; margin-right: 10px; }
+  .section-sub { color: var(--fg-dim); margin: 0 0 22px; max-width: 800px; }
+
+  /* "Where you sit" callout */
+  .situate {
+    margin-top: 30px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    background: var(--bg-soft);
+    padding: 22px 24px;
+  }
+  .situate h3 { margin: 0 0 8px; font-size: 17px; }
+  .situate p { margin: 0 0 10px; color: var(--fg-dim); }
+  .pipeline {
+    font-family: var(--mono); font-size: 13px; color: var(--fg);
+    background: #0b0f14; border: 1px solid var(--border-soft); border-radius: 8px;
+    padding: 14px 16px; margin: 14px 0 4px; overflow-x: auto; white-space: pre;
+  }
+  .tag-accent { color: var(--accent); }
+  .tag-blue { color: var(--accent-2); }
+  .tag-amber { color: var(--accent-3); }
+
+  /* Controls */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin: 8px 0 26px; position: sticky; top: 0; z-index: 5;
+    background: var(--bg); padding: 14px 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .filter-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--fg-faint); margin-right: 4px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; cursor: pointer;
+    background: var(--bg-soft); color: var(--fg-dim);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 13px;
+    transition: all .15s ease;
+  }
+  .chip:hover { border-color: var(--fg-faint); color: var(--fg); }
+  .chip.active { background: var(--accent); color: #07110c; border-color: var(--accent); font-weight: 600; }
+
+  /* Cards grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+  .card {
+    border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card);
+    padding: 20px 20px 18px; display: flex; flex-direction: column;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .card:hover { border-color: var(--fg-faint); transform: translateY(-2px); }
+  .card .cat {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 5px; align-self: flex-start; margin-bottom: 10px; font-weight: 600;
+  }
+  .cat.c-iter   { background: rgba(88,214,163,.14); color: var(--accent); }
+  .cat.c-verify { background: rgba(110,168,254,.14); color: var(--accent-2); }
+  .cat.c-plan   { background: rgba(210,153,34,.16); color: var(--accent-3); }
+  .cat.c-multi  { background: rgba(219,109,109,.15); color: var(--accent-4); }
+  .cat.c-method { background: rgba(180,142,255,.16); color: #c8a6ff; }
+  .card h3 { margin: 0 0 4px; font-size: 17px; }
+  .card .tagline { color: var(--fg-faint); font-size: 13px; margin: 0 0 12px; font-style: italic; }
+  .card .summary { color: var(--fg-dim); font-size: 13.5px; margin: 0 0 14px; }
+
+  .proscons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .proscons h4 { margin: 0 0 5px; font-size: 11px; font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; }
+  .proscons .p h4 { color: var(--accent); }
+  .proscons .c h4 { color: var(--accent-4); }
+  .proscons ul { margin: 0; padding-left: 15px; font-size: 12.5px; color: var(--fg-dim); }
+  .proscons li { margin-bottom: 4px; }
+
+  .attrs { border-top: 1px solid var(--border-soft); padding-top: 12px; margin-top: auto; }
+  .attr-row { display: flex; gap: 8px; font-size: 12px; margin-bottom: 5px; }
+  .attr-row .k { font-family: var(--mono); color: var(--fg-faint); flex: 0 0 92px; }
+  .attr-row .v { color: var(--fg); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .lvl-high { background: var(--accent-4); }
+  .lvl-med { background: var(--accent-3); }
+  .lvl-low { background: var(--accent); }
+
+  .loop-note {
+    margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+    background: rgba(88,214,163,.07); border: 1px dashed rgba(88,214,163,.35);
+    font-size: 12.5px; color: var(--fg-dim);
+  }
+  .loop-note b { color: var(--accent); font-family: var(--mono); font-size: 11px; letter-spacing: .5px; }
+
+  /* Matrix table */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 880px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  th {
+    background: var(--bg-soft); font-family: var(--mono); font-size: 11px; letter-spacing: .5px;
+    text-transform: uppercase; color: var(--fg-dim); position: sticky; top: 0; cursor: pointer; user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--fg); }
+  th .arrow { color: var(--accent); margin-left: 4px; opacity: 0; }
+  th.sorted .arrow { opacity: 1; }
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+  td.name { font-weight: 600; color: var(--fg); }
+  td .mini-cat { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); display: block; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 14px 0 0; font-size: 12px; color: var(--fg-dim); font-family: var(--mono); }
+
+  /* Takeaways */
+  .takeaways { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; margin-top: 8px; }
+  .takeaway { border: 1px solid var(--border); border-radius: 10px; padding: 18px 18px; background: var(--bg-soft); }
+  .takeaway h3 { margin: 0 0 8px; font-size: 15px; color: var(--accent); }
+  .takeaway p { margin: 0; font-size: 13.5px; color: var(--fg-dim); }
+
+  /* Sources */
+  .sources { margin-top: 14px; columns: 2; column-gap: 30px; }
+  .sources a { color: var(--accent-2); text-decoration: none; font-size: 13px; display: block; margin-bottom: 9px; break-inside: avoid; }
+  .sources a:hover { text-decoration: underline; }
+  footer { margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--border); color: var(--fg-faint); font-size: 12.5px; font-family: var(--mono); }
+  @media (max-width: 640px) {
+    .proscons { grid-template-columns: 1fr; }
+    .sources { columns: 1; }
+    h1 { font-size: 27px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Loop Engineering · Field Guide</p>
+    <h1>Patterns for working with autonomous coding agents</h1>
+    <p class="lede">A survey of the loop, verification, planning, and multi-agent patterns that have emerged around coding agents &mdash; with each one positioned against your <span class="tag-accent">loop&#8209;orchestrator</span> (Maker&ndash;Verifier&ndash;Checker) design and its V4 Planner&nbsp;+&nbsp;Judge direction.</p>
+    <p class="meta-line">Compiled June 2026 · 13 patterns · filter &amp; sort below · sources at the end</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Framing -->
+  <h2><span class="num">00</span>The shape of the field</h2>
+  <p class="section-sub">A coding agent on its own is a single forward pass: it reasons, edits, runs a tool, reads the result, and repeats until it decides it's done. <b>Loop engineering</b> is the craft of wrapping that raw capability in external structure &mdash; state, verification, budgets, and gates &mdash; so it produces trustworthy output instead of plausible-looking output. The patterns below are different answers to the same four questions: <i>how do you iterate, how do you verify, how do you plan, and how many agents do you run?</i> Most real systems combine several.</p>
+
+  <div class="situate">
+    <h3>Where loop-orchestrator sits today</h3>
+    <p>Your system is a <b>guarded Maker&ndash;Checker loop with a deterministic verifier wedged in the middle</b>. That puts it in the sweet spot the wider field has converged on: an LLM reviewer for judgment-heavy failures, plus a hard deterministic gate so nothing half-done ships. The git worktree is your blast-radius boundary; the budget and identical-failure breaker are your runaway-stop.</p>
+    <div class="pipeline">Maker <span class="tag-accent">(cheap model, edits in worktree)</span>  →  protected-path check  →  Verifier <span class="tag-blue">(your shell command, exit 0 = pass)</span>  →  Checker <span class="tag-amber">(strong model, JSON verdict)</span>  →  guard <span style="color:#db6d6d">(budget / breaker)</span></div>
+    <p style="margin-top:14px;">Your <b>V4</b> direction &mdash; a Planner before the Maker and an <b>LLM Judge</b> replacing the binary <code>verdict == "PASS"</code> gate with a richer <code>PASS&nbsp;|&nbsp;CONTINUE&nbsp;|&nbsp;REVISE_PLAN&nbsp;|&nbsp;REVISE_TASK&nbsp;|&nbsp;ESCALATE&nbsp;|&nbsp;HALT</code> decision set &mdash; is exactly the move from "workflow" toward "agent" that Anthropic and others describe. The cards tagged with a green note below show what each external pattern would lend you.</p>
+  </div>
+
+  <!-- Controls -->
+  <h2><span class="num">01</span>The patterns</h2>
+  <p class="section-sub">Filter by family. Each card carries pros, cons, and a small attribute panel; the green note maps it back to your loop.</p>
+  <div class="controls" id="filters">
+    <span class="filter-label">Filter</span>
+    <span class="chip active" data-cat="all">All</span>
+    <span class="chip" data-cat="iter">Loops &amp; workflows</span>
+    <span class="chip" data-cat="verify">Verification</span>
+    <span class="chip" data-cat="plan">Planning &amp; reasoning</span>
+    <span class="chip" data-cat="multi">Multi-agent &amp; parallel</span>
+    <span class="chip" data-cat="method">Methodology</span>
+  </div>
+
+  <div class="grid" id="cards"></div>
+
+  <!-- Matrix -->
+  <h2><span class="num">02</span>Comparison matrix</h2>
+  <p class="section-sub">The same patterns across shared attributes. Click any column header to sort.</p>
+  <div class="table-scroll">
+    <table id="matrix">
+      <thead>
+        <tr>
+          <th data-key="name">Pattern <span class="arrow">▾</span></th>
+          <th data-key="autonomyRank">Autonomy <span class="arrow">▾</span></th>
+          <th data-key="verification">Verification <span class="arrow">▾</span></th>
+          <th data-key="parallelism">Parallelism <span class="arrow">▾</span></th>
+          <th data-key="context">Context strategy <span class="arrow">▾</span></th>
+          <th data-key="human">Human-in-loop <span class="arrow">▾</span></th>
+          <th data-key="maturityRank">Maturity <span class="arrow">▾</span></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="legend">
+    <span><span class="dot lvl-high"></span> high</span>
+    <span><span class="dot lvl-med"></span> medium</span>
+    <span><span class="dot lvl-low"></span> low / bounded</span>
+  </div>
+
+  <!-- Takeaways -->
+  <h2><span class="num">03</span>What to take from this for your loop</h2>
+  <p class="section-sub">Reading the field back onto loop-orchestrator and V4.</p>
+  <div class="takeaways">
+    <div class="takeaway">
+      <h3>You already have the part everyone learns the hard way</h3>
+      <p>The dominant 2026 lesson &mdash; "a loop without verification is just automation" &mdash; is that an LLM reviewer alone is too soft a gate, and you need a deterministic hard stop underneath it. Your Verifier&nbsp;+&nbsp;Checker pairing is precisely that two-tier design. Most Ralph-style setups bolt this on after getting burned.</p>
+    </div>
+    <div class="takeaway">
+      <h3>V4's Judge is the field's frontier, not an over-engineering risk</h3>
+      <p>The binary PASS gate can't tell "impossible" from "not done yet" from "oscillating but progressing." A semantic LLM-as-Judge with an escalation verdict is the recognised fix. Keep your safeguards: strict JSON schema, fall back to the binary gate on parse failure, and a minimum-iterations floor before ESCALATE.</p>
+    </div>
+    <div class="takeaway">
+      <h3>Borrow specs, resist multi-agent (for now)</h3>
+      <p>Spec-driven development would upgrade your MAKER.md/TASK.md anchor into durable acceptance criteria &mdash; cheap, high-leverage, and it feeds the Planner directly. Multi-maker parallelism is tempting but Huntley's "non-deterministic microservices" warning is real; your monolithic single-run design is a feature. Your worktrees already give you the isolation primitive if you ever fan out.</p>
+    </div>
+    <div class="takeaway">
+      <h3>Protect the tests &mdash; you already do</h3>
+      <p>Every test-driven loop eventually meets a model that edits the test to make it pass. Your <code>protected_paths</code> forcing a FAIL on diffs touching <code>tests/</code> is the standard defence against reward-hacking the verifier. Keep it.</p>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <h2><span class="num">04</span>Sources</h2>
+  <p class="section-sub">Primary write-ups and references behind this survey.</p>
+  <div class="sources">
+    <a href="https://ghuntley.com/ralph/" target="_blank">Geoffrey Huntley — Ralph Wiggum as a "software engineer"</a>
+    <a href="https://ghuntley.com/loop/" target="_blank">Geoffrey Huntley — everything is a ralph loop</a>
+    <a href="https://www.humanlayer.dev/blog/brief-history-of-ralph" target="_blank">HumanLayer — A Brief History of Ralph</a>
+    <a href="https://github.com/anthropics/claude-code/blob/main/plugins/ralph-wiggum/README.md" target="_blank">Anthropic — Claude Code ralph-wiggum plugin</a>
+    <a href="https://github.com/snarktank/ralph" target="_blank">snarktank/ralph — autonomous PRD-completion loop</a>
+    <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">Anthropic — Building Effective Agents (workflows vs agents)</a>
+    <a href="https://www.sonarsource.com/blog/loop-engineering-without-verification-is-just-automation/" target="_blank">Sonar — Loop engineering without verification is just automation</a>
+    <a href="https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-2-reflection" target="_blank">DeepLearning.AI — Agentic Design Patterns: Reflection</a>
+    <a href="https://www.augmentcode.com/guides/agentic-design-patterns" target="_blank">Augment Code — Agentic Design Patterns (2026 catalog)</a>
+    <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns" target="_blank">Microsoft — AI Agent Orchestration Patterns (maker-checker)</a>
+    <a href="https://www.marktechpost.com/2026/05/08/meet-github-spec-kit-an-open-source-toolkit-for-spec-driven-development-with-ai-coding-agents/" target="_blank">MarkTechPost — GitHub Spec Kit / spec-driven development</a>
+    <a href="https://thebcms.com/blog/spec-driven-development" target="_blank">BCMS — Spec-Driven Development: the 2026 guide</a>
+    <a href="https://www.augmentcode.com/guides/git-worktrees-parallel-ai-agent-execution" target="_blank">Augment Code — Git worktrees for parallel agent execution</a>
+    <a href="https://ssojet.com/blog/parallel-sub-agent-coding-tools" target="_blank">SSOJet — Coding agents that run sub-agents in parallel</a>
+    <a href="https://arxiv.org/pdf/2510.23761" target="_blank">TDFlow — Agentic Workflows for Test-Driven Development</a>
+    <a href="https://nlp.elvissaravia.com/p/autonomous-long-running-coding-agents" target="_blank">Elvis Saravia — Autonomous Long-Running Coding Agents</a>
+    <a href="https://www.sonarsource.com/blog/loop-engineering-without-verification-is-just-automation/" target="_blank">SWE-agent / SWE-bench — agent-computer interfaces (refs in Sonar &amp; arXiv)</a>
+  </div>
+
+  <footer>
+    loop-orchestrator · docs/agent-loop-patterns.html · generated as a learning aid, not a spec.<br>
+    Claims are sourced above; treat vendor blog figures (star counts, ROI anecdotes) as illustrative, not audited.
+  </footer>
+</div>
+
+<script>
+const PATTERNS = [
+  {
+    cat: "iter", catLabel: "Iteration loop", catClass: "c-iter",
+    name: "Ralph Loop", tagline: "while :; do cat PROMPT.md | agent ; done",
+    summary: "Geoffrey Huntley's brute-force technique: a single agent in a bare shell loop, fresh context every pass, doing exactly one item per loop. External state (a fix_plan.md + a specs/ folder) survives between loops; the primary context acts as a scheduler that fans work out to subagents.",
+    pros: ["Almost zero orchestration code — it's a Bash loop", "Fresh context each loop dodges context-window degradation", "Leverages the model's own planning; you don't decompose", "Astonishing ROI on greenfield bootstrapping (the famous $297-for-a-$50k-MVP anecdote)"],
+    cons: ["Non-determinism is the Achilles heel — duplicate/parallel implementations", "Strong bias toward placeholder/minimal code unless fought with prompts", "You can wake up to a broken, uncompilable codebase", "Huntley himself says “no way” for existing codebases; greenfield only", "Burns the context allocation every loop — wasteful"],
+    autonomy: "Very high", autonomyRank: 5,
+    verification: "Deterministic (compiler/tests as 'backpressure')",
+    parallelism: "Subagents (many for search/write, one for build/test)",
+    context: "Fresh each loop; state externalised to files",
+    human: "Operator tunes prompts, watches stream, git-resets",
+    maturity: "Viral 2025–26; packaged as /loop plugin", maturityRank: 4,
+    loop: "loop-orchestrator is essentially “Ralph with guardrails”: you replaced the bare while-true with an isolated worktree, an independent Checker, and a budget/breaker guard. You traded raw throughput for safety and auditability."
+  },
+  {
+    cat: "iter", catLabel: "Iteration loop", catClass: "c-iter",
+    name: "Maker–Checker / Evaluator–Optimizer", tagline: "one generates, another judges, repeat",
+    summary: "Anthropic's evaluator-optimizer workflow (a.k.a. generator-verifier, critic loop). One LLM produces work; a second, with its own criteria, evaluates and feeds specific feedback back. The loop continues until the evaluator passes it.",
+    pros: ["Catches quality issues a generator is blind to", "Feedback is specific and actionable, so output converges", "A fresh-context reviewer avoids the self-grading bias of reflection", "Maps cleanly onto code review intuition"],
+    cons: ["The evaluator is itself fallible — a soft gate", "Extra model call(s) per iteration add cost and latency", "Can loop without converging if criteria are fuzzy", "A binary pass/fail verdict is coarse (your V4 motivation)"],
+    autonomy: "Medium–high", autonomyRank: 4,
+    verification: "LLM evaluator (+ deterministic in your case)",
+    parallelism: "Sequential by default",
+    context: "Reviewer gets fresh context; maker carries task",
+    human: "Sets criteria; reviews final",
+    maturity: "Canonical, widely deployed", maturityRank: 5,
+    loop: "This IS your spine. loop-orchestrator's Checker is the evaluator; its fresh-context design is the textbook reason to prefer it over self-reflection. V4 keeps this and upgrades the gate."
+  },
+  {
+    cat: "iter", catLabel: "Iteration loop", catClass: "c-iter",
+    name: "Reflection / Self-Critique", tagline: "the agent grades its own homework",
+    summary: "A single agent generates output, critiques its own result against quality criteria (optionally using tools like running tests), then revises. No second party involved.",
+    pros: ["Cheapest improvement loop — one agent, no coordination", "Strong when paired with a tool (run tests, then reflect on failures)", "Trivial to add to an existing single-agent harness"],
+    cons: ["Self-bias: a model is often blind to its own errors", "Can rationalise rather than fix", "Weaker gate than an independent checker"],
+    autonomy: "Medium", autonomyRank: 3,
+    verification: "Self-evaluation (probabilistic)",
+    parallelism: "None",
+    context: "Single continuous context",
+    human: "Minimal",
+    maturity: "Foundational", maturityRank: 5,
+    loop: "The weaker cousin of your Checker. You deliberately moved past this to an independent reviewer — the right call. Worth knowing as the baseline you improved on."
+  },
+  {
+    cat: "verify", catLabel: "Verification", catClass: "c-verify",
+    name: "Two-Tier Verification", tagline: "soft LLM critique + hard deterministic gate",
+    summary: "The defining 2026 'loop engineering' lesson (Sonar): an LLM reviewer gives a probabilistic critique of intent and semantics, but never acts as the final gate. A deterministic tier — tests, type-checks, linters, security scanners — is the hard halt that enforces reproducible quality at loop speed.",
+    pros: ["Prevents premature-completion: nothing half-done ships", "Deterministic tier is reproducible and fast", "LLM tier catches judgment-heavy failures the tests can't express", "Cheap deterministic checks fail fast before the costly review"],
+    cons: ["Only catches what you can encode as a check", "Needs a genuinely meaningful verify command / test suite", "Two tiers = more setup than a single critic"],
+    autonomy: "Medium", autonomyRank: 3,
+    verification: "Hybrid (deterministic + LLM)",
+    parallelism: "N/A",
+    context: "N/A",
+    human: "Author of checks",
+    maturity: "Emerging best practice", maturityRank: 4,
+    loop: "You implement this already: Verifier (deterministic exit-0 gate, chainable as ruff && mypy && pytest) under a Checker (LLM). This is the part Ralph-style setups usually learn to add only after shipping bad code."
+  },
+  {
+    cat: "verify", catLabel: "Verification", catClass: "c-verify",
+    name: "TDD / Edit–Test Loop", tagline: "write test → run → fix → repeat",
+    summary: "The agent drives development from tests: write or read a failing test, implement, run the test, fix, loop. Strong models exhibit a natural cyclic edit→pytest rhythm; formalised in systems like TDFlow.",
+    pros: ["Objective, machine-checkable success signal", "Tight, immediate feedback after every change", "Tests double as living spec and regression guard"],
+    cons: ["Model may edit the test to pass it (reward hacking)", "Requires test infrastructure and fast test runs", "Tests can be placeholder/trivial unless policed"],
+    autonomy: "Medium–high", autonomyRank: 4,
+    verification: "Deterministic (tests)",
+    parallelism: "Usually single",
+    context: "Carries task + test results",
+    human: "Defines acceptance tests",
+    maturity: "Mature, model-native", maturityRank: 5,
+    loop: "Your Verifier is the 'run test' step. Critically, your protected_paths force a FAIL on any diff touching tests/ — the standard defence against the Maker gaming the verifier by rewriting the tests."
+  },
+  {
+    cat: "plan", catLabel: "Planning", catClass: "c-plan",
+    name: "Planning / Plan-and-Execute", tagline: "decompose first, then build",
+    summary: "An explicit planning stage decomposes the task into subtasks with acceptance criteria and a feasibility read before any code is written. The executor then works the plan; the plan can be revised when reality diverges.",
+    pros: ["Handles multi-step dependencies that can't be pre-specified", "Upfront feasibility check catches impossible tasks early", "Reduces aimless wandering / context churn", "Acceptance criteria give the verifier something concrete"],
+    cons: ["A wrong plan misdirects the whole run", "Adds rigidity and an extra model call", "Plans can over-decompose simple tasks"],
+    autonomy: "Medium–high", autonomyRank: 4,
+    verification: "Plan adherence + downstream checks",
+    parallelism: "Can spawn parallel subtasks",
+    context: "Plan persisted as external state",
+    human: "Can approve the plan",
+    maturity: "Established", maturityRank: 4,
+    loop: "This is your V4 Planner stage exactly: PLANNER.md producing subtasks + acceptance_criteria + a feasibility block, threaded into the Maker anchor and re-run on REVISE_PLAN. Note the alignment with Ralph's fix_plan.md as externalised plan state."
+  },
+  {
+    cat: "plan", catLabel: "Planning", catClass: "c-plan",
+    name: "LLM-as-Judge / Semantic Gating", tagline: "a reasoning gate, not an equality check",
+    summary: "Replaces a binary pass/fail with an LLM that reasons over plan, maker self-assessment, verifier, checker, and history, then emits a richer decision — continue, revise, escalate, halt — and can override mechanical guards.",
+    pros: ["Distinguishes 'impossible' from 'not done' from 'progressing but oscillating'", "Enables human escalation instead of silent budget-exhaustion", "Can override a breaker stall when real progress is happening", "Gives the agent a channel to say 'I can't do this'"],
+    cons: ["Judge can hallucinate into its own loop", "Risk of over-escalation or premature halting", "One more model call per iteration (mitigate with a cheaper model)", "Needs strict schema + graceful fallback to the binary gate"],
+    autonomy: "High", autonomyRank: 5,
+    verification: "Meta (reasons over all signals)",
+    parallelism: "N/A",
+    context: "Consumes full iteration history",
+    human: "Receives escalations",
+    maturity: "Frontier / emerging", maturityRank: 2,
+    loop: "Your V4 Judge: it replaces the verdict == “PASS” gate with PASS|CONTINUE|REVISE_PLAN|REVISE_TASK|ESCALATE|HALT and demotes the guard to advisory input. Keep your planned safeguards — JSON validator, fallback to the binary gate on parse failure, min-iterations-before-escalate."
+  },
+  {
+    cat: "plan", catLabel: "Planning", catClass: "c-plan",
+    name: "ReAct / Single-Agent Harness", tagline: "reason → act → observe, with a good ACI",
+    summary: "The base coding-agent loop: the model interleaves reasoning with tool calls (edit, run, search) and observes results, iterating until done. SWE-agent showed that the agent-computer interface (ACI) — how cleanly the agent can act and read results — matters as much as the model.",
+    pros: ["Simple, single context, no orchestration", "Strong on bounded, well-scoped issue resolution (SWE-bench)", "ACI quality is a big, controllable lever"],
+    cons: ["Context degrades on long-horizon work", "No independent verification gate by itself", "Quietly declares success (premature completion)"],
+    autonomy: "Medium", autonomyRank: 3,
+    verification: "None intrinsic",
+    parallelism: "Single agent",
+    context: "One growing context — degrades over time",
+    human: "Reviews output",
+    maturity: "Mature (benchmark standard)", maturityRank: 5,
+    loop: "Your Maker subprocess is essentially this. loop-orchestrator's value is everything wrapped around it — the worktree ACI boundary, the verifier, the checker — that a bare ReAct harness lacks."
+  },
+  {
+    cat: "multi", catLabel: "Multi-agent", catClass: "c-multi",
+    name: "Orchestrator–Workers", tagline: "a lead delegates and synthesizes",
+    summary: "A central LLM dynamically breaks a task into subtasks, delegates each to a worker agent, and synthesizes the results. Unlike fixed parallelization, the subtasks aren't known in advance — the orchestrator decides them per input.",
+    pros: ["Handles complex tasks with unpredictable subtasks", "Allows role/skill specialization among workers", "Scales breadth of work"],
+    cons: ["Coordination overhead and emergent complexity", "Non-determinism compounds across agents (Huntley's 'non-deterministic microservices' warning)", "Harder to audit and reproduce", "Cost scales with worker count"],
+    autonomy: "High", autonomyRank: 5,
+    verification: "Per-worker + orchestrator synthesis",
+    parallelism: "High (dynamic workers)",
+    context: "Distributed across agents",
+    human: "Sets top-level goal",
+    maturity: "Established but operationally heavy", maturityRank: 4,
+    loop: "Deliberately out of scope for you — V4's parking lot lists multi-maker parallelism for V5+. Your monolithic single-run design is a defensible choice; Ralph's author explicitly argues against multi-agent for this exact reason."
+  },
+  {
+    cat: "multi", catLabel: "Multi-agent", catClass: "c-multi",
+    name: "Parallel Fan-Out / Best-of-N", tagline: "run N attempts, keep the best",
+    summary: "Spawn several agents on the same or related tasks in isolated git worktrees, then select or merge the best result. By 2026, /worktree and /best-of-n are first-class commands in tools like Cursor, Codex, and Antigravity.",
+    pros: ["Explores the solution space; raises odds of a good result", "Worktrees give each agent full filesystem isolation — no collisions", "Speeds up genuinely independent work"],
+    cons: ["Cost multiplies by N", "Selecting/merging the winner is its own hard problem", "Most real work has dependencies and can't be parallelized", "Merge conflicts across branches"],
+    autonomy: "High", autonomyRank: 5,
+    verification: "Per-branch, then selection",
+    parallelism: "Very high (N worktrees)",
+    context: "Independent per agent",
+    human: "Often picks the winner",
+    maturity: "Rapidly maturing (2026)", maturityRank: 3,
+    loop: "You already own the key primitive: a worktree per run at ~/.loop/worktrees/<id>. Fanning out N Makers and letting the Checker/Judge pick a winner is a natural — if expensive — future extension."
+  },
+  {
+    cat: "iter", catLabel: "Workflow", catClass: "c-iter",
+    name: "Prompt Chaining", tagline: "fixed pipeline of LLM steps",
+    summary: "Anthropic's simplest workflow: decompose a task into a fixed sequence of steps where each step's output feeds the next, often with a programmatic gate between steps.",
+    pros: ["Predictable and easy to debug", "Each step can be validated independently", "Cheap and transparent"],
+    cons: ["Rigid — can't adapt the steps to the input", "Only fits tasks with a knowable decomposition"],
+    autonomy: "Low", autonomyRank: 2,
+    verification: "Gate between steps",
+    parallelism: "Sequential",
+    context: "Handed step to step",
+    human: "Designs the chain",
+    maturity: "Foundational", maturityRank: 5,
+    loop: "Your per-iteration Maker→Verifier→Checker is a fixed three-step chain. The iteration wrapper is what turns a static chain into a feedback loop."
+  },
+  {
+    cat: "iter", catLabel: "Workflow", catClass: "c-iter",
+    name: "Routing", tagline: "classify, then dispatch to a specialist",
+    summary: "Anthropic's routing workflow: classify the input and send it to a specialized handler/prompt tuned for that category, instead of one prompt trying to do everything.",
+    pros: ["Lets each handler be optimized for its case", "Avoids one bloated prompt degrading on every input", "Cheap classification, focused execution"],
+    cons: ["Misclassification sends work down the wrong path", "Adds a classification step to maintain"],
+    autonomy: "Low–medium", autonomyRank: 2,
+    verification: "Per-handler",
+    parallelism: "Sequential",
+    context: "Per-route",
+    human: "Defines routes",
+    maturity: "Foundational", maturityRank: 5,
+    loop: "Not currently used, but a fit: you could route task types (bugfix vs feature vs refactor) to different MAKER.md profiles or model tiers before the loop runs."
+  },
+  {
+    cat: "method", catLabel: "Methodology", catClass: "c-method",
+    name: "Spec-Driven Development", tagline: "the spec is the source of truth; code is regenerable",
+    summary: "A methodology (GitHub Spec Kit, AWS Kiro, BMAD) where a written specification is the primary, executable artifact and code is a regenerable output. The agent works from durable specs rather than throwaway prompts.",
+    pros: ["Captures durable intent; survives across loops and sessions", "Specs give verifiers concrete acceptance criteria", "Aligns teams and agents on the same source of truth", "Code becomes regenerable from the spec"],
+    cons: ["Heavy upfront investment to write good specs", "Spec drift if not maintained", "Some tooling is proprietary / IDE-locked (e.g. Kiro)", "Overkill for tiny tasks"],
+    autonomy: "Medium", autonomyRank: 3,
+    verification: "Spec conformance",
+    parallelism: "N/A",
+    context: "Spec files as durable state",
+    human: "Authors & curates specs",
+    maturity: "Booming in 2026", maturityRank: 4,
+    loop: "Your MAKER.md (standing instructions) + per-run TASK.md is a lightweight spec anchor. Adopting richer, criteria-bearing specs is the cheapest high-leverage upgrade — and it feeds the V4 Planner directly. Note Ralph also relies on a specs/ folder as externalised truth."
+  }
+];
+
+const LEVEL = { "Very high": "lvl-high", "High": "lvl-high", "Medium–high": "lvl-med", "Medium": "lvl-med", "Low–medium": "lvl-low", "Low": "lvl-low" };
+
+const cardsEl = document.getElementById("cards");
+function renderCards(filter) {
+  cardsEl.innerHTML = "";
+  PATTERNS.filter(p => filter === "all" || p.cat === filter).forEach(p => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <span class="cat ${p.catClass}">${p.catLabel}</span>
+      <h3>${p.name}</h3>
+      <p class="tagline">${p.tagline}</p>
+      <p class="summary">${p.summary}</p>
+      <div class="proscons">
+        <div class="p"><h4>Pros</h4><ul>${p.pros.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+        <div class="c"><h4>Cons</h4><ul>${p.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+      </div>
+      <div class="attrs">
+        <div class="attr-row"><span class="k">autonomy</span><span class="v">${p.autonomy}</span></div>
+        <div class="attr-row"><span class="k">verify</span><span class="v">${p.verification}</span></div>
+        <div class="attr-row"><span class="k">parallel</span><span class="v">${p.parallelism}</span></div>
+        <div class="attr-row"><span class="k">context</span><span class="v">${p.context}</span></div>
+        <div class="attr-row"><span class="k">human</span><span class="v">${p.human}</span></div>
+        <div class="attr-row"><span class="k">maturity</span><span class="v">${p.maturity}</span></div>
+      </div>
+      <div class="loop-note"><b>↳ vs loop-orchestrator</b><br>${p.loop}</div>`;
+    cardsEl.appendChild(el);
+  });
+}
+renderCards("all");
+
+document.getElementById("filters").addEventListener("click", e => {
+  if (!e.target.classList.contains("chip")) return;
+  document.querySelectorAll("#filters .chip").forEach(c => c.classList.remove("active"));
+  e.target.classList.add("active");
+  renderCards(e.target.dataset.cat);
+});
+
+// Matrix
+const tbody = document.querySelector("#matrix tbody");
+let sortKey = "name", sortDir = 1;
+function dotFor(level){ const c = LEVEL[level] || "lvl-med"; return `<span class="dot ${c}"></span>`; }
+function renderMatrix() {
+  const rows = [...PATTERNS].sort((a,b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === "string") { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    return (av < bv ? -1 : av > bv ? 1 : 0) * sortDir;
+  });
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td class="name">${p.name}<span class="mini-cat">${p.catLabel}</span></td>
+      <td>${dotFor(p.autonomy)}${p.autonomy}</td>
+      <td>${p.verification}</td>
+      <td>${p.parallelism}</td>
+      <td>${p.context}</td>
+      <td>${p.human}</td>
+      <td>${p.maturity}</td>
+    </tr>`).join("");
+}
+renderMatrix();
+document.querySelectorAll("#matrix th").forEach(th => {
+  th.addEventListener("click", () => {
+    const k = th.dataset.key;
+    if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; }
+    document.querySelectorAll("#matrix th").forEach(x => x.classList.remove("sorted"));
+    th.classList.add("sorted");
+    renderMatrix();
+  });
+});
+</script>
+</body>
+</html>

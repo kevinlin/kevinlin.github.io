@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ralph Loop: What the Community Says (/Last30Days) | Artefacts</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+    <meta name="theme-color" content="#0063a3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        (function () {
+            try {
+                var stored = localStorage.getItem('theme');
+                var dark = stored ? stored === 'dark'
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary-color: #0063a3;
+            --accent-color: #ff5a5f;
+            --text-color: #333333;
+            --light-text: #666666;
+            --background-color: #ffffff;
+            --section-bg: #f8f9fa;
+            --border-color: #e6e6e6;
+            --tint: rgba(0, 99, 163, 0.1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary-color: #4389b9;
+            --accent-color: #ff8085;
+            --text-color: #f8f9fa;
+            --light-text: #cccccc;
+            --background-color: #121212;
+            --section-bg: #1e1e1e;
+            --border-color: #3a3a3a;
+            --tint: rgba(67, 137, 185, 0.16);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            margin: 0;
+            background: var(--section-bg);
+            color: var(--text-color);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        header, main, footer {
+            width: min(72rem, calc(100% - 48px));
+            margin-inline: auto;
+        }
+
+        header { padding: 56px 0 8px; }
+
+        a { color: var(--primary-color); text-underline-offset: 0.2em; }
+        a:hover { color: var(--accent-color); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-link:hover span { text-decoration: underline; }
+
+        h1 {
+            margin: 24px 0 8px;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+
+        main { padding-bottom: 72px; }
+
+        article {
+            padding: 32px;
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        article > :first-child { margin-top: 0; }
+        article > :last-child { margin-bottom: 0; }
+
+        article h1, article h2, article h3, article h4 {
+            margin: 2em 0 0.6em;
+            line-height: 1.3;
+            text-wrap: balance;
+        }
+
+        article h2 {
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        article h3 { font-size: 1.2rem; }
+
+        article img { max-width: 100%; height: auto; }
+
+        article blockquote {
+            margin: 1.5em 0;
+            padding: 0.2em 1.2em;
+            border-left: 3px solid var(--primary-color);
+            color: var(--light-text);
+        }
+
+        article code {
+            padding: 0.15em 0.4em;
+            background: var(--tint);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        article pre {
+            overflow-x: auto;
+            padding: 16px;
+            background: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        article pre code { padding: 0; background: none; }
+
+        .table-scroll, article table { display: block; overflow-x: auto; }
+
+        article table { border-collapse: collapse; width: 100%; }
+
+        article th, article td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        article th { background: var(--tint); }
+
+        article hr { border: none; border-top: 1px solid var(--border-color); }
+
+        footer {
+            padding-bottom: 48px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a class="back-link" href="../../">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Artefacts</span>
+        </a>
+        <h1>Ralph Loop: What the Community Says (/Last30Days)</h1>
+    </header>
+
+    <main>
+        <article id="markdown-body"></article>
+    </main>
+
+    <footer>
+        <p>Rendered from Markdown in the browser.</p>
+    </footer>
+
+<script type="text/markdown" id="markdown-source">
+🌐 last30days v3.3.2 · synced 2026-06-10
+
+# Ralph Loop: What the Community Says (/Last30Days)
+
+> Date range: 2026-05-11 to 2026-06-10
+> Sources: Reddit, Hacker News, YouTube, Web
+
+What I learned:
+
+**The ralph loop has crossed from indie technique into enterprise vocabulary.** In the last 30 days, HN comments on unrelated engineering threads casually reference it by name as shared knowledge. The sharpest recent example: a commenter on the [Harness/Codex thread](https://news.ycombinator.com/item?id=48416264) (June 7) noted Harness uses it in production - "To drive a PR to completion, we instruct Codex to review its own changes locally... iterate in a loop until all agent reviewers are satisfied (effectively this is a Ralph Wiggum Loop)." The loop pattern is no longer a hobbyist hack; it is embedded in commercial CI/CD tooling.
+
+**The community is actively debating its limits, not just celebrating it.** The May 2026 thread ["ralph loop overnight: 91 codex reviews. $200 gone"](https://www.reddit.com/r/ClaudeCode/comments/1to6hen/ralph_loop_overnight_91_codex_reviews_200_gone/) on [r/ClaudeCode](https://reddit.com/r/ClaudeCode) is the most upvoted cost-horror story in the last 30 days. Top comment from [u/GhostTheSlayer](https://reddit.com/r/ClaudeCode): "I do 2-3 review cycles max after that it's usually just slop." An April 2026 HN commenter put it bluntly: "The way these agents are being used now is crazy in how inefficient the token utilization is. Reading from ill-structured knowledge dumps meant for humans, ralph wiggum loops... just crazy iterations for simple things." And a June 2026 Zerostack thread produced what may be the clearest architectural critique: "This shouldn't be embedded in the executor layer. Orchestration should handle this."
+
+**The "beyond ralph loops" framing is gaining traction as a concept.** A June 8 HN post titled ["Beyond Ralph Loops: Orchestrate-Map-Reduce and Higher Order Skills"](https://twitter.com/djgrant_/status/2063960111173808335) and a [r/dataengineering](https://reddit.com/r/dataengineering) thread the same day ("AI Workflows - Ralph Loops/Ticket based Agentic Workflows") both signal a community searching for the next architectural layer. The emerging successor pattern: ralph loops as primitives inside a multi-agent orchestration wrapper - fan out parallel specialized subagents (map), synthesize results (reduce). [Geoffrey Huntley](https://ghuntley.com) himself is already operating at this scale: his CURSED programming language project runs up to 500 parallel subagents per loop.
+
+**[Maximilian Schwarzmuller](https://www.youtube.com/watch?v=J2ZE6XGCYb0)'s June 9 video** (26k views, 1.1k likes) captures the cultural moment: he cites [Peter Steinberger's](https://twitter.com/steipete) X post - "you shouldn't be prompting coding agents anymore. You should be designing loops that prompt your agents" - and observes that "the Ralph loop back then... is now officially integrated into Claude Code and Codex, and now we're talking about loop engineering." The term is evolving from a specific technique to a broader design philosophy.
+
+**A small ecosystem of extensions is active right now.** [Fabro](https://github.com/fabro-sh/fabro) (April 2026) frames itself explicitly as the "last mile beyond ralph" - "it's easy to throw a Ralph shell script around Claude, but as runtime increases the chance of high quality output declines." [Zerostack](https://crates.io/crates/zerostack/1.0.0) (Rust, June 2026) bakes ralph loops in as a first-class feature. [r/opencodeCLI](https://reddit.com/r/opencodeCLI)'s May 11 post "Ralph Loops - Help!" shows even the OpenCode community is adopting the pattern: "Started Ralph Loops on the weekend... I'm spooked by how well it's worked." And [r/vibecoding](https://reddit.com/r/vibecoding)'s "My Ralph Loop Experiments, and Why /goal Feels Like the Successor" signals the comparison between ralph-loop and native agent goal commands is now a live debate.
+
+**[Simon Willison](https://simonwillison.net)'s take is the most honest calibration:** "Given the quality of their existing test suite I'm confident the Ralph Wiggum loop would produce a working implementation... but the code quality wouldn't be anywhere near what they got from two weeks of hands-on expert prompting." Working code, not necessarily good code.
+
+KEY PATTERNS from the research:
+
+1. **Enterprise adoption confirmed.** Harness/Codex and similar tools have productized the ralph loop pattern inside CI/CD pipelines - no longer just a solo-dev bash script.
+2. **Cost is the top friction.** $200 overnight for 91 review cycles is the cautionary tale circulating right now. Community consensus is 2-3 max iterations before quality degrades.
+3. **Architectural critique is sharpening.** The emerging view: ralph loops belong in the orchestration layer, not embedded per-tool. The "executor vs. orchestrator" debate is active on HN right now.
+4. **The successor is map-reduce orchestration.** Multi-agent fan-out (many parallel ralph-style subagents) + a reduce step is the natural next layer. Huntley himself is there; commercial tools are building toward it.
+5. **The vocabulary is shifting.** "Ralph loop" is giving way to "loop engineering" as a broader framing. Peter Steinberger's post and Schwarzmuller's video are crystallizing this.
+6. **Quality ceiling is documented.** Willison's comment is the canonical reference: working code yes, high-quality code no. Expert steering still matters at the edges.
+
+---
+✅ All agents reported back!
+├─ 🟠 Reddit: 4 threads │ 54 comments
+├─ 🔴 YouTube: 1 video │ 26,284 views │ 1/1 with transcripts
+├─ 🟡 HN: 1 story │ 3 points
+├─ 🗣️ Top voices: r/dataengineering, r/ClaudeCode, r/vibecoding
+└─ 📎 Raw results saved to ~/Documents/Last30Days/ralph-loop-raw-v3.md
+---
+</script>
+    <script src="../../vendor/marked.min.js"></script>
+    <script>
+        // The source block carries the Markdown verbatim except for two escaped
+        // sequences; the same substitution runs in reverse here. See
+        // escape_markdown_block in scripts/artefacts.py.
+        (function () {
+            // textContent starts at the newline that follows the opening tag, which
+            // the Python-side extract_markdown slice does not include. Drop it so
+            // both sides see the same bytes.
+            var raw = document.getElementById('markdown-source').textContent.replace(/^\n/, '');
+            var text = raw.replace(/<(\\+)(\/script|!--)/gi, function (match, slashes, marker) {
+                return '<' + slashes.slice(1) + marker;
+            });
+            var body = document.getElementById('markdown-body');
+            body.innerHTML = marked.parse(text);
+            // Most documents open with their own H1, and the proposal derives the
+            // manifest title from exactly that heading, so the page would print the
+            // title twice. Drop the article's copy when it repeats the header rather
+            // than stripping it from the source, which has to stay byte-exact.
+            // The H1 is not always the first element — several sources open with a
+            // banner line — so match on the first H1 anywhere in the article. Equal
+            // text is the whole test: a heading that differs really does say
+            // something else, and both copies stay.
+            var lead = body.querySelector('h1');
+            var heading = document.querySelector('header h1');
+            if (lead && heading &&
+                lead.textContent.trim() === heading.textContent.trim()) {
+                lead.remove();
+            }
+        })();
+    </script>
+</body>
+</html>

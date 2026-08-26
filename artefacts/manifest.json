@@ -324,6 +324,7 @@
       "collection": "product-timeline",
       "order": 10,
       "replacements": {},
+      "description": "Every Snapdragon 7-series chip by announcement date, with the lifespan of each branch until its successor arrived.",
       "date": "2026-07-27"
     },
     {
@@ -334,6 +335,7 @@
       "collection": "claude-code",
       "order": 10,
       "replacements": {},
+      "description": "Three configuration gaps that lined up to ship 512,000 lines of Claude Code source in a public npm package, and the safeguards that were missing.",
       "date": "2026-04-02"
     },
     {
@@ -344,6 +346,7 @@
       "collection": "claude-code",
       "order": 20,
       "replacements": {},
+      "description": "The release pipeline that should have caught the leak, drawn next to the one that actually ran: missing validation, misconfigured build, a known Bun bug.",
       "date": "2026-04-01"
     },
     {
@@ -354,6 +357,7 @@
       "collection": "claude-code",
       "order": 30,
       "replacements": {},
+      "description": "The commands and key bindings worth memorising, plus a daily rhythm for when to reach for each one.",
       "date": "2026-03-22"
     },
     {
@@ -364,6 +368,7 @@
       "collection": "people-lead-lifecycle",
       "order": 10,
       "replacements": {},
+      "description": "What a People Lead does and when: onboarding milestones, monthly and quarterly rhythms, the annual review cycle, and the offboarding checklist.",
       "date": "2026-04-10"
     },
     {
@@ -374,6 +379,7 @@
       "collection": "fde",
       "order": 100,
       "replacements": {},
+      "description": "The bright line is what the client asks for out loud. The dark line is the unstated business reality underneath, and it is what decides whether the project works.",
       "date": "2026-07-28"
     },
     {
@@ -384,6 +390,7 @@
       "collection": "fde",
       "order": 110,
       "replacements": {},
+      "description": "Client language to business objective, objective to judgment rules, rules to workflow, workflow to acceptance criteria. Technology gets picked at step three, not step zero.",
       "date": "2026-07-28"
     },
     {
@@ -394,6 +401,7 @@
       "collection": "fde",
       "order": 120,
       "replacements": {},
+      "description": "A year of Forward Deployed Engineering on one page: what an FDE is not, the bright line and dark line, the five questions to ask, and the four translation steps.",
       "date": "2026-07-28"
     },
     {
@@ -404,6 +412,7 @@
       "collection": "fable5-21days",
       "order": 20,
       "replacements": {},
+      "description": "380 agent sessions over three weeks, broken out project by project with hours, session counts, and what each one produced.",
       "date": "2026-07-22"
     },
     {
@@ -414,6 +423,7 @@
       "collection": "fable5-21days",
       "order": 30,
       "replacements": {},
+      "description": "The same three weeks as a ranked bar chart: hours per project, top-four highlights, and a 91% session success rate.",
       "date": "2026-07-22"
     },
     {
@@ -424,6 +434,7 @@
       "collection": "fable5-21days",
       "order": 40,
       "replacements": {},
+      "description": "The full three-week report in seven modules: vitals, effort ranking, deep dive on the top three, the pipeline, tool split, outcomes, and most-used skills.",
       "date": "2026-07-22"
     },
     {
@@ -434,6 +445,7 @@
       "collection": "fable5-21days",
       "order": 50,
       "replacements": {},
+      "description": "All ten workstreams arranged around a single hub, each spoke labelled with hours, share of time, and session count.",
       "date": "2026-07-22"
     },
     {
@@ -444,6 +456,7 @@
       "collection": "fable5-21days",
       "order": 70,
       "replacements": {},
+      "description": "The three weeks as a trail map: foundations, ship and scan, decide and polish, with the milestone that landed in each.",
       "date": "2026-07-22"
     },
     {
@@ -454,6 +467,7 @@
       "collection": "ai-native-organisation",
       "order": 10,
       "replacements": {},
+      "description": "Two roles left after AI takes the middle: the Architect who designs how AI works, and the Operator who verifies it. Plus what the shift cost the people living through it.",
       "date": "2026-07-28"
     },
     {
@@ -464,6 +478,7 @@
       "collection": "ai-native-organisation",
       "order": 20,
       "replacements": {},
+      "description": "A tighter cut of the same argument, with the guiding principle pulled out: we don't fire for production bugs, we improve the process.",
       "date": "2026-07-28"
     },
     {
@@ -474,6 +489,7 @@
       "collection": "claude-code",
       "order": 40,
       "replacements": {},
+      "description": "A turtle at a desk, debugging. Mascot art, no data.",
       "date": "2026-07-28"
     },
     {
@@ -484,6 +500,7 @@
       "collection": "product-builder",
       "order": 10,
       "replacements": {},
+      "description": "Taste is a smell you can't always pinpoint but always notice. Sketch notes on why agents without human taste produce slop, and why taste plus system design are the two skills left.",
       "date": "2026-04-27"
     },
     {
@@ -494,6 +511,7 @@
       "collection": "product-builder",
       "order": 20,
       "replacements": {},
+      "description": "The same argument from the AI Engineer keynote of 17 April 2026, with the OpenClaw examples and the cross-reference to Karpathy's cognitive core.",
       "date": "2026-04-27"
     },
     {
@@ -504,6 +522,7 @@
       "collection": "product-builder",
       "order": 30,
       "replacements": {},
+      "description": "Three paths that survive when the ritual doesn't: the strong generalist, the deep specialist, and the new grad who learns craft. Resilience over process.",
       "date": "2026-07-28"
     },
     {
@@ -514,6 +533,7 @@
       "collection": "hermes-agent",
       "order": 10,
       "replacements": {},
+      "description": "113 phantom inbound messages over 26 hours, traced to a corrupted Signal encryption session. Timeline, root cause, and fix.",
       "date": "2026-07-24"
     },
     {
@@ -524,6 +544,7 @@
       "collection": "product-idea",
       "order": 10,
       "replacements": {},
+      "description": "Product requirements for a fundraising map where donors pick an animal avatar and place it on a world map. Workshop-scoped build.",
       "date": "2026-06-29"
     },
     {
@@ -534,6 +555,7 @@
       "collection": "java-interview",
       "order": 10,
       "replacements": {},
+      "description": "Questions across Java fullstack, platform, and AI engineering, with sample answers hidden until you have tried your own.",
       "date": "2026-08-07"
     },
     {
@@ -544,6 +566,7 @@
       "collection": "star-wars",
       "order": 10,
       "replacements": {},
+      "description": "Every canon film and series in story order rather than release order, dated from the Battle of Yavin.",
       "date": "2026-08-11"
     },
     {
@@ -554,6 +577,7 @@
       "collection": "coding-agent-war",
       "order": 10,
       "replacements": {},
+      "description": "Weekly active users for both coding agents, aligned to each product's own month one, with every data point sourced.",
       "date": "2026-08-22"
     },
     {
@@ -564,6 +588,7 @@
       "collection": "everything-llm",
       "order": 10,
       "replacements": {},
+      "description": "Start at xhigh for coding, set max_tokens to 64K or more, turn on thinking summaries, and match effort to task complexity.",
       "date": "2026-07-28"
     },
     {
@@ -574,6 +599,7 @@
       "collection": "everything-llm",
       "order": 20,
       "replacements": {},
+      "description": "Input up 4x and output up 3x across eight months and three GPT-5 releases, with Claude Opus 4.7 held flat for comparison.",
       "date": "2026-07-28"
     },
     {
@@ -584,6 +610,7 @@
       "collection": "everything-llm",
       "order": 30,
       "replacements": {},
+      "description": "Quota resets, a context-limit rollback, a reverted reasoning picker: everything OpenAI changed or undid in the five days after launch.",
       "date": "2026-07-14"
     },
     {
@@ -597,6 +624,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
+      "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
       "date": "2026-08-25"
     },
     {
@@ -610,6 +638,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
+      "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
       "date": "2026-08-20"
     },
     {
@@ -622,6 +651,7 @@
       "replacements": {
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
       },
+      "description": "Flagship models from six labs by release date, with vendor-reported and independently verified scores drawn separately.",
       "date": "2026-08-17"
     },
     {
@@ -632,6 +662,7 @@
       "collection": "skillops",
       "order": 10,
       "replacements": {},
+      "description": "Raw last30days run for July 2026: ranked evidence from GitHub, Hacker News, Reddit, and YouTube. Untrusted source text, kept as collected.",
       "date": "2026-08-01"
     },
     {
@@ -642,6 +673,7 @@
       "collection": "ai-buzzword",
       "order": 10,
       "replacements": {},
+      "description": "The six pieces of a working agent loop — automations, worktrees, skills, connectors, sub-agents, state — and why the leverage point moved but the responsibility didn't.",
       "date": "2026-07-27"
     },
     {
@@ -652,6 +684,7 @@
       "collection": "ai-buzzword",
       "order": 20,
       "replacements": {},
+      "description": "AI reaches for digital transformation and platform economy because the pattern is common, not because it fits. Five rules for using it in strategy anyway.",
       "date": "2026-04-27"
     },
     {
@@ -662,6 +695,7 @@
       "collection": "everything-llm",
       "order": 100,
       "replacements": {},
+      "description": "Raw last30days run for June 2026: ranked evidence from Hacker News, Reddit, and YouTube. Untrusted source text, kept as collected.",
       "date": "2026-08-01"
     },
     {
@@ -672,6 +706,7 @@
       "collection": "everything-llm",
       "order": 110,
       "replacements": {},
+      "description": "Claude releases at Sonnet tier and above plot above the axis, full-size GPT releases below, from March 2024 to July 2026.",
       "date": "2026-07-27"
     },
     {
@@ -685,6 +720,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
+      "description": "Blended price per million tokens for each Copilot model, weighted the way an agentic session actually bills, against its SWE-Bench Pro resolve rate.",
       "date": "2026-08-25"
     },
     {
@@ -695,6 +731,7 @@
       "collection": "java-interview",
       "order": 20,
       "replacements": {},
+      "description": "Every OpenJDK feature release since Java 10, LTS above the axis and interim below, each with its headline features.",
       "date": "2026-08-06"
     },
     {
@@ -705,6 +742,7 @@
       "collection": "travel",
       "order": 10,
       "replacements": {},
+      "description": "Lines currently in service, drawn to their real routes and coloured by speed band, with hub and regional cities marked.",
       "date": "2026-08-14"
     },
     {
@@ -715,6 +753,7 @@
       "collection": "travel",
       "order": 20,
       "replacements": {},
+      "description": "An interactive map of the Chinese rail network showing hubs and major cities. Labels are in Chinese.",
       "date": "2026-08-14"
     },
     {
@@ -725,6 +764,7 @@
       "collection": "claude-tag",
       "order": 10,
       "replacements": {},
+      "description": "Raw last30days run for August 2026, filtered to Claude Tag itself across eleven sources. Untrusted source text, kept as collected.",
       "date": "2026-08-15"
     },
     {
@@ -735,6 +775,7 @@
       "collection": "claude-tag",
       "order": 20,
       "replacements": {},
+      "description": "Claude Tag sits in the channel rather than waiting to be called: it reads the history, connects to your tools, starts work itself, and remembers.",
       "date": "2026-08-15"
     },
     {
@@ -745,6 +786,7 @@
       "collection": "claude-tag",
       "order": 30,
       "replacements": {},
+      "description": "A coding agent has one person feeding it context. A channel member gets the context for free. Same intelligence, different amount of it.",
       "date": "2026-08-15"
     },
     {
@@ -755,6 +797,7 @@
       "collection": "claude-tag",
       "order": 40,
       "replacements": {},
+      "description": "A task carried across a week: tagged on Monday, blocked on a customer reply, self-scheduled wake-up, shipped Thursday, reported back the following week.",
       "date": "2026-08-15"
     },
     {
@@ -765,6 +808,7 @@
       "collection": "claude-tag",
       "order": 50,
       "replacements": {},
+      "description": "Interface, execution, model, and tools, with memory writing back at every layer. One ephemeral sandbox per thread.",
       "date": "2026-08-15"
     },
     {
@@ -775,6 +819,7 @@
       "collection": "claude-tag",
       "order": 60,
       "replacements": {},
+      "description": "The usual path has a human summarising context before the agent sees it. Here nothing gets summarised away, because the agent is already in the room.",
       "date": "2026-08-15"
     },
     {
@@ -785,6 +830,7 @@
       "collection": "claude-tag",
       "order": 70,
       "replacements": {},
+      "description": "Thread, channel, and workspace scopes, with promotion between them and no leakage across channels. Distillation is what separates a strong coworker from a weak one.",
       "date": "2026-08-15"
     },
     {
@@ -795,6 +841,7 @@
       "collection": "claude-tag",
       "order": 80,
       "replacements": {},
+      "description": "Seven steps from an @claude mention to a reply: route, sandbox, model, tools, memory write-back, and the option to wake itself later.",
       "date": "2026-08-15"
     },
     {
@@ -805,6 +852,7 @@
       "collection": "claude-tag",
       "order": 100,
       "replacements": {},
+      "description": "Noticing the same complaint for the third time across channels, investigating unasked, opening a fix, and stopping to ask before the irreversible call.",
       "date": "2026-08-15"
     },
     {
@@ -815,6 +863,7 @@
       "collection": "claude-tag",
       "order": 110,
       "replacements": {},
+      "description": "The three memory scopes and the recording-versus-distilling contrast, in the dark treatment.",
       "date": "2026-08-15"
     },
     {
@@ -825,6 +874,7 @@
       "collection": "llm-eval",
       "order": 10,
       "replacements": {},
+      "description": "Drag the question vectors and watch the score move. Only the angle to the original input matters, not the distance.",
       "date": "2026-08-16"
     },
     {
@@ -835,6 +885,7 @@
       "collection": "llm-eval",
       "order": 20,
       "replacements": {},
+      "description": "Two Ragas metrics that compare a response against a reference and nothing else. Where they differ is how they reach a number.",
       "date": "2026-08-16"
     },
     {
@@ -845,6 +896,7 @@
       "collection": "developer-productivity-ai-native",
       "order": 10,
       "replacements": {},
+      "description": "Session notes and slide captures from the STACK Meetup talk on how GovTech's Developer Productivity team builds environments for AI-native work.",
       "date": "2026-08-17"
     },
     {
@@ -855,6 +907,7 @@
       "collection": "agent-harness",
       "order": 30,
       "replacements": {},
+      "description": "Raw last30days run for June 2026: ranked evidence on the ralph loop from Hacker News, Reddit, and YouTube. Untrusted source text, kept as collected.",
       "date": "2026-08-01"
     },
     {
@@ -865,6 +918,7 @@
       "collection": "agent-harness",
       "order": 40,
       "replacements": {},
+      "description": "Raw last30days run for July 2026: ranked evidence on loop engineering from GitHub, Hacker News, Reddit, and YouTube. Untrusted source text, kept as collected.",
       "date": "2026-08-01"
     },
     {
@@ -875,6 +929,7 @@
       "collection": "agent-harness",
       "order": 50,
       "replacements": {},
+      "description": "Raw last30days run for August 2026: ranked evidence on the agent gauntlet pipeline across nine sources. Untrusted source text, kept as collected.",
       "date": "2026-08-21"
     },
     {
@@ -885,7 +940,41 @@
       "collection": "mingpt-vs-toy-transformer",
       "order": 10,
       "replacements": {},
+      "description": "Karpathy's minGPT next to a toy transformer shrunk to one layer, one head, and three embedding dimensions. Same architecture, twelve points of comparison.",
       "date": "2026-07-23"
+    },
+    {
+      "id": "skillops-20260821-skillops-raw",
+      "source": "SkillOps/20260821_skillops-raw.md",
+      "destination": "skillops/20260821-skillops-raw/index.html",
+      "title": "last30days v3.21.1: SkillOps agent skills",
+      "collection": "skillops",
+      "order": 20,
+      "replacements": {},
+      "description": "Raw last30days run for August 2026: ranked evidence on SkillOps agent skills across eight sources. Untrusted source text, kept as collected.",
+      "date": "2026-08-21"
+    },
+    {
+      "id": "agent-harness-20260511-ralph-loop-last30days",
+      "source": "agent-harness/20260511_ralph-loop-last30days.md",
+      "destination": "agent-harness/20260511-ralph-loop-last30days/index.html",
+      "title": "Ralph Loop: What the Community Says (/Last30Days)",
+      "collection": "agent-harness",
+      "order": 60,
+      "replacements": {},
+      "description": "A written read of the May-June 2026 community evidence: the ralph loop moving from indie technique to enterprise vocabulary, and the cost and quality arguments against it.",
+      "date": "2026-06-11"
+    },
+    {
+      "id": "agent-harness-agent-loop-patterns",
+      "source": "agent-harness/agent-loop-patterns.html",
+      "destination": "agent-harness/agent-loop-patterns/index.html",
+      "title": "Agent loop patterns",
+      "collection": "agent-harness",
+      "order": 70,
+      "replacements": {},
+      "description": "The loop, verification, planning, and multi-agent patterns that grew up around coding agents, each positioned against a Maker-Verifier-Checker design.",
+      "date": "2026-06-22"
     }
   ]
 }
