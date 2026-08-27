@@ -432,6 +432,19 @@ export default {
     0.124674,
     0.166341
    ]
+  },
+  {
+   "id": "mingpt-vs-toy-transformer-infographic",
+   "href": "mingpt-vs-toy-transformer/infographic.png",
+   "title": "Infographic",
+   "collection": "minGPT vs toy-transformer",
+   "aspect": 1.777778,
+   "uv": [
+    0.500163,
+    0.869954,
+    0.166341,
+    0.093424
+   ]
   }
  ]
 };
