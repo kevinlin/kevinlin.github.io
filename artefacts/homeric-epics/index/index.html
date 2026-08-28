@@ -56,7 +56,7 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* layers */
-  --z-stage: 0; --z-rail: 20; --z-panel: 30; --z-nav: 40; --z-selftest: 99;
+  --z-stage: 0; --z-labels: 10; --z-rail: 20; --z-panel: 30; --z-nav: 40; --z-selftest: 99;
 
   /* the rail owns the bottom strip; the panel and the credit sit above it */
   --rail-h: 4.25rem;
@@ -247,6 +247,29 @@ noscript .nojs {
   .entry, .entry h2, .entry .prose { animation: none; }
 }
 
+/* ===================== MAP LABELS ===================== */
+/* Names drawn over the canvas as DOM rather than baked into the relief, so they
+   stay crisp at every zoom and cost one transform each per frame. Which names
+   fit is decided in scene code; this only says how they look. */
+#labels { position: fixed; inset: 0; z-index: var(--z-labels); pointer-events: none; }
+#labels span {
+  position: absolute; top: 0; left: 0; opacity: 0; white-space: nowrap;
+  /* the cartographer's halo: the map underneath is teal in places and pale
+     parchment in others, and this reads on both */
+  text-shadow: 0 1px 2px rgba(10,7,6,.9), 0 0 8px rgba(10,7,6,.7);
+  transition: opacity 160ms var(--ease-out), color 160ms var(--ease-out);
+}
+#labels .sea {
+  font-size: .6875rem; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(244,236,216,.72);
+}
+#labels .stop {
+  font-size: .875rem; letter-spacing: .05em; font-variant: small-caps;
+  color: var(--bone);
+}
+#labels .stop.on { color: var(--terra-lit); }
+@media (prefers-reduced-motion: reduce) { #labels span { transition: none; } }
+
 /* ===================== YEAR RAIL + NAV ===================== */
 #rail {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-rail);
@@ -390,6 +413,7 @@ noscript .nojs {
 
 <a class="skip" href="#journal">Skip to the journal entry</a>
 <div id="stage" aria-hidden="true"></div>
+<div id="labels" aria-hidden="true"></div>
 <main id="fallback" tabindex="-1"></main>
 <aside id="journal" tabindex="-1" aria-label="Journal">
   <div id="entry" aria-live="polite" aria-atomic="true"></div>
@@ -575,6 +599,21 @@ export const markerLonLat = (s) => {
   return d ? [s.lon + d[0], s.lat + d[1]] : [s.lon, s.lat];
 };
 
+/* ===================== SEA NAMES ===================== */
+/* The classical Latin names for the water, the register the source map labels
+   its seas in. The names are ancient and factual; the positions are chosen
+   here, in open water, and the selftest keeps them there. */
+export const SEAS = [
+  ['Mare Ibericum',       0.60, 38.60],
+  ['Mare Ligusticum',     8.30, 43.30],
+  ['Mare Tyrrhenum',     12.20, 39.90],
+  ['Mare Adriaticum',    16.40, 42.60],
+  ['Mare Ionium',        18.70, 37.10],
+  ['Mare Aegaeum',       25.10, 38.20],
+  ['Pontus Euxinus',     34.00, 43.30],
+  ['Mare Mediterraneum', 20.50, 33.60],
+];
+
 /* ===================== ROUTE ===================== */
 /* Ray-casting point-in-polygon over the atlas rings. Used by the tests to prove
    no leg of the route crosses land, and by nothing at runtime. */
@@ -753,6 +792,10 @@ export function selftest(setpieceKeys = null) {
     return bad.length === 0 || bad.map(s => s.setpiece).join(', ');
   });
   check('atlas present', () => ATLAS.length > 0 || 'atlas is empty');
+  check('sea names in open water', () => {
+    const dry = SEAS.filter(([, lon, lat]) => pointInLand([lon, lat]));
+    return dry.length === 0 || dry.map(s => s[0]).join(', ');
+  });
   check('map-derived stops in open water', () => {
     const dry = STOPS.filter(s => s.prov === 'map' && pointInLand([s.lon, s.lat]));
     return dry.length === 0 || dry.map(s => s.name).join(', ');
@@ -854,10 +897,16 @@ if (!webglAvailable()) {
   scene.add(sea);
 
   const RAIL_PX = 68;                       // --rail-h, 4.25rem
-  function frameVisibleArea() {
+  /* What the journal takes from the canvas: the left edge on wide screens, the
+     bottom half on narrow ones. Centres the camera, and keeps labels out from
+     under the panel. */
+  function uiInset() {
     const narrow = innerWidth <= 768;
-    const panelW = narrow ? 0 : Math.min(30 * 16, innerWidth * 0.34);
-    const covered = narrow ? innerHeight * 0.52 + RAIL_PX : RAIL_PX;
+    return { panelW: narrow ? 0 : Math.min(30 * 16, innerWidth * 0.34),
+             covered: narrow ? innerHeight * 0.52 + RAIL_PX : RAIL_PX };
+  }
+  function frameVisibleArea() {
+    const { panelW, covered } = uiInset();
     camera.setViewOffset(innerWidth, innerHeight,
                          -panelW / 2, covered / 2, innerWidth, innerHeight);
   }
@@ -1391,6 +1440,66 @@ if (!webglAvailable()) {
     window.__nostos.triangles = tris;
   }
 
+  /* ---- map labels: names projected onto the canvas ----
+     The seventeen stop names and the classical sea names. Placement is greedy:
+     the current stop first, then the route in order, then the seas. A name that
+     would land on one already placed is dropped for that frame rather than
+     stacked on top of it, which is what keeps Scylla and Charybdis legible at
+     one zoom and the whole basin legible at another. */
+  const labelsEl = document.getElementById('labels');
+  const labels = [
+    ...core.STOPS.map(s => ({ kind: 'stop', n: s.n, text: s.name,
+                              at: core.lonLatToWorld(...core.markerLonLat(s)) })),
+    ...core.SEAS.map(([text, lon, lat]) => ({ kind: 'sea', text,
+                                              at: core.lonLatToWorld(lon, lat) })),
+  ];
+  for (const l of labels) {
+    l.el = document.createElement('span');
+    l.el.className = l.kind;
+    l.el.textContent = l.text;
+    labelsEl.appendChild(l.el);
+    l.v = new THREE.Vector3(l.at.x, l.kind === 'stop' ? 5 : 0, l.at.z);
+  }
+
+  const placed = [];
+  const labelV = new THREE.Vector3();
+  let labelCurrent = null, labelOrder = labels;
+
+  function placeLabel(l, inset) {
+    labelV.copy(l.v).project(camera);
+    if (labelV.z > 1) { l.el.style.opacity = '0'; return; }   // behind the camera
+    if (!l.w) { l.w = l.el.offsetWidth; l.h = l.el.offsetHeight; }
+    // a stop name sits beside its marker; a sea name centres on its point
+    const x = (labelV.x * 0.5 + 0.5) * innerWidth + (l.kind === 'stop' ? 11 : -l.w / 2);
+    const y = (-labelV.y * 0.5 + 0.5) * innerHeight - l.h / 2;
+    const r = [x, y, x + l.w, y + l.h];
+    const clear = r[0] > inset.panelW + 8 && r[1] > 8 &&
+                  r[2] < innerWidth - 8 && r[3] < innerHeight - inset.covered - 4 &&
+                  !placed.some(q => r[0] < q[2] && r[2] > q[0] &&
+                                    r[1] < q[3] && r[3] > q[1]);
+    if (!clear) { l.el.style.opacity = '0'; return; }
+    placed.push([r[0] - 6, r[1] - 4, r[2] + 6, r[3] + 4]);   // keep names off each other
+    l.el.style.transform = `translate(${Math.round(x)}px,${Math.round(y)}px)`;
+    l.el.style.opacity = '1';
+  }
+
+  function layoutLabels() {
+    const inset = uiInset();
+    const cur = labels.find(l => l.n === window.__nostos.current);
+    if (cur !== labelCurrent) {
+      labels.forEach(l => l.el.classList.toggle('on', l === cur));
+      labelCurrent = cur;
+      /* first claim on the space goes to the stop being read, then to its
+         neighbours in the voyage, then to the seas — so the legs either side
+         of the current stop keep their names in a crowded cluster. */
+      const rank = l => l.kind === 'sea' ? 99 : Math.abs(l.n - (cur ? cur.n : 1));
+      labelOrder = labels.slice().sort((a, b) => rank(a) - rank(b));
+    }
+    placed.length = 0;
+    for (const l of labelOrder) placeLabel(l, inset);
+  }
+  window.__nostos.labels = labels;
+
 /* SCENE-EXTRA */
 
   /* THREE.Clock is deprecated in 0.185.1; performance.now() needs no addon.
@@ -1420,6 +1529,7 @@ if (!webglAvailable()) {
       camera.position.lerpVectors(flight.fromP, flight.toP, k);
       if (k === 1) flight = null;
     }
+    layoutLabels();
 /* FRAME-EXTRA */
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
