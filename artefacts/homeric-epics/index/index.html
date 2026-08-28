@@ -873,16 +873,114 @@ if (!webglAvailable()) {
   window.__nostos = { scene, camera, renderer, controls, core, reducedMotion, ready: true };
 
 
+  /* ---- terrain: a relief map painted onto the land ----
+     Real elevation data stays out of scope, so the height field is synthetic:
+     how far inland a pixel sits (the coastline filled once through a blur)
+     times fractal noise. It drives a hypsometric colour ramp and a bump map,
+     which is what turns flat parchment into something that reads as land under
+     a moving light. Seeded, so the same coast grows the same mountains every
+     load. No custom shader, same as the sea. */
+  const surface = (w, h) =>
+    Object.assign(document.createElement('canvas'), { width: w, height: h })
+          .getContext('2d', { willReadFrequently: true });
+
+  function terrainMaps(bb) {
+    const W = bb.x1 - bb.x0, H = bb.y1 - bb.y0;
+    const PX = 1024, PY = Math.round(PX * H / W);
+    let seed = 0x6d795365;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+
+    /* fractal noise: small random grids drawn large, so the browser's bilinear
+       upscale does the interpolation and we write no lerp of our own. */
+    const noise = surface(PX, PY);
+    noise.fillStyle = '#000'; noise.fillRect(0, 0, PX, PY);
+    noise.globalCompositeOperation = 'lighter';
+    for (const [cells, amp] of [[5, 0.5], [12, 0.26], [30, 0.16], [72, 0.11], [170, 0.06]]) {
+      const g = surface(cells, Math.max(1, Math.round(cells * PY / PX)));
+      const d = g.createImageData(g.canvas.width, g.canvas.height);
+      for (let i = 0; i < d.data.length; i += 4) {
+        d.data[i] = d.data[i + 1] = d.data[i + 2] = rnd() * 255;
+        d.data[i + 3] = 255;
+      }
+      g.putImageData(d, 0, 0);
+      noise.globalAlpha = amp;
+      noise.drawImage(g.canvas, 0, 0, PX, PY);
+    }
+
+    /* inland-ness: the shore lands near mid-grey, the deep interior at white. */
+    const relief = surface(PX, PY);
+    relief.fillStyle = '#000'; relief.fillRect(0, 0, PX, PY);
+    relief.filter = `blur(${PX / 48}px)`;
+    relief.fillStyle = '#fff';
+    relief.beginPath();
+    for (const ring of core.ATLAS) {
+      ring.forEach(([lon, lat], i) => {
+        const p = core.lonLatToWorld(lon, lat);
+        const x = (p.x - bb.x0) / W * PX, y = (bb.y1 - -p.z) / H * PY;
+        i === 0 ? relief.moveTo(x, y) : relief.lineTo(x, y);
+      });
+      relief.closePath();
+    }
+    relief.fill();
+    relief.filter = 'none';
+
+    const ramp = surface(256, 1), grad = ramp.createLinearGradient(0, 0, 256, 0);
+    for (const [at, hex] of [[0, '#ded0af'], [0.07, '#cbc293'], [0.22, '#9aa771'],
+                             [0.44, '#a89660'], [0.67, '#957748'], [0.86, '#8a7b6c'],
+                             [1, '#e7e3d9']]) grad.addColorStop(at, hex);
+    ramp.fillStyle = grad; ramp.fillRect(0, 0, 256, 1);
+    const LUT = ramp.getImageData(0, 0, 256, 1).data;
+
+    const height = relief.getImageData(0, 0, PX, PY);
+    const grain = noise.getImageData(0, 0, PX, PY);
+    const tint = relief.createImageData(PX, PY);
+    for (let i = 0; i < height.data.length; i += 4) {
+      const inland = Math.max(0, (height.data[i] / 255 - 0.5) * 2);   // 0 at the shore
+      const h = Math.min(1, Math.pow(inland, 0.8) * (0.4 + 1.15 * grain.data[i] / 255));
+      /* south of ~36N the ramp skips its green band: the Libyan and Egyptian
+         coast is desert, and a green Sahara is the one thing that would read
+         as obviously wrong. */
+      const lat = (bb.y1 - (i / 4 / PX | 0) / PY * H) / core.UNITS_PER_DEG;
+      const arid = Math.min(1, Math.max(0, (36 - lat) / 5));
+      const c = (255 * (h * (1 - arid) + (0.34 + 0.46 * h) * arid)) | 0;
+      tint.data[i]     = LUT[c * 4];
+      tint.data[i + 1] = LUT[c * 4 + 1];
+      tint.data[i + 2] = LUT[c * 4 + 2];
+      tint.data[i + 3] = 255;
+      height.data[i] = height.data[i + 1] = height.data[i + 2] = h * 255;
+    }
+    relief.putImageData(height, 0, 0);        // the blurred mask becomes the bump map
+    const colour = surface(PX, PY);
+    colour.putImageData(tint, 0, 0);
+
+    /* ExtrudeGeometry's top UVs are the shape's own world units, so one
+       repeat/offset pair maps the whole atlas window onto one texture. */
+    const texture = (canvas, srgb) => {
+      const t = new THREE.CanvasTexture(canvas);
+      t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+      t.repeat.set(1 / W, 1 / H);
+      t.offset.set(-bb.x0 / W, -bb.y0 / H);
+      t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    };
+    return { colour: texture(colour.canvas, true), relief: texture(relief.canvas, false) };
+  }
+
+
   /* ---- land: one extruded shape per coastline ring, merged ---- */
   const LAND_DEPTH = 1.6;
   {
     const geoms = [];
+    const bb = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
     for (const ring of core.ATLAS) {
       const shape = new THREE.Shape();
       ring.forEach(([lon, lat], i) => {
         const p = core.lonLatToWorld(lon, lat);
         // Shape is 2D in XY; we rotate into XZ after extruding.
         i === 0 ? shape.moveTo(p.x, -p.z) : shape.lineTo(p.x, -p.z);
+        bb.x0 = Math.min(bb.x0, p.x); bb.x1 = Math.max(bb.x1, p.x);
+        bb.y0 = Math.min(bb.y0, -p.z); bb.y1 = Math.max(bb.y1, -p.z);
       });
       shape.closePath();
       try {
@@ -893,10 +991,13 @@ if (!webglAvailable()) {
       } catch { /* a degenerate ring cannot be triangulated; skip it */ }
     }
 
+    const terrain = terrainMaps(bb);
     const land = new THREE.Mesh(
       mergeGeometries(geoms, false),
-      new THREE.MeshStandardMaterial({ color: 0xe8dcc0, roughness: 0.88, metalness: 0.0,
+      new THREE.MeshStandardMaterial({ map: terrain.colour, bumpMap: terrain.relief,
+                                       bumpScale: 2.4, roughness: 0.92, metalness: 0.0,
                                        flatShading: true }));
+    window.__nostos.terrain = terrain;
     land.name = 'land';
     land.rotation.x = -Math.PI / 2;   // XY shape plane -> XZ ground plane
     scene.add(land);
