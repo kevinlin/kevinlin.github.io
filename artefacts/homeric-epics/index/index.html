@@ -1117,7 +1117,7 @@ if (!webglAvailable()) {
     markers.forEach((m) => {
       const on = m.userData.stop === n;
       m.children[0].material.emissiveIntensity = on ? 2.4 : 1.0;
-      m.scale.setScalar(on ? 1.45 : 1.0);
+      m.userData.baseScale = on ? 1.45 : 1.0;   // applied by keepApparentSize
       if (on) { halo.position.copy(m.position); halo.visible = true; }
     });
   };
@@ -1601,6 +1601,25 @@ if (!webglAvailable()) {
 
 /* SCENE-EXTRA */
 
+  /* Markers, the ship and the set pieces are map symbols, not scenery: they hold
+     their apparent size as the camera closes in instead of swelling to fill the
+     view. World scale tracks camera distance up to REF_DIST — the standard stop
+     framing — and stops there, so the pulled-back basin view is unchanged. The
+     floor keeps a symbol from collapsing at controls.minDistance. */
+  const REF_DIST = 265;
+  const MIN_SCALE = 0.15;   // controls.minDistance / REF_DIST — constant all the way in
+  const apparent = [...markers, halo, ship, ...Object.values(setpieces)];
+  for (const o of apparent) o.userData.baseScale ??= o.scale.x;
+
+  function keepApparentSize() {
+    for (const o of apparent) {
+      const f = Math.min(camera.position.distanceTo(o.position) / REF_DIST, 1);
+      o.scale.setScalar(o.userData.baseScale * Math.max(f, MIN_SCALE));
+    }
+  }
+  window.__nostos.keepApparentSize = keepApparentSize;
+
+
   /* THREE.Clock is deprecated in 0.185.1; performance.now() needs no addon.
      dt is clamped so a long hidden-tab pause cannot jump the animations. */
   const T0 = performance.now();
@@ -1628,6 +1647,7 @@ if (!webglAvailable()) {
       camera.position.lerpVectors(flight.fromP, flight.toP, k);
       if (k === 1) flight = null;
     }
+    keepApparentSize();
     layoutLabels();
 /* FRAME-EXTRA */
     renderer.render(scene, camera);
