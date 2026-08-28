@@ -47,8 +47,9 @@
     "developer-productivity-ai-native/slides/overview-slide-15-1.png"
   ],
   "ignored_sources": [
+    "**/plans/**",
+    "**/specs/**",
     ".*",
-    "20260813 - STACK Meetup - Developer Productivity for the AI Native/slides/",
     "claude-tag/prompts/",
     "fable5-21days/narrative/",
     "fable5-21days/prompts/",
@@ -58,6 +59,7 @@
     "fde/structured-content.md",
     "java-interview/java-fullstack-interview-questions.md",
     "java-interview/java-releases.md",
+    "meetup/20260813 - STACK Meetup - Developer Productivity for the AI Native/slides/",
     "mingpt-vs-toy-transformer/analysis.md",
     "mingpt-vs-toy-transformer/infographic-prompt.md",
     "mingpt-vs-toy-transformer/source-mingpt-vs-toy-transformer.md",
@@ -313,6 +315,14 @@
       "section": "Image collections",
       "section_order": 20,
       "order": 160
+    },
+    {
+      "id": "homeric-epics",
+      "title": "Homeric Epics",
+      "description": "Maps and visual references for the Iliad and the Odyssey.",
+      "section": "Image collections",
+      "section_order": 20,
+      "order": 170
     }
   ],
   "entries": [
@@ -890,7 +900,7 @@
     },
     {
       "id": "developer-productivity-ai-native-deck",
-      "source": "20260813 - STACK Meetup - Developer Productivity for the AI Native/Developer Productivity for the AI Native.html",
+      "source": "meetup/20260813 - STACK Meetup - Developer Productivity for the AI Native/Developer Productivity for the AI Native.html",
       "destination": "developer-productivity-ai-native/index.html",
       "title": "Developer Productivity for the AI Native (STACK Meetup, 13 Aug 2026)",
       "collection": "developer-productivity-ai-native",
@@ -975,6 +985,17 @@
       "replacements": {},
       "description": "The loop, verification, planning, and multi-agent patterns that grew up around coding agents, each positioned against a Maker-Verifier-Checker design.",
       "date": "2026-06-22"
+    },
+    {
+      "id": "homeric-epics-map-of-odysseus-10-year-journey-home-15906",
+      "source": "homeric-epics/map-of-odysseus-10-year-journey-home-15906.png",
+      "destination": "homeric-epics/map-of-odysseus-10-year-journey-home-15906.png",
+      "title": "Map of Odysseus' ten-year journey home",
+      "collection": "homeric-epics",
+      "order": 10,
+      "replacements": {},
+      "description": "The route of the Odyssey plotted across the Mediterranean, from Troy to Ithaca.",
+      "date": "2026-08-28"
     }
   ]
 }
