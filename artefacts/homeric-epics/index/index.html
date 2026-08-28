@@ -56,7 +56,7 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* layers */
-  --z-stage: 0; --z-labels: 10; --z-rail: 20; --z-panel: 30; --z-nav: 40; --z-selftest: 99;
+  --z-stage: 0; --z-labels: 10; --z-tucked: 15; --z-rail: 20; --z-panel: 30; --z-nav: 40; --z-selftest: 99;
 
   /* the rail owns the bottom strip; the panel and the credit sit above it */
   --rail-h: 4.25rem;
@@ -148,7 +148,39 @@ noscript .nojs {
     1px 0 1px rgba(0,0,0,.20),
     3px 0 8px rgba(0,0,0,.18),
     12px 0 40px rgba(0,0,0,.30);
+  transition: transform 420ms var(--ease-in-out);
 }
+
+/* Tucked away after a spell of inactivity: the panel is the only thing covering
+   the map. A strip stays behind to grab, and the gilt edge rides with it, so
+   there is always something visible to bring the journal back. */
+body.journal-away #journal {
+  transform: translateX(calc(-100% + 14px));
+  /* the tucked sheet overhangs the rail on narrow screens, so it drops below it
+     while away — the strip that stays visible sits above the rail either way */
+  z-index: var(--z-tucked);
+}
+
+/* collapse by hand: the same tuck the idle timer performs, on demand. Fixed
+   rather than in flow so a long entry cannot scroll it out of reach; it is
+   hidden while tucked, which is also why its position needs no away-state
+   variant. */
+#collapse {
+  position: fixed; top: var(--s-4); left: calc(min(30rem, 34vw) - 2.75rem);
+  width: 2.25rem; height: 2.25rem; display: grid; place-items: center;
+  font: inherit; font-size: 1.375rem; line-height: 1;
+  color: var(--fg-subtle); cursor: pointer;
+  background: rgba(20,15,12,.92);
+  border: 1px solid rgba(244,236,216,.22);
+  border-radius: var(--r-md);
+  transition: opacity 200ms var(--ease-out), color 120ms var(--ease-out),
+              border-color 120ms var(--ease-out);
+}
+#collapse span { display: block; }
+@media (hover: hover) and (pointer: fine) {
+  #collapse:hover { color: var(--fg); border-color: rgba(242,164,104,.55); }
+}
+body.journal-away #collapse { opacity: 0; pointer-events: none; }
 
 /* hairline highlight along the panel edge, the way gilt edges catch light */
 #journal::after {
@@ -240,11 +272,26 @@ noscript .nojs {
     left: 0; right: 0; top: auto; bottom: calc(52vh + var(--rail-h)); width: auto; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(242,164,104,.30) 40%, transparent);
   }
+  /* thumb-sized on touch, and the chevron turns to point the way the sheet goes */
+  #collapse {
+    top: auto; bottom: calc(52vh + var(--rail-h) - 3.25rem);
+    left: auto; right: var(--s-4);
+    width: 2.75rem; height: 2.75rem;
+  }
+  #collapse span { transform: rotate(-90deg); }
+
+  /* the bottom sheet tucks downwards. It is taller than the gap above the rail,
+     so the tucked remainder ends up behind the rail, whose background is
+     translucent — the entry heading would show through it. Solid while away. */
+  body.journal-away #journal { transform: translateY(calc(100% - 14px)); }
+  body.journal-away #rail { background: linear-gradient(180deg, #100c0a, #0c0907); }
   .entry h2 { font-size: 2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .entry, .entry h2, .entry .prose { animation: none; }
+  #journal { transition: none; }
+  #collapse { transition: none; }
 }
 
 /* ===================== MAP LABELS ===================== */
@@ -416,6 +463,8 @@ noscript .nojs {
 <div id="labels" aria-hidden="true"></div>
 <main id="fallback" tabindex="-1"></main>
 <aside id="journal" tabindex="-1" aria-label="Journal">
+  <button id="collapse" type="button" aria-controls="journal" aria-expanded="true"
+          aria-label="Collapse the journal"><span>&lsaquo;</span></button>
   <div id="entry" aria-live="polite" aria-atomic="true"></div>
   <footer id="colophon">
     <details id="about">
@@ -1120,7 +1169,8 @@ if (!webglAvailable()) {
     window.__nostos.current = n;
 
     journalEl.innerHTML = core.renderEntry(s);
-    document.getElementById('journal').scrollTop = 0;
+    journalPanel.scrollTop = 0;
+    wakeJournal();                                 // a new entry is a new read
 
     railEl.querySelectorAll('button').forEach(b => {
       const on = Number(b.dataset.stop) === n;
@@ -1158,6 +1208,51 @@ if (!webglAvailable()) {
                  fromP: camera.position.clone(), toP: eye };
     }
   }
+
+  /* ---- journal auto-dismiss ----
+     The panel covers a third of the map, so it tucks itself away once the reader
+     has stopped using it, and returns the moment they do: any navigation, the
+     pointer on the panel, or focus moving into it. It never leaves mid-read —
+     hover and focus-within both defer the tuck rather than cancelling it — and
+     it leaves a strip behind, because content that disappears with no way back
+     is a bug. Nothing is removed from the DOM or hidden from assistive tech;
+     this is a transform. */
+  const IDLE_MS = 5000;           // hovering or focusing the panel defers this
+  const journalPanel = document.getElementById('journal');
+  const collapseEl = document.getElementById('collapse');
+  let idleTimer = 0;
+
+  function tuckJournal() {
+    document.body.classList.add('journal-away');
+    collapseEl.setAttribute('aria-expanded', 'false');
+  }
+
+  function wakeJournal() {
+    document.body.classList.remove('journal-away');
+    collapseEl.setAttribute('aria-expanded', 'true');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function tuck() {
+      if (journalPanel.matches(':hover, :focus-within')) {
+        idleTimer = setTimeout(tuck, IDLE_MS);       // still being read
+        return;
+      }
+      tuckJournal();
+    }, IDLE_MS);
+  }
+
+  collapseEl.addEventListener('click', () => {
+    clearTimeout(idleTimer);
+    tuckJournal();
+    /* the button leaves with the panel, so hand focus to the nearest control
+       that stays on screen rather than stranding it off canvas */
+    railEl.querySelector('button[aria-current="true"]')?.focus({ preventScroll: true });
+  });
+
+  journalPanel.addEventListener('pointerenter', wakeJournal);
+  journalPanel.addEventListener('focusin', wakeJournal);
+  journalPanel.addEventListener('scroll', wakeJournal, { passive: true });
+  window.__nostos.wakeJournal = wakeJournal;
+  window.__nostos.tuckJournal = tuckJournal;
 
   window.__nostos.goToStop = goToStop;
   window.__nostos.onMarkerPick = goToStop;
@@ -1485,6 +1580,10 @@ if (!webglAvailable()) {
 
   function layoutLabels() {
     const inset = uiInset();
+    // the tucked panel frees its side of the canvas for names
+    if (document.body.classList.contains('journal-away')) {
+      inset.panelW = 0; inset.covered = RAIL_PX;
+    }
     const cur = labels.find(l => l.n === window.__nostos.current);
     if (cur !== labelCurrent) {
       labels.forEach(l => l.el.classList.toggle('on', l === cur));
