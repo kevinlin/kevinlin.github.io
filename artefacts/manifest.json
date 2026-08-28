@@ -53,7 +53,6 @@
     "**/test/**",
     ".*",
     "claude-tag/prompts/",
-    "earthquake-map/",
     "fable5-21days/narrative/",
     "fable5-21days/prompts/",
     "fde/analysis.md",
@@ -326,6 +325,14 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 170
+    },
+    {
+      "id": "earthquake-map",
+      "title": "Earthquake Map",
+      "description": "Two centuries of magnitude 6.0+ earthquakes around the Pacific, drawn from the USGS catalog.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 180
     }
   ],
   "entries": [
@@ -997,6 +1004,17 @@
       "collection": "homeric-epics",
       "order": 20,
       "replacements": {},
+      "date": "2026-08-28"
+    },
+    {
+      "id": "earthquake-map-index",
+      "source": "earthquake-map/index.html",
+      "destination": "earthquake-map/index/index.html",
+      "title": "Asia Pacific Earthquake Map",
+      "collection": "earthquake-map",
+      "order": 10,
+      "replacements": {},
+      "description": "An interactive map of every magnitude 6.0+ quake in the Asia Pacific over the last 200 years, coloured by depth, pulled live from the USGS catalog with a bundled CSV as fallback.",
       "date": "2026-08-28"
     }
   ]
