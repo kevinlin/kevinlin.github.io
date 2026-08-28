@@ -1356,7 +1356,7 @@ class CatalogueTests(unittest.TestCase):
         self.assertNotIn("<p>", rendered)
         self.assertIn("<h3>Charts</h3>", rendered)
 
-    def test_stamp_missing_dates_reads_mtime_once_and_leaves_a_set_date(self):
+    def test_stamp_dates_reads_mtime_for_undated_and_leaves_a_set_date(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         source = Path(directory.name)
@@ -1365,8 +1365,8 @@ class CatalogueTests(unittest.TestCase):
         (source / "Images" / "new.png").write_bytes(b"png")
         os.utime(source / "Images" / "old.png", (1767225600, 1767225600))
 
-        stamped = artefacts_cli.stamp_missing_dates(
-            self.dated_manifest(new="2026-03-11"), source
+        stamped = artefacts_cli.stamp_dates(
+            self.dated_manifest(new="2026-03-11"), source, set()
         )
 
         dates = {entry.id: entry.date for entry in stamped.entries}
@@ -1505,6 +1505,26 @@ class ApplyTests(ArtefactFixture, unittest.TestCase):
                 ("update", "manifest.json"),
             },
         )
+
+    def test_plan_redates_a_republished_entry_and_leaves_an_unchanged_one(self):
+        repo, source, manifest_path, _head = self.make_fixture()
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        payload["entries"][0]["date"] = "2020-01-01"   # Existing.png: source differs
+        payload["entries"][1]["date"] = "2020-02-02"   # New.png: published as-is below
+        manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        (repo / "artefacts" / "charts" / "new.png").write_bytes(b"new")
+        os.utime(source / "Charts" / "Existing.png", (1767225600, 1767225600))
+        head_manifest = manifest_path.read_bytes()
+
+        plan = artefacts_cli.create_sync_plan(
+            manifest_path, source, repo / "artefacts", head_manifest
+        )
+
+        dates = {entry.id: entry.date for entry in plan.next_manifest.entries}
+        self.assertEqual(
+            dates["existing"], datetime.fromtimestamp(1767225600).strftime("%Y-%m-%d")
+        )
+        self.assertEqual(dates["new"], "2020-02-02")
 
     def test_plan_renumbers_duplicate_orders_and_reports_them(self):
         repo, source, manifest_path, head_manifest = self.make_fixture()
@@ -2354,8 +2374,8 @@ class PublishingTests(unittest.TestCase):
         (source / "Images" / "Card.png").write_bytes(b"seed")
         # Written the way a sync would leave it — dates stamped, keys in canonical
         # order — so an unchanged tree really does plan as unchanged.
-        manifest = artefacts_cli.stamp_missing_dates(
-            artefacts_cli.load_manifest(manifest_path), source
+        manifest = artefacts_cli.stamp_dates(
+            artefacts_cli.load_manifest(manifest_path), source, set()
         )
         manifest_path.write_bytes(artefacts_cli.manifest_to_json(manifest))
         catalogue_shell = (
@@ -2371,7 +2391,7 @@ class PublishingTests(unittest.TestCase):
             artefacts_cli.replace_generated_catalogue(
                 catalogue_shell,
                 artefacts_cli.render_catalogue(
-                    artefacts_cli.stamp_missing_dates(manifest, source)
+                    artefacts_cli.stamp_dates(manifest, source, set())
                 ),
             ),
             encoding="utf-8",

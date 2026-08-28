@@ -144,9 +144,11 @@ class Entry:
     order: int
     replacements: dict[str, str] = field(default_factory=dict)
     description: str | None = None
-    # ISO date the catalogue sorts and stamps cards by. Written once, from the
-    # source's modification time, then left alone: a re-download must not silently
-    # reorder the catalogue, and a hand-set date has to survive the next run.
+    # ISO date the catalogue sorts and stamps cards by. Written from the source's
+    # modification time when the entry is first published and again when a sync
+    # republishes it, and otherwise left alone: a re-download must not silently
+    # reorder the catalogue, and a hand-set date has to survive a run that changes
+    # nothing.
     date: str | None = None
 
 
@@ -1312,18 +1314,22 @@ def public_url(site: Site, destination: PurePosixPath) -> str:
     return site.base_url + public_href(destination)
 
 
-def stamp_missing_dates(manifest: Manifest, source_root: Path) -> Manifest:
-    """Fill in `date` from the source's modification time, once, for entries with none.
+def stamp_dates(
+    manifest: Manifest, source_root: Path, republished: set[PurePosixPath]
+) -> Manifest:
+    """Set `date` from the source's modification time for undated and republished entries.
 
     Written into the manifest rather than recomputed each run: the catalogue sorts
     cards by date, so reading the filesystem every time lets a re-download silently
     reorder the page, and a hand-corrected date would be overwritten on the next
-    sync. An entry whose source is gone keeps whatever it already had.
+    sync. It is refreshed only when this run actually republishes the artefact, so a
+    published date names the version on the page. An entry whose source is gone keeps
+    whatever it already had.
     """
     entries: list[Entry] = []
     for entry in manifest.entries:
         source_path = source_root / entry.source.as_posix()
-        if entry.date is None:
+        if entry.date is None or entry.destination in republished:
             try:
                 stamp = date.fromtimestamp(source_path.stat().st_mtime).isoformat()
             except OSError:
@@ -1677,7 +1683,7 @@ def create_sync_plan(
         scan_source(source_root, repo_root), manifest.ignored_sources
     )
     reconciliation = reconcile_inventory(manifest, inventory)
-    next_manifest = stamp_missing_dates(reconciliation.next_manifest, source_root)
+    next_manifest = reconciliation.next_manifest
     check_published_invariants(next_manifest, head_manifest)
 
     # Everything that must stop the run, gathered before anything is rendered, so one
@@ -1701,6 +1707,15 @@ def create_sync_plan(
 
     template = load_template(artefacts_root)
     desired_files = build_desired_files(next_manifest, source_root, template)
+    # Dates reach only manifest.json and the catalogue, never the artefact pages, so
+    # they can settle once the pages are rendered and it is clear which ones change.
+    republished = {
+        destination
+        for destination, content in desired_files.items()
+        if (artefacts_root / destination.as_posix()).is_file()
+        and (artefacts_root / destination.as_posix()).read_bytes() != content
+    }
+    next_manifest = stamp_dates(next_manifest, source_root, republished)
 
     catalogue_destination = _catalogue_destination(next_manifest)
     catalogue_path = artefacts_root / catalogue_destination.as_posix()

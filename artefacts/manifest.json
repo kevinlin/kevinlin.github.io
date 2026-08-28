@@ -279,7 +279,7 @@
       "description": "Monthly research digests on agent loops, loop engineering, and agent pipelines.",
       "section": "Presentations and analysis",
       "section_order": 10,
-      "order": 150
+      "order": 160
     },
     {
       "id": "mingpt-vs-toy-transformer",
@@ -737,7 +737,7 @@
       "order": 20,
       "replacements": {},
       "description": "An interactive map of the Chinese rail network showing hubs and major cities. Labels are in Chinese.",
-      "date": "2026-08-14"
+      "date": "2026-08-28"
     },
     {
       "id": "claude-tag-20260815-claude-tag-raw-v3",
