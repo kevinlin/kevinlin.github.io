@@ -109,7 +109,7 @@ p, li { text-wrap: pretty; }
 /* no-WebGL / no-JS fallback */
 #fallback { display: none; }
 .no-webgl #stage, .no-webgl #journal, .no-webgl #rail,
-.no-webgl #nav, .no-webgl #credit { display: none; }
+.no-webgl #nav, .no-webgl #credit, .no-webgl #flow-legend { display: none; }
 .no-webgl #fallback { display: block; }
 
 #fallback {
@@ -317,6 +317,28 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
 #labels .stop.on { color: var(--terra-lit); }
 @media (prefers-reduced-motion: reduce) { #labels span { transition: none; } }
 
+/* ===================== FLOW LEGEND ===================== */
+/* Two swatches above the rail's caption. The full note lives in the panel; this
+   only has to say which mark is which while the reader is looking at the map. */
+#flow-legend {
+  position: fixed; right: var(--s-4);
+  /* clears one 44px row of #nav, which only wraps below the width this is hidden at */
+  bottom: calc(var(--rail-h) + var(--s-3) + 44px + var(--s-2));
+  z-index: var(--z-nav); pointer-events: none;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  background: rgba(10,7,6,.88);
+  font-size: .6875rem; line-height: 1.5; color: var(--fg-muted);
+}
+#flow-legend[hidden] { display: none; }
+#flow-legend p { margin: 0; display: flex; align-items: center; gap: var(--s-2); }
+#flow-legend .sw { width: 22px; height: 4px; border-radius: 2px; flex: 0 0 auto; }
+#flow-legend .sw-wind { background: #ffffff; }
+#flow-legend .sw-cur  { background: #60c4f7; }
+
+/* the bottom sheet covers this corner; the panel's own note carries it there */
+@media (max-width: 768px) { #flow-legend { display: none; } }
+
 /* ===================== YEAR RAIL + NAV ===================== */
 #rail {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-rail);
@@ -379,6 +401,12 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
 #nav {
   position: fixed; right: var(--s-4); bottom: calc(var(--rail-h) + var(--s-3));
   z-index: var(--z-nav); display: flex; gap: var(--s-2);
+  /* three buttons no longer fit on one row at 390px */
+  flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - var(--s-6));
+}
+/* pressed state for the layer toggle: the map is showing what the button names */
+#nav button[aria-pressed="true"] {
+  background: rgba(29,111,126,.55); border-color: rgba(96,196,247,.60);
 }
 #nav button {
   font: inherit; font-size: .8125rem;
@@ -432,21 +460,21 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
   background: linear-gradient(180deg, rgba(20,15,12,0), rgba(18,13,11,.97) 28%);
   border-top: 1px solid rgba(244,236,216,.10);
 }
-#about summary {
+.disc summary {
   cursor: pointer; list-style: none;
   font-size: .75rem; letter-spacing: .14em; text-transform: uppercase;
   color: var(--fg-subtle);
   padding: var(--s-2) 0;
   transition: color 120ms var(--ease-out);
 }
-#about summary::-webkit-details-marker { display: none; }
-#about summary::before { content: "\25B8"; color: var(--terra-lit); padding-right: .5em;
+.disc summary::-webkit-details-marker { display: none; }
+.disc summary::before { content: "\25B8"; color: var(--terra-lit); padding-right: .5em;
   display: inline-block; transition: transform 140ms var(--ease-out); }
-#about[open] summary::before { transform: rotate(90deg); }
+.disc[open] summary::before { transform: rotate(90deg); }
 @media (hover: hover) and (pointer: fine) {
-  #about summary:hover { color: var(--fg); }
+  .disc summary:hover { color: var(--fg); }
 }
-#route-note {
+.note {
   margin: 0 0 var(--s-3); padding-left: var(--s-4);
   border-left: 2px solid var(--wine);
   font-size: .8125rem; line-height: 1.5; color: var(--fg-muted);
@@ -467,14 +495,23 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
           aria-label="Collapse the journal"><span>&lsaquo;</span></button>
   <div id="entry" aria-live="polite" aria-atomic="true"></div>
   <footer id="colophon">
-    <details id="about">
+    <details id="about" class="disc">
       <summary>About this route</summary>
-      <p id="route-note"></p>
+      <p id="route-note" class="note"></p>
+    </details>
+    <details id="about-flow" class="disc">
+      <summary>Winds and currents</summary>
+      <p id="flow-note" class="note"></p>
     </details>
     <p id="credit"></p>
   </footer>
 </aside>
+<div id="flow-legend">
+  <p><i class="sw sw-wind"></i>Summer winds — Etesians, Mistral, Sirocco</p>
+  <p><i class="sw sw-cur"></i>Surface currents — the basin turns counter-clockwise</p>
+</div>
 <nav id="nav" aria-label="Voyage navigation">
+  <button id="flow" type="button" aria-pressed="true">Winds &amp; currents</button>
   <button id="prev" type="button">← Previous</button>
   <button id="next" type="button">Next →</button>
 </nav>
@@ -679,6 +716,20 @@ export function pointInLand([lon, lat]) {
   return false;
 }
 
+/* Densely interpolated points along a flow polyline, ~0.1 deg apart. The drawn
+   ribbon is a Catmull-Rom through the same pairs and bows slightly off these
+   chords, so the paths are placed with margin rather than to the pixel. */
+export function flowSamples(path, step = 0.1) {
+  const out = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x0, y0] = path[i], [x1, y1] = path[i + 1];
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / step));
+    for (let k = 0; k < n; k++) out.push([x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n]);
+  }
+  out.push(path[path.length - 1]);
+  return out;
+}
+
 /* Hand-tuned waypoints that keep a leg in open water. Keyed "from-to" by stop
    number. The source map arcs these legs the same way. Add points here when the
    "no route leg cuts across land" test reports an offender. */
@@ -719,6 +770,109 @@ export function routeLonLats() {
   return out;
 }
 
+
+/* ===================== WINDS + CURRENTS ===================== */
+/* The sea Odysseus is actually crossing. Both layers show the SUMMER state,
+   because the ancient sailing season was summer (mare clausum from roughly
+   November) and because the Etesians only exist then.
+
+   On the word "monsoon": the Mediterranean has none. Its nearest equivalent is
+   the Etesian system below — northerlies that blow mid-May to mid-September and
+   whose strength is driven by the pressure gradient between the Azores/Balkan
+   highs and the thermal low over southwest Asia, the same low that drives the
+   South Asian summer monsoon. Stronger monsoon years give stronger Etesians.
+   That teleconnection is the only monsoon in this basin, and it is drawn here
+   as the Etesians, not as a monsoon.
+
+   `path` is [lon, lat] west-to-east or upstream-to-downstream: the arrows point
+   from the first pair toward the last, so path order IS flow direction.
+   `speed` is a published mean surface speed — cm/s for water, m/s for air —
+   and drives the animation rate within its own layer. */
+
+export const CURRENTS = [
+  { name: 'Almería–Oran Jet', speed: 50,
+    note: 'Atlantic water leaving the Alboran Sea for the African slope; the fastest surface flow in the basin.',
+    path: [[-5.35, 35.95], [-4.40, 36.15], [-3.40, 36.45], [-2.35, 36.55], [-1.40, 36.15], [-0.40, 35.90]] },
+  { name: 'Algerian Current', speed: 22,
+    note: 'Modified Atlantic water running east along the Algerian slope, 30–50 km wide and unstable, shedding eddies that drift east a few km a day.',
+    path: [[-0.40, 35.90], [0.60, 36.50], [1.80, 36.95], [3.20, 37.20], [5.00, 37.40], [6.80, 37.50], [8.30, 37.60]] },
+  { name: 'Sardinia Channel branch', speed: 15,
+    note: 'Where the Algerian Current splits: one branch turns north into the Tyrrhenian, the other holds on for the Strait of Sicily.',
+    path: [[8.30, 37.60], [9.40, 38.05], [10.40, 38.50], [11.60, 38.50], [12.40, 38.35]] },
+  { name: 'Tyrrhenian gyre', speed: 12,
+    note: 'Cyclonic, so east along Sicily’s north coast and then north up the Italian shore — with Odysseus on the run to the strait, against him on the way back.',
+    path: [[12.40, 38.35], [13.80, 38.50], [15.20, 38.70], [15.60, 39.50], [15.30, 40.00], [14.30, 40.35], [13.20, 40.85], [12.20, 41.35], [11.20, 41.90], [10.40, 42.40], [9.90, 42.80]] },
+  { name: 'Western Corsican Current', speed: 15,
+    note: 'North along Corsica’s Atlantic-water flank.',
+    path: [[8.30, 41.40], [8.10, 42.10], [8.20, 42.80], [8.60, 43.20]] },
+  { name: 'Eastern Corsican Current', speed: 20,
+    note: 'North through the Corsica Channel. Odysseus leaves Scheria against it.',
+    path: [[9.90, 42.30], [9.70, 42.90], [9.40, 43.30]] },
+  { name: 'Northern Current', speed: 30,
+    note: 'The Liguro-Provençal-Catalan Current: the two Corsican flows join north of the island and run southwest along the Ligurian, French and Catalan coasts.',
+    path: [[8.80, 43.50], [7.60, 43.40], [6.40, 43.00], [5.20, 42.85], [4.10, 42.35], [3.40, 41.70], [2.60, 41.10], [1.60, 40.70]] },
+  { name: 'Balearic Current', speed: 15,
+    note: 'Northeast along the Iberian side of the islands, closing the western gyre. Ogygia and the Cimmerian shore both sit on it.',
+    path: [[0.20, 39.00], [1.30, 39.60], [2.60, 40.00], [3.90, 40.40]] },
+  { name: 'Atlantic Ionian Stream', speed: 30,
+    note: 'The main Atlantic-water jet through the Strait of Sicily, northeast past Capo Passero into the Ionian.',
+    path: [[11.20, 37.20], [12.30, 36.70], [13.60, 36.40], [15.00, 36.40], [16.40, 36.80], [17.80, 37.30]] },
+  { name: 'Atlantic Tunisian Current', speed: 15,
+    note: 'The strait’s southern stream, hugging the Tunisian shelf toward the Gulf of Sirte.',
+    path: [[11.20, 36.70], [11.70, 35.90], [12.40, 34.90], [13.60, 34.20], [15.00, 33.70]] },
+  { name: 'Mid-Mediterranean Jet', speed: 20,
+    note: 'The Ionian branches rejoin near 19°E and carry Atlantic water across the Levantine basin.',
+    path: [[19.40, 35.20], [22.00, 34.60], [25.00, 34.10], [28.00, 33.90], [31.00, 33.60], [33.50, 33.90]] },
+  { name: 'North Ionian gyre', speed: 15,
+    note: 'Northeast toward Ithaca in the anticyclonic state. This gyre reverses on a decadal beat, so its arrows are the least permanent on the map.',
+    path: [[17.60, 37.00], [18.30, 37.90], [18.80, 38.80], [19.20, 39.60], [19.30, 40.30]] },
+  { name: 'Aegean surface outflow', speed: 15,
+    note: 'Brackish Black Sea water out of the Dardanelles, turned southwest by the Etesians — the drift that takes a ship from Thrace toward Cape Malea whether it means to go or not.',
+    path: [[26.10, 40.05], [25.30, 39.70], [24.80, 39.10], [24.60, 38.40], [24.60, 37.60], [24.80, 36.90]] },
+  { name: 'Asia Minor Current', speed: 15,
+    note: 'West along the Anatolian coast and north into the Aegean, the eastern basin’s return limb.',
+    path: [[31.50, 36.00], [29.80, 35.85], [28.50, 35.75], [27.40, 35.90], [26.90, 36.50], [26.60, 37.30], [26.30, 38.10]] },
+];
+
+export const WINDS = [
+  { name: 'Etesians (north Aegean)', speed: 12,
+    note: 'Northeasterly in the north Aegean, force 5–7 through July and August.',
+    path: [[26.90, 41.40], [26.20, 40.70], [25.50, 40.00], [24.90, 39.30], [24.40, 38.70]] },
+  { name: 'Etesians (central Aegean)', speed: 13,
+    note: 'Due northerly across the Cyclades, freshening through the afternoon and easing after sunset.',
+    path: [[25.20, 39.60], [25.10, 38.60], [25.00, 37.60], [24.95, 36.60], [24.95, 35.80]] },
+  { name: 'Etesians (Cretan Sea)', speed: 11,
+    note: 'Backed northwesterly by the time it reaches Crete and the Carpathian Sea.',
+    path: [[22.80, 37.30], [23.80, 36.70], [24.90, 36.10], [26.00, 35.50], [27.10, 35.00]] },
+  { name: 'Mistral', speed: 15,
+    note: 'Cold and dry down the Rhône corridor into the Gulf of Lion, the strongest wind in the western basin.',
+    path: [[4.30, 44.50], [4.60, 43.60], [5.00, 42.70], [5.50, 41.80], [6.00, 41.00]] },
+  { name: 'Tramontane', speed: 13,
+    note: 'The Mistral’s twin west of the Rhône, funnelled between the Massif Central and the Pyrenees.',
+    path: [[2.20, 43.60], [2.90, 42.90], [3.60, 42.20], [4.30, 41.50]] },
+  { name: 'Sirocco', speed: 10,
+    note: 'Warm southeasterly off the Sahara, carrying dust north over the Strait of Sicily.',
+    path: [[14.20, 31.60], [13.30, 33.30], [12.60, 35.00], [12.00, 36.60], [11.50, 38.10]] },
+  { name: 'Libeccio', speed: 9,
+    note: 'Southwesterly across the Tyrrhenian, raising the heaviest sea on the Italian west coast.',
+    path: [[9.00, 38.40], [10.40, 39.60], [11.70, 40.80], [12.90, 41.80]] },
+  { name: 'Gregale', speed: 11,
+    note: 'Northeasterly over the central Mediterranean, at its worst around Malta and the Ionian.',
+    path: [[17.20, 38.20], [16.20, 37.20], [15.20, 36.20], [14.20, 35.40]] },
+  { name: 'Levanter', speed: 8,
+    note: 'Humid easterly compressed through the Strait of Gibraltar.',
+    path: [[-0.60, 36.10], [-2.20, 36.00], [-3.60, 35.90], [-5.20, 35.95]] },
+];
+
+export const FLOW_NOTE =
+  'Both layers show the summer state, the season the ancients sailed in. Blue bands ' +
+  'are surface currents, drawn from drifter and altimeter climatologies; the whole basin ' +
+  'turns counter-clockwise, because Atlantic water entering at Gibraltar is deflected ' +
+  'right onto the African coast and returns along the European one. White arrows are the ' +
+  'named summer winds. The Mediterranean has no monsoon: the Etesians are the closest ' +
+  'thing, and their strength does track the South Asian monsoon through the thermal low ' +
+  'over southwest Asia. Speeds are published means, and set each arrow’s pace ' +
+  'relative to the others in its own layer — wind and water are not on one scale.';
 
 /* ===================== TEXT + RENDERING ===================== */
 export const ATTRIBUTION = {
@@ -844,6 +998,19 @@ export function selftest(setpieceKeys = null) {
   check('sea names in open water', () => {
     const dry = SEAS.filter(([, lon, lat]) => pointInLand([lon, lat]));
     return dry.length === 0 || dry.map(s => s[0]).join(', ');
+  });
+  check('current paths stay in open water', () => {
+    const dry = CURRENTS.filter(c => flowSamples(c.path).some(pointInLand));
+    return dry.length === 0 || dry.map(c => c.name).join(', ');
+  });
+  check('flow paths within map bounds', () => {
+    const out = [...CURRENTS, ...WINDS].filter(f => f.path.some(
+      ([lon, lat]) => lon < -7 || lon > 42 || lat < 29 || lat > 48));
+    return out.length === 0 || out.map(f => f.name).join(', ');
+  });
+  check('flow speeds are positive', () => {
+    const bad = [...CURRENTS, ...WINDS].filter(f => !(f.speed > 0));
+    return bad.length === 0 || bad.map(f => f.name).join(', ');
   });
   check('map-derived stops in open water', () => {
     const dry = STOPS.filter(s => s.prov === 'map' && pointInLand([s.lon, s.lat]));
@@ -1079,6 +1246,147 @@ if (!webglAvailable()) {
     setWave(0);                                  // static dots under reduced motion
     window.__nostos.animateRoute = setWave;
   }
+
+  /* ---- winds and currents: ribbons carrying a scrolling arrow texture ----
+     One builder, two styles. Currents lie on the sea as blue bands; winds float
+     above it as white darts, which is the honest arrangement (air over water)
+     and also what keeps the two layers apart where they cross. Each ribbon is a
+     triangle strip along a Catmull-Rom through the published path, textured with
+     a repeating glyph whose offset advances at a rate set by that feature's real
+     mean speed — so within a layer, relative pace is data.
+     The two layers are NOT on a common scale: 22 cm/s of Algerian Current
+     against 15 m/s of Mistral is 1:68, which would leave every current
+     apparently frozen. Each layer gets its own base rate, and the panel note
+     says so rather than letting the picture imply otherwise. */
+  /* World units per arrow glyph. The whole basin is only ~390 units wide, so
+     these are small numbers: a 12-unit pitch puts about six chevrons along the
+     Algerian Current. */
+  const TILE_CURRENT = 19, TILE_WIND = 6.5;
+  const flows = [];              // { map, rate } — offsets advanced by the frame loop
+
+  function arrowTexture(kind) {
+    const W = 128, H = 32, c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    if (kind === 'current') {
+      /* a continuous band, soft-edged across v so the ribbon has no hard rim,
+         with a chevron riding it to carry direction */
+      const grad = g.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0,   'rgba(38,120,175,0)');
+      grad.addColorStop(0.5, 'rgba(96,196,247,0.52)');
+      grad.addColorStop(1,   'rgba(38,120,175,0)');
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+      g.strokeStyle = 'rgba(206,242,255,0.78)'; g.lineWidth = 3.5;
+      g.beginPath();
+      g.moveTo(W * .58, H * .18); g.lineTo(W * .76, H * .5); g.lineTo(W * .58, H * .82);
+      g.stroke();
+    } else {
+      /* discrete darts: transparent between glyphs, so wind reads as arrows and
+         not as a second band */
+      g.strokeStyle = 'rgba(255,255,255,0.94)'; g.lineWidth = 5;
+      g.beginPath(); g.moveTo(W * .12, H * .5); g.lineTo(W * .60, H * .5); g.stroke();
+      g.beginPath();
+      g.moveTo(W * .48, H * .20); g.lineTo(W * .70, H * .5); g.lineTo(W * .48, H * .80);
+      g.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = THREE.RepeatWrapping;
+    t.wrapT = THREE.ClampToEdgeWrapping;
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+
+  /* Colour lives in the canvas, not in the material, because additive blending
+     would multiply a tint into an already-coloured glyph. */
+  function flowRibbon(path, y, width, tile, tex) {
+    const curve = new THREE.CatmullRomCurve3(
+      path.map(([lon, lat]) => {
+        const p = core.lonLatToWorld(lon, lat);
+        return new THREE.Vector3(p.x, y, p.z);
+      }), false, 'catmullrom', 0.4);
+    /* one segment per ~3.5 world units, floor 12 and cap 44: smooth for paths
+       this gentle, and cheap enough to keep the whole layer inside the 50k
+       triangle budget (the land alone is already 47k) */
+    const N = Math.max(12, Math.min(44, Math.round(curve.getLength() / 3.5)));
+    const pts = curve.getSpacedPoints(N - 1);
+
+    const pos = new Float32Array(N * 6), uv = new Float32Array(N * 4);
+    const col = new Float32Array(N * 6), idx = [];
+    let run = 0;
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      const a = pts[Math.max(i - 1, 0)], b = pts[Math.min(i + 1, N - 1)];
+      const tx = b.x - a.x, tz = b.z - a.z, len = Math.hypot(tx, tz) || 1;
+      const nx = (-tz / len) * width / 2, nz = (tx / len) * width / 2;
+      if (i) run += p.distanceTo(pts[i - 1]);
+      /* vertex-colour taper over the end eighth, so a ribbon fades out instead
+         of being chopped off mid-band */
+      const f = Math.min(1, Math.min(i, N - 1 - i) / (N * 0.08));
+      for (const [k, s] of [[0, 1], [1, -1]]) {
+        const v = i * 2 + k, o = v * 3;
+        pos[o] = p.x + nx * s; pos[o + 1] = p.y; pos[o + 2] = p.z + nz * s;
+        col[o] = col[o + 1] = col[o + 2] = f;
+        uv[v * 2] = run / tile; uv[v * 2 + 1] = k;
+      }
+      if (i) idx.push((i - 1) * 2, (i - 1) * 2 + 1, i * 2,
+                      (i - 1) * 2 + 1, i * 2 + 1, i * 2);
+    }
+    const gg = new THREE.BufferGeometry();
+    gg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    gg.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    gg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    gg.setIndex(idx);
+    return new THREE.Mesh(gg, new THREE.MeshBasicMaterial({
+      map: tex, vertexColors: true, transparent: true, depthWrite: false,
+      side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    }));
+  }
+
+  const flowLayer = new THREE.Group();
+  flowLayer.name = 'flow';
+  {
+    /* tiles per second per unit of published speed. Divisors chosen so the
+       fastest feature in each layer drifts briskly rather than blurring: the
+       Almeria-Oran Jet at 50 cm/s and the Mistral at 15 m/s both land near
+       0.8 tiles/s. Texture.clone() shares the canvas and owns its own offset,
+       which is what lets one glyph serve every ribbon at its own pace. */
+    const CURRENT_DIV = 62, WIND_DIV = 18;
+    const sea = arrowTexture('current'), air = arrowTexture('wind');
+    for (const c of core.CURRENTS) {
+      const m = flowRibbon(c.path, 0.7, 5.4, TILE_CURRENT, sea.clone());
+      m.name = `current:${c.name}`;
+      flowLayer.add(m);
+      flows.push({ map: m.material.map, rate: c.speed / CURRENT_DIV });
+    }
+    /* winds ride at y=10: clear of the 1.6-unit land extrusion and the route's
+       dots at 2.2, low enough that the parallax against the ground plane stays
+       small at basin zoom */
+    for (const w of core.WINDS) {
+      const m = flowRibbon(w.path, 10, 1.9, TILE_WIND, air.clone());
+      m.name = `wind:${w.name}`;
+      flowLayer.add(m);
+      flows.push({ map: m.material.map, rate: w.speed / WIND_DIV });
+    }
+  }
+  scene.add(flowLayer);
+
+  /* One button and one legend. The layer covers the whole basin, so it has to be
+     dismissable; aria-pressed carries the state and the legend follows it. */
+  const flowBtn = document.getElementById('flow');
+  const flowLegend = document.getElementById('flow-legend');
+  let flowOn = true;
+  function setFlow(on) {
+    flowOn = on;
+    flowLayer.visible = on;
+    flowBtn.setAttribute('aria-pressed', String(on));
+    flowLegend.hidden = !on;
+  }
+  flowBtn.addEventListener('click', () => setFlow(!flowOn));
+  setFlow(true);
+  window.__nostos.flowLayer = flowLayer;
+  window.__nostos.setFlow = setFlow;
+
 
 
   /* ---- markers ---- */
@@ -1649,6 +1957,9 @@ if (!webglAvailable()) {
     }
     keepApparentSize();
     layoutLabels();
+    if (!reducedMotion && flowOn) {   // still arrows under reduced motion
+      for (const f of flows) f.map.offset.x -= dt * f.rate;
+    }
 /* FRAME-EXTRA */
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
@@ -1660,6 +1971,7 @@ if (!webglAvailable()) {
 
   document.getElementById('fallback').innerHTML = core.renderFallback();
   document.getElementById('route-note').textContent = core.ROUTE_NOTE;
+  document.getElementById('flow-note').textContent = core.FLOW_NOTE;
   document.getElementById('credit').innerHTML =
     `${core.ATTRIBUTION.text} <a href="${core.ATTRIBUTION.href}" target="_blank" ` +
     `rel="noopener noreferrer">Source map</a> (${core.ATTRIBUTION.licence}). ` +
