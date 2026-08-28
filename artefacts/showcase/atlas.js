@@ -5,26 +5,13 @@ export default {
  "cell": 512,
  "panels": [
   {
-   "id": "travel-china-fuxing-high-speed-rail-network-map",
-   "href": "travel/china-fuxing-high-speed-rail-network-map.png",
-   "title": "China high-speed rail network map, lines in service",
-   "collection": "Travel",
-   "aspect": 1.333333,
-   "uv": [
-    0.000163,
-    0.020996,
-    0.166341,
-    0.124674
-   ]
-  },
-  {
    "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
    "href": "everything-llm/4-best-practices-for-claude-opus-4-7.jpg",
    "title": "Four best practices for Claude Opus 4.7 xhigh mode",
    "collection": "Everything LLM",
    "aspect": 0.55814,
    "uv": [
-    0.203613,
+    0.036947,
     0.000163,
     0.092773,
     0.166341
@@ -37,7 +24,7 @@ export default {
    "collection": "Everything LLM",
    "aspect": 1.5,
    "uv": [
-    0.333496,
+    0.166829,
     0.027995,
     0.166341,
     0.110677
@@ -50,7 +37,7 @@ export default {
    "collection": "Everything LLM",
    "aspect": 0.666667,
    "uv": [
-    0.527995,
+    0.361328,
     0.000163,
     0.110677,
     0.166341
@@ -63,7 +50,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.666829,
+    0.500163,
     0.036621,
     0.166341,
     0.093424
@@ -76,7 +63,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.833496,
+    0.666829,
     0.036621,
     0.166341,
     0.093424
@@ -89,8 +76,8 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.000163,
-    0.203288,
+    0.833496,
+    0.036621,
     0.166341,
     0.093424
    ]
@@ -102,7 +89,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.166829,
+    0.000163,
     0.203288,
     0.166341,
     0.093424
@@ -115,7 +102,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.333496,
+    0.166829,
     0.203288,
     0.166341,
     0.093424
@@ -128,7 +115,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.500163,
+    0.333496,
     0.203288,
     0.166341,
     0.093424
@@ -141,7 +128,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.666829,
+    0.500163,
     0.203288,
     0.166341,
     0.093424
@@ -154,7 +141,7 @@ export default {
    "collection": "Claude Tag",
    "aspect": 1.777778,
    "uv": [
-    0.833496,
+    0.666829,
     0.203288,
     0.166341,
     0.093424
@@ -166,6 +153,19 @@ export default {
    "title": "Memory core (dark variant)",
    "collection": "Claude Tag",
    "aspect": 1.777778,
+   "uv": [
+    0.833496,
+    0.203288,
+    0.166341,
+    0.093424
+   ]
+  },
+  {
+   "id": "homeric-epics-map-of-odysseus-10-year-journey-home-15906",
+   "href": "homeric-epics/map-of-odysseus-10-year-journey-home-15906.png",
+   "title": "Map of Odysseus' ten-year journey home",
+   "collection": "Homeric Epics",
+   "aspect": 1.777857,
    "uv": [
     0.000163,
     0.369954,
