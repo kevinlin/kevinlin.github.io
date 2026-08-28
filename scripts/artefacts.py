@@ -467,8 +467,11 @@ def _require_unique(values: list[Any], message: str) -> None:
 def _validate_path_components(
     path: PurePosixPath, pattern: re.Pattern[str], message: str
 ) -> None:
-    if not all(pattern.fullmatch(component) for component in path.parts):
-        raise ManifestError(message)
+    for component in path.parts:
+        if not pattern.fullmatch(component):
+            raise ManifestError(
+                f"{message}: {path.as_posix()} (component {component!r})"
+            )
 
 
 def validate_manifest(manifest: Manifest) -> None:
