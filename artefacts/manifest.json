@@ -996,6 +996,26 @@
       "replacements": {},
       "description": "The route of the Odyssey plotted across the Mediterranean, from Troy to Ithaca.",
       "date": "2026-08-28"
+    },
+    {
+      "id": "homeric-epics-index",
+      "source": "homeric-epics/index.html",
+      "destination": "homeric-epics/index/index.html",
+      "title": "Index",
+      "collection": "homeric-epics",
+      "order": 20,
+      "replacements": {},
+      "date": "2026-08-28"
+    },
+    {
+      "id": "homeric-epics-test-browser",
+      "source": "homeric-epics/test/browser.md",
+      "destination": "homeric-epics/test/browser/index.html",
+      "title": "Browser verification procedure",
+      "collection": "homeric-epics",
+      "order": 30,
+      "replacements": {},
+      "date": "2026-08-28"
     }
   ]
 }

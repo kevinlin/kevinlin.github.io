@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A navigable 3D map of the seventeen stops of Odysseus' ten-year voyage home, with an encyclopedic entry per stop and a year rail showing that seven of the ten years pass on Ogygia alone.">
+<title>Nostos — Odysseus' Ten-Year Journey Home</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314100d'/%3E%3Cpath d='M11 6h10l-2 3c3 2 4 5 4 9 0 5-3 8-7 8s-7-3-7-8c0-4 1-7 4-9z' fill='%23b4451f'/%3E%3Cpath d='M13 9h6' stroke='%23f4ecd8' stroke-width='1.4'/%3E%3C/svg%3E">
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.185.1/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.185.1/examples/jsm/"
+} }
+</script>
+<style>
+/* ===================== TOKENS =====================
+   Greek black-figure: terracotta, black, bone, with the source map's teal and
+   dark red. Palette values live here only; components reference semantic names. */
+:root {
+  /* raw palette */
+  --ink:        #14100d;
+  --ink-2:      #1c1410;
+  --parch:      #e8dcc0;
+  --bone:       #f4ecd8;
+  --terra:      #b4451f;
+  --terra-lit:  #f2a468;
+  --teal:       #1d6f7e;
+  --wine:       #7d2230;
+
+  /* semantic */
+  --bg:            var(--ink);
+  --fg:            var(--bone);
+  --fg-muted:      #cfc3ab;
+  --fg-subtle:     #a99c85;
+  --accent:        var(--terra);
+  --accent-fg:     #fff8ec;
+  --link:          var(--terra-lit);
+  --panel:         rgba(20, 15, 12, 0.94);
+  --panel-edge:    rgba(244, 236, 216, 0.14);
+  --ring:          var(--terra-lit);
+
+  /* type */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Palatino LT STD", Georgia, serif;
+  --font-body:    "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* space — 4px scale */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+  /* radius, concentric: outer = inner + padding */
+  --r-sm: 3px; --r-md: 6px;
+
+  /* motion */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* layers */
+  --z-stage: 0; --z-rail: 20; --z-panel: 30; --z-nav: 40; --z-selftest: 99;
+
+  /* the rail owns the bottom strip; the panel and the credit sit above it */
+  --rail-h: 4.25rem;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--font-body);
+}
+
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+
+/* the 3D stage fills the viewport; UI floats over it */
+#stage { position: fixed; inset: 0; z-index: var(--z-stage); }
+#stage canvas { display: block; }
+
+/* a low vignette so the UI edges read against bright sea */
+#stage::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(8,6,5,.55) 100%);
+}
+
+/* focus is never removed, only restyled */
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: var(--r-sm); }
+
+/* skip link: first focusable, hidden until focused */
+.skip {
+  position: fixed; top: var(--s-2); left: var(--s-2); z-index: 200;
+  padding: var(--s-2) var(--s-4);
+  background: var(--panel); color: var(--fg);
+  border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+/* no-WebGL / no-JS fallback */
+#fallback { display: none; }
+.no-webgl #stage, .no-webgl #journal, .no-webgl #rail,
+.no-webgl #nav, .no-webgl #credit { display: none; }
+.no-webgl #fallback { display: block; }
+
+#fallback {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--s-7) var(--s-5) var(--s-8);
+}
+#fallback h1 {
+  font-family: var(--font-display);
+  font-variant: small-caps; letter-spacing: .04em;
+  font-size: clamp(2rem, 5vw, 3rem); line-height: 1.15;
+  margin: 0 0 var(--s-5);
+}
+#fallback .note, #fallback .credit {
+  color: var(--fg-subtle); font-size: .9rem;
+  border-left: 2px solid var(--wine); padding-left: var(--s-4);
+}
+#fallback .fallback-list { list-style: none; margin: var(--s-7) 0; padding: 0; }
+#fallback .fallback-list > li { margin: 0 0 var(--s-7); }
+
+noscript .nojs {
+  display: block; max-width: 68ch; margin: 0 auto; padding: var(--s-7) var(--s-5);
+  color: var(--fg-muted);
+}
+
+/* ===================== JOURNAL PANEL ===================== */
+#journal {
+  position: fixed; top: 0; left: 0; z-index: var(--z-panel);
+  width: min(30rem, 34vw); height: calc(100% - var(--rail-h));
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--s-7) var(--s-6) var(--s-7);
+  background:
+    linear-gradient(100deg, rgba(20,15,12,.97) 0%, rgba(20,15,12,.90) 70%, rgba(20,15,12,.80) 100%);
+  /* layered shadow, not a border: reads as depth over the moving map */
+  box-shadow:
+    1px 0 1px rgba(0,0,0,.20),
+    3px 0 8px rgba(0,0,0,.18),
+    12px 0 40px rgba(0,0,0,.30);
+}
+
+/* hairline highlight along the panel edge, the way gilt edges catch light */
+#journal::after {
+  content: ""; position: fixed; top: 0; bottom: var(--rail-h);
+  left: min(30rem, 34vw); width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(242,164,104,.30) 35%, transparent);
+  pointer-events: none;
+}
+
+.entry { max-width: 62ch; }
+
+.entry .eyebrow {
+  display: flex; gap: var(--s-4); align-items: baseline;
+  margin: 0 0 var(--s-2);
+}
+.entry .numeral {
+  font-family: var(--font-display);
+  font-size: 2rem; line-height: 1;
+  color: var(--terra-lit);
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+}
+.entry .year {
+  font-size: .8125rem; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+.entry h2 {
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.4vw, 2.75rem); line-height: 1.08;
+  font-variant: small-caps; letter-spacing: .035em;
+  color: var(--fg);
+}
+
+.entry .event {
+  margin: 0 0 var(--s-5); padding-bottom: var(--s-5);
+  font-size: 1.0625rem; font-style: italic; color: var(--fg-muted);
+  border-bottom: 1px solid rgba(244,236,216,.12);
+}
+
+.entry .prose { margin: 0 0 var(--s-5); color: #efe6d2; }
+
+.entry .prov {
+  margin: 0 0 var(--s-5); padding-left: var(--s-4);
+  border-left: 2px solid var(--wine);
+  font-size: .875rem; color: var(--fg-muted);
+}
+
+.entry .links {
+  display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5);
+  margin: var(--s-6) 0 0;
+  font-size: .875rem; letter-spacing: .06em; font-variant: small-caps;
+}
+
+#journal a, #fallback a {
+  color: var(--link);
+  text-decoration-thickness: 1px; text-underline-offset: .22em;
+  text-decoration-color: rgba(242,164,104,.45);
+  transition: text-decoration-color 120ms var(--ease-out), color 120ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  #journal a:hover, #fallback a:hover, #credit a:hover {
+    color: #ffc59a; text-decoration-color: currentColor;
+  }
+}
+
+/* stop switching happens tens of times a session, so the entry gets one short
+   fade-and-rise and nothing more */
+.entry { animation: entryIn 180ms var(--ease-out) both; }
+.entry h2       { animation: entryIn 220ms var(--ease-out) 40ms both; }
+.entry .prose   { animation: entryIn 240ms var(--ease-out) 70ms both; }
+@keyframes entryIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 768px) {
+  #journal {
+    width: 100%; height: 52vh; top: auto; bottom: var(--rail-h);
+    padding: var(--s-5) var(--s-5) var(--s-6);
+    box-shadow: 0 -1px 1px rgba(0,0,0,.2), 0 -8px 32px rgba(0,0,0,.35);
+    /* the desktop panel is translucent because it sits over dark sea; the bottom
+       sheet sits over bright parchment, where translucency wrecks the prose */
+    background: #16110e;
+  }
+  #rail button { padding-top: var(--s-3); }
+  #journal::after {
+    left: 0; right: 0; top: auto; bottom: calc(52vh + var(--rail-h)); width: auto; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(242,164,104,.30) 40%, transparent);
+  }
+  .entry h2 { font-size: 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry, .entry h2, .entry .prose { animation: none; }
+}
+
+/* ===================== YEAR RAIL + NAV ===================== */
+#rail {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-rail);
+  display: flex; height: var(--rail-h);
+  overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: thin; scrollbar-color: rgba(244,236,216,.22) transparent;
+  background: linear-gradient(180deg, rgba(12,9,7,.86), rgba(12,9,7,.96));
+  box-shadow: 0 -1px 0 rgba(244,236,216,.16), 0 -6px 22px rgba(0,0,0,.35);
+}
+
+/* the rail's own label, so the proportions are readable as data and not just
+   as a control strip */
+#rail::before {
+  content: "Years elapsed (approximate)";
+  position: fixed; left: var(--s-4); bottom: calc(var(--rail-h) + var(--s-2));
+  padding: 3px var(--s-2);
+  border-radius: var(--r-sm);
+  background: rgba(10,7,6,.88);          /* the panel behind is translucent, so the
+                                            caption carries its own contrast */
+  font-size: .6875rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+#rail button {
+  position: relative;
+  /* min-width keeps every stop a 24px target; flex-shrink lets Ogygia and Aeaea
+     give up the room, so the proportions survive without overflowing */
+  flex: 0 1 auto; min-width: 24px;
+  border: 0; border-right: 1px solid rgba(244,236,216,.14);
+  background: transparent; color: var(--fg-muted);
+  cursor: pointer; padding: var(--s-4) var(--s-1) var(--s-2);
+  font: inherit; font-size: .75rem;
+  font-variant: small-caps; letter-spacing: .06em;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  transition: background 140ms var(--ease-out), color 140ms var(--ease-out);
+}
+#rail button:last-child { border-right: 0; }
+
+/* the tick that turns the strip into a timeline */
+#rail button::before {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 1px; height: .55rem;
+  background: rgba(244,236,216,.28);
+}
+/* a bead per stop, so the narrow segments are still something to aim at */
+#rail button::after {
+  content: ""; position: absolute; left: 50%; bottom: 1.05rem;
+  width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+  background: rgba(242,164,104,.55);
+}
+#rail button[aria-current="true"]::after { background: var(--accent-fg); }
+
+@media (hover: hover) and (pointer: fine) {
+  #rail button:hover { background: rgba(180,69,31,.30); color: var(--fg); }
+}
+#rail button[aria-current="true"] {
+  background: var(--accent); color: var(--accent-fg);
+  box-shadow: inset 0 2px 0 var(--terra-lit);
+}
+
+#nav {
+  position: fixed; right: var(--s-4); bottom: calc(var(--rail-h) + var(--s-3));
+  z-index: var(--z-nav); display: flex; gap: var(--s-2);
+}
+#nav button {
+  font: inherit; font-size: .8125rem;
+  font-variant: small-caps; letter-spacing: .10em;
+  min-height: 44px; padding: var(--s-3) var(--s-5);
+  color: var(--fg); cursor: pointer;
+  background: rgba(20,15,12,.92);
+  border: 1px solid rgba(244,236,216,.28);
+  border-radius: var(--r-md);
+  box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 4px 14px rgba(0,0,0,.25);
+  transition: background 120ms var(--ease-out), border-color 120ms var(--ease-out),
+              transform 90ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  #nav button:not(:disabled):hover {
+    background: rgba(38,26,20,.95); border-color: rgba(242,164,104,.55);
+  }
+}
+#nav button:not(:disabled):active { transform: scale(.97); }
+#nav button:disabled { opacity: .35; cursor: default; }
+
+@media (max-width: 768px) {
+  #nav { bottom: calc(52vh + var(--rail-h) + var(--s-3)); right: var(--s-3); }
+  /* no room for the rail's caption once the sheet sits directly above it */
+  #rail::before { content: ""; }
+  /* 17 x 24px does not fit in 390px, so the rail scrolls instead of collapsing */
+  #rail button { flex-shrink: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rail button, #nav button { transition: none; }
+  #nav button:not(:disabled):active { transform: none; }
+}
+
+/* ===================== SELFTEST BANNER ===================== */
+#selftest {
+  position: fixed; inset: 0 0 auto 0; z-index: var(--z-selftest);
+  padding: var(--s-3) var(--s-5);
+  font: 13px/1.6 var(--font-mono); white-space: pre;
+  overflow: auto; max-height: 60vh;
+  box-shadow: 0 4px 20px rgba(0,0,0,.45);
+}
+
+/* ===================== COLOPHON ===================== */
+/* Sticks to the foot of the panel so the byline and the honesty note are on
+   screen at every width, without duplicating them over the map. */
+#colophon {
+  position: sticky; bottom: 0;
+  margin: var(--s-7) calc(var(--s-6) * -1) calc(var(--s-7) * -1);
+  padding: var(--s-3) var(--s-6) var(--s-4);
+  background: linear-gradient(180deg, rgba(20,15,12,0), rgba(18,13,11,.97) 28%);
+  border-top: 1px solid rgba(244,236,216,.10);
+}
+#about summary {
+  cursor: pointer; list-style: none;
+  font-size: .75rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-subtle);
+  padding: var(--s-2) 0;
+  transition: color 120ms var(--ease-out);
+}
+#about summary::-webkit-details-marker { display: none; }
+#about summary::before { content: "\25B8"; color: var(--terra-lit); padding-right: .5em;
+  display: inline-block; transition: transform 140ms var(--ease-out); }
+#about[open] summary::before { transform: rotate(90deg); }
+@media (hover: hover) and (pointer: fine) {
+  #about summary:hover { color: var(--fg); }
+}
+#route-note {
+  margin: 0 0 var(--s-3); padding-left: var(--s-4);
+  border-left: 2px solid var(--wine);
+  font-size: .8125rem; line-height: 1.5; color: var(--fg-muted);
+}
+#credit {
+  margin: 0; font-size: .6875rem; line-height: 1.45; color: var(--fg-subtle);
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#journal">Skip to the journal entry</a>
+<div id="stage" aria-hidden="true"></div>
+<main id="fallback" tabindex="-1"></main>
+<aside id="journal" tabindex="-1" aria-label="Journal">
+  <div id="entry" aria-live="polite" aria-atomic="true"></div>
+  <footer id="colophon">
+    <details id="about">
+      <summary>About this route</summary>
+      <p id="route-note"></p>
+    </details>
+    <p id="credit"></p>
+  </footer>
+</aside>
+<nav id="nav" aria-label="Voyage navigation">
+  <button id="prev" type="button">← Previous</button>
+  <button id="next" type="button">Next →</button>
+</nav>
+<div id="rail" role="group" aria-label="Years elapsed (approximate) — jump to a stop"></div>
+<noscript><div class="nojs">
+  <h1>Nostos — Odysseus' Ten-Year Journey Home</h1>
+  <p>This page draws the voyage with JavaScript and WebGL. With scripting disabled,
+  read the source it is built from:
+  <a href="https://www.worldhistory.org/image/15906/map-of-odysseus-10-year-journey-home/">Map of
+  Odysseus' 10-Year Journey Home</a>, Simeon Netchev, World History Encyclopedia (CC BY-NC-ND).</p>
+</div></noscript>
+
+<script type="module" id="core">
+/* ===================== PROJECTION ===================== */
+/* Plate carree with a longitude correction. The source map is UNCORRECTED
+   plate carree; we correct so landmasses hold their real proportions under a
+   moving camera. Set LON_SCALE = 1.0 to match the source map exactly. */
+export const LON_SCALE = Math.cos(38 * Math.PI / 180);
+export const UNITS_PER_DEG = 10;
+
+export function lonLatToWorld(lon, lat) {
+  return { x: lon * LON_SCALE * UNITS_PER_DEG, y: 0, z: -lat * UNITS_PER_DEG };
+}
+
+export function worldToLonLat({ x, z }) {
+  return { lon: x / (LON_SCALE * UNITS_PER_DEG), lat: -z / UNITS_PER_DEG };
+}
+
+/* ===================== STOPS ===================== */
+/* Coordinates transcribed from the design table. Three map-derived stops there
+   fell inside coastline geometry, and the design requires map-derived placements
+   to sit in open water; each is nudged by the smallest offset that clears land,
+   keeping its longitude:
+     Lamos      36.51 -> 36.86 lat (offshore Algeria)
+     Cimmerians 41.94 -> 41.74 lat (off the Catalan coast)
+     Sirens     39.25 -> 38.85 lat (south of Sardinia, not inside it)
+   Real-world coordinates are untouched, including the ones that are properly on
+   land: Troy at inland Hisarlik, Lotophagi on Djerba, Scylla on the Calabrian
+   shore. Those are landfalls, not errors. */
+const W = 'https://en.wikipedia.org/wiki/';
+const H = 'https://www.worldhistory.org/';
+
+export const STOPS = [
+  { n: 1, numeral: 'I', name: 'Troy', lon: 26.239, lat: 39.957, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: 'troy',
+    event: 'Odysseus leaves with 12 ships',
+    prose: `After ten years of siege Troy falls to the stratagem of the wooden horse, and Odysseus, king of Ithaca and architect of that deception, sails for home with twelve ships. The Odyssey opens long after this departure and recovers the voyage in retrospect, largely through Odysseus' own telling at the Phaeacian court. Homer grants the returning fleet no easy passage: the Greeks have offended Athena by their conduct in the sack, and the sea will take ten further years before Ithaca is reached.`,
+    links: { wikipedia: W + 'Troy', whe: H + 'Troy/' } },
+
+  { n: 2, numeral: 'II', name: 'Ismarus', lon: 25.520, lat: 40.870, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: null,
+    event: "The crew pillages the Cicones' town; the Cicones kill 76",
+    prose: `The fleet's first landfall is Ismarus, a town of the Cicones on the Thracian coast. Odysseus' men sack it, killing the men and carrying off the women and goods, which is conventional conduct for a returning raiding fleet and the first sign that the crew's appetites will govern this voyage. The Cicones summon inland allies and counterattack from the plain. Homer's tally is six men lost from each of the twelve ships, seventy-two in all; the source map gives the figure as 76. The survivors put to sea.`,
+    links: { wikipedia: W + 'Ismara', whe: H + 'Odysseus/' } },
+
+  { n: 3, numeral: 'III', name: 'Cape Malea', lon: 23.199, lat: 36.439, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: null,
+    event: 'Odysseus is blown off course',
+    prose: `Rounding Cape Malea at the southeastern tip of the Peloponnese, the fleet meets the north wind and is driven off course. The cape was notorious in antiquity as a hazard, and a Greek proverb advised sailors rounding it to forget their homeland. This is the hinge of the poem's geography. Everything before it is ordinary coastal sailing between places a Greek audience knew; everything after belongs to myth, which is why the remaining identifications on this route are proposals rather than locations.`,
+    links: { wikipedia: W + 'Cape_Maleas', whe: H + 'Odyssey/' } },
+
+  { n: 4, numeral: 'IV', name: 'Cythera', lon: 23.000, lat: 36.150, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: null,
+    event: 'Storms for ten days',
+    prose: `Blown past Cythera, the island south of Cape Malea sacred to Aphrodite, the fleet is carried across open water by storms. Homer counts nine days and gives no direction at all; the source map records ten. With that the ships leave charted water. Every landfall from here until the Phaeacians ferry Odysseus home belongs to a world that resists being placed on any map, and the scholarly attempts to place it have never converged.`,
+    links: { wikipedia: W + 'Kythira', whe: H + 'Odyssey/' } },
+
+  { n: 5, numeral: 'V', name: 'Lotophagi', lon: 10.900, lat: 33.800, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: null,
+    event: 'The crew eats addictive flowers and wants to stay',
+    prose: `The land of the Lotus-eaters, whose people live on a flowering plant that erases the wish to go home. Three scouts sent ashore eat it and lose all desire to leave. Odysseus has them dragged back to the ship and bound beneath the benches. Nobody dies here. It is the mildest-looking danger in the poem and among the most serious: the voyage very nearly ends. Herodotus placed the Lotus-eaters on the North African coast, an identification that later fixed them at Djerba.`,
+    links: { wikipedia: W + 'Lotus-eaters', whe: H + 'Odyssey/' } },
+
+  { n: 6, numeral: 'VI', name: 'Cyclopes', lon: 15.160, lat: 37.560, prov: 'real',
+    yearFrom: 1, yearTo: 1, setpiece: 'cyclops',
+    event: "Odysseus blinds Polyphemus, Poseidon's son",
+    prose: `Odysseus and twelve men enter the cave of Polyphemus, a one-eyed giant and a son of Poseidon, who seals them in and eats six. Odysseus gives his name as Outis, Nobody, gets the giant drunk and blinds him with a sharpened stake; the survivors escape clinging beneath the bellies of his sheep. Once clear of the shore Odysseus shouts his real name back at the cliff. Polyphemus prays to his father, and Poseidon's answering enmity is what keeps the fleet from home.`,
+    links: { wikipedia: W + 'Polyphemus', whe: H + 'Polyphemus/' } },
+
+  { n: 7, numeral: 'VII', name: 'Aeolia', lon: 12.430, lat: 36.850, prov: 'map',
+    yearFrom: 1, yearTo: 1, setpiece: 'aeolia',
+    event: 'The crew opens the bag of winds and is blown off course',
+    prose: `Aeolus, keeper of the winds, receives Odysseus hospitably and gives him a leather bag holding every wind but the west, which is left free to carry the ships home. Ithaca is in sight on the tenth day when Odysseus sleeps and his crew, suspecting hidden treasure, open the bag. The released winds drive the fleet all the way back to Aeolia, where Aeolus turns them away, reading their misfortune as proof of divine disfavour. The source map places Aeolia in the Strait of Sicily; tradition puts it at the Aeolian Islands.`,
+    links: { wikipedia: W + 'Aeolus_(Odyssey)', whe: H + 'Odyssey/' } },
+
+  { n: 8, numeral: 'VIII', name: 'Lamos', lon: 6.000, lat: 36.860, prov: 'map',
+    yearFrom: 1, yearTo: 1, setpiece: 'lamos',
+    event: 'Laestrygonians kill and eat most of the crew',
+    prose: `Lamos, city of the Laestrygonians, a race of giants. Its harbour is a near-enclosed basin with a narrow mouth, and eleven of the twelve ships moor inside; Odysseus alone keeps his ship at the entrance. The Laestrygonians attack from the cliffs with boulders, crushing the trapped vessels and spearing the crews in the water. Only Odysseus' ship escapes. One episode reduces the expedition from twelve ships to one, and the poem stops being the story of a fleet.`,
+    links: { wikipedia: W + 'Laestrygonians', whe: H + 'Odyssey/' } },
+
+  { n: 9, numeral: 'IX', name: 'Aeaea', lon: 3.890, lat: 39.760, prov: 'map',
+    yearFrom: 1, yearTo: 2, setpiece: 'aeaea',
+    event: 'Circe turns the crew to swine',
+    prose: `The island of Circe, an enchantress and a daughter of Helios. A scouting party of twenty-two men drinks from her cup and is turned into swine. Warned by Hermes and protected by the herb moly, Odysseus resists the drug and compels her to restore them. Then he stays. The crew remains a full year; Homer says plainly that a year was gone before the men urged departure. Her parting instruction sends them further from home, to the edge of the world, to consult the dead.`,
+    links: { wikipedia: W + 'Circe', whe: H + 'Circe/' } },
+
+  { n: 10, numeral: 'X', name: 'Cimmerians', lon: 2.960, lat: 41.740, prov: 'map',
+    yearFrom: 2, yearTo: 2, setpiece: 'underworld',
+    event: 'Odysseus enters the Underworld',
+    prose: `At the world's edge, in the land of the Cimmerians where the sun never shines, Odysseus performs the rites that summon the dead. He speaks with the seer Teiresias, who gives him his route home and warns him to leave the cattle of Helios alone; with his mother Anticleia, dead of grief in his absence; and with Achilles, who says he would rather be a living man's slave than king among the dead. The episode is the poem's turning point, supplying both the way home and the terms of survival.`,
+    links: { wikipedia: W + 'Nekyia', whe: H + 'Underworld/' } },
+
+  { n: 11, numeral: 'XI', name: 'Sirens', lon: 9.240, lat: 38.850, prov: 'map',
+    yearFrom: 2, yearTo: 2, setpiece: 'sirens',
+    event: 'The crew blocks their ears with wax to avoid the song',
+    prose: `The Sirens sing from their island to passing sailors, and those who listen steer onto the rocks; Homer describes a meadow heaped with the bones of men. Following Circe's instructions, Odysseus plugs his crew's ears with beeswax and has himself lashed upright to the mast so that he can hear the song and survive it, ordering the crew to tighten the ropes if he begs to be freed. They do. It is the one danger in the poem Odysseus arranges to experience on purpose.`,
+    links: { wikipedia: W + 'Siren_(mythology)', whe: H + 'Sirens/' } },
+
+  { n: 12, numeral: 'XII', name: 'Scylla', lon: 15.720, lat: 38.250, prov: 'real',
+    yearFrom: 2, yearTo: 2, setpiece: 'strait',
+    event: 'The monster eats six of the crew',
+    prose: `Scylla, a cliff-dwelling monster with six heads on long necks, guards one side of a narrow strait. Circe's advice is blunt: pass close to Scylla and lose a few men, because the alternative is losing the whole ship to Charybdis opposite. Odysseus does not tell his crew what is coming. Scylla takes six men off the deck as the ship runs through, and Homer's simile compares their cries to fish hauled up on a line. Antiquity placed the strait at Messina, between Italy and Sicily.`,
+    links: { wikipedia: W + 'Scylla', whe: H + 'Scylla/' } },
+
+  { n: 13, numeral: 'XIII', name: 'Charybdis', lon: 15.650, lat: 38.090, prov: 'real',
+    yearFrom: 2, yearTo: 2, setpiece: null,
+    event: 'The monstrous whirlpool',
+    prose: `Charybdis lies opposite Scylla, a whirlpool that swallows the sea three times a day and vomits it back. Odysseus passes safely on the first crossing by hugging Scylla's cliff. He meets it a second time alone, after the loss of his ship, clinging to a fig tree above the vortex until the mast and keel he had been riding are spat back up, then dropping onto them and paddling clear. The pair have named a proverb ever since, for a choice between two unavoidable dangers.`,
+    links: { wikipedia: W + 'Charybdis', whe: H + 'Charybdis/' } },
+
+  { n: 14, numeral: 'XIV', name: 'Thrinacia', lon: 14.600, lat: 36.720, prov: 'real',
+    yearFrom: 2, yearTo: 2, setpiece: 'thrinacia',
+    event: 'The crew eats the Oxen of the Sun and is punished by Zeus',
+    prose: `Thrinacia, the island pasturing the cattle of Helios, which both Teiresias and Circe warned Odysseus to leave untouched. Contrary winds hold the ship there for a month until the provisions run out, and while Odysseus sleeps his men slaughter and eat the cattle. Helios demands redress, and Zeus destroys the ship with a thunderbolt once it puts to sea. Every remaining crewman drowns and Odysseus survives alone, reducing the poem's cast to one man in the water. Thrinacia is traditionally identified with Sicily.`,
+    links: { wikipedia: W + 'Thrinacia', whe: H + 'Helios/' } },
+
+  { n: 15, numeral: 'XV', name: 'Ogygia', lon: 2.430, lat: 39.130, prov: 'map',
+    yearFrom: 3, yearTo: 9, setpiece: 'ogygia',
+    event: 'Odysseus has a seven-year stay with the nymph Calypso',
+    prose: `The island of Calypso, a nymph who takes in the shipwrecked Odysseus and keeps him seven years, offering immortality if he will stay. Homer's account is ambivalent: Odysseus weeps on the shore by day and shares her bed at night. Only when Athena raises the matter in council does Zeus send Hermes to order his release. Seven of the journey's ten years pass here, in one place, with nothing happening, which makes this the longest and stillest stretch of the poem.`,
+    links: { wikipedia: W + 'Ogygia', whe: H + 'Ogygia/' } },
+
+  { n: 16, numeral: 'XVI', name: 'Scheria', lon: 9.360, lat: 41.620, prov: 'map',
+    yearFrom: 10, yearTo: 10, setpiece: null,
+    event: 'The Phaeacians ferry Odysseus home',
+    prose: `The land of the Phaeacians, expert seafarers ruled by Alcinous and Arete. Odysseus washes ashore naked and exhausted, is found by their daughter Nausicaa, and is received at court without being asked his name. Over two nights he tells the story of his wanderings. Books 9 to 12 of the Odyssey are that telling. The Phaeacians then load him with gifts and carry him to Ithaca in a single night's sailing, asleep on deck, and Poseidon punishes them for it. The source map places Scheria at Corsica; other readings favour Corfu.`,
+    links: { wikipedia: W + 'Scheria', whe: H + 'Odyssey/' } },
+
+  { n: 17, numeral: 'XVII', name: 'Ithaca', lon: 20.650, lat: 38.400, prov: 'real',
+    yearFrom: 10, yearTo: 10, setpiece: 'ithaca',
+    event: 'Odysseus returns home and kills the suitors besetting Penelope',
+    prose: `Odysseus lands after twenty years away, ten at Troy and ten returning, set ashore asleep and alone. Athena disguises him as a beggar. He is recognised first by his old dog Argos and then by his nurse Eurycleia, who knows the scar on his thigh; he tests the loyalty of his household and reveals himself by stringing the bow that none of Penelope's hundred and eight suitors can bend. He kills them in the hall. Penelope tests him in turn, with a question about their marriage bed only her husband could answer.`,
+    links: { wikipedia: W + 'Homer%27s_Ithaca', whe: H + 'Ithaca/' } },
+];
+
+
+/* ===================== ATLAS ===================== */
+/* Natural Earth ne_50m_land (public domain), clipped to the Mediterranean
+   and simplified at tol=0.04. 67 rings, 4837 vertices.
+   Regenerate with tools/build_atlas.py — not a delivery-path build step. */
+export const ATLAS = [[[23.852,35.535],[24.166,35.595],[24.198,35.537],[24.109,35.496],[24.255,35.469],[24.275,35.386],[24.354,35.359],[24.721,35.425],[25.476,35.306],[25.730,35.349],[25.791,35.123],[26.168,35.215],[26.320,35.315],[26.244,35.045],[26.166,35.019],[24.800,34.934],[24.709,35.089],[24.464,35.160],[23.593,35.257],[23.570,35.535],[23.673,35.514],[23.737,35.656],[23.852,35.535]],[[23.415,38.959],[23.525,38.813],[24.128,38.648],[24.276,38.220],[24.563,38.148],[24.579,38.020],[24.502,37.970],[24.359,38.019],[24.212,38.118],[24.040,38.390],[23.651,38.443],[23.617,38.553],[23.252,38.801],[22.870,38.871],[23.258,39.031],[23.415,38.959]],[[34.463,35.594],[33.942,35.292],[33.908,35.202],[34.050,34.988],[33.699,34.970],[33.415,34.751],[33.062,34.675],[33.008,34.570],[32.867,34.661],[32.449,34.729],[32.317,34.953],[32.301,35.083],[32.391,35.050],[32.652,35.183],[32.880,35.181],[32.942,35.390],[33.608,35.354],[34.556,35.662],[34.463,35.594]],[[3.145,39.790],[3.396,39.777],[3.462,39.698],[3.245,39.387],[3.073,39.301],[2.800,39.385],[2.701,39.542],[2.500,39.478],[2.370,39.572],[2.785,39.855],[3.159,39.971],[3.199,39.890],[3.145,39.790]],[[9.632,40.882],[9.805,40.500],[9.643,40.268],[9.707,40.017],[9.562,39.166],[9.056,39.239],[8.967,38.964],[8.881,38.913],[8.649,38.927],[8.418,39.206],[8.399,39.482],[8.451,39.722],[8.541,39.732],[8.548,39.839],[8.408,39.917],[8.471,40.293],[8.190,40.652],[8.224,40.913],[8.363,40.846],[8.572,40.850],[8.821,40.950],[9.228,41.257],[9.615,41.017],[9.554,40.932],[9.632,40.882]],[[9.480,42.805],[9.454,42.659],[9.526,42.553],[9.551,42.130],[9.401,41.926],[9.374,41.679],[9.186,41.385],[8.808,41.588],[8.887,41.701],[8.718,41.761],[8.740,41.925],[8.622,41.931],[8.701,42.096],[8.588,42.161],[8.566,42.219],[8.675,42.284],[8.566,42.358],[8.815,42.608],[9.138,42.733],[9.313,42.713],[9.363,43.017],[9.463,42.981],[9.480,42.805]],[[15.577,38.220],[15.234,37.785],[15.100,37.459],[15.117,37.335],[15.230,37.244],[15.174,37.209],[15.296,37.055],[15.116,36.839],[15.113,36.688],[14.502,36.799],[14.259,37.046],[13.801,37.136],[12.924,37.571],[12.640,37.594],[12.436,37.820],[12.548,38.053],[12.734,38.183],[12.903,38.035],[13.160,38.190],[13.291,38.191],[13.789,37.981],[14.506,38.046],[14.790,38.167],[15.119,38.153],[15.499,38.291],[15.635,38.268],[15.577,38.220]],[[13.938,40.706],[13.868,40.709],[13.871,40.762],[13.962,40.739],[13.938,40.706]],[[16.651,42.997],[17.188,42.917],[16.851,42.896],[16.651,42.997]],[[17.194,43.126],[16.679,43.123],[16.376,43.214],[17.194,43.126]],[[16.785,43.271],[16.423,43.317],[16.449,43.387],[16.891,43.315],[16.785,43.271]],[[32.012,46.204],[32.150,46.155],[31.564,46.258],[31.509,46.373],[31.638,46.273],[32.012,46.204]],[[27.843,35.929],[27.716,35.957],[27.757,36.069],[27.716,36.172],[27.914,36.345],[28.232,36.434],[28.068,36.130],[28.088,36.065],[27.966,36.048],[27.843,35.929]],[[27.176,35.465],[27.138,35.409],[27.071,35.598],[27.223,35.820],[27.157,35.629],[27.234,35.479],[27.176,35.465]],[[27.860,36.554],[27.786,36.608],[27.863,36.641],[27.860,36.554]],[[27.020,36.959],[26.920,36.945],[26.889,37.087],[27.040,37.002],[27.020,36.959]],[[26.950,36.727],[27.215,36.899],[27.352,36.869],[26.950,36.727]],[[25.546,36.968],[25.457,36.930],[25.362,37.070],[25.525,37.196],[25.588,37.153],[25.546,36.968]],[[25.279,37.068],[25.199,36.991],[25.105,37.035],[25.235,37.149],[25.279,37.068]],[[25.482,36.393],[25.371,36.359],[25.409,36.474],[25.482,36.393]],[[25.382,36.674],[25.260,36.758],[25.407,36.717],[25.382,36.674]],[[26.824,37.811],[27.040,37.770],[27.055,37.709],[26.845,37.645],[26.581,37.724],[26.824,37.811]],[[26.029,37.529],[25.982,37.526],[26.086,37.635],[26.351,37.674],[26.029,37.529]],[[25.859,36.790],[25.743,36.790],[26.001,36.937],[26.064,36.903],[25.859,36.790]],[[26.461,36.585],[26.331,36.511],[26.270,36.547],[26.370,36.639],[26.461,36.585]],[[24.356,37.577],[24.289,37.528],[24.320,37.678],[24.379,37.683],[24.356,37.577]],[[24.436,37.344],[24.379,37.314],[24.370,37.420],[24.431,37.475],[24.481,37.408],[24.436,37.344]],[[24.536,36.764],[24.531,36.684],[24.326,36.656],[24.357,36.744],[24.536,36.764]],[[24.992,37.760],[24.962,37.692],[24.700,37.962],[24.790,37.990],[24.956,37.905],[24.992,37.760]],[[25.256,37.600],[25.156,37.545],[24.996,37.677],[25.256,37.600]],[[24.721,36.921],[24.681,37.022],[24.763,36.949],[24.721,36.921]],[[26.094,38.218],[25.999,38.162],[25.892,38.243],[25.991,38.354],[25.846,38.574],[26.012,38.602],[26.160,38.541],[26.157,38.303],[26.094,38.218]],[[26.410,39.329],[26.393,39.270],[26.578,39.110],[26.584,39.031],[26.489,39.075],[26.547,38.994],[26.161,39.026],[26.108,39.081],[26.273,39.198],[26.176,39.194],[26.072,39.096],[25.844,39.200],[25.910,39.288],[26.088,39.304],[26.165,39.374],[26.348,39.383],[26.410,39.329]],[[23.780,39.114],[23.666,39.095],[23.594,39.209],[23.780,39.114]],[[23.888,39.158],[23.841,39.147],[23.971,39.268],[23.888,39.158]],[[24.675,38.809],[24.541,38.789],[24.566,38.832],[24.461,38.889],[24.486,38.980],[24.675,38.809]],[[25.686,40.427],[25.573,40.400],[25.448,40.483],[25.569,40.516],[25.686,40.427]],[[25.438,39.983],[25.357,39.808],[25.263,39.823],[25.249,39.894],[25.185,39.830],[25.062,39.852],[25.058,40.000],[25.286,39.956],[25.449,40.035],[25.438,39.983]],[[24.774,40.615],[24.646,40.579],[24.517,40.687],[24.623,40.793],[24.719,40.786],[24.774,40.615]],[[25.970,40.136],[25.669,40.136],[25.918,40.238],[25.970,40.136]],[[11.278,34.754],[11.124,34.682],[11.255,34.820],[11.278,34.754]],[[10.958,33.722],[10.857,33.687],[10.722,33.739],[10.745,33.889],[10.922,33.893],[11.018,33.823],[10.958,33.722]],[[-1.178,45.904],[-1.214,45.817],[-1.389,46.050],[-1.178,45.904]],[[10.395,42.858],[10.419,42.713],[10.110,42.785],[10.395,42.858]],[[8.479,39.068],[8.421,38.969],[8.359,39.099],[8.479,39.068]],[[8.286,41.040],[8.206,40.997],[8.320,41.122],[8.286,41.040]],[[4.294,39.842],[3.867,39.959],[3.853,40.063],[4.226,40.032],[4.315,39.917],[4.294,39.842]],[[1.594,38.672],[1.402,38.711],[1.436,38.768],[1.594,38.672]],[[1.445,38.919],[1.409,38.857],[1.223,38.904],[1.349,39.081],[1.613,39.087],[1.624,39.039],[1.445,38.919]],[[14.566,35.853],[14.436,35.822],[14.352,35.872],[14.351,35.978],[14.566,35.853]],[[14.810,44.977],[14.687,44.956],[14.438,45.099],[14.571,45.225],[14.810,44.977]],[[14.831,44.759],[14.857,44.715],[14.660,44.800],[14.754,44.845],[14.831,44.759]],[[15.188,44.336],[14.913,44.486],[14.742,44.697],[15.240,44.350],[15.188,44.336]],[[15.189,43.922],[15.136,43.907],[14.865,44.168],[15.189,43.922]],[[15.371,43.974],[15.437,43.900],[15.270,44.011],[15.371,43.974]],[[14.488,44.660],[14.420,44.670],[14.312,44.900],[14.340,45.020],[14.286,45.145],[14.331,45.165],[14.467,44.970],[14.488,44.660]],[[17.608,42.769],[17.744,42.700],[17.344,42.790],[17.608,42.769]],[[20.612,38.383],[20.625,38.268],[20.789,38.142],[20.761,38.071],[20.524,38.107],[20.452,38.234],[20.353,38.180],[20.409,38.337],[20.520,38.332],[20.563,38.475],[20.612,38.383]],[[20.888,37.805],[20.994,37.708],[20.909,37.732],[20.819,37.665],[20.620,37.855],[20.692,37.930],[20.888,37.805]],[[20.687,38.609],[20.555,38.583],[20.592,38.760],[20.694,38.844],[20.687,38.609]],[[20.759,38.329],[20.709,38.319],[20.624,38.480],[20.759,38.329]],[[20.078,39.433],[20.100,39.377],[19.884,39.462],[19.646,39.767],[19.839,39.820],[19.926,39.774],[19.847,39.668],[19.955,39.470],[20.078,39.433]],[[23.551,37.926],[23.419,37.931],[23.484,37.991],[23.551,37.926]],[[23.054,36.190],[23.042,36.146],[22.911,36.221],[22.950,36.384],[23.097,36.247],[23.054,36.190]],[[25.403,37.419],[25.307,37.413],[25.313,37.489],[25.463,37.471],[25.403,37.419]],[[24.524,37.125],[24.425,37.132],[24.441,37.187],[24.529,37.192],[24.524,37.125]],[[17.980,59.329],[18.509,59.408],[18.618,59.327],[18.414,59.290],[18.285,59.109],[16.978,58.654],[16.214,58.637],[16.788,58.585],[16.924,58.493],[16.652,58.434],[16.770,58.214],[16.700,58.161],[16.695,57.918],[16.597,57.913],[16.555,57.812],[16.652,57.501],[16.476,57.265],[16.528,57.068],[15.997,56.223],[15.827,56.125],[15.627,56.186],[14.714,56.134],[14.755,56.033],[14.559,56.049],[14.215,55.833],[14.203,55.729],[14.342,55.528],[14.174,55.397],[13.806,55.429],[13.321,55.346],[12.886,55.411],[12.974,55.748],[12.471,56.291],[12.802,56.264],[12.656,56.441],[12.857,56.452],[12.920,56.516],[12.884,56.618],[12.718,56.663],[12.421,56.906],[12.152,57.227],[12.053,57.447],[11.962,57.426],[11.879,57.679],[11.735,57.718],[11.703,57.973],[11.549,58.001],[11.449,58.118],[11.432,58.340],[11.248,58.369],[11.208,58.866],[11.147,58.989],[11.196,59.078],[11.386,59.066],[10.834,59.184],[10.645,59.389],[10.595,59.765],[10.534,59.696],[10.570,59.587],[10.398,59.519],[10.431,59.280],[10.179,59.009],[9.843,58.958],[9.635,59.118],[9.557,59.113],[9.696,59.010],[9.657,58.971],[9.310,58.857],[9.396,58.806],[8.166,58.145],[7.466,58.021],[7.005,58.024],[6.877,58.151],[6.731,58.068],[6.555,58.123],[6.692,58.224],[6.660,58.263],[6.389,58.268],[6.055,58.375],[5.586,58.620],[5.522,58.823],[5.612,59.013],[6.099,58.870],[6.363,59.001],[6.099,58.952],[5.889,59.098],[5.969,59.186],[5.952,59.299],[6.415,59.547],[5.564,59.291],[5.362,59.166],[5.173,59.163],[5.132,59.226],[5.242,59.564],[5.472,59.713],[5.772,59.661],[6.217,59.818],[5.834,59.795],[5.730,59.863],[6.349,60.353],[6.518,60.408],[6.574,60.361],[6.527,60.153],[6.720,60.418],[6.996,60.512],[6.153,60.346],[5.877,60.070],[5.146,59.639],[5.105,59.732],[5.220,59.979],[5.206,60.088],[5.689,60.123],[5.286,60.206],[5.137,60.446],[5.648,60.688],[5.244,60.570],[5.116,60.636],[5.049,60.708],[5.009,61.038],[6.778,61.142],[6.972,61.056],[7.039,60.953],[7.040,61.091],[7.604,61.211],[7.404,61.222],[7.347,61.301],[7.443,61.435],[7.331,61.372],[7.276,61.181],[6.943,61.161],[6.657,61.207],[6.600,61.290],[6.493,61.155],[6.383,61.134],[6.083,61.167],[5.325,61.108],[5.022,61.251],[4.990,61.378],[5.003,61.434],[5.339,61.485],[4.997,61.645],[4.910,61.810],[4.985,61.900],[5.465,61.897],[6.016,61.788],[6.731,61.870],[6.131,61.852],[5.267,61.936],[5.096,62.027],[5.143,62.160],[5.358,62.152],[5.533,62.311],[5.718,62.379],[5.908,62.416],[6.209,62.353],[6.692,62.468],[6.136,62.407],[6.118,62.447],[6.353,62.611],[6.961,62.627],[7.570,62.548],[7.691,62.586],[7.527,62.610],[7.538,62.672],[8.096,62.732],[6.735,62.721],[6.940,62.930],[7.572,63.100],[8.101,63.091],[8.623,62.846],[8.158,63.162],[8.271,63.287],[8.636,63.342],[8.594,63.426],[8.387,63.445],[8.361,63.499],[8.576,63.601],[8.842,63.646],[9.136,63.594],[9.076,63.500],[9.156,63.459],[9.324,63.570],[9.697,63.625],[10.021,63.391],[10.340,63.469],[10.760,63.461],[10.674,63.558],[10.725,63.625],[11.371,63.805],[11.176,63.899],[11.458,64.003],[11.307,64.049],[10.914,63.921],[11.047,63.845],[10.935,63.770],[10.055,63.513],[9.924,63.522],[9.767,63.700],[9.567,63.706],[10.010,64.083],[10.566,64.418],[11.633,64.814],[11.297,64.755],[11.350,64.906],[11.489,64.976],[12.160,65.179],[12.307,65.086],[12.508,65.099],[12.916,65.339],[12.418,65.184],[12.134,65.279],[12.122,65.362],[12.273,65.568],[12.689,65.902],[13.033,65.956],[12.784,66.100],[13.674,66.180],[14.034,66.298],[13.119,66.231],[13.068,66.431],[13.105,66.539],[13.192,66.537],[13.211,66.641],[13.621,66.795],[13.959,66.794],[13.652,66.907],[13.880,66.965],[14.109,67.119],[15.416,67.202],[15.435,67.247],[14.442,67.271],[14.962,67.574],[15.409,67.474],[15.594,67.349],[15.576,67.444],[15.692,67.521],[15.487,67.515],[15.249,67.602],[15.219,67.655],[15.346,67.734],[15.304,67.765],[14.781,67.675],[14.799,67.809],[15.134,67.973],[15.621,67.948],[15.293,68.036],[16.008,68.229],[16.121,68.027],[16.312,67.881],[16.259,68.001],[16.392,68.092],[16.260,68.145],[16.204,68.317],[16.388,68.390],[16.951,68.355],[17.553,68.426],[17.426,68.482],[16.585,68.466],[16.514,68.533],[16.652,68.626],[17.131,68.693],[17.391,68.799],[17.705,69.100],[18.101,69.156],[18.079,69.325],[18.260,69.471],[18.646,69.322],[18.859,69.314],[18.916,69.336],[18.624,69.434],[18.614,69.491],[18.991,69.561],[19.038,69.660],[19.197,69.748],[19.687,69.805],[19.642,69.424],[19.961,69.825],[20.324,69.945],[20.387,69.868],[20.338,69.617],[20.044,69.356],[20.107,69.341],[20.487,69.542],[20.739,69.521],[20.533,69.692],[20.546,69.851],[20.622,69.914],[21.163,69.890],[21.254,70.003],[21.433,70.013],[21.975,69.835],[21.803,70.066],[21.356,70.233],[21.780,70.230],[22.219,70.309],[22.322,70.265],[22.421,70.338],[22.685,70.375],[22.941,70.305],[23.046,70.102],[23.354,69.983],[23.400,70.020],[23.286,70.105],[23.379,70.247],[23.661,70.400],[24.038,70.485],[24.420,70.702],[24.263,70.826],[24.765,71.008],[25.265,70.844],[25.436,70.912],[25.781,70.817],[25.274,70.552],[25.146,70.324],[24.994,70.218],[24.983,70.144],[25.044,70.109],[25.419,70.235],[25.471,70.341],[26.507,70.913],[26.661,70.940],[26.734,70.854],[26.558,70.669],[26.645,70.636],[26.585,70.410],[26.989,70.511],[27.184,70.744],[27.309,70.804],[27.546,70.804],[27.235,70.947],[27.332,70.997],[27.597,71.091],[28.142,71.043],[28.392,70.975],[28.383,70.869],[27.898,70.678],[28.272,70.668],[28.203,70.577],[28.193,70.249],[28.609,70.760],[28.832,70.864],[29.102,70.861],[29.738,70.647],[30.065,70.703],[30.238,70.622],[30.213,70.543],[30.596,70.524],[30.961,70.344],[30.944,70.274],[30.263,70.125],[28.781,70.145],[28.804,70.093],[29.601,69.977],[29.636,69.780],[29.695,69.745],[30.088,69.718],[30.238,69.862],[30.349,69.835],[30.428,69.722],[30.484,69.795],[30.714,69.796],[31.547,69.697],[31.789,69.816],[31.998,69.810],[31.985,69.954],[33.008,69.722],[32.995,69.626],[32.915,69.602],[32.177,69.674],[32.092,69.633],[32.331,69.554],[32.378,69.479],[33.000,69.470],[32.979,69.367],[33.454,69.428],[33.328,69.152],[33.141,69.069],[33.436,69.130],[33.684,69.310],[35.010,69.221],[35.290,69.275],[35.858,69.192],[37.731,68.692],[38.430,68.356],[38.832,68.325],[39.569,68.072],[39.823,68.059],[39.746,68.162],[39.809,68.151],[40.381,67.832],[40.966,67.713],[41.134,67.386],[41.134,67.267],[41.359,67.210],[41.276,66.914],[41.189,66.826],[40.522,66.447],[40.103,66.300],[38.654,66.069],[37.901,66.096],[36.984,66.273],[35.513,66.396],[34.825,66.611],[34.483,66.550],[34.396,66.613],[34.452,66.651],[33.150,66.844],[32.848,67.022],[32.930,67.087],[31.895,67.161],[32.501,67.004],[32.464,66.916],[32.862,66.721],[33.181,66.680],[33.217,66.532],[33.656,66.443],[33.361,66.330],[34.113,66.225],[34.692,65.952],[34.786,65.865],[34.777,65.768],[34.616,65.510],[34.406,65.396],[34.804,64.986],[34.833,64.800],[34.952,64.756],[34.858,64.707],[34.870,64.560],[35.035,64.440],[35.432,64.347],[35.647,64.378],[36.146,64.189],[36.365,64.003],[37.442,63.813],[37.968,63.949],[38.071,64.026],[38.062,64.091],[37.954,64.320],[37.741,64.397],[37.184,64.408],[36.579,64.791],[36.535,64.939],[36.786,64.987],[36.883,65.172],[37.141,65.194],[37.528,65.108],[38.009,64.879],[38.412,64.857],[39.567,64.571],[39.758,64.577],[39.849,64.691],[40.058,64.771],[40.445,64.779],[40.281,64.998],[39.798,65.350],[39.749,65.448],[39.817,65.598],[40.328,65.752],[40.692,65.963],[41.476,66.123],[42.211,66.520],[42.602,66.423],[43.233,66.416],[43.653,66.251],[43.542,66.123],[43.844,66.142],[44.104,66.009],[44.145,66.113],[44.097,66.235],[44.489,66.672],[44.429,66.938],[44.292,67.100],[43.855,67.189],[43.782,67.254],[44.225,67.996],[44.205,68.254],[44.169,68.327],[43.333,68.673],[44.048,68.549],[45.078,68.578],[45.892,68.480],[46.684,67.970],[46.690,67.849],[45.529,67.758],[44.902,67.413],[44.939,67.351],[45.562,67.186],[45.885,66.891],[46.492,66.800],[47.656,66.976],[47.768,67.276],[47.908,67.455],[47.875,67.584],[48.833,67.681],[48.878,67.731],[48.696,67.874],[48.754,67.896],[49.155,67.870],[50.699,68.318],[51.995,68.539],[52.285,68.459],[52.183,68.374],[52.397,68.352],[52.723,68.484],[52.550,68.592],[52.344,68.608],[53.802,68.996],[54.491,68.992],[53.798,68.907],[53.971,68.844],[53.759,68.634],[53.918,68.537],[53.931,68.436],[53.343,68.343],[53.261,68.267],[53.968,68.227],[54.476,68.294],[54.718,68.184],[54.861,68.202],[54.923,68.374],[55.418,68.568],[56.044,68.649],[57.127,68.554],[58.173,68.890],[58.237,68.834],[58.354,68.916],[59.057,69.006],[59.110,68.896],[59.371,68.738],[59.112,68.616],[59.099,68.444],[59.726,68.352],[59.923,68.471],[59.865,68.605],[59.896,68.706],[60.489,68.729],[60.934,68.987],[60.859,69.146],[60.665,69.110],[60.171,69.591],[60.909,69.847],[63.361,69.675],[64.190,69.535],[64.929,69.325],[64.896,69.248],[65.032,69.270],[66.416,68.948],[67.002,68.874],[67.149,68.754],[67.731,68.514],[68.371,68.314],[68.504,68.348],[68.829,68.567],[69.141,68.951],[68.763,68.917],[68.543,68.967],[68.117,69.236],[68.006,69.480],[67.624,69.584],[67.064,69.694],[66.897,69.554],[66.803,69.740],[66.926,70.014],[67.069,70.006],[67.239,70.108],[67.146,70.220],[67.285,70.739],[67.143,70.838],[66.702,70.819],[66.666,70.901],[66.847,71.064],[66.640,71.081],[66.918,71.282],[67.542,71.412],[68.269,71.683],[68.607,72.013],[69.039,72.670],[69.391,72.956],[69.694,72.978],[69.645,72.898],[69.738,72.885],[71.617,72.902],[72.812,72.691],[72.753,72.343],[72.574,72.013],[72.279,71.696],[71.912,71.548],[71.867,71.457],[72.079,71.307],[72.581,71.151],[72.704,70.963],[72.700,70.457],[72.469,70.275],[72.599,69.793],[72.616,69.484],[72.527,69.154],[72.577,68.969],[72.812,68.815],[73.548,68.575],[73.592,68.482],[73.139,68.181],[73.173,67.973],[73.067,67.767],[72.594,67.587],[71.847,67.008],[71.668,66.940],[71.365,66.962],[71.551,66.760],[71.540,66.683],[71.342,66.687],[70.725,66.519],[70.383,66.602],[70.691,66.745],[70.283,66.686],[69.877,66.845],[69.013,66.788],[69.194,66.579],[69.982,66.401],[70.339,66.342],[71.358,66.359],[72.068,66.253],[72.322,66.332],[72.417,66.561],[73.514,66.861],[73.792,66.995],[74.075,67.414],[74.770,67.766],[74.743,68.074],[74.391,68.421],[74.481,68.659],[74.580,68.751],[75.125,68.862],[76.459,68.978],[77.238,68.470],[77.248,67.941],[77.174,67.779],[77.772,67.570],[78.922,67.589],[77.588,67.752],[77.536,68.008],[77.665,68.190],[77.995,68.259],[77.651,68.903],[76.001,69.235],[75.420,69.239],[74.815,69.091],[74.363,69.145],[73.977,69.115],[73.776,69.198],[73.891,69.418],[73.560,69.707],[73.578,69.803],[73.830,70.176],[74.343,70.579],[73.577,71.217],[73.086,71.445],[73.672,71.845],[74.992,72.145],[75.090,72.263],[75.060,72.549],[74.787,72.812],[75.152,72.853],[75.369,72.797],[75.604,72.581],[75.591,72.457],[75.741,72.296],[75.395,71.983],[75.274,71.959],[75.247,71.813],[75.503,71.655],[75.469,71.534],[75.280,71.430],[75.332,71.342],[75.734,71.266],[76.742,71.202],[76.929,71.128],[76.995,71.181],[77.590,71.168],[78.321,70.930],[79.015,70.950],[79.084,71.002],[78.724,70.976],[78.491,71.025],[78.213,71.266],[77.481,71.312],[76.433,71.552],[76.312,71.595],[76.032,71.910],[76.871,72.033],[77.551,71.842],[78.187,71.907],[78.232,71.952],[78.016,72.092],[77.411,72.108],[77.472,72.192],[77.968,72.329],[78.483,72.395],[79.422,72.381],[79.954,72.223],[80.763,72.089],[80.856,71.970],[81.662,71.716],[82.758,71.764],[83.107,71.721],[83.234,71.668],[82.977,71.451],[82.323,71.260],[82.239,70.998],[82.336,70.807],[82.163,70.598],[82.221,70.396],[82.258,70.544],[82.592,70.890],[82.869,70.955],[83.010,70.895],[83.030,70.581],[82.920,70.407],[82.682,70.218],[82.857,70.105],[83.081,70.093],[83.132,70.157],[83.074,70.277],[83.497,70.345],[83.660,70.418],[83.736,70.546],[83.579,70.766],[83.151,71.104],[83.550,71.544],[83.534,71.684],[83.200,71.875],[82.645,71.925],[82.319,72.072],[82.094,72.265],[81.098,72.390],[80.827,72.488],[80.656,72.712],[80.842,72.949],[80.510,73.086],[80.425,73.231],[80.398,73.357],[80.596,73.474],[80.583,73.568],[81.817,73.659],[83.545,73.667],[84.738,73.763],[85.201,73.722],[85.448,73.735],[85.611,73.822],[86.893,73.887],[87.029,73.824],[86.094,73.578],[85.793,73.438],[85.818,73.327],[86.677,73.107],[86.715,73.126],[85.910,73.390],[86.092,73.519],[87.120,73.615],[87.571,73.811],[87.210,73.879],[86.571,74.244],[86.001,74.316],[86.183,74.423],[86.396,74.450],[86.898,74.325],[87.230,74.364],[86.426,74.585],[85.791,74.645],[85.881,74.740],[86.059,74.728],[86.201,74.816],[86.651,74.682],[86.863,74.718],[87.419,74.941],[87.468,75.013],[86.939,75.068],[87.006,75.170],[87.671,75.130],[88.733,75.369],[89.310,75.470],[89.595,75.458],[90.185,75.591],[91.479,75.650],[94.156,75.959],[93.574,75.956],[93.406,75.901],[93.178,75.959],[92.987,75.903],[92.890,75.910],[92.859,75.979],[92.972,76.075],[93.105,76.026],[93.259,76.099],[93.648,76.054],[94.576,76.152],[95.579,76.137],[96.075,76.082],[95.653,75.892],[96.601,75.990],[96.497,75.891],[97.351,76.033],[97.499,75.980],[97.670,76.078],[98.662,76.243],[99.770,76.029],[99.602,75.852],[99.442,75.803],[99.541,75.799],[99.851,75.930],[99.825,76.136],[98.806,76.481],[100.844,76.525],[101.598,76.439],[101.684,76.485],[100.928,76.557],[101.099,76.704],[100.920,76.823],[100.906,76.901],[100.990,76.990],[101.518,77.198],[102.610,77.509],[104.015,77.730],[105.710,77.525],[106.060,77.391],[105.385,77.238],[104.202,77.102],[105.646,77.101],[105.712,77.001],[105.822,76.998],[106.942,77.034],[107.430,76.927],[106.639,76.573],[106.385,76.589],[106.414,76.512],[107.722,76.522],[107.902,76.570],[108.028,76.718],[108.182,76.738],[111.115,76.723],[111.786,76.604],[112.094,76.480],[111.943,76.380],[112.297,76.435],[112.620,76.384],[112.684,76.219],[112.798,76.130],[112.656,76.054],[113.150,76.175],[112.988,76.240],[113.273,76.252],[113.564,75.892],[113.857,75.921],[113.871,75.856],[113.749,75.705],[113.568,75.568],[113.486,75.564],[113.517,75.622],[113.392,75.678],[112.466,75.844],[112.956,75.572],[113.243,75.611],[113.726,75.451],[113.614,75.293],[112.925,75.015],[109.840,74.322],[109.911,74.261],[109.810,74.169],[109.075,74.032],[108.200,73.694],[107.271,73.621],[106.679,73.331],[106.189,73.308],[105.677,72.959],[105.144,72.777],[105.708,72.837],[106.478,73.139],[107.750,73.173],[108.351,73.310],[109.090,73.378],[109.331,73.487],[109.855,73.472],[110.868,73.731],[110.722,73.780],[109.753,73.723],[109.666,73.800],[109.869,73.931],[110.261,74.017],[111.056,73.939],[111.131,74.053],[111.551,74.029],[111.228,73.969],[111.400,73.828],[112.147,73.709],[112.795,73.746],[112.940,73.836],[112.836,73.962],[113.033,73.914],[113.416,73.648],[113.157,73.460],[113.491,73.346],[113.475,73.048],[113.128,72.831],[113.312,72.657],[113.665,72.635],[113.712,72.654],[113.216,72.806],[113.543,73.054],[113.559,73.233],[113.886,73.346],[113.539,73.434],[113.510,73.505],[114.061,73.585],[114.816,73.607],[115.338,73.703],[118.450,73.590],[118.871,73.538],[118.936,73.481],[118.457,73.464],[118.377,73.367],[118.430,73.247],[119.750,72.979],[121.748,72.970],[122.537,72.878],[122.752,72.906],[122.502,72.971],[122.527,73.017],[123.160,72.955],[123.622,73.193],[123.323,73.431],[123.305,73.533],[123.416,73.637],[123.797,73.627],[124.019,73.712],[124.541,73.751],[125.617,73.521],[125.599,73.447],[126.254,73.548],[126.345,73.506],[126.257,73.420],[126.292,73.394],[126.553,73.335],[127.031,73.547],[127.740,73.482],[128.281,73.331],[128.258,73.267],[128.587,73.262],[128.889,73.190],[128.913,73.111],[129.101,73.112],[129.054,73.045],[128.599,72.895],[129.017,72.872],[129.229,72.776],[129.250,72.705],[128.418,72.535],[129.281,72.438],[129.412,72.315],[129.411,72.166],[129.283,72.092],[128.935,72.079],[127.803,72.434],[127.726,72.413],[128.911,71.755],[129.117,71.825],[129.122,71.953],[129.210,71.917],[129.461,71.739],[128.843,71.663],[128.923,71.602],[129.134,71.593],[129.762,71.120],[130.537,70.893],[130.668,70.888],[130.757,70.962],[131.022,70.746],[131.268,70.766],[131.562,70.901],[131.906,71.203],[132.035,71.244],[132.004,71.350],[132.228,71.643],[132.654,71.926],[132.804,71.768],[133.131,71.607],[133.689,71.434],[134.703,71.387],[135.022,71.515],[135.559,71.610],[136.090,71.620],[137.116,71.416],[137.940,71.133],[137.992,71.143],[137.844,71.227],[138.314,71.326],[137.918,71.384],[138.048,71.526],[138.234,71.596],[138.525,71.563],[138.780,71.629],[139.209,71.445],[139.984,71.492],[139.695,71.700],[139.723,71.885],[139.359,71.951],[139.640,71.998],[139.847,72.149],[140.188,72.191],[139.617,72.226],[139.176,72.163],[139.141,72.330],[139.601,72.496],[140.451,72.493],[141.079,72.587],[140.983,72.630],[140.973,72.717],[140.652,72.843],[140.808,72.891],[142.061,72.721],[143.516,72.698],[146.253,72.442],[146.235,72.350],[144.897,72.396],[144.169,72.259],[144.471,72.175],[145.039,72.260],[146.832,72.295],[146.599,72.124],[146.113,71.945],[146.006,71.945],[146.230,72.138],[145.759,72.226],[145.664,72.067],[145.757,72.021],[145.757,71.941],[145.407,71.890],[145.064,71.926],[145.074,71.831],[144.990,71.753],[145.189,71.696],[146.073,71.808],[147.262,72.328],[148.402,72.312],[149.502,72.164],[149.963,71.992],[150.017,71.896],[149.049,71.796],[148.923,71.715],[149.857,71.601],[150.061,71.511],[150.600,71.520],[150.668,71.455],[150.098,71.227],[150.968,71.380],[151.582,71.287],[152.093,71.023],[151.762,70.982],[152.509,70.834],[153.794,70.880],[155.895,71.096],[157.447,71.075],[158.702,70.935],[159.351,70.791],[159.728,70.650],[159.912,70.506],[160.006,70.310],[159.729,69.870],[159.833,69.785],[160.911,69.606],[161.036,69.098],[161.310,68.982],[161.341,68.905],[161.129,68.654],[160.856,68.538],[161.104,68.562],[161.365,68.823],[161.566,68.905],[161.566,69.064],[161.480,69.202],[161.537,69.380],[162.166,69.612],[163.201,69.715],[163.946,69.735],[164.513,69.609],[166.820,69.500],[167.628,69.740],[167.857,69.728],[168.150,69.577],[168.303,69.271],[169.311,69.080],[169.415,68.920],[169.610,68.786],[170.538,68.825],[170.995,69.045],[170.997,69.135],[170.582,69.583],[170.161,69.627],[170.503,69.857],[170.487,70.108],[172.560,69.968],[173.277,69.824],[173.439,69.947],[174.786,69.856],[175.921,69.895],[176.924,69.646],[178.848,69.387],[178.951,69.296],[179.273,69.260],[180.000,68.983],[180.000,65.067],[179.448,64.822],[178.520,64.603],[177.749,64.717],[177.179,65.014],[176.881,65.082],[176.341,65.047],[177.037,65.000],[177.223,64.862],[177.069,64.787],[176.429,64.855],[176.061,64.961],[175.781,64.844],[174.549,64.684],[175.678,64.782],[176.057,64.905],[176.247,64.843],[176.351,64.705],[176.141,64.586],[176.508,64.682],[176.843,64.634],[177.387,64.774],[177.467,64.737],[177.433,64.444],[177.688,64.305],[178.045,64.220],[178.131,64.235],[178.229,64.364],[178.477,64.128],[178.451,64.011],[178.650,63.965],[178.692,63.842],[178.731,63.667],[178.440,63.606],[178.466,63.574],[178.654,63.557],[178.706,63.522],[178.679,63.402],[178.744,63.395],[178.793,63.540],[178.921,63.345],[179.332,63.190],[179.405,63.078],[179.260,63.008],[179.571,62.773],[179.571,62.688],[179.477,62.613],[179.177,62.469],[179.121,62.320],[178.019,62.547],[177.293,62.599],[177.339,62.781],[177.024,62.777],[176.965,62.659],[177.190,62.592],[177.159,62.561],[176.703,62.506],[176.328,62.346],[174.715,61.948],[174.514,61.824],[174.139,61.795],[173.822,61.679],[173.623,61.716],[173.132,61.407],[172.857,61.469],[172.807,61.436],[172.908,61.312],[172.731,61.314],[172.585,61.190],[172.396,61.167],[172.393,61.062],[170.608,60.435],[170.351,59.966],[169.983,60.067],[169.618,60.438],[169.227,60.596],[168.137,60.574],[167.227,60.406],[166.964,60.307],[166.273,59.856],[166.187,59.849],[166.136,59.979],[166.352,60.485],[166.180,60.480],[165.085,60.099],[165.074,59.946],[164.954,59.844],[164.779,59.874],[164.525,60.061],[164.377,60.058],[164.113,59.898],[164.135,59.984],[163.744,60.028],[163.365,59.781],[163.269,59.520],[163.273,59.303],[163.085,59.131],[162.940,59.114],[163.004,59.020],[162.970,58.986],[162.453,58.709],[162.142,58.447],[161.960,58.077],[162.040,57.918],[162.411,57.778],[162.391,57.717],[162.522,57.904],[162.654,57.948],[163.226,57.790],[163.188,57.637],[162.779,57.358],[162.762,57.244],[162.803,56.811],[162.922,56.723],[163.257,56.688],[163.336,56.233],[163.047,56.045],[162.840,56.066],[162.628,56.232],[163.038,56.522],[162.671,56.490],[162.489,56.399],[162.528,56.261],[162.085,56.090],[161.724,55.496],[161.785,55.205],[162.080,54.886],[162.106,54.752],[161.625,54.516],[161.294,54.521],[161.130,54.598],[160.773,54.541],[160.074,54.189],[159.922,54.008],[159.844,53.784],[159.956,53.552],[159.898,53.381],[160.002,53.275],[160.025,53.130],[159.586,53.238],[158.952,53.048],[158.745,52.909],[158.565,53.050],[158.472,53.032],[158.432,52.957],[158.609,52.874],[158.481,52.627],[158.493,52.383],[158.104,51.810],[156.748,50.969],[156.671,51.227],[156.521,51.380],[156.490,51.913],[156.365,52.509],[156.229,52.626],[156.110,52.866],[155.950,53.744],[155.564,55.199],[155.717,56.072],[155.983,56.695],[156.728,57.152],[156.849,57.290],[156.977,57.466],[156.948,57.616],[156.792,57.748],[156.830,57.780],[156.986,57.830],[157.450,57.799],[157.666,58.020],[158.275,58.009],[158.449,58.163],[159.211,58.519],[159.592,58.804],[159.847,59.127],[161.754,60.152],[162.068,60.466],[162.973,60.783],[163.352,60.800],[163.710,60.917],[163.554,61.026],[164.005,61.344],[163.973,61.420],[163.804,61.461],[163.883,61.640],[164.020,61.711],[164.074,62.045],[164.207,62.292],[164.598,62.471],[165.208,62.374],[165.214,62.448],[165.417,62.447],[165.397,62.494],[164.792,62.571],[164.418,62.705],[163.332,62.551],[163.244,62.455],[163.302,62.373],[163.163,62.260],[163.131,62.050],[163.018,61.891],[163.009,61.792],[163.258,61.699],[163.085,61.571],[162.994,61.544],[162.856,61.705],[162.393,61.662],[161.037,60.963],[160.767,60.753],[160.482,60.740],[160.174,60.638],[160.226,60.832],[160.379,61.025],[160.184,61.048],[159.790,60.957],[159.949,61.129],[159.883,61.292],[160.247,61.648],[160.309,61.894],[159.552,61.719],[159.189,61.929],[158.070,61.754],[157.469,61.799],[157.084,61.676],[156.680,61.481],[156.630,61.272],[156.056,60.996],[155.716,60.682],[154.971,60.377],[154.578,60.095],[154.441,59.884],[154.293,59.833],[154.269,59.658],[154.150,59.529],[154.272,59.475],[154.583,59.540],[154.971,59.450],[155.167,59.360],[155.160,59.190],[154.704,59.141],[154.458,59.217],[154.011,59.076],[153.695,59.225],[153.361,59.215],[153.273,59.091],[153.078,59.082],[152.818,58.926],[152.320,59.031],[152.165,58.997],[152.088,58.910],[151.327,58.875],[151.121,59.083],[152.261,59.224],[151.798,59.323],[151.348,59.561],[151.034,59.586],[150.823,59.461],[150.484,59.494],[150.667,59.556],[149.643,59.770],[149.425,59.761],[149.065,59.631],[149.205,59.488],[148.925,59.475],[148.797,59.532],[148.709,59.449],[148.744,59.374],[148.965,59.369],[148.914,59.283],[148.727,59.258],[148.491,59.262],[148.257,59.414],[147.875,59.388],[147.514,59.269],[146.537,59.457],[146.444,59.430],[146.273,59.221],[146.050,59.171],[145.932,59.198],[145.756,59.374],[145.555,59.414],[143.869,59.411],[143.524,59.344],[143.192,59.370],[142.580,59.240],[142.025,59.000],[141.603,58.649],[140.790,58.303],[140.447,57.814],[140.002,57.688],[139.803,57.514],[139.182,57.262],[138.966,57.088],[138.662,56.966],[137.692,56.139],[135.262,54.943],[135.212,54.841],[135.258,54.731],[135.852,54.584],[136.797,54.621],[136.820,54.452],[136.683,53.931],[136.719,53.804],[137.155,53.822],[137.258,54.025],[137.096,54.129],[137.142,54.182],[137.378,54.282],[137.666,54.283],[137.339,54.101],[137.623,53.970],[137.835,53.947],[137.645,53.866],[137.517,53.707],[137.221,53.579],[137.254,53.546],[137.950,53.604],[138.253,53.726],[138.379,53.909],[138.528,53.960],[138.569,53.819],[138.250,53.524],[138.451,53.537],[138.661,53.745],[138.722,54.044],[138.657,54.298],[138.696,54.320],[139.320,54.193],[139.796,54.256],[140.179,54.052],[140.347,53.813],[140.688,53.596],[141.374,53.293],[141.402,53.184],[141.181,53.015],[140.840,53.088],[141.256,52.840],[141.245,52.550],[141.132,52.436],[141.485,52.179],[141.386,52.057],[141.367,51.921],[140.933,51.620],[140.688,51.232],[140.671,51.051],[140.521,50.800],[140.476,50.546],[140.535,50.131],[140.625,50.082],[140.463,49.911],[140.517,49.596],[140.309,49.054],[140.378,48.964],[140.224,48.773],[140.113,48.423],[139.373,47.887],[139.001,47.383],[138.587,47.057],[138.337,46.543],[138.210,46.463],[138.106,46.251],[137.685,45.818],[136.804,45.171],[136.251,44.667],[136.142,44.489],[135.875,44.374],[135.483,43.835],[135.131,43.526],[134.010,42.947],[133.160,42.697],[132.997,42.808],[132.864,42.794],[132.709,42.876],[132.304,42.883],[132.310,43.314],[131.947,43.095],[131.867,43.095],[132.013,43.280],[131.795,43.255],[131.158,42.626],[130.709,42.656],[130.834,42.523],[130.730,42.326],[130.637,42.275],[130.458,42.302],[130.236,42.183],[129.756,41.712],[129.686,41.595],[129.766,41.304],[129.709,40.857],[129.341,40.726],[129.110,40.491],[128.701,40.318],[128.511,40.130],[128.304,40.036],[127.967,39.996],[127.867,39.896],[127.568,39.782],[127.549,39.461],[127.523,39.377],[127.422,39.374],[127.395,39.208],[127.786,39.084],[128.329,38.681],[128.619,38.176],[129.335,37.275],[129.418,37.059],[129.473,36.742],[129.404,36.052],[129.458,36.006],[129.573,36.051],[129.562,35.948],[129.419,35.498],[129.214,35.182],[128.980,35.102],[128.511,35.101],[128.419,35.016],[128.444,34.870],[128.095,34.934],[128.036,35.022],[127.715,34.955],[127.639,34.890],[127.742,34.783],[127.715,34.721],[127.632,34.690],[127.524,34.840],[127.404,34.823],[127.390,34.743],[127.479,34.625],[127.325,34.463],[127.173,34.546],[127.261,34.662],[127.247,34.755],[126.897,34.439],[126.755,34.512],[126.531,34.314],[126.482,34.494],[126.264,34.673],[126.301,34.720],[126.525,34.698],[126.473,34.756],[126.593,34.824],[126.421,34.823],[126.291,35.154],[126.493,35.501],[126.614,35.571],[126.488,35.647],[126.717,35.769],[126.753,35.872],[126.647,35.922],[126.693,36.014],[126.540,36.166],[126.488,36.694],[126.389,36.651],[126.181,36.692],[126.161,36.772],[126.217,36.871],[126.487,37.007],[126.784,36.948],[126.872,36.824],[126.977,36.939],[126.869,36.976],[126.746,37.194],[126.791,37.295],[126.650,37.447],[126.563,37.717],[126.634,37.782],[126.370,37.878],[126.117,37.743],[126.050,37.870],[125.769,37.985],[125.449,37.730],[125.358,37.725],[125.311,37.844],[124.989,37.931],[125.247,38.057],[125.207,38.082],[124.691,38.129],[124.875,38.233],[124.881,38.342],[125.067,38.557],[125.310,38.665],[125.554,38.686],[125.169,38.806],[125.410,39.288],[125.361,39.527],[124.775,39.758],[124.732,39.652],[124.638,39.615],[124.557,39.791],[124.349,39.907],[124.350,40.012],[124.106,39.841],[123.760,39.822],[123.651,39.882],[123.581,39.786],[122.840,39.601],[122.335,39.366],[121.982,39.053],[121.677,39.003],[121.650,38.865],[121.164,38.732],[121.107,38.921],[121.680,39.109],[121.628,39.220],[121.818,39.387],[121.275,39.385],[121.267,39.545],[121.518,39.639],[121.474,39.755],[121.517,39.845],[121.801,39.951],[122.264,40.500],[122.140,40.688],[121.859,40.842],[121.835,40.974],[121.729,40.846],[121.175,40.901],[120.771,40.589],[120.479,40.231],[119.591,39.903],[119.391,39.752],[119.225,39.408],[118.977,39.183],[118.626,39.177],[118.298,39.067],[118.041,39.227],[117.785,39.134],[117.554,38.691],[117.656,38.424],[118.015,38.183],[118.543,38.095],[118.800,38.127],[118.940,38.043],[119.089,37.701],[118.991,37.641],[118.953,37.331],[119.287,37.138],[119.761,37.155],[119.888,37.253],[119.883,37.351],[120.312,37.623],[120.257,37.679],[120.750,37.834],[121.640,37.460],[121.965,37.445],[122.057,37.529],[122.338,37.405],[122.667,37.403],[122.573,37.318],[122.587,37.181],[122.447,37.068],[122.520,36.947],[122.341,36.832],[122.242,36.850],[122.162,36.959],[121.933,36.959],[121.054,36.611],[120.811,36.633],[120.896,36.444],[120.712,36.413],[120.638,36.130],[120.393,36.054],[120.328,36.228],[120.183,36.202],[120.094,36.119],[120.285,35.984],[120.055,35.861],[119.430,35.301],[119.165,34.849],[119.201,34.748],[119.351,34.749],[119.583,34.582],[120.267,34.274],[120.505,33.638],[120.871,33.017],[120.853,32.661],[121.342,32.425],[121.401,32.372],[121.404,32.206],[121.751,31.993],[121.856,31.816],[121.866,31.704],[121.681,31.712],[121.352,31.859],[120.974,31.869],[120.792,32.032],[120.520,32.106],[120.036,31.936],[120.192,31.906],[120.497,32.020],[120.716,31.984],[120.788,31.820],[121.055,31.719],[121.661,31.320],[121.878,30.917],[121.419,30.790],[120.998,30.558],[120.821,30.355],[120.450,30.388],[120.195,30.241],[120.495,30.303],[120.633,30.133],[120.904,30.161],[121.258,30.304],[121.433,30.227],[121.678,29.979],[122.083,29.870],[121.506,29.485],[121.888,29.628],[121.968,29.491],[121.918,29.135],[121.717,29.256],[121.534,29.237],[121.448,29.131],[121.680,28.953],[121.540,28.932],[121.662,28.851],[121.475,28.641],[121.610,28.292],[121.510,28.324],[121.272,28.222],[121.217,28.346],[121.146,28.327],[120.959,28.037],[120.748,28.010],[120.833,27.891],[120.588,27.581],[120.608,27.412],[120.279,27.097],[120.139,26.886],[120.087,26.672],[119.968,26.586],[119.882,26.610],[119.824,26.846],[119.710,26.729],[119.588,26.785],[119.638,26.621],[119.785,26.547],[119.881,26.334],[119.463,26.055],[119.139,26.122],[119.332,25.949],[119.619,26.004],[119.648,25.919],[119.539,25.591],[119.622,25.391],[119.422,25.460],[119.180,25.450],[119.169,25.356],[119.286,25.232],[118.978,25.209],[118.914,25.127],[118.956,25.005],[118.909,24.929],[118.637,24.836],[118.719,24.746],[118.657,24.621],[118.295,24.573],[118.087,24.627],[118.006,24.482],[117.843,24.474],[117.879,24.396],[118.024,24.380],[118.056,24.246],[117.839,24.012],[117.742,24.015],[117.628,23.837],[117.466,23.841],[117.368,23.589],[117.291,23.714],[117.083,23.579],[116.911,23.647],[116.861,23.453],[116.629,23.354],[116.699,23.278],[116.538,23.180],[116.471,22.946],[116.252,22.981],[116.157,22.887],[115.852,22.802],[115.640,22.853],[115.498,22.719],[115.196,22.817],[114.854,22.617],[114.750,22.626],[114.652,22.755],[114.544,22.621],[114.554,22.529],[114.341,22.593],[114.266,22.541],[114.335,22.396],[114.268,22.296],[113.903,22.396],[114.015,22.512],[113.828,22.607],[113.620,22.861],[113.621,23.127],[113.520,23.102],[113.445,23.055],[113.442,22.941],[113.331,22.912],[113.553,22.594],[113.548,22.223],[113.149,22.075],[113.089,22.208],[112.954,21.907],[112.809,21.945],[112.586,21.777],[112.360,21.978],[112.390,21.801],[112.305,21.742],[111.944,21.850],[111.873,21.717],[111.776,21.719],[111.603,21.559],[111.319,21.486],[111.017,21.512],[110.997,21.430],[110.771,21.387],[110.567,21.214],[110.458,21.231],[110.411,21.338],[110.375,21.172],[110.154,20.945],[110.180,20.859],[110.365,20.838],[110.313,20.672],[110.512,20.518],[110.450,20.355],[110.345,20.295],[109.938,20.295],[109.886,20.413],[109.984,20.403],[109.968,20.448],[109.861,20.514],[109.663,20.917],[109.681,21.132],[109.780,21.337],[109.921,21.376],[109.931,21.481],[109.759,21.560],[109.687,21.525],[109.521,21.693],[109.544,21.538],[109.347,21.454],[109.082,21.440],[109.102,21.590],[108.772,21.630],[108.616,21.770],[108.594,21.901],[108.480,21.905],[108.502,21.633],[108.444,21.607],[108.325,21.694],[108.246,21.558],[107.809,21.497],[107.410,21.285],[107.354,21.055],[107.165,20.949],[107.075,20.999],[106.886,20.950],[106.683,21.000],[106.753,20.735],[106.551,20.527],[106.573,20.392],[106.518,20.289],[106.166,19.992],[105.984,19.939],[105.814,19.587],[105.791,19.294],[105.622,18.966],[105.888,18.502],[106.499,17.946],[106.479,17.720],[106.371,17.747],[107.120,17.056],[107.180,16.898],[107.549,16.643],[107.834,16.322],[108.029,16.331],[108.209,16.091],[108.267,16.090],[108.578,15.585],[108.821,15.378],[109.085,14.716],[109.303,13.856],[109.288,13.765],[109.247,13.855],[109.272,13.279],[109.424,12.956],[109.445,12.600],[109.336,12.752],[109.219,12.646],[109.305,12.391],[109.207,12.415],[109.259,11.955],[109.247,11.909],[109.199,11.999],[109.158,11.837],[109.199,11.725],[109.133,11.601],[109.040,11.593],[108.987,11.336],[108.821,11.315],[108.272,10.934],[108.095,10.897],[108.001,10.720],[107.845,10.700],[107.262,10.398],[107.088,10.498],[107.007,10.661],[106.947,10.400],[106.813,10.433],[106.727,10.536],[106.606,10.465],[106.741,10.444],[106.757,10.296],[106.464,10.298],[106.785,10.116],[106.596,9.860],[106.136,10.222],[106.507,9.821],[106.572,9.641],[106.378,9.556],[105.831,10.001],[106.159,9.594],[106.206,9.502],[106.168,9.397],[105.501,9.093],[105.322,8.801],[105.114,8.629],[104.770,8.598],[104.896,8.747],[104.819,8.802],[104.845,9.606],[104.903,9.816],[105.093,9.901],[105.028,10.067],[104.802,10.203],[104.663,10.170],[104.262,10.541],[103.937,10.587],[103.871,10.655],[103.841,10.581],[103.662,10.509],[103.587,10.552],[103.540,10.669],[103.681,10.759],[103.722,10.890],[103.654,11.059],[103.532,11.147],[103.354,10.922],[103.153,10.914],[103.091,11.211],[103.125,11.461],[103.011,11.589],[103.004,11.711],[102.949,11.773],[102.912,11.704],[102.594,12.203],[102.540,12.109],[102.259,12.394],[102.230,12.332],[102.034,12.532],[101.724,12.689],[101.445,12.619],[100.898,12.654],[100.963,13.432],[100.603,13.568],[100.236,13.484],[100.017,13.353],[99.991,13.243],[100.090,13.046],[99.964,12.690],[99.989,12.171],[99.627,11.463],[99.487,10.890],[99.165,10.320],[99.161,9.734],[99.288,9.415],[99.254,9.265],[99.394,9.214],[99.724,9.314],[99.836,9.288],[99.990,8.589],[100.129,8.428],[100.163,8.508],[100.279,8.269],[100.545,7.227],[100.439,7.281],[100.380,7.542],[100.284,7.552],[100.317,7.716],[100.257,7.775],[100.158,7.728],[100.161,7.599],[100.424,7.188],[100.586,7.176],[101.018,6.861],[101.302,6.908],[101.498,6.865],[101.799,6.475],[102.101,6.242],[102.340,6.172],[102.534,5.863],[102.982,5.525],[103.197,5.262],[103.454,4.669],[103.469,4.393],[103.362,3.769],[103.454,3.521],[103.439,2.933],[103.537,2.775],[103.812,2.580],[103.968,2.261],[104.288,1.481],[104.176,1.365],[103.981,1.624],[103.992,1.455],[103.695,1.450],[103.480,1.329],[103.357,1.546],[102.727,1.856],[102.548,2.042],[102.146,2.248],[101.781,2.574],[101.520,2.684],[101.296,2.885],[101.354,3.011],[101.300,3.253],[100.715,3.966],[100.796,4.023],[100.615,4.373],[100.615,4.652],[100.353,5.588],[100.343,5.984],[100.119,6.442],[99.696,6.877],[99.720,7.106],[99.553,7.219],[99.597,7.356],[99.359,7.372],[99.264,7.619],[99.183,7.718],[99.078,7.718],[99.051,7.888],[98.789,8.060],[98.704,8.257],[98.579,8.344],[98.421,8.178],[98.305,8.226],[98.238,8.423],[98.242,8.768],[98.703,10.190],[98.563,10.035],[98.497,10.183],[98.465,10.676],[98.676,10.987],[98.745,11.240],[98.741,11.592],[98.876,11.720],[98.805,11.779],[98.636,11.738],[98.696,12.225],[98.600,12.245],[98.679,12.348],[98.624,12.441],[98.663,12.662],[98.576,13.162],[98.245,13.733],[98.200,13.980],[98.150,13.648],[98.111,13.713],[98.100,14.162],[97.910,14.653],[97.929,14.696],[98.019,14.653],[97.937,14.764],[97.869,14.739],[97.812,14.859],[97.710,15.876],[97.584,16.020],[97.634,16.458],[97.726,16.569],[97.376,16.523],[97.212,16.893],[97.200,17.095],[96.851,17.401],[96.910,17.305],[96.851,17.203],[96.909,17.031],[96.765,16.710],[96.622,16.564],[96.431,16.505],[96.282,16.596],[96.249,16.765],[96.189,16.768],[96.324,16.444],[95.763,16.169],[95.679,15.977],[95.390,15.723],[95.301,15.756],[95.347,16.098],[95.177,15.826],[94.943,15.818],[94.893,16.183],[94.798,15.971],[94.662,15.904],[94.703,16.512],[94.665,16.336],[94.442,16.094],[94.224,16.016],[94.271,16.517],[94.564,17.309],[94.589,17.569],[94.431,18.202],[94.171,18.732],[94.246,18.741],[94.070,18.893],[94.045,19.287],[93.941,19.146],[93.929,18.900],[93.705,19.027],[93.493,19.369],[93.579,19.401],[93.825,19.238],[93.962,19.329],[93.998,19.441],[93.612,19.776],[93.707,19.912],[93.582,19.910],[93.410,20.038],[93.250,20.070],[93.157,20.041],[93.199,19.898],[93.129,19.858],[93.002,20.075],[93.096,20.181],[93.015,20.185],[93.067,20.378],[93.035,20.406],[92.882,20.152],[92.828,20.178],[92.791,20.211],[92.891,20.340],[92.736,20.563],[92.723,20.296],[92.308,20.790],[92.056,21.175],[92.008,21.685],[91.825,22.229],[91.863,22.350],[91.797,22.297],[91.530,22.708],[91.480,22.885],[91.216,22.642],[90.946,22.597],[90.656,23.025],[90.604,23.591],[90.556,23.422],[90.269,23.456],[90.591,23.266],[90.595,23.134],[90.466,23.054],[90.552,22.905],[90.462,22.882],[90.435,22.752],[90.616,22.362],[90.231,21.830],[90.071,21.887],[90.088,22.017],[90.210,22.157],[89.954,22.023],[89.918,22.116],[89.894,22.308],[89.985,22.466],[89.882,22.388],[89.812,21.983],[89.569,21.767],[89.483,22.276],[89.501,21.914],[89.354,21.721],[89.234,21.722],[89.094,21.873],[89.051,22.093],[89.028,21.937],[88.949,21.938],[89.052,21.654],[88.907,21.653],[88.858,21.745],[88.745,21.584],[88.691,21.733],[88.740,22.005],[88.642,22.122],[88.585,21.660],[88.446,21.614],[88.287,21.758],[88.254,21.622],[88.122,21.636],[88.057,21.694],[88.196,22.140],[87.994,22.266],[87.941,22.374],[87.962,22.255],[88.159,22.122],[87.948,21.825],[87.678,21.654],[87.101,21.501],[86.860,21.237],[86.842,21.106],[86.975,20.700],[86.763,20.419],[86.750,20.313],[86.499,20.172],[86.377,20.007],[86.245,20.053],[86.312,19.988],[86.216,19.896],[85.575,19.693],[85.497,19.697],[85.560,19.753],[85.504,19.888],[85.249,19.758],[85.181,19.595],[85.371,19.679],[85.442,19.627],[84.771,19.125],[84.104,18.293],[83.654,18.070],[83.198,17.609],[82.360,17.096],[82.282,16.936],[82.360,16.783],[82.259,16.560],[81.762,16.329],[81.286,16.337],[81.132,15.962],[80.979,15.758],[80.826,15.766],[80.782,15.867],[80.647,15.895],[80.293,15.711],[80.101,15.324],[80.053,15.074],[80.179,14.478],[80.112,14.212],[80.307,13.485],[80.156,13.714],[80.062,13.606],[80.342,13.361],[80.229,12.690],[79.858,11.989],[79.754,11.575],[79.793,11.447],[79.693,11.313],[79.799,11.339],[79.849,11.197],[79.838,10.323],[79.532,10.330],[79.315,10.257],[79.258,10.035],[78.940,9.566],[78.919,9.453],[79.020,9.333],[79.275,9.285],[79.411,9.192],[78.980,9.269],[78.421,9.105],[78.192,8.891],[78.060,8.385],[77.518,8.078],[77.301,8.145],[77.066,8.316],[76.553,8.903],[76.325,9.452],[76.242,9.927],[76.343,9.827],[76.376,9.540],[76.459,9.536],[76.346,9.922],[76.196,10.086],[76.201,10.201],[75.724,11.362],[75.525,11.703],[75.197,12.058],[74.946,12.565],[74.771,13.077],[74.671,13.668],[74.382,14.495],[73.949,15.075],[73.801,15.397],[73.932,15.397],[73.772,15.573],[73.833,15.659],[73.680,15.709],[73.476,16.054],[73.338,16.460],[73.156,17.622],[72.875,18.643],[73.006,19.021],[72.972,19.153],[72.835,18.976],[72.803,19.079],[72.812,19.299],[72.987,19.277],[72.788,19.363],[72.799,19.520],[72.727,19.578],[72.668,19.831],[72.894,20.673],[72.814,21.117],[72.692,21.178],[72.624,21.372],[72.735,21.471],[72.613,21.462],[73.112,21.750],[72.543,21.697],[72.592,21.878],[72.700,21.972],[72.522,21.976],[72.553,22.160],[72.809,22.233],[72.183,22.270],[72.306,22.189],[72.274,22.090],[72.037,21.823],[72.210,21.728],[72.254,21.531],[72.015,21.156],[71.025,20.739],[70.719,20.740],[70.485,20.840],[70.034,21.179],[69.192,21.992],[68.970,22.290],[69.052,22.437],[69.277,22.285],[70.177,22.573],[70.513,23.002],[70.489,23.090],[70.339,22.940],[70.118,22.947],[69.665,22.759],[69.236,22.849],[68.817,23.054],[68.641,23.190],[68.417,23.571],[68.777,23.852],[68.235,23.597],[68.165,23.857],[68.116,23.753],[68.037,23.848],[67.951,23.829],[67.860,23.903],[67.819,23.828],[67.668,23.811],[67.646,23.920],[67.563,23.882],[67.309,24.175],[67.171,24.756],[66.703,24.861],[66.699,25.226],[66.429,25.575],[66.219,25.590],[66.131,25.493],[66.356,25.507],[66.468,25.445],[64.777,25.307],[64.659,25.184],[64.059,25.403],[63.936,25.343],[63.557,25.353],[63.491,25.211],[62.665,25.265],[62.315,25.135],[62.199,25.225],[61.908,25.131],[61.533,25.196],[61.412,25.102],[60.664,25.282],[60.511,25.437],[60.400,25.312],[59.616,25.403],[59.456,25.481],[59.046,25.417],[58.798,25.555],[58.203,25.592],[57.937,25.692],[57.796,25.653],[57.733,25.725],[57.335,25.792],[57.104,26.371],[57.036,26.801],[56.910,26.995],[56.728,27.128],[56.356,27.200],[56.118,27.143],[55.941,27.038],[55.650,26.978],[55.424,26.771],[55.294,26.786],[54.896,26.557],[54.645,26.509],[54.247,26.697],[53.706,26.726],[53.455,26.943],[52.692,27.323],[52.476,27.617],[52.031,27.824],[51.589,27.864],[51.279,28.131],[51.094,28.512],[51.062,28.726],[50.867,28.870],[50.876,29.063],[50.675,29.147],[50.650,29.420],[50.169,29.921],[50.072,30.199],[49.555,30.029],[49.002,30.374],[49.190,30.375],[49.247,30.413],[49.225,30.472],[49.002,30.507],[49.037,30.450],[48.891,30.328],[48.919,30.121],[48.832,30.035],[48.454,29.938],[48.142,30.041],[47.983,30.011],[48.143,29.572],[47.970,29.617],[47.723,29.393],[48.051,29.355],[48.184,28.979],[48.809,27.896],[48.797,27.724],[49.237,27.493],[49.175,27.438],[49.405,27.181],[49.538,27.152],[49.717,26.956],[49.986,26.829],[50.150,26.663],[50.008,26.679],[50.027,26.527],[50.185,26.405],[50.214,26.308],[50.155,26.101],[50.032,26.111],[50.081,25.961],[50.239,25.623],[50.455,25.425],[50.558,25.087],[50.804,24.789],[50.847,24.889],[50.755,25.399],[51.003,25.981],[51.262,26.153],[51.543,25.902],[51.572,25.781],[51.485,25.525],[51.609,25.053],[51.428,24.668],[51.268,24.607],[51.418,24.531],[51.310,24.340],[51.535,24.286],[51.605,24.338],[51.665,24.250],[51.768,24.254],[51.843,24.011],[52.119,23.971],[52.648,24.155],[53.802,24.069],[54.148,24.171],[54.397,24.278],[54.747,24.810],[55.098,25.042],[55.523,25.498],[55.941,25.794],[56.164,26.207],[56.306,26.235],[56.413,26.351],[56.374,25.805],[56.298,25.651],[56.363,25.569],[56.373,25.018],[56.641,24.470],[56.913,24.150],[57.220,23.923],[58.325,23.624],[58.578,23.643],[58.773,23.517],[59.429,22.661],[59.823,22.509],[59.824,22.305],[59.371,21.499],[58.896,21.113],[58.474,20.407],[58.209,20.424],[58.245,20.599],[58.169,20.590],[57.862,20.244],[57.714,19.678],[57.812,19.017],[57.177,18.903],[56.826,18.754],[56.655,18.587],[56.551,18.166],[56.383,17.988],[55.479,17.843],[55.255,17.586],[55.275,17.321],[55.064,17.039],[54.772,16.965],[54.567,17.031],[54.068,17.006],[53.610,16.760],[53.298,16.723],[52.581,16.470],[52.237,16.171],[52.174,15.957],[52.217,15.656],[51.322,15.226],[50.527,15.038],[50.167,14.851],[49.906,14.828],[49.350,14.638],[49.048,14.456],[48.929,14.267],[48.668,14.050],[48.278,13.998],[47.990,14.048],[47.408,13.662],[46.789,13.466],[45.657,13.339],[45.394,13.067],[45.164,12.998],[45.039,12.816],[44.755,12.764],[44.618,12.817],[44.358,12.669],[43.930,12.617],[43.634,12.744],[43.488,12.699],[43.475,12.839],[43.232,13.267],[43.282,13.693],[43.234,13.859],[43.089,14.011],[42.936,14.939],[42.856,15.133],[42.658,15.233],[42.698,15.326],[42.788,15.266],[42.799,15.326],[42.717,15.655],[42.840,16.032],[42.790,16.452],[42.699,16.737],[42.383,17.122],[42.294,17.435],[41.658,18.008],[41.432,18.452],[41.229,18.678],[41.116,19.082],[40.759,19.755],[40.081,20.266],[39.728,20.390],[39.276,20.974],[39.094,21.310],[39.147,21.519],[38.988,21.882],[39.096,22.393],[39.062,22.592],[38.464,23.712],[37.920,24.185],[37.543,24.292],[37.181,24.820],[37.266,24.960],[37.149,25.291],[36.921,25.641],[36.763,25.751],[36.675,26.039],[36.519,26.105],[36.250,26.595],[35.180,28.035],[34.722,28.131],[34.625,28.065],[34.780,28.507],[34.973,29.555],[34.736,29.271],[34.617,28.758],[34.446,28.357],[34.400,28.016],[34.220,27.764],[33.760,28.048],[33.248,28.568],[33.130,28.978],[32.721,29.522],[32.566,29.974],[32.473,29.925],[32.489,29.852],[32.360,29.631],[32.599,29.322],[32.659,28.928],[33.202,28.208],[33.547,27.898],[33.550,27.607],[33.849,27.185],[33.959,26.649],[34.565,25.691],[35.194,24.475],[35.478,24.155],[35.784,23.938],[35.541,23.921],[35.504,23.779],[35.523,23.443],[35.698,22.946],[35.913,22.740],[36.230,22.629],[36.415,22.394],[36.870,22.016],[36.927,21.587],[37.259,21.109],[37.257,21.039],[37.151,21.104],[37.141,20.982],[37.228,20.557],[37.193,20.121],[37.248,19.582],[37.471,18.820],[37.922,18.556],[38.202,18.249],[38.283,18.287],[38.574,18.073],[38.912,17.427],[39.143,16.729],[39.299,15.921],[39.422,15.787],[39.507,15.532],[39.631,15.453],[39.786,15.125],[39.864,15.470],[40.041,15.335],[40.084,15.152],[40.204,15.014],[40.546,14.934],[40.799,14.743],[41.176,14.620],[41.658,13.983],[42.245,13.588],[42.399,13.213],[42.523,13.221],[42.734,13.019],[42.796,12.864],[42.970,12.808],[42.999,12.900],[43.083,12.825],[43.131,12.660],[43.354,12.367],[43.410,12.190],[43.337,12.027],[42.799,11.739],[42.640,11.560],[42.522,11.572],[42.540,11.504],[42.912,11.587],[43.162,11.566],[43.441,11.346],[43.853,10.784],[44.279,10.472],[44.943,10.437],[45.817,10.836],[46.565,10.746],[47.405,11.174],[47.712,11.112],[48.019,11.139],[48.573,11.321],[49.062,11.271],[50.110,11.529],[50.466,11.728],[50.636,11.944],[50.792,11.984],[51.255,11.831],[51.084,11.336],[51.141,10.657],[51.032,10.445],[51.188,10.480],[51.193,10.555],[51.369,10.475],[51.385,10.387],[51.209,10.431],[50.930,10.336],[50.825,9.428],[50.430,8.845],[50.103,8.200],[49.852,7.963],[49.671,7.470],[49.235,6.777],[49.049,6.174],[47.975,4.497],[46.879,3.286],[46.051,2.475],[44.920,1.810],[43.718,0.858],[41.980,-0.973],[41.732,-1.430],[41.387,-1.867],[41.107,-1.982],[40.996,-1.951],[40.952,-2.056],[40.890,-2.024],[40.922,-2.194],[40.813,-2.392],[40.644,-2.539],[40.404,-2.556],[40.279,-2.629],[40.180,-2.819],[40.195,-3.019],[40.115,-3.251],[39.861,-3.577],[39.819,-3.786],[39.491,-4.478],[39.377,-4.625],[39.228,-4.666],[38.819,-5.878],[38.805,-6.070],[38.874,-6.331],[39.125,-6.556],[39.287,-6.815],[39.472,-6.879],[39.546,-7.024],[39.288,-7.518],[39.287,-7.788],[39.330,-7.747],[39.428,-7.813],[39.441,-8.012],[39.304,-8.444],[39.377,-8.721],[39.488,-8.862],[39.451,-8.943],[39.641,-9.192],[39.625,-9.409],[39.784,-9.915],[39.725,-10.000],[39.864,-10.022],[39.984,-10.160],[40.084,-10.157],[40.389,-10.354],[40.612,-10.662],[40.487,-10.765],[40.597,-10.831],[40.403,-11.332],[40.532,-12.005],[40.487,-12.492],[40.581,-12.636],[40.553,-12.825],[40.437,-12.983],[40.569,-12.985],[40.596,-14.123],[40.716,-14.214],[40.646,-14.539],[40.727,-14.421],[40.818,-14.468],[40.835,-14.792],[40.618,-15.116],[40.651,-15.261],[40.559,-15.473],[40.109,-15.979],[39.984,-16.225],[39.791,-16.295],[39.845,-16.436],[39.242,-16.793],[39.084,-16.973],[38.670,-17.050],[38.145,-17.243],[37.512,-17.571],[36.939,-17.993],[36.900,-18.129],[36.540,-18.518],[36.404,-18.770],[36.327,-18.793],[36.263,-18.720],[36.236,-18.861],[36.125,-18.842],[35.854,-18.993],[35.365,-19.494],[34.948,-19.813],[34.852,-19.821],[34.649,-19.701],[34.756,-19.822],[34.705,-20.473],[34.982,-20.806],[35.128,-21.395],[35.268,-21.651],[35.316,-22.397],[35.383,-22.455],[35.456,-22.116],[35.540,-22.303],[35.490,-22.658],[35.575,-22.963],[35.370,-23.798],[35.542,-23.824],[35.438,-24.171],[35.156,-24.541],[34.992,-24.651],[33.347,-25.261],[32.792,-25.644],[32.590,-26.004],[32.849,-26.268],[32.955,-26.084],[32.889,-26.830],[32.535,-28.200],[32.375,-28.498],[32.027,-28.840],[31.778,-28.937],[31.335,-29.378],[30.472,-30.715],[29.971,-31.322],[29.483,-31.675],[28.856,-32.294],[27.861,-33.054],[27.077,-33.521],[26.614,-33.707],[26.429,-33.760],[25.806,-33.737],[25.652,-33.850],[25.638,-34.011],[25.574,-34.035],[25.003,-33.974],[24.827,-34.169],[24.596,-34.175],[23.698,-33.993],[23.268,-34.081],[22.554,-34.010],[22.246,-34.069],[21.789,-34.373],[20.990,-34.367],[20.530,-34.463],[20.021,-34.786],[19.635,-34.753],[19.392,-34.606],[19.298,-34.615],[19.331,-34.492],[19.098,-34.350],[18.831,-34.364],[18.809,-34.108],[18.752,-34.083],[18.500,-34.109],[18.462,-34.347],[18.352,-34.188],[18.354,-33.939],[18.465,-33.888],[18.433,-33.717],[18.261,-33.422],[17.993,-33.152],[17.851,-32.827],[17.965,-32.709],[18.037,-32.775],[18.125,-32.749],[18.325,-32.505],[18.311,-32.122],[18.211,-31.742],[17.677,-31.019],[17.347,-30.445],[16.950,-29.403],[16.739,-29.009],[16.481,-28.642],[15.719,-27.966],[15.342,-27.387],[15.133,-26.788],[15.139,-26.508],[14.968,-26.318],[14.845,-25.726],[14.837,-25.033],[14.502,-24.202],[14.474,-23.281],[14.403,-22.968],[14.438,-22.881],[14.496,-22.921],[14.520,-22.805],[14.463,-22.449],[13.451,-20.917],[13.168,-20.185],[12.458,-18.927],[12.041,-18.471],[11.776,-18.002],[11.722,-17.467],[11.820,-16.504],[11.751,-15.832],[11.900,-15.720],[12.016,-15.514],[12.550,-13.438],[12.898,-13.028],[12.983,-12.776],[13.417,-12.520],[13.686,-12.124],[13.785,-11.813],[13.847,-11.054],[13.721,-10.634],[13.539,-10.421],[13.332,-9.999],[12.999,-9.048],[13.047,-8.922],[13.093,-8.900],[13.054,-9.007],[13.359,-8.687],[13.379,-8.370],[12.862,-7.232],[12.823,-6.955],[12.521,-6.590],[12.283,-6.124],[12.791,-6.004],[13.068,-5.865],[12.861,-5.854],[12.453,-6.000],[12.240,-5.807],[12.155,-5.633],[12.177,-5.325],[11.821,-4.755],[11.778,-4.566],[11.032,-3.826],[10.947,-3.662],[10.641,-3.398],[10.348,-3.013],[9.722,-2.468],[10.002,-2.588],[10.062,-2.550],[9.625,-2.367],[9.533,-2.164],[9.299,-1.903],[9.483,-1.962],[9.483,-1.895],[9.266,-1.825],[9.036,-1.309],[9.319,-1.632],[9.523,-1.598],[9.501,-1.555],[9.296,-1.515],[9.347,-1.325],[9.204,-1.382],[9.065,-1.298],[8.703,-0.591],[8.821,-0.708],[8.946,-0.689],[9.137,-0.573],[9.297,-0.351],[9.339,-0.058],[9.302,0.289],[9.355,0.344],[9.468,0.160],[9.797,0.044],[9.813,0.126],[10.001,0.195],[9.777,0.192],[9.546,0.296],[9.325,0.552],[9.330,0.611],[9.495,0.665],[9.618,0.577],[9.599,1.054],[9.386,1.139],[9.494,1.435],[9.632,1.566],[9.807,1.927],[9.822,2.539],[9.948,3.079],[9.876,3.310],[9.672,3.538],[9.766,3.624],[9.642,3.612],[9.556,3.798],[9.628,3.870],[9.740,3.853],[9.640,3.965],[9.689,4.056],[9.484,4.066],[9.501,4.001],[9.425,3.922],[9.000,4.092],[8.918,4.554],[8.762,4.580],[8.660,4.671],[8.690,4.550],[8.574,4.526],[8.533,4.606],[8.571,4.752],[8.431,4.746],[8.253,4.924],[8.328,4.656],[8.293,4.558],[7.644,4.525],[7.531,4.655],[7.460,4.555],[7.284,4.548],[7.077,4.716],[7.164,4.616],[7.155,4.514],[6.923,4.391],[6.768,4.725],[6.793,4.469],[6.860,4.373],[6.633,4.340],[6.580,4.476],[6.555,4.341],[6.264,4.309],[6.271,4.432],[6.206,4.292],[6.077,4.291],[5.588,4.647],[5.493,4.839],[5.383,5.129],[5.476,5.154],[5.370,5.195],[5.368,5.338],[5.501,5.379],[5.550,5.474],[5.386,5.402],[5.199,5.534],[5.457,5.612],[5.350,5.623],[5.327,5.708],[5.173,5.603],[5.112,5.642],[5.093,5.767],[4.861,6.026],[4.431,6.349],[3.451,6.427],[3.717,6.598],[3.430,6.525],[3.336,6.397],[2.287,6.328],[1.311,6.147],[1.106,6.051],[0.950,5.810],[0.260,5.757],[-0.349,5.501],[-0.798,5.227],[-1.502,5.038],[-2.002,4.762],[-2.399,4.929],[-3.246,5.114],[-3.019,5.131],[-3.169,5.203],[-3.151,5.348],[-3.200,5.354],[-3.348,5.131],[-4.120,5.310],[-4.609,5.236],[-4.037,5.230],[-4.900,5.138],[-5.024,5.204],[-5.282,5.210],[-5.368,5.151],[-5.062,5.131],[-5.914,5.011],[-7.545,4.351],[-8.259,4.590],[-9.132,5.055],[-10.276,6.078],[-10.786,6.310],[-10.849,6.465],[-11.292,6.688],[-11.733,7.089],[-12.486,7.386],[-12.433,7.545],[-12.510,7.666],[-12.480,7.753],[-12.698,7.716],[-12.851,7.819],[-12.957,8.145],[-13.149,8.215],[-13.273,8.430],[-13.261,8.488],[-13.085,8.425],[-12.894,8.630],[-13.182,8.577],[-13.207,8.843],[-13.059,8.881],[-13.272,8.987],[-13.269,9.171],[-13.436,9.420],[-13.568,9.543],[-13.691,9.536],[-13.690,9.928],[-13.820,9.887],[-13.955,9.969],[-14.045,10.141],[-14.170,10.129],[-14.427,10.248],[-14.610,10.550],[-14.594,10.767],[-14.677,10.689],[-14.776,10.932],[-14.887,10.968],[-15.012,10.804],[-15.094,11.011],[-15.055,11.142],[-15.222,11.031],[-15.217,11.156],[-15.393,11.217],[-15.348,11.378],[-15.479,11.410],[-15.429,11.499],[-15.073,11.598],[-15.230,11.687],[-15.413,11.615],[-15.500,11.778],[-15.416,11.872],[-15.211,11.871],[-15.078,11.969],[-15.435,11.944],[-15.819,11.763],[-15.942,11.787],[-15.920,11.938],[-16.138,11.917],[-16.328,12.052],[-16.245,12.237],[-16.437,12.204],[-16.712,12.355],[-16.785,12.473],[-16.678,12.560],[-16.443,12.609],[-16.598,12.715],[-16.701,12.603],[-16.768,12.628],[-16.825,13.341],[-16.750,13.425],[-16.669,13.475],[-16.556,13.303],[-16.413,13.270],[-16.185,13.283],[-16.158,13.384],[-15.427,13.468],[-16.135,13.448],[-16.441,13.353],[-16.530,13.458],[-16.588,13.690],[-16.767,13.905],[-16.618,14.041],[-16.792,14.004],[-16.974,14.403],[-17.168,14.641],[-17.346,14.729],[-17.418,14.723],[-17.445,14.652],[-17.536,14.755],[-17.147,14.922],[-16.571,15.734],[-16.464,16.602],[-16.079,17.546],[-16.030,17.888],[-16.085,18.521],[-16.213,19.003],[-16.514,19.362],[-16.371,19.410],[-16.305,19.513],[-16.445,19.473],[-16.283,19.787],[-16.210,20.228],[-16.430,20.652],[-16.530,20.710],[-16.563,20.604],[-16.623,20.634],[-16.876,21.086],[-16.928,21.115],[-16.998,21.040],[-17.048,20.806],[-17.099,20.857],[-16.931,21.900],[-16.793,22.160],[-16.514,22.333],[-16.359,22.595],[-16.304,22.835],[-16.170,23.032],[-16.210,23.098],[-15.789,23.793],[-15.802,23.842],[-15.981,23.670],[-15.899,23.844],[-14.904,24.720],[-14.795,25.404],[-14.523,25.925],[-14.471,26.163],[-14.168,26.415],[-13.576,26.735],[-13.176,27.656],[-12.949,27.914],[-11.986,28.129],[-11.553,28.310],[-11.081,28.714],[-10.486,29.065],[-10.201,29.380],[-9.667,30.109],[-9.653,30.448],[-9.875,30.718],[-9.809,31.425],[-9.675,31.711],[-9.347,32.086],[-9.246,32.572],[-8.513,33.252],[-6.901,33.969],[-6.353,34.776],[-5.925,35.786],[-5.397,35.930],[-5.278,35.903],[-5.338,35.745],[-5.253,35.615],[-4.837,35.281],[-4.628,35.206],[-4.330,35.161],[-3.693,35.280],[-3.395,35.212],[-3.206,35.239],[-2.972,35.407],[-2.840,35.128],[-1.913,35.094],[-1.336,35.364],[-0.917,35.668],[-0.426,35.862],[-0.048,35.833],[0.312,36.162],[1.257,36.520],[2.593,36.601],[2.973,36.784],[3.521,36.795],[3.779,36.896],[4.758,36.896],[5.295,36.648],[6.065,36.864],[6.487,37.086],[6.576,37.003],[6.928,36.919],[7.238,36.969],[7.204,37.092],[7.432,37.059],[7.910,36.856],[8.824,36.998],[9.142,37.195],[9.688,37.340],[9.838,37.309],[9.784,37.211],[9.830,37.135],[9.896,37.182],[9.876,37.254],[10.196,37.206],[10.189,37.034],[10.334,36.865],[10.293,36.781],[10.412,36.732],[10.571,36.879],[10.951,37.059],[11.054,37.073],[11.127,36.874],[10.798,36.493],[10.488,36.255],[10.506,36.032],[10.591,35.887],[11.004,35.634],[11.043,35.335],[11.120,35.240],[10.691,34.678],[10.065,34.212],[10.049,34.056],[10.159,33.850],[10.305,33.728],[10.454,33.663],[10.713,33.689],[10.723,33.514],[10.898,33.534],[10.958,33.626],[11.085,33.563],[11.150,33.369],[11.257,33.309],[11.203,33.249],[11.813,33.094],[12.280,32.859],[12.754,32.801],[13.283,32.915],[14.156,32.710],[14.513,32.511],[15.177,32.391],[15.359,32.160],[15.363,31.971],[15.496,31.657],[15.706,31.426],[16.123,31.264],[16.782,31.215],[17.830,30.928],[18.190,30.777],[18.670,30.416],[18.936,30.290],[19.292,30.288],[19.590,30.414],[20.013,30.801],[20.151,31.079],[20.141,31.196],[19.961,31.556],[19.926,31.818],[20.121,32.219],[20.621,32.580],[21.062,32.776],[21.425,32.799],[21.636,32.937],[22.187,32.918],[23.091,32.619],[23.106,32.331],[23.286,32.214],[23.798,32.159],[24.130,32.009],[24.879,31.984],[25.025,31.883],[25.225,31.534],[25.382,31.513],[25.893,31.621],[26.769,31.470],[27.248,31.378],[27.540,31.213],[27.830,31.195],[27.968,31.097],[28.515,31.050],[29.072,30.830],[29.429,30.927],[29.930,31.227],[30.223,31.258],[30.395,31.458],[30.924,31.567],[30.563,31.417],[31.002,31.463],[31.083,31.603],[31.524,31.458],[31.889,31.541],[32.136,31.341],[31.892,31.482],[31.771,31.293],[32.008,31.221],[32.102,31.093],[32.282,31.201],[32.251,31.295],[32.603,31.069],[33.130,31.168],[33.194,31.085],[33.903,31.181],[34.176,31.304],[34.484,31.592],[34.678,31.896],[35.109,33.084],[35.612,34.032],[35.648,34.248],[35.978,34.547],[35.888,34.949],[35.943,35.224],[35.902,35.421],[35.764,35.572],[35.840,35.849],[35.957,35.998],[35.811,36.310],[36.188,36.659],[36.180,36.807],[36.049,36.911],[35.661,36.724],[35.537,36.597],[35.393,36.575],[34.704,36.817],[34.300,36.604],[33.955,36.295],[33.695,36.182],[32.795,36.036],[32.378,36.184],[32.022,36.535],[31.241,36.822],[30.644,36.866],[30.446,36.270],[30.232,36.307],[29.689,36.157],[29.224,36.324],[29.038,36.693],[28.970,36.715],[28.817,36.675],[28.304,36.812],[28.112,36.646],[28.019,36.634],[28.084,36.751],[27.540,36.684],[27.467,36.746],[28.005,36.832],[28.242,37.029],[27.263,36.977],[27.300,37.127],[27.535,37.164],[27.520,37.249],[27.219,37.389],[27.148,37.604],[27.068,37.658],[27.224,37.725],[27.232,37.979],[26.879,38.055],[26.683,38.198],[26.582,38.149],[26.291,38.277],[26.344,38.370],[26.416,38.368],[26.378,38.624],[26.441,38.641],[26.587,38.557],[26.595,38.419],[26.674,38.336],[26.727,38.419],[26.861,38.373],[27.144,38.452],[26.907,38.482],[26.764,38.710],[27.014,38.887],[26.815,38.961],[26.854,39.116],[26.682,39.292],[26.899,39.550],[26.113,39.467],[26.181,39.990],[26.313,40.025],[26.738,40.400],[27.285,40.456],[27.476,40.320],[27.728,40.329],[27.849,40.382],[27.732,40.481],[27.875,40.513],[27.990,40.489],[27.963,40.370],[29.007,40.390],[29.055,40.424],[28.788,40.534],[28.958,40.631],[29.849,40.760],[29.365,40.809],[29.114,40.938],[29.046,41.008],[29.148,41.221],[29.919,41.151],[30.345,41.197],[30.810,41.085],[31.255,41.108],[31.458,41.320],[32.306,41.730],[33.381,42.018],[34.750,41.957],[35.006,42.063],[35.155,42.028],[35.122,41.891],[35.298,41.729],[35.558,41.634],[35.920,41.714],[36.052,41.683],[36.179,41.427],[36.405,41.275],[36.778,41.363],[37.066,41.184],[38.381,40.925],[39.426,41.106],[39.808,40.983],[40.265,40.961],[41.414,41.424],[41.702,41.705],[41.763,41.970],[41.419,42.738],[41.129,42.828],[40.837,43.063],[40.462,43.146],[39.874,43.473],[38.717,44.288],[38.181,44.420],[37.851,44.699],[37.495,44.695],[37.205,44.972],[36.628,45.151],[36.941,45.290],[36.720,45.372],[36.866,45.427],[37.214,45.272],[37.647,45.377],[37.672,45.488],[37.610,45.500],[37.612,45.565],[37.841,45.800],[37.933,46.002],[38.014,46.048],[38.080,45.935],[38.184,46.095],[38.492,46.091],[38.078,46.394],[37.914,46.406],[37.767,46.636],[37.968,46.618],[38.230,46.701],[38.501,46.664],[38.439,46.813],[39.271,47.044],[39.293,47.106],[39.196,47.269],[39.024,47.272],[38.928,47.176],[38.668,47.144],[38.552,47.150],[38.762,47.262],[38.577,47.239],[38.178,47.080],[37.543,47.075],[37.340,46.917],[37.048,46.876],[36.795,46.714],[36.559,46.763],[36.279,46.659],[35.827,46.624],[35.400,46.381],[35.204,46.169],[35.015,46.106],[35.280,46.279],[35.230,46.441],[35.064,46.267],[34.850,46.190],[34.857,45.987],[35.023,45.701],[35.458,45.316],[35.833,45.402],[36.013,45.372],[36.171,45.453],[36.575,45.394],[36.393,45.065],[35.870,45.005],[35.678,45.102],[35.473,45.098],[35.088,44.803],[34.717,44.807],[34.470,44.722],[34.282,44.538],[33.910,44.388],[33.656,44.433],[33.451,44.554],[33.612,44.908],[33.555,45.098],[33.392,45.188],[33.187,45.195],[32.919,45.348],[32.611,45.328],[32.508,45.404],[33.142,45.749],[33.665,45.947],[33.594,46.096],[33.430,46.058],[33.202,46.176],[32.477,46.084],[32.036,46.261],[31.831,46.282],[31.780,46.325],[31.992,46.364],[32.008,46.430],[31.555,46.554],[32.361,46.475],[32.578,46.616],[32.354,46.565],[32.044,46.642],[31.945,46.784],[31.940,46.982],[31.759,47.213],[31.913,46.926],[31.873,46.650],[31.532,46.665],[31.563,46.777],[31.403,46.629],[30.796,46.552],[30.657,46.267],[30.219,45.867],[29.628,45.722],[29.601,45.600],[29.727,45.343],[29.558,44.843],[29.048,44.758],[29.095,44.975],[28.931,44.966],[28.926,44.810],[28.807,44.565],[28.888,44.575],[28.645,44.296],[28.659,43.984],[28.562,43.501],[28.465,43.389],[28.134,43.396],[27.929,43.186],[27.889,42.750],[27.754,42.707],[27.485,42.468],[27.708,42.350],[27.983,42.047],[27.987,41.855],[28.198,41.554],[29.057,41.230],[28.956,41.008],[28.780,40.974],[28.172,41.081],[27.925,40.991],[27.499,40.973],[27.258,40.687],[26.772,40.498],[26.203,40.075],[26.254,40.315],[26.792,40.627],[26.105,40.611],[26.011,40.769],[25.856,40.844],[25.104,40.995],[24.793,40.858],[24.477,40.948],[24.082,40.724],[23.763,40.748],[23.743,40.677],[23.879,40.544],[23.832,40.482],[23.867,40.419],[24.213,40.328],[24.343,40.148],[23.913,40.359],[23.728,40.330],[23.967,40.115],[24.001,40.025],[23.947,39.966],[23.665,40.224],[23.426,40.264],[23.386,40.222],[23.433,40.115],[23.674,39.959],[23.627,39.924],[23.396,39.990],[23.312,40.216],[22.896,40.400],[22.851,40.491],[22.922,40.591],[22.629,40.496],[22.592,40.037],[22.979,39.564],[23.233,39.358],[23.328,39.175],[23.155,39.101],[23.162,39.258],[22.921,39.306],[22.839,39.259],[22.886,39.170],[22.966,39.031],[23.067,39.038],[22.803,38.902],[22.569,38.867],[23.253,38.661],[23.369,38.526],[23.570,38.489],[23.684,38.352],[23.967,38.275],[24.025,38.140],[24.062,37.775],[24.020,37.678],[23.502,38.035],[23.036,37.878],[23.147,37.795],[23.198,37.620],[23.396,37.580],[23.489,37.440],[23.162,37.334],[23.015,37.482],[22.775,37.585],[22.725,37.542],[23.060,36.854],[23.041,36.645],[23.160,36.448],[22.983,36.528],[22.717,36.794],[22.608,36.780],[22.489,36.568],[22.489,36.447],[22.428,36.476],[22.375,36.514],[22.376,36.702],[22.080,37.029],[21.956,36.990],[21.892,36.737],[21.583,37.081],[21.679,37.387],[21.571,37.541],[21.329,37.669],[21.288,37.775],[21.125,37.892],[21.308,38.027],[21.404,38.197],[21.658,38.175],[21.825,38.328],[22.920,37.958],[22.893,38.051],[23.122,38.073],[23.183,38.134],[23.149,38.176],[22.834,38.235],[22.422,38.439],[22.320,38.357],[21.965,38.412],[21.473,38.321],[21.331,38.487],[21.303,38.374],[21.183,38.346],[20.992,38.654],[20.777,38.808],[20.769,38.874],[20.777,38.928],[20.893,38.941],[21.112,38.896],[21.118,39.030],[20.780,39.009],[20.301,39.327],[20.191,39.546],[20.001,39.709],[19.852,40.044],[19.398,40.285],[19.322,40.407],[19.459,40.405],[19.337,40.664],[19.461,40.933],[19.441,41.425],[19.576,41.640],[19.578,41.788],[19.186,41.949],[18.894,42.249],[18.633,42.378],[18.646,42.443],[18.517,42.433],[17.824,42.797],[17.045,43.015],[17.220,43.026],[17.724,42.851],[16.903,43.392],[16.394,43.543],[15.986,43.520],[15.942,43.657],[15.499,43.909],[15.186,44.172],[15.123,44.257],[15.471,44.272],[14.981,44.603],[14.895,44.707],[14.855,45.081],[14.550,45.298],[14.313,45.338],[13.966,44.836],[13.861,44.837],[13.629,45.108],[13.517,45.482],[13.783,45.627],[13.628,45.771],[13.465,45.710],[13.206,45.771],[13.030,45.638],[12.432,45.468],[12.536,45.545],[12.492,45.546],[12.274,45.446],[12.226,45.242],[12.523,44.968],[12.384,44.798],[12.279,44.832],[12.248,44.723],[12.396,44.224],[12.691,43.995],[13.564,43.571],[14.010,42.690],[14.541,42.244],[15.169,41.934],[16.165,41.896],[16.151,41.758],[15.914,41.621],[15.900,41.512],[17.103,41.062],[17.474,40.841],[17.955,40.655],[18.461,40.221],[18.486,40.105],[18.344,39.821],[18.078,39.937],[17.865,40.280],[17.396,40.340],[17.180,40.503],[16.928,40.458],[16.670,40.137],[16.522,39.748],[16.598,39.639],[16.824,39.578],[17.115,39.381],[17.175,38.998],[17.099,38.919],[16.951,38.940],[16.617,38.800],[16.559,38.715],[16.546,38.409],[16.282,38.250],[16.057,37.942],[15.725,37.939],[15.646,38.034],[15.643,38.175],[15.822,38.303],[15.905,38.483],[15.879,38.614],[15.972,38.713],[16.197,38.759],[16.210,38.941],[16.107,39.024],[16.024,39.354],[15.693,39.990],[15.585,40.053],[15.295,40.070],[14.951,40.239],[14.948,40.469],[14.766,40.668],[14.340,40.599],[14.461,40.729],[14.309,40.813],[14.044,40.812],[13.733,41.236],[13.247,41.289],[13.089,41.244],[12.849,41.409],[12.631,41.470],[12.075,41.941],[11.807,42.082],[11.637,42.288],[11.296,42.423],[11.141,42.390],[11.103,42.417],[11.185,42.457],[11.168,42.535],[10.708,42.936],[10.515,42.968],[10.521,43.204],[10.321,43.513],[10.188,43.948],[9.289,44.319],[8.766,44.422],[8.552,44.346],[8.005,43.877],[7.262,43.696],[6.717,43.374],[6.570,43.199],[6.116,43.072],[5.809,43.098],[5.407,43.229],[5.320,43.345],[5.073,43.367],[5.060,43.445],[4.712,43.373],[4.224,43.480],[4.053,43.593],[3.259,43.193],[3.043,42.838],[3.091,42.591],[3.307,42.289],[3.166,42.256],[3.150,42.162],[3.238,42.082],[3.248,41.944],[3.005,41.767],[2.311,41.467],[2.083,41.287],[1.033,41.062],[0.715,40.823],[0.891,40.722],[0.596,40.615],[-0.327,39.520],[-0.205,39.063],[0.202,38.759],[-0.521,38.317],[-0.815,37.770],[-0.722,37.631],[-1.328,37.561],[-1.641,37.387],[-2.112,36.777],[-2.188,36.745],[-2.453,36.831],[-2.788,36.715],[-3.149,36.758],[-3.431,36.708],[-3.828,36.756],[-4.367,36.718],[-4.674,36.506],[-5.171,36.424],[-5.361,36.135],[-5.444,36.151],[-5.463,36.074],[-5.625,36.026],[-6.041,36.188],[-6.226,36.426],[-6.269,36.597],[-6.384,36.637],[-6.412,36.729],[-6.217,36.914],[-6.396,36.832],[-6.492,36.955],[-6.885,37.194],[-6.864,37.279],[-6.975,37.198],[-7.494,37.168],[-7.834,37.006],[-8.598,37.121],[-8.998,37.032],[-8.814,37.431],[-8.792,37.733],[-8.879,37.959],[-8.802,38.184],[-8.881,38.447],[-8.668,38.424],[-8.799,38.518],[-9.213,38.448],[-9.250,38.657],[-9.021,38.747],[-8.938,38.998],[-8.792,39.078],[-8.954,39.016],[-9.136,38.743],[-9.357,38.698],[-9.474,38.731],[-9.480,38.799],[-9.375,39.338],[-9.148,39.543],[-8.838,40.116],[-8.873,40.259],[-8.685,40.753],[-8.660,41.086],[-8.806,41.560],[-8.755,41.698],[-8.888,41.765],[-8.777,41.941],[-8.878,41.947],[-8.887,42.105],[-8.691,42.274],[-8.816,42.285],[-8.730,42.412],[-8.812,42.470],[-8.812,42.640],[-9.033,42.594],[-8.927,42.799],[-9.042,42.814],[-9.235,42.977],[-9.178,43.174],[-8.874,43.334],[-8.666,43.317],[-8.355,43.397],[-8.249,43.439],[-8.257,43.580],[-7.698,43.765],[-7.061,43.554],[-5.847,43.645],[-4.523,43.416],[-3.605,43.519],[-3.046,43.372],[-2.875,43.454],[-2.337,43.328],[-1.991,43.345],[-1.631,43.438],[-1.485,43.564],[-1.246,44.560],[-1.077,44.690],[-1.153,44.764],[-1.245,44.667],[-1.081,45.532],[-0.826,45.381],[-0.691,45.093],[-0.548,45.001],[-0.641,45.090],[-0.791,45.468],[-1.196,45.714],[-1.210,45.771],[-1.032,45.741],[-1.146,46.311],[-1.787,46.515],[-2.092,46.865],[-2.019,47.038],[-2.197,47.163],[-2.149,47.224],[-2.028,47.274],[-1.743,47.216],[-1.975,47.311],[-2.503,47.312],[-2.530,47.382],[-2.428,47.471],[-2.770,47.514],[-2.733,47.602],[-2.787,47.626],[-2.964,47.601],[-3.159,47.695],[-3.901,47.838],[-4.312,47.823],[-4.428,47.969],[-4.679,48.040],[-4.329,48.170],[-4.577,48.290],[-4.241,48.304],[-4.393,48.368],[-4.719,48.363],[-4.763,48.450],[-4.721,48.540],[-4.531,48.620],[-3.715,48.710],[-3.231,48.841],[-3.003,48.791],[-2.692,48.537],[-2.446,48.648],[-2.079,48.645],[-2.004,48.582],[-1.906,48.697],[-1.825,48.631],[-1.376,48.653],[-1.565,48.806],[-1.583,49.202],[-1.813,49.490],[-1.856,49.684],[-1.259,49.680],[-1.232,49.495],[-1.139,49.388],[-0.163,49.297],[0.417,49.448],[0.129,49.508],[0.187,49.703],[1.407,50.089],[1.593,50.252],[1.552,50.294],[1.579,50.739],[1.768,50.936],[2.446,51.067],[3.426,51.394],[4.226,51.386],[3.587,51.454],[3.449,51.541],[3.744,51.596],[4.141,51.456],[4.274,51.472],[4.005,51.596],[4.183,51.610],[3.947,51.811],[4.026,51.928],[4.483,52.309],[4.769,52.941],[4.888,52.908],[5.061,52.961],[5.358,53.096],[5.532,53.269],[6.062,53.407],[6.816,53.441],[6.968,53.327],[7.197,53.282],[7.053,53.376],[7.107,53.557],[7.206,53.655],[7.629,53.697],[8.009,53.691],[8.167,53.543],[8.108,53.468],[8.201,53.432],[8.334,53.606],[8.493,53.514],[8.495,53.394],[8.528,53.781],[8.619,53.875],[9.206,53.856],[9.585,53.600],[9.784,53.555],[9.631,53.600],[9.312,53.859],[8.978,53.926],[8.904,54.000],[8.907,54.261],[8.645,54.295],[8.648,54.398],[8.952,54.468],[8.957,54.538],[8.682,54.792],[8.573,55.134],[8.670,55.156],[8.616,55.418],[8.132,55.600],[8.202,55.982],[8.121,56.140],[8.164,56.607],[8.672,56.496],[8.736,56.627],[8.888,56.735],[9.067,56.794],[9.196,56.702],[9.255,57.012],[9.110,57.044],[8.993,57.016],[8.772,56.725],[8.468,56.665],[8.268,56.754],[8.284,56.852],[8.619,57.111],[9.434,57.174],[9.962,57.581],[10.610,57.737],[10.445,57.562],[10.537,57.449],[10.524,57.243],[10.296,56.999],[10.283,56.621],[10.490,56.521],[10.846,56.522],[10.926,56.443],[10.856,56.296],[10.753,56.242],[10.539,56.200],[10.427,56.276],[10.319,56.213],[10.183,55.865],[9.904,55.843],[10.024,55.761],[9.591,55.493],[9.671,55.266],[9.454,55.040],[9.688,55.000],[9.746,54.807],[10.022,54.674],[10.029,54.581],[9.869,54.472],[10.143,54.488],[10.212,54.409],[10.360,54.438],[10.732,54.316],[11.013,54.379],[11.064,54.281],[11.009,54.181],[10.811,54.075],[10.855,54.010],[11.400,53.945],[11.796,54.145],[12.111,54.168],[12.575,54.467],[13.029,54.411],[13.147,54.283],[13.448,54.141],[13.724,54.153],[13.866,53.853],[13.950,53.801],[14.583,53.639],[14.558,53.823],[13.926,53.879],[13.828,54.127],[14.384,53.925],[16.186,54.290],[16.560,54.554],[17.262,54.730],[18.086,54.836],[18.323,54.838],[18.759,54.685],[18.800,54.633],[18.436,54.745],[18.670,54.431],[18.836,54.370],[19.407,54.386],[19.859,54.634],[19.975,54.921],[20.397,54.951],[20.679,55.103],[21.014,55.402],[21.115,55.617],[21.032,55.350],[20.595,54.982],[20.887,54.909],[21.189,54.935],[21.238,55.455],[21.062,55.813],[21.031,56.637],[21.071,56.824],[21.351,57.018],[21.459,57.322],[21.729,57.571],[22.555,57.724],[22.649,57.595],[23.137,57.324],[23.287,57.090],[23.648,56.971],[23.931,57.008],[24.383,57.250],[24.302,57.784],[24.529,58.354],[24.337,58.381],[24.115,58.266],[23.768,58.361],[23.509,58.659],[23.681,58.787],[23.504,58.790],[23.432,58.921],[23.515,58.999],[23.468,59.032],[23.494,59.196],[24.083,59.292],[24.054,59.372],[24.380,59.473],[25.444,59.521],[25.521,59.559],[25.509,59.639],[26.625,59.554],[26.975,59.451],[27.893,59.414],[28.064,59.554],[28.014,59.725],[28.058,59.782],[28.335,59.693],[28.518,59.850],[28.947,59.829],[29.147,60.000],[30.123,59.874],[30.173,59.957],[29.721,60.195],[29.069,60.191],[28.643,60.375],[28.492,60.540],[28.622,60.492],[28.651,60.611],[28.513,60.677],[27.462,60.465],[27.205,60.543],[26.535,60.413],[26.569,60.625],[26.378,60.424],[25.956,60.474],[26.036,60.342],[25.758,60.268],[25.656,60.333],[24.600,60.114],[24.446,60.021],[23.464,59.986],[23.021,59.816],[22.964,59.826],[23.198,60.022],[22.994,60.099],[22.912,60.210],[22.750,60.057],[22.463,60.029],[22.443,60.157],[22.590,60.228],[22.512,60.281],[22.585,60.381],[21.854,60.505],[21.805,60.594],[21.613,60.531],[21.436,60.596],[21.361,60.967],[21.513,61.281],[21.507,61.484],[21.565,61.484],[21.498,61.552],[21.606,61.592],[21.385,61.915],[21.256,61.990],[21.343,62.277],[21.166,62.414],[21.104,62.623],[21.144,62.740],[21.458,62.950],[21.474,63.033],[21.651,63.039],[21.545,63.204],[21.896,63.210],[22.320,63.310],[22.243,63.438],[22.346,63.442],[22.319,63.504],[22.398,63.491],[22.528,63.580],[22.532,63.648],[22.756,63.683],[23.599,64.041],[23.653,64.134],[24.278,64.515],[24.558,64.801],[24.942,64.884],[25.288,64.860],[25.228,64.951],[25.373,65.009],[25.256,65.143],[25.348,65.479],[24.675,65.671],[24.582,65.757],[24.628,65.859],[24.404,65.780],[23.691,65.829],[23.102,65.735],[22.747,65.871],[22.539,65.794],[22.401,65.862],[22.288,65.751],[22.254,65.598],[22.086,65.611],[22.148,65.553],[21.920,65.532],[21.950,65.470],[21.880,65.424],[21.566,65.408],[21.523,65.359],[21.609,65.261],[21.410,65.317],[21.574,65.126],[21.138,64.809],[21.520,64.463],[21.465,64.380],[21.018,64.178],[20.763,63.868],[19.914,63.611],[19.722,63.463],[19.502,63.509],[19.495,63.424],[19.354,63.477],[19.034,63.238],[18.817,63.257],[18.859,63.207],[18.606,63.178],[18.531,63.064],[18.313,62.996],[18.502,62.989],[18.463,62.896],[18.170,62.789],[17.880,62.873],[17.974,62.721],[17.903,62.659],[18.037,62.601],[17.646,62.451],[17.410,62.508],[17.378,62.463],[17.429,62.335],[17.634,62.233],[17.510,62.166],[17.375,61.866],[17.465,61.684],[17.196,61.725],[17.216,61.656],[17.131,61.576],[17.203,60.952],[17.279,60.812],[17.251,60.701],[17.593,60.628],[17.661,60.535],[17.956,60.590],[18.163,60.408],[18.558,60.254],[18.535,60.153],[18.787,60.079],[18.990,59.828],[18.971,59.757],[17.980,59.329]]];
+
+
+/* Presentation-only marker offsets, in degrees. The data coordinates above stay
+   authoritative — the route, the ship and the projection tests all use them. This
+   moves only the clickable bead.
+
+   Scylla and Charybdis are ~18km apart, which renders 5px apart: the beads are
+   wider than the gap, so no camera distance separates them (zooming scales both).
+   Design section 3 asks for them to be separated enough to be individually
+   clickable, so each is pushed onto the shore it actually belongs to — Scylla to
+   the Calabrian side, Charybdis to the Sicilian side off Punta del Faro. */
+export const MARKER_NUDGE = {
+  12: [ 0.20,  0.20],   // Scylla, northeast onto Calabria
+  13: [-0.20, -0.20],   // Charybdis, southwest towards the Sicilian shore
+};
+
+export const markerLonLat = (s) => {
+  const d = MARKER_NUDGE[s.n];
+  return d ? [s.lon + d[0], s.lat + d[1]] : [s.lon, s.lat];
+};
+
+/* ===================== ROUTE ===================== */
+/* Ray-casting point-in-polygon over the atlas rings. Used by the tests to prove
+   no leg of the route crosses land, and by nothing at runtime. */
+export function pointInLand([lon, lat]) {
+  for (const ring of ATLAS) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if ((yi > lat) !== (yj > lat) &&
+          lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    if (inside) return true;
+  }
+  return false;
+}
+
+/* Hand-tuned waypoints that keep a leg in open water. Keyed "from-to" by stop
+   number. The source map arcs these legs the same way. Add points here when the
+   "no route leg cuts across land" test reports an offender. */
+export const VIA = {
+  '2-3':   [[25.75, 40.30], [25.60, 39.60], [24.60, 38.10], [23.90, 37.00]],
+           // Thrace south down the Aegean, east of Samothrace and Lemnos
+  '4-5':   [[21.00, 34.60], [16.00, 33.60], [13.00, 33.40]],
+           // south of Crete, then west along the Libyan shore
+  '5-6':   [[12.60, 35.40], [14.90, 36.30], [15.30, 36.60], [15.45, 37.10]],
+           // Djerba past Malta, round Capo Passero, north up Sicily's east coast
+  '6-7':   [[15.45, 37.10], [15.35, 36.55], [14.30, 36.35], [13.30, 36.50]],
+           // back round Capo Passero and west along Sicily's south coast
+  '7-8':   [[11.50, 37.60], [9.50, 37.70], [7.30, 37.55], [6.30, 37.30]],
+           // north of Cap Bon, then west along the Algerian shore
+  '8-9':   [[5.20, 38.00]],
+           // open Balearic
+  '10-11': [[5.60, 40.60], [7.60, 39.60], [8.20, 38.70]],
+           // out of the Gulf of Lion, down Sardinia's west coast, round Capo Teulada
+  '11-12': [[11.50, 38.90], [13.50, 38.60], [15.00, 38.40]],
+           // east along Sicily's north coast to the strait
+  '13-14': [[15.45, 37.40], [15.30, 36.60]],
+           // back out of the strait and round Capo Passero
+  '14-15': [[12.50, 37.00], [9.50, 37.70], [6.50, 37.60], [4.00, 38.50]],
+           // north of Tunisia, then west along the African shore
+  '15-16': [[2.60, 39.90], [4.50, 40.60], [7.00, 41.30]],
+           // north of the Balearics up to Corsica
+  '16-17': [[10.60, 39.60], [12.00, 37.30], [15.00, 36.30], [17.50, 36.60], [19.80, 37.60]],
+           // Corsica south past Sardinia, below Sicily, east to Ithaca
+};
+
+export function routeLonLats() {
+  const out = [];
+  STOPS.forEach((s, i) => {
+    out.push([s.lon, s.lat]);
+    const next = STOPS[i + 1];
+    if (next) for (const p of VIA[`${s.n}-${next.n}`] ?? []) out.push(p);
+  });
+  return out;
+}
+
+
+/* ===================== TEXT + RENDERING ===================== */
+export const ATTRIBUTION = {
+  text: 'Route after Peter T. Struck. Map by Simeon Netchev, World History Encyclopedia.',
+  href: 'https://www.worldhistory.org/image/15906/map-of-odysseus-10-year-journey-home/',
+  licence: 'CC BY-NC-ND',
+};
+
+export const ROUTE_NOTE =
+  `The Odyssey blends myth, memory and geography in ways that resist literal mapping. ` +
+  `The route shown here follows Peter T. Struck of the University of Pennsylvania. ` +
+  `It is one reading among many — Abraham Ortelius charted the voyage in 1597, ` +
+  `William Gladstone proposed another arrangement — and there is no scholarly consensus. ` +
+  `Places marked as identifications have no established location.`;
+
+const esc = (s) => String(s).replace(/[&<>"]/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const yearLabel = (s) =>
+  s.yearFrom === s.yearTo ? `Year ${s.yearFrom}` : `Years ${s.yearFrom}–${s.yearTo}`;
+
+const link = (href, label) =>
+  `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;
+
+export function renderEntry(s) {
+  const prov = s.prov === 'map'
+    ? `<p class="prov">Placed after the source map; an identification, not an established location.</p>`
+    : '';
+  return `
+<article class="entry" aria-label="${esc(s.numeral)}. ${esc(s.name)}">
+  <p class="eyebrow"><span class="numeral">${esc(s.numeral)}</span>
+     <span class="year">${esc(yearLabel(s))}</span></p>
+  <h2>${esc(s.name)}</h2>
+  <p class="event">${esc(s.event)}</p>
+  <p class="prose">${esc(s.prose)}</p>
+  ${prov}
+  <p class="links">${link(s.links.wikipedia, 'Wikipedia')}
+     ${link(s.links.whe, 'World History Encyclopedia')}</p>
+</article>`.trim();
+}
+
+export function renderFallback() {
+  return `
+<h1>Nostos — Odysseus' Ten-Year Journey Home</h1>
+<p class="note">${esc(ROUTE_NOTE)}</p>
+<ol class="fallback-list">
+${STOPS.map(s => `  <li id="stop-${s.n}">${renderEntry(s)}</li>`).join('\n')}
+</ol>
+<p class="credit">${esc(ATTRIBUTION.text)}
+   ${link(ATTRIBUTION.href, 'Source map')} (${esc(ATTRIBUTION.licence)}).
+   Coastlines from Natural Earth (public domain).</p>`.trim();
+}
+
+
+/* ===================== YEAR RAIL ===================== */
+/* Segment width is proportional to time spent, so the seven years on Ogygia take
+   roughly 70% of the rail. Stops that occupy no measurable time still need to be
+   clickable, so each gets a MIN_SHARE floor before normalisation.
+   MIN_SHARE = 0.09 puts Ogygia at 71.9%. 0.06 puts it at 75.9% and fails the
+   test; 0.12 passes at 68.2% and makes the single-year stops easier to hit. */
+const MIN_SHARE = 0.09;   // in years
+
+export function railSegments() {
+  const raw = STOPS.map(s => Math.max(s.yearTo - s.yearFrom + 1 - 1, 0) || MIN_SHARE);
+  const total = raw.reduce((a, b) => a + b, 0);
+  return STOPS.map((s, i) => ({
+    n: s.n, numeral: s.numeral, name: s.name,
+    yearFrom: s.yearFrom, yearTo: s.yearTo,
+    widthPct: (raw[i] / total) * 100,
+  }));
+}
+
+
+/* ===================== SELFTEST ===================== */
+const NUMERALS = ['I','II','III','IV','V','VI','VII','VIII','IX','X',
+                  'XI','XII','XIII','XIV','XV','XVI','XVII'];
+
+export function selftest(setpieceKeys = null) {
+  const results = [];
+  const check = (name, fn) => {
+    try { const detail = fn(); results.push({ name, ok: detail === true, detail:
+      detail === true ? 'ok' : String(detail) }); }
+    catch (e) { results.push({ name, ok: false, detail: e.message }); }
+  };
+
+  check('stop count', () => STOPS.length === 17 || `got ${STOPS.length}`);
+  check('numerals ordered', () => {
+    const bad = STOPS.filter((s, i) => s.n !== i + 1 || s.numeral !== NUMERALS[i]);
+    return bad.length === 0 || bad.map(s => s.name).join(', ');
+  });
+  check('links well-formed', () => {
+    const bad = [];
+    for (const s of STOPS) {
+      for (const [k, host] of [['wikipedia', 'en.wikipedia.org'],
+                               ['whe', 'www.worldhistory.org']]) {
+        const u = new URL(s.links[k]);
+        if (u.protocol !== 'https:' || u.host !== host) bad.push(`${s.name}.${k}`);
+      }
+    }
+    return bad.length === 0 || bad.join(', ');
+  });
+  check('projection round-trip', () => {
+    const bad = STOPS.filter(s => {
+      const b = worldToLonLat(lonLatToWorld(s.lon, s.lat));
+      return Math.abs(b.lon - s.lon) > 1e-9 || Math.abs(b.lat - s.lat) > 1e-9;
+    });
+    return bad.length === 0 || bad.map(s => s.name).join(', ');
+  });
+  check('rail widths', () => {
+    const total = railSegments().reduce((a, s) => a + s.widthPct, 0);
+    return Math.abs(total - 100) < 1e-6 || `sum ${total}`;
+  });
+  check('stops in bounds', () => {
+    const bad = STOPS.filter(s => s.lon < -7 || s.lon > 42 || s.lat < 29 || s.lat > 48);
+    return bad.length === 0 || bad.map(s => s.name).join(', ');
+  });
+  check('setpiece keys resolvable', () => {
+    if (!setpieceKeys) return true;                       // Node run: nothing to resolve
+    const bad = STOPS.filter(s => s.setpiece && !setpieceKeys.includes(s.setpiece));
+    return bad.length === 0 || bad.map(s => s.setpiece).join(', ');
+  });
+  check('atlas present', () => ATLAS.length > 0 || 'atlas is empty');
+  check('map-derived stops in open water', () => {
+    const dry = STOPS.filter(s => s.prov === 'map' && pointInLand([s.lon, s.lat]));
+    return dry.length === 0 || dry.map(s => s.name).join(', ');
+  });
+
+  return { pass: results.every(r => r.ok), results };
+}
+
+/* CORE-END */
+</script>
+
+<script type="module" id="scene">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const core = await import(
+  URL.createObjectURL(new Blob([document.getElementById('core').textContent],
+                               { type: 'text/javascript' })));
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* WebGL support gate — the fallback list is built in the branch below. */
+function webglAvailable() {
+  try {
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext &&
+              (c.getContext('webgl2') || c.getContext('webgl')));
+  } catch { return false; }
+}
+
+if (!webglAvailable()) {
+  document.documentElement.classList.add('no-webgl');
+  document.querySelector('.skip').href = '#fallback';   // the journal is hidden here
+  document.querySelector('.skip').textContent = 'Skip to the seventeen entries';
+  document.getElementById('fallback').innerHTML = core.renderFallback();
+  window.__nostos = { ready: true, fallback: true, core };
+} else {
+  const stage = document.getElementById('stage');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d1b20);
+  scene.fog = new THREE.Fog(0x0d1b20, 520, 1700);
+
+  const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 4000);
+  const mid = core.lonLatToWorld(17, 39);
+  camera.position.set(mid.x, 340, mid.z + 300);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  stage.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(mid.x, 0, mid.z);
+  controls.enableDamping = !reducedMotion;
+  controls.maxPolarAngle = Math.PI * 0.48;
+  controls.minDistance = 40;
+  controls.maxDistance = 900;
+
+  scene.add(new THREE.HemisphereLight(0xbfd8e0, 0x3a2a18, 0.85));
+  const sun = new THREE.DirectionalLight(0xffe8c4, 1.25);
+  sun.position.set(-300, 400, 160);
+  scene.add(sun);
+
+  /* ---- sea: one plane, one procedurally drawn texture, no shader ----
+     Sized to outrun the atlas in every direction so no plane edge is ever
+     visible on the horizon. Two triangles; the size costs nothing. */
+  const LON_SCALE = core.LON_SCALE;
+  const SEA_W = 1200, SEA_H = 900;
+  function seaTexture() {
+    const S = 512, c = document.createElement('canvas');
+    c.width = c.height = S;
+    const g = c.getContext('2d');
+    g.fillStyle = '#1d6f7e'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 9000; i++) {           // faint grain
+      g.fillStyle = `rgba(255,255,255,${Math.random() * 0.035})`;
+      g.fillRect(Math.random() * S, Math.random() * S, 1, 1);
+    }
+    /* one line per tile edge: the repeat below then sets the spacing to 5 degrees.
+       Subdividing inside the tile makes the grid read as noise, not as a graticule. */
+    g.strokeStyle = 'rgba(240,236,216,0.13)';
+    g.lineWidth = 2;
+    g.strokeRect(0, 0, S, S);
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(SEA_W / (5 * LON_SCALE * core.UNITS_PER_DEG),
+                 SEA_H / (5 * core.UNITS_PER_DEG));   // a 5-degree graticule
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+
+  const seaMap = seaTexture();
+  const sea = new THREE.Mesh(
+    new THREE.PlaneGeometry(SEA_W, SEA_H),
+    new THREE.MeshStandardMaterial({ map: seaMap, roughness: 0.72, metalness: 0.05 }));
+  sea.name = 'sea';
+  sea.rotation.x = -Math.PI / 2;
+  sea.position.set(core.lonLatToWorld(17, 0).x, -0.35, core.lonLatToWorld(0, 39).z);
+  scene.add(sea);
+
+  const RAIL_PX = 68;                       // --rail-h, 4.25rem
+  function frameVisibleArea() {
+    const narrow = innerWidth <= 768;
+    const panelW = narrow ? 0 : Math.min(30 * 16, innerWidth * 0.34);
+    const covered = narrow ? innerHeight * 0.52 + RAIL_PX : RAIL_PX;
+    camera.setViewOffset(innerWidth, innerHeight,
+                         -panelW / 2, covered / 2, innerWidth, innerHeight);
+  }
+
+  function onResize() {
+    camera.aspect = innerWidth / innerHeight;
+    frameVisibleArea();                     // calls updateProjectionMatrix
+    renderer.setSize(innerWidth, innerHeight);
+  }
+  addEventListener('resize', onResize);
+  frameVisibleArea();
+
+  window.__nostos = { scene, camera, renderer, controls, core, reducedMotion, ready: true };
+
+
+  /* ---- land: one extruded shape per coastline ring, merged ---- */
+  const LAND_DEPTH = 1.6;
+  {
+    const geoms = [];
+    for (const ring of core.ATLAS) {
+      const shape = new THREE.Shape();
+      ring.forEach(([lon, lat], i) => {
+        const p = core.lonLatToWorld(lon, lat);
+        // Shape is 2D in XY; we rotate into XZ after extruding.
+        i === 0 ? shape.moveTo(p.x, -p.z) : shape.lineTo(p.x, -p.z);
+      });
+      shape.closePath();
+      try {
+        geoms.push(new THREE.ExtrudeGeometry(shape, {
+          depth: LAND_DEPTH, bevelEnabled: true, bevelSize: 0.35,
+          bevelThickness: 0.35, bevelSegments: 1, curveSegments: 1,
+        }));
+      } catch { /* a degenerate ring cannot be triangulated; skip it */ }
+    }
+
+    const land = new THREE.Mesh(
+      mergeGeometries(geoms, false),
+      new THREE.MeshStandardMaterial({ color: 0xe8dcc0, roughness: 0.88, metalness: 0.0,
+                                       flatShading: true }));
+    land.name = 'land';
+    land.rotation.x = -Math.PI / 2;   // XY shape plane -> XZ ground plane
+    scene.add(land);
+    geoms.forEach(g => g.dispose());
+
+    window.__nostos.triangles = land.geometry.index
+      ? land.geometry.index.count / 3
+      : land.geometry.attributes.position.count / 3;
+  }
+
+
+  /* ---- route: a Catmull-Rom curve drawn as travelling dots ---- */
+  const curve = new THREE.CatmullRomCurve3(
+    core.routeLonLats().map(([lon, lat]) => {
+      const p = core.lonLatToWorld(lon, lat);
+      return new THREE.Vector3(p.x, 2.2, p.z);
+    }), false, 'catmullrom', 0.35);
+
+  const DOTS = 900;
+  {
+    const dotPos = new Float32Array(DOTS * 3);
+    curve.getSpacedPoints(DOTS - 1).forEach((p, i) => {
+      dotPos[i * 3] = p.x; dotPos[i * 3 + 1] = p.y; dotPos[i * 3 + 2] = p.z;
+    });
+    const dotGeom = new THREE.BufferGeometry();
+    dotGeom.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
+    /* PointsMaterial has no per-point opacity, but it does multiply by a per-point
+       colour. Under additive blending a brightness wave reads as the opacity wave
+       the design asks for, and needs no custom shader. */
+    dotGeom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(DOTS * 3), 3));
+
+    function dotSprite() {
+      const S = 64, c = document.createElement('canvas');
+      c.width = c.height = S;
+      const g = c.getContext('2d');
+      const grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+      grad.addColorStop(0, 'rgba(255,236,200,1)');
+      grad.addColorStop(1, 'rgba(255,236,200,0)');
+      g.fillStyle = grad; g.fillRect(0, 0, S, S);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const route = new THREE.Points(dotGeom, new THREE.PointsMaterial({
+      size: 4.2, map: dotSprite(), transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending, color: 0xffb066, vertexColors: true,
+    }));
+    route.name = 'route';
+    scene.add(route);
+
+    /* travelling brightness wave, driven from the frame loop */
+    const tint = dotGeom.attributes.color;
+    const setWave = (t) => {
+      for (let i = 0; i < DOTS; i++) {
+        const phase = (i / DOTS) * 8 - t * 0.35;
+        const w = 0.25 + 0.75 * Math.pow((Math.sin(phase * Math.PI * 2) + 1) / 2, 3);
+        tint.array[i * 3] = tint.array[i * 3 + 1] = tint.array[i * 3 + 2] = w;
+      }
+      tint.needsUpdate = true;
+    };
+    setWave(0);                                  // static dots under reduced motion
+    window.__nostos.animateRoute = setWave;
+  }
+
+
+  /* ---- markers ---- */
+  const markerGeom = new THREE.SphereGeometry(2.6, 12, 8);
+
+  /* a single halo, parked on the current marker. Seventeen copies of it cost
+     8k triangles and only one is ever visible. */
+  const halo = new THREE.Mesh(
+    new THREE.TorusGeometry(4.4, 0.45, 8, 32),
+    new THREE.MeshStandardMaterial({ color: 0xf4ecd8, emissive: 0x3a2a18, roughness: 0.6 }));
+  halo.name = 'halo';
+  halo.rotation.x = -Math.PI / 2;
+  halo.visible = false;
+  scene.add(halo);
+
+  const markers = core.STOPS.map((s) => {
+    const g = new THREE.Group();
+    const p = core.lonLatToWorld(...core.markerLonLat(s));
+    g.position.set(p.x, 3.2, p.z);
+    g.name = `marker-${s.n}`;
+    g.userData.stop = s.n;
+
+    const bead = new THREE.Mesh(markerGeom, new THREE.MeshStandardMaterial({
+      color: 0xb4451f, emissive: 0x5a1a06, roughness: 0.4, metalness: 0.15 }));
+    bead.userData.stop = s.n;
+    g.add(bead);
+
+    scene.add(g);
+    return g;
+  });
+  window.__nostos.markers = markers;
+  window.__nostos.halo = halo;
+
+  /* highlight — goToStop calls this */
+  window.__nostos.highlightMarker = (n) => {
+    markers.forEach((m) => {
+      const on = m.userData.stop === n;
+      m.children[0].material.emissiveIntensity = on ? 2.4 : 1.0;
+      m.scale.setScalar(on ? 1.45 : 1.0);
+      if (on) { halo.position.copy(m.position); halo.visible = true; }
+    });
+  };
+
+  /* picking */
+  window.__nostos.onMarkerPick = () => {};   // goToStop replaces this
+  {
+    const ray = new THREE.Raycaster();
+    ray.params.Points.threshold = 3;
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      const r = renderer.domElement.getBoundingClientRect();
+      ray.setFromCamera(new THREE.Vector2(
+        ((e.clientX - r.left) / r.width) * 2 - 1,
+        -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+      const hit = ray.intersectObjects(markers, true)[0];
+      if (hit) {
+        let o = hit.object;
+        while (o && o.userData.stop === undefined) o = o.parent;
+        if (o) window.__nostos.onMarkerPick(o.userData.stop);
+      }
+    });
+  }
+
+
+  /* ---- navigation: one entry point ---- */
+  const journalEl = document.getElementById('entry');
+  const railEl = document.getElementById('rail');
+  const prevEl = document.getElementById('prev');
+  const nextEl = document.getElementById('next');
+
+  railEl.innerHTML = core.railSegments().map(seg => {
+    const years = seg.yearFrom === seg.yearTo
+      ? `year ${seg.yearFrom}` : `years ${seg.yearFrom}–${seg.yearTo}`;
+    const label = `${seg.numeral}. ${seg.name} — ${years}`;
+    return `<button type="button" data-stop="${seg.n}" style="width:${seg.widthPct}%"
+      title="${label}" aria-label="${label}">${seg.widthPct > 8 ? seg.name : ''}</button>`;
+  }).join('');
+
+  let flight = null;
+  const FLIGHT_MS = 1400;
+  const easeInOut = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  function goToStop(n) {
+    const s = core.STOPS.find(x => x.n === n);
+    if (!s) return;
+
+    const fromStop = window.__nostos.current;      // read before overwriting
+    window.__nostos.moveShipTo?.(n, fromStop !== undefined);
+    window.__nostos.current = n;
+
+    journalEl.innerHTML = core.renderEntry(s);
+    document.getElementById('journal').scrollTop = 0;
+
+    railEl.querySelectorAll('button').forEach(b => {
+      const on = Number(b.dataset.stop) === n;
+      b.setAttribute('aria-current', String(on));
+      if (on && railEl.scrollWidth - railEl.clientWidth > 8) {
+        b.scrollIntoView({ inline: 'center', block: 'nearest',
+                           behavior: reducedMotion ? 'auto' : 'smooth' });
+      }
+    });
+    prevEl.disabled = n === 1;
+    nextEl.disabled = n === core.STOPS.length;
+
+    window.__nostos.highlightMarker(n);
+
+    const p = core.lonLatToWorld(...core.markerLonLat(s));
+    const target = new THREE.Vector3(p.x, 0, p.z);
+    const k = Math.min(Math.max(1.5 / camera.aspect, 1), 1.7);  // pull back when narrow
+
+    /* Crowded stops need a closer camera or they collide on screen: Scylla and
+       Charybdis are ~18km apart, which is 5px at the standard distance. Only the
+       genuinely tight pairs tighten; everything else keeps the basin framing. */
+    const nearest = Math.min(...core.STOPS.filter(x => x.n !== n).map(o => {
+      const q = core.lonLatToWorld(...core.markerLonLat(o));
+      return Math.hypot(q.x - p.x, q.z - p.z);
+    }));
+    const zoom = Math.min(Math.max(nearest / 10, 0.28), 1);
+
+    const eye = new THREE.Vector3(p.x - 58 * k * zoom, 196 * k * zoom, p.z + 168 * k * zoom);
+    if (reducedMotion) {
+      controls.target.copy(target); camera.position.copy(eye); controls.update();
+      flight = null;
+    } else {
+      flight = { t0: performance.now(),
+                 fromT: controls.target.clone(), toT: target,
+                 fromP: camera.position.clone(), toP: eye };
+    }
+  }
+
+  window.__nostos.goToStop = goToStop;
+  window.__nostos.onMarkerPick = goToStop;
+
+  prevEl.addEventListener('click', () => goToStop(window.__nostos.current - 1));
+  nextEl.addEventListener('click', () => goToStop(window.__nostos.current + 1));
+  railEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-stop]');
+    if (b) goToStop(Number(b.dataset.stop));
+  });
+  addEventListener('keydown', (e) => {
+    /* e.target is not always an Element — a key pressed with focus on the document
+       or the window has no matches(), and calling it there throws */
+    if (e.target instanceof Element && e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); goToStop(window.__nostos.current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); goToStop(window.__nostos.current - 1); }
+  });
+
+
+  /* ---- ship: a small procedural galley ---- */
+  function buildShip() {
+    const g = new THREE.Group();
+    const hullMat = new THREE.MeshStandardMaterial({ color: 0x3d2415, roughness: 0.8 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: 0xb4451f, roughness: 0.6 });
+    const sailMat = new THREE.MeshStandardMaterial({ color: 0xf4ecd8, roughness: 0.9,
+      side: THREE.DoubleSide });
+
+    const hull = new THREE.Mesh(new THREE.CapsuleGeometry(1.5, 7.5, 4, 12), hullMat);
+    hull.rotation.z = Math.PI / 2;
+    hull.scale.set(1, 1, 0.55);
+    g.add(hull);
+
+    const prow = new THREE.Mesh(new THREE.ConeGeometry(1.2, 3.2, 8), trimMat);
+    prow.position.set(5.6, 0.7, 0);
+    prow.rotation.z = -Math.PI / 2.3;
+    g.add(prow);
+
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 9, 6), hullMat);
+    mast.position.y = 4.4;
+    g.add(mast);
+
+    const sailMesh = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 5.4), sailMat);
+    sailMesh.position.set(0, 5.2, 0);
+    g.add(sailMesh);
+
+    for (let i = 0; i < 5; i++) {                 // oars, both sides
+      for (const side of [-1, 1]) {
+        const oar = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4.2, 4), hullMat);
+        oar.position.set(-3 + i * 1.6, -0.3, side * 1.3);
+        oar.rotation.set(side * 0.5, 0, Math.PI / 2.6);
+        g.add(oar);
+      }
+    }
+    g.scale.setScalar(1.5);
+    return g;
+  }
+
+  const ship = buildShip();
+  ship.name = 'ship';
+  scene.add(ship);
+  window.__nostos.ship = ship;
+
+  /* stop n maps to a fraction along the route curve */
+  const stopU = new Map();
+  {
+    const pts = curve.getSpacedPoints(1200);
+    for (const st of core.STOPS) {
+      const p = core.lonLatToWorld(st.lon, st.lat);
+      let best = 0, bestD = Infinity;
+      pts.forEach((q, i) => {
+        const d = (q.x - p.x) ** 2 + (q.z - p.z) ** 2;
+        if (d < bestD) { bestD = d; best = i / (pts.length - 1); }
+      });
+      stopU.set(st.n, best);
+    }
+  }
+
+  /* shipSail, not sail: the sail mesh above is a different thing */
+  let shipSail = null;
+  const SAIL_MS = 1400;
+
+  function moveShipTo(n, animate) {
+    const to = stopU.get(n);
+    if (to === undefined) return;
+    const place = (u) => {
+      const uu = Math.min(Math.max(u, 0), 1);
+      const p = curve.getPointAt(uu);
+      const t = curve.getTangentAt(uu);
+      ship.position.set(p.x, 3.4, p.z);
+      ship.rotation.y = Math.atan2(t.x, t.z) - Math.PI / 2;
+    };
+    if (!animate || reducedMotion) { place(to); shipSail = null; return; }
+    shipSail = { t0: performance.now(), from: stopU.get(window.__nostos.current) ?? to, to, place };
+  }
+  window.__nostos.moveShipTo = moveShipTo;
+
+
+  /* ---- set pieces: original geometry, no traced source art ---- */
+  const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...o });
+  const ROCK = 0x554233, STONE = 0xd8cbb0, EMBER = 0xff7a2f, PALE = 0xf4ecd8;
+
+  const SETPIECES = {
+    troy: () => {                                   // burning citadel and the fleet
+      const g = new THREE.Group();
+      for (let i = 0; i < 5; i++) {
+        const w = new THREE.Mesh(new THREE.BoxGeometry(3.4, 4 + i % 2 * 2, 3.4), M(STONE));
+        w.position.set((i - 2) * 4, 2 + (i % 2), (i % 2) * 3 - 1.5);
+        g.add(w);
+      }
+      for (let i = 0; i < 7; i++) {                 // smoke column
+        const q = new THREE.Mesh(new THREE.SphereGeometry(2.6 - i * 0.22, 7, 5),
+          M(0x2a2320, { transparent: true, opacity: 0.34 - i * 0.035 }));
+        q.position.set(Math.sin(i) * 2, 7 + i * 3.4, Math.cos(i) * 2);
+        g.add(q);
+      }
+      return g;
+    },
+    cyclops: () => {                                // cave mouth, boulder, one eye
+      const g = new THREE.Group();
+      const cliff = new THREE.Mesh(new THREE.BoxGeometry(15, 13, 9), M(ROCK));
+      cliff.position.y = 6.5; g.add(cliff);
+      const mouth = new THREE.Mesh(new THREE.SphereGeometry(3.6, 12, 8,
+        0, Math.PI * 2, 0, Math.PI / 2), M(0x11090a));
+      mouth.position.set(0, 3.4, 4.6); mouth.rotation.x = Math.PI / 2; g.add(mouth);
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.85, 10, 8),
+        M(EMBER, { emissive: 0xff5a10, emissiveIntensity: 3 }));
+      eye.position.set(0, 4.2, 5.4); g.add(eye);
+      const boulder = new THREE.Mesh(new THREE.DodecahedronGeometry(3.4, 0), M(ROCK));
+      boulder.position.set(8, 2.6, 5); g.add(boulder);
+      return g;
+    },
+    aeolia: () => {                                 // wind vortex
+      const g = new THREE.Group();
+      for (let i = 0; i < 5; i++) {
+        const r = new THREE.Mesh(new THREE.TorusGeometry(3 + i * 1.5, 0.3, 5, 18),
+          M(0xbfd8e0, { transparent: true, opacity: 0.5 - i * 0.07,
+                        emissive: 0x2a4a55, emissiveIntensity: 1.2 }));
+        r.rotation.x = Math.PI / 2 + i * 0.16;
+        r.position.y = 3 + i * 2.6;
+        g.add(r);
+      }
+      return g;
+    },
+    lamos: () => {                                  // jagged cliffs around a narrow mouth
+      const g = new THREE.Group();
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 1.6 + 0.7;
+        const c = new THREE.Mesh(new THREE.ConeGeometry(2.6, 9 + (i % 3) * 3, 5), M(ROCK));
+        c.position.set(Math.cos(a) * 13, 4.5, Math.sin(a) * 13);
+        g.add(c);
+      }
+      return g;
+    },
+    aeaea: () => {                                  // Circe's colonnade
+      const g = new THREE.Group();
+      for (let i = 0; i < 8; i++) {
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.85, 9, 10), M(STONE));
+        c.position.set((i % 4) * 4 - 6, 4.5, i < 4 ? -3 : 3);
+        g.add(c);
+      }
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(18, 0.9, 9), M(PALE));
+      roof.position.y = 9.4; g.add(roof);
+      return g;
+    },
+    underworld: () => {                             // a rift and cold light
+      const g = new THREE.Group();
+      const rift = new THREE.Mesh(new THREE.CircleGeometry(7.5, 28), M(0x07080d));
+      rift.rotation.x = -Math.PI / 2; rift.position.y = 0.6; g.add(rift);
+      for (let i = 0; i < 4; i++) {
+        const halo = new THREE.Mesh(new THREE.TorusGeometry(7.5 - i * 1.5, 0.22, 5, 20),
+          M(0x7fa6c8, { emissive: 0x3f6a8f, emissiveIntensity: 2.2,
+                        transparent: true, opacity: 0.6 - i * 0.1 }));
+        halo.rotation.x = Math.PI / 2; halo.position.y = 0.9 + i * 1.6; g.add(halo);
+      }
+      return g;
+    },
+    sirens: () => {                                 // rock, two figures, sound rings
+      const g = new THREE.Group();
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(6, 8, 7), M(ROCK));
+      rock.position.y = 4; g.add(rock);
+      for (const dx of [-1.6, 1.6]) {
+        const f = new THREE.Mesh(new THREE.CapsuleGeometry(0.6, 2.4, 3, 8), M(PALE));
+        f.position.set(dx, 9.4, 0); g.add(f);
+      }
+      for (let i = 0; i < 3; i++) {
+        const r = new THREE.Mesh(new THREE.TorusGeometry(7 + i * 3, 0.16, 4, 20),
+          M(0xf0d9a0, { emissive: 0x8a6a26, emissiveIntensity: 1.6,
+                        transparent: true, opacity: 0.45 - i * 0.11 }));
+        r.rotation.x = Math.PI / 2; r.position.y = 8; g.add(r);
+      }
+      return g;
+    },
+    strait: () => {                                 // Scylla's cliff and Charybdis' funnel
+      const g = new THREE.Group();
+      /* the group is anchored on Scylla's marker; Charybdis' bead sits about
+         (-3.2, +4.0) from it in world units after the nudges above */
+      const cliff = new THREE.Mesh(new THREE.BoxGeometry(6, 13, 6), M(ROCK));
+      cliff.position.set(0, 6.5, 0); g.add(cliff);
+      for (let i = 0; i < 6; i++) {                 // six necks
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 6, 6), M(0x5d2b2b));
+        neck.position.set(Math.sin(i) * 2, 13 + i * 0.4, Math.cos(i) * 2);
+        neck.rotation.z = Math.sin(i) * 0.6; g.add(neck);
+      }
+      const funnel = new THREE.Mesh(new THREE.ConeGeometry(4.6, 9, 22, 1, true),
+        M(0x11454f, { side: THREE.DoubleSide, transparent: true, opacity: 0.72 }));
+      funnel.position.set(-3.2, -4, 4.0); g.add(funnel);
+      funnel.name = 'vortex';
+      return g;
+    },
+    thrinacia: () => {                              // cattle and a sun disc
+      const g = new THREE.Group();
+      for (let i = 0; i < 6; i++) {
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(1.1, 2.6, 3, 8), M(0xe0d2b4));
+        body.rotation.z = Math.PI / 2;
+        body.position.set((i % 3) * 5 - 5, 1.8, i < 3 ? -3.5 : 3.5);
+        g.add(body);
+      }
+      const sun = new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 8),
+        M(0xf7c473, { emissive: 0xffa733, emissiveIntensity: 1.1 }));
+      sun.position.set(0, 14, -6); g.add(sun);
+      const corona = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.14, 4, 22),
+        M(0xffcf6a, { emissive: 0xffa733, emissiveIntensity: 1.4,
+                      transparent: true, opacity: 0.5 }));
+      corona.position.copy(sun.position);
+      corona.rotation.x = -Math.PI / 2.6; g.add(corona);
+      return g;
+    },
+    ogygia: () => {                                 // one island, one cypress
+      const g = new THREE.Group();
+      const isle = new THREE.Mesh(new THREE.SphereGeometry(7, 16, 8,
+        0, Math.PI * 2, 0, Math.PI / 2), M(0xd9c9a4));
+      isle.scale.y = 0.42; g.add(isle);
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.5, 5, 7), M(0x4a3520));
+      trunk.position.y = 4.5; g.add(trunk);
+      const crown = new THREE.Mesh(new THREE.ConeGeometry(1.9, 9, 9), M(0x2f4a2c));
+      crown.position.y = 10.5; g.add(crown);
+      return g;
+    },
+    ithaca: () => {                                 // a lit palace and an olive tree
+      const g = new THREE.Group();
+      const hall = new THREE.Mesh(new THREE.BoxGeometry(13, 6.5, 9), M(STONE));
+      hall.position.y = 3.4; g.add(hall);
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(9.5, 4.4, 4), M(0x8f4a2a));
+      roof.position.y = 8.6; roof.rotation.y = Math.PI / 4; g.add(roof);
+      for (const dx of [-3.2, 0, 3.2]) {
+        const win = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2.2),
+          M(0xffcf6a, { emissive: 0xffb04a, emissiveIntensity: 3 }));
+        win.position.set(dx, 3.6, 4.55); g.add(win);
+      }
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.85, 5, 8), M(0x4a3520));
+      trunk.position.set(10, 2.5, 2); g.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(3.4, 12, 8), M(0x5c6b3a));
+      crown.position.set(10, 6.6, 2); crown.scale.y = 0.75; g.add(crown);
+      return g;
+    },
+  };
+
+  const setpieces = {};
+  for (const st of core.STOPS) {
+    if (!st.setpiece || setpieces[st.setpiece]) continue;
+    const build = SETPIECES[st.setpiece];
+    if (!build) { console.warn(`no builder for setpiece "${st.setpiece}"`); continue; }
+    const obj = build();
+    const p = core.lonLatToWorld(...core.markerLonLat(st));
+    obj.position.set(p.x, 0, p.z);
+    obj.name = `setpiece-${st.setpiece}`;
+    scene.add(obj);
+    setpieces[st.setpiece] = obj;
+  }
+  window.__nostos.setpieces = setpieces;
+
+  /* recount triangles now that the set pieces are in */
+  {
+    let tris = 0;
+    scene.traverse(o => {
+      if (!o.isMesh) return;
+      const gg = o.geometry;
+      tris += gg.index ? gg.index.count / 3 : gg.attributes.position.count / 3;
+    });
+    window.__nostos.triangles = tris;
+  }
+
+/* SCENE-EXTRA */
+
+  /* THREE.Clock is deprecated in 0.185.1; performance.now() needs no addon.
+     dt is clamped so a long hidden-tab pause cannot jump the animations. */
+  const T0 = performance.now();
+  let tPrev = T0;
+  function frame() {
+    if (document.hidden) return;                 // paused; resumed below
+    const tNow = performance.now();
+    const dt = Math.min((tNow - tPrev) / 1000, 0.1);
+    const time = (tNow - T0) / 1000;
+    tPrev = tNow;
+    if (!reducedMotion) { seaMap.offset.x += dt * 0.004; controls.update(); }
+    if (!reducedMotion) window.__nostos.animateRoute?.(time);
+    if (!reducedMotion) {
+      const v = setpieces.strait?.getObjectByName('vortex');
+      if (v) v.rotation.y = time * 1.6;
+    }
+    if (shipSail) {
+      const k = easeInOut(Math.min((performance.now() - shipSail.t0) / SAIL_MS, 1));
+      shipSail.place(shipSail.from + (shipSail.to - shipSail.from) * k);
+      if (k === 1) shipSail = null;
+    }
+    if (flight) {
+      const k = easeInOut(Math.min((performance.now() - flight.t0) / FLIGHT_MS, 1));
+      controls.target.lerpVectors(flight.fromT, flight.toT, k);
+      camera.position.lerpVectors(flight.fromP, flight.toP, k);
+      if (k === 1) flight = null;
+    }
+/* FRAME-EXTRA */
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) { tPrev = performance.now(); frame(); }
+  });
+  frame();
+
+  document.getElementById('fallback').innerHTML = core.renderFallback();
+  document.getElementById('route-note').textContent = core.ROUTE_NOTE;
+  document.getElementById('credit').innerHTML =
+    `${core.ATTRIBUTION.text} <a href="${core.ATTRIBUTION.href}" target="_blank" ` +
+    `rel="noopener noreferrer">Source map</a> (${core.ATTRIBUTION.licence}). ` +
+    `Coastlines from Natural Earth (public domain).`;
+
+  moveShipTo(1, false);
+  goToStop(1);
+
+  /* ?selftest=1 — banner plus console table */
+  if (new URLSearchParams(location.search).has('selftest')) {
+    const r = core.selftest(Object.keys(setpieces));
+    const el = document.createElement('div');
+    el.id = 'selftest';
+    el.style.background = r.pass ? '#123d1e' : '#4d1218';
+    el.style.color = '#f4ecd8';
+    el.textContent = `SELFTEST ${r.pass ? 'PASS' : 'FAIL'}\n` +
+      r.results.map(x => `${x.ok ? '  ok  ' : ' FAIL '} ${x.name} — ${x.detail}`).join('\n');
+    document.body.appendChild(el);
+    console.table(r.results);
+  }
+
+/* SCENE-TAIL */
+}
+
+</script>
+
+</body>
+</html>
