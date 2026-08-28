@@ -729,7 +729,6 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 11098, y: 59.01, label: 'GPT-5.6 Sol (xhigh)', al: 'top', ao: 8 },
           { x: 16879, y: 60.93, label: 'GPT-5.6 Sol (max)', al: 'top', ao: 8 } ] },
       { name: 'GPT-5.6 Terra', provider: 'OpenAI', points: [
-          { x: 2504, y: 41.30, label: 'GPT-5.6 Terra (low)', al: 'right', ao: 8 },
           { x: 4143, y: 46.76, label: 'GPT-5.6 Terra (medium)', al: 'bottom', ao: 8 },
           { x: 8486, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 8 },
           { x: 12107, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'left', ao: 8 },
@@ -749,7 +748,6 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 31185, y: 62.52, label: 'Claude Opus 5 (xhigh)', al: 'top', ao: 8 },
           { x: 40249, y: 63.05, label: 'Claude Opus 5 (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Sonnet 5', provider: 'Anthropic', dashed: true, points: [
-          { x: 10701, y: 42.57, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'bottom', ao: 8 },
           { x: 72342, y: 55.26, label: 'Claude Sonnet 5 (max)', al: 'top', ao: 8 } ] }
     ],
 
@@ -783,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 40, max: 65 }
+      scale: { min: 42, max: 65 }
     },
 
     tooltip: function (p) { return p.y.toFixed(2) + ' index  ·  ' + p.x.toLocaleString() + ' tokens per task'; },

@@ -729,7 +729,6 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.6711, y: 59.01, label: 'GPT-5.6 Sol (xhigh)', al: 'bottom', ao: 12 },
           { x: 1.0056, y: 60.93, label: 'GPT-5.6 Sol (max)', al: 'right', ao: 8 } ] },
       { name: 'GPT-5.6 Terra', provider: 'OpenAI', points: [
-          { x: 0.0962, y: 41.30, label: 'GPT-5.6 Terra (low)', al: 'right', ao: 8 },
           { x: 0.1232, y: 46.76, label: 'GPT-5.6 Terra (medium)', al: 'left', ao: 8 },
           { x: 0.2276, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'right', ao: 8 },
           { x: 0.3182, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'bottom', ao: 20 },
@@ -749,7 +748,6 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 1.8012, y: 62.52, label: 'Claude Opus 5 (xhigh)', al: 'top', ao: 20 },
           { x: 2.3369, y: 63.05, label: 'Claude Opus 5 (max)', al: 'right', ao: 16 } ] },
       { name: 'Claude Sonnet 5', provider: 'Anthropic', dashed: true, points: [
-          { x: 0.4170, y: 42.57, label: 'Claude Sonnet 5 (Non-reasoning)', al: 'bottom', ao: 16 },
           { x: 1.7173, y: 55.26, label: 'Claude Sonnet 5 (max)', al: 'bottom', ao: 20 } ] },
       { name: 'DeepSeek V4 Pro 0813', provider: 'DeepSeek', dashed: true, points: [
           { x: 0.1326, y: 53.20, label: 'DeepSeek V4 Pro 0813 (off-peak)', tableLabel: 'DeepSeek V4 Pro 0813 (max) · off-peak', al: 'top', ao: 8 },
@@ -786,7 +784,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 40, max: 65 }
+      scale: { min: 42, max: 65 }
     },
 
     tooltip: function (p) {
