@@ -45,7 +45,8 @@
     "developer-productivity-ai-native/slides/overview-slide-12-1.png",
     "developer-productivity-ai-native/slides/overview-slide-13-1.png",
     "developer-productivity-ai-native/slides/overview-slide-14-1.png",
-    "developer-productivity-ai-native/slides/overview-slide-15-1.png"
+    "developer-productivity-ai-native/slides/overview-slide-15-1.png",
+    "earthquake-map/index/data/major-earthquakes.csv"
   ],
   "ignored_sources": [
     "**/plans/**",
@@ -1004,7 +1005,7 @@
       "collection": "homeric-epics",
       "order": 20,
       "replacements": {},
-      "date": "2026-08-28"
+      "date": "2026-08-29"
     },
     {
       "id": "earthquake-map-index",
@@ -1015,7 +1016,7 @@
       "order": 10,
       "replacements": {},
       "description": "An interactive map of every magnitude 6.0+ quake in the Asia Pacific over the last 200 years, coloured by depth, pulled live from the USGS catalog with a bundled CSV as fallback.",
-      "date": "2026-08-28"
+      "date": "2026-08-29"
     }
   ]
 }
