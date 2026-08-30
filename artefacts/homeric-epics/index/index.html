@@ -651,7 +651,7 @@ export const STOPS = [
     links: { wikipedia: W + 'Scylla', whe: H + 'Scylla/' } },
 
   { n: 13, numeral: 'XIII', name: 'Charybdis', lon: 15.650, lat: 38.090, prov: 'real',
-    yearFrom: 2, yearTo: 2, setpiece: null,
+    yearFrom: 2, yearTo: 2, setpiece: 'charybdis',
     event: 'The monstrous whirlpool',
     prose: `Charybdis lies opposite Scylla, a whirlpool that swallows the sea three times a day and vomits it back. Odysseus passes safely on the first crossing by hugging Scylla's cliff. He meets it a second time alone, after the loss of his ship, clinging to a fig tree above the vortex until the mast and keel he had been riding are spat back up, then dropping onto them and paddling clear. The pair have named a proverb ever since, for a choice between two unavoidable dangers.`,
     links: { wikipedia: W + 'Charybdis', whe: H + 'Charybdis/' } },
@@ -1674,15 +1674,33 @@ const SETPIECES = {
     }
     return g;
   },
-  strait: () => {                                 // Scylla's cliff and Charybdis' funnel
+  strait: () => models.strait ?? new THREE.Group(),  // Scylla's cliff and necks, from Blender
+  /* Charybdis is its own set piece, not a child of Scylla's. Hanging it off the
+     strait group put it at an offset that `keepApparentSize` scaled along with
+     everything else, so the funnel slid towards Scylla as the camera came in and
+     never sat over its own marker.
+
+     The sea is an opaque plane at y=-0.35, so a funnel sunk into it is a funnel
+     nobody sees; it stands on the water instead, mouth up and throat down, the way
+     Aeolia's rings and the underworld's halos do. Foam colours, because the old
+     0x11454f cone was near-invisible against the 0x1d6f7e sea. The tilted rings are
+     what makes the spin read — a solid of revolution turning on its own axis does not. */
+  charybdis: () => {                              // the whirlpool, procedural throughout
     const g = new THREE.Group();
-    /* the group is anchored on Scylla's marker; Charybdis' bead sits about
-       (-3.2, +4.0) from it in world units after the nudges above */
-    if (models.strait) g.add(models.strait);
-    const funnel = new THREE.Mesh(new THREE.ConeGeometry(4.6, 9, 22, 1, true),
-      M(0x11454f, { side: THREE.DoubleSide, transparent: true, opacity: 0.72 }));
-    funnel.position.set(-3.2, -4, 4.0); g.add(funnel);
-    funnel.name = 'vortex';
+    g.name = 'vortex';
+    const throat = new THREE.Mesh(new THREE.ConeGeometry(5.4, 6, 24, 1, true),
+      M(0xcfe6ea, { side: THREE.DoubleSide, emissive: 0x2a4a55, emissiveIntensity: 0.9,
+                    transparent: true, opacity: 0.55 }));
+    throat.rotation.x = Math.PI; throat.position.y = 3.2;
+    g.add(throat);
+    for (let i = 0; i < 3; i++) {
+      const r = new THREE.Mesh(new THREE.TorusGeometry(5.2 - i * 1.6, 0.26, 5, 20),
+        M(0xeef6f7, { emissive: 0x6a9aa6, emissiveIntensity: 1.6,
+                      transparent: true, opacity: 0.6 - i * 0.13 }));
+      r.rotation.set(Math.PI / 2 + 0.18, 0, i * 2.1);
+      r.position.y = 5.6 - i * 1.7;
+      g.add(r);
+    }
     return g;
   },
   thrinacia: () => {                              // oxen from Blender, sun disc in code
@@ -1755,7 +1773,7 @@ function buildSetpieces() {
   }
 
   // the one set piece that moves owns its own tick rather than the loop knowing about it
-  const vortex = setpieces.strait?.getObjectByName('vortex');
+  const vortex = setpieces.charybdis;
   if (vortex) onMotionTick((dt, time) => { vortex.rotation.y = time * 1.6; });
 
   nostos.setpieces = setpieces;
@@ -2105,7 +2123,9 @@ function sceneChecks() {
     `got ${Object.keys(models).length}: ${Object.keys(models).join(', ')}`);
   check('every setpiece key has a node', () => {
     const need = [...new Set(core.STOPS.map(s => s.setpiece).filter(Boolean))];
-    const bad = need.filter(k => k !== 'aeolia' && !models[k]);
+    /* aeolia and charybdis are pure effects — wind rings and a foam funnel — and
+       design_blender_models.md section 7 keeps both out of the GLB by design */
+    const bad = need.filter(k => !['aeolia', 'charybdis'].includes(k) && !models[k]);
     return bad.length === 0 || bad.join(', ');
   });
   check('scene triangles under 150k', () =>
