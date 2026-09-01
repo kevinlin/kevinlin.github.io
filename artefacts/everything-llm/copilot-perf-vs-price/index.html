@@ -171,7 +171,7 @@ h1 {
   flex: none;
 }
 
-/* Static key for the hollow markers; not a filter, so it carries no button. */
+/* Static keys for the hollow and dotted markers; not filters, so they carry no button. */
 .legend .key {
   color: hsl(var(--ink-muted));
   font-weight: 400;
@@ -180,6 +180,14 @@ h1 {
 .legend .key .dot {
   background: hsl(var(--surface));
   box-shadow: inset 0 0 0 2px hsl(var(--ink-muted));
+}
+
+/* Dotted = a score nobody has published. Border rather than inset shadow, because
+   only a real border can be dotted. */
+.legend .key .dot.is-est {
+  box-sizing: border-box;
+  box-shadow: none;
+  border: 2px dotted hsl(var(--ink-muted));
 }
 
 /* --- Chart card -------------------------------------------------------- */
@@ -392,10 +400,17 @@ a.src-url:hover { color: hsl(var(--ring)); }
   background: var(--dot);
 }
 
-/* Same convention as the chart: hollow = Scale's independent run. */
+/* Same convention as the chart: hollow = Scale's independent run, dotted = estimated. */
 .src-model .swatch.is-hollow {
   background: hsl(var(--surface));
   box-shadow: inset 0 0 0 2px var(--dot);
+}
+
+.src-model .swatch.is-est {
+  box-sizing: border-box;
+  background: hsl(var(--surface));
+  box-shadow: none;
+  border: 2px dotted var(--dot);
 }
 
 /* --- Footnote ---------------------------------------------------------- */
@@ -489,9 +504,9 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
     <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the next point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over. <strong>GPT-5.6 Sol carries two extra points.</strong> GitHub lists Sol at promotional pricing, 50% off list rates, through 3 September 2026 &mdash; and the rates printed in GitHub&rsquo;s table today are already the discounted ones. The list Sol figures plotted here are therefore those listed rates doubled. That is the only relationship the page states, and it makes Sol the one inferred price on this chart. The promotion halves both tiers, but only the default tier&rsquo;s promotional price is plotted. That list price is itself a reduction: on <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">21 August 2026</a> OpenAI cut Sol to $4.00 per 1M input, $0.40 cached and $20.00 output, from $5.00 / $0.50 / $30.00, and holds it there at least until 21 November. The long-context tier came down with it. The fourth Sol point is the rate card that cut replaced &mdash; the price Sol reverts to if the promotion lapses, and the one figure on this chart GitHub never printed.</p>
 
-    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The <em>Score published by</em> section below links every figure to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Opus 4.7, Opus 4.8 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5, Sonnet 5 and Fable 5 are listed there as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. Treat any gap under about two points as noise.</p>
+    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The <em>Score published by</em> section below links every figure to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Fable 5, Opus 4.8, Opus 4.7 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5 and Sonnet 5 are listed there as having no primary source I could verify, since Anthropic&rsquo;s launch posts publish SWE-bench Verified but not SWE-Bench Pro. <strong>Grok 4.6 is the one estimated point.</strong> xAI published SWE-Bench Pro prominently for Grok 4.5 and then dropped it from both the 4.6 launch post and the <a href="https://media.x.ai/v1/website/card-4p6-4cd2dc57.pdf">4.6 model card</a>, which report DeepSWE 1.1 and APEX-SWE instead. The 70% plotted here is 4.5&rsquo;s 64.7% plus a 15% cut in its failure rate &mdash; the gain implied by 4.6&rsquo;s improvement on those adjacent coding evals &mdash; with a plausible range of roughly 67 to 73. It is a prediction, not a measurement: its markers carry a <strong>dotted ring</strong> instead of a solid one, and every label it carries says (est.). Treat any gap under about two points as noise.</p>
 
-    <p class="note"><strong>Not shown.</strong> Twelve priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Grok 4.6, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4, Claude Sonnet 4.5, Claude Opus 4.5 and Gemini 3.1 Pro do have Scale figures, but are left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 22 August 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note"><strong>Not shown.</strong> Eleven priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash, Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4, Claude Sonnet 4.5, Claude Opus 4.5 and Gemini 3.1 Pro do have Scale figures, but are left off this chart. Grok 4.5 is off it too: GitHub still prices it, and xAI still publishes its 64.7%, but its rate card is identical to 4.6&rsquo;s at both tiers, so it would draw as a duplicate line. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 1 September 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -573,7 +588,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
   }
 
   // Fill for one marker: the provider colour, or the card ground when the score
-  // came from Scale rather than the vendor.
+  // did not come from the vendor.
   function fillColor(name, hollow) {
     if (!hollow) return pointColor(name);
     return isEmphasised(name) ? surfaceColor() : withAlpha(providerColor(name), DIM_POINT * 0.4);
@@ -622,6 +637,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
         type: 'scatter',
         provider: f.provider,
         data: f.points,
+        estimated: f.est,
         showLine: true,
         borderWidth: 1.25,
         borderDash: f.dashed ? [5, 4] : [],
@@ -654,16 +670,44 @@ a.src-url:hover { color: hsl(var(--ring)); }
         var f = spec.families[i];
         var c = pointColor(f.provider);
         ds.borderColor = c;
-        ds.pointBorderColor = c;
+        ds.pointBorderColor = ds.data.map(function (p) {
+          return (f.est || p.est) ? 'transparent' : c;
+        });
         ds.pointBackgroundColor = ds.data.map(function (p) {
           return fillColor(f.provider, p.hollow != null ? p.hollow : f.hollow);
         });
       } else {
-        ds.pointBorderColor = ds.data.map(function (s) { return pointColor(s.provider); });
+        ds.pointBorderColor = ds.data.map(function (s) {
+          return s.est ? 'transparent' : pointColor(s.provider);
+        });
         ds.pointBackgroundColor = ds.data.map(function (s) { return fillColor(s.provider, s.hollow); });
       }
     });
   }
+
+  // Chart.js has no dashed option for a point's own border, so estimated markers are
+  // left border-less in paint() and get their ring stroked here instead. Reading the
+  // radius off the element keeps the ring on the marker as it grows under the pointer.
+  var estimateRing = {
+    id: 'estimateRing',
+    afterDatasetsDraw: function (chart) {
+      var ctx = chart.ctx;
+      chart.data.datasets.forEach(function (ds, i) {
+        chart.getDatasetMeta(i).data.forEach(function (el, j) {
+          var d = ds.data[j];
+          if (!(ds.estimated || (d && d.est))) return;
+          ctx.save();
+          ctx.setLineDash([2, 2.5]);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = pointColor(ds.provider || d.provider);
+          ctx.beginPath();
+          ctx.arc(el.x, el.y, el.options.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        });
+      });
+    }
+  };
 
   function axisScale(cfg, t) {
     return Object.assign({
@@ -693,6 +737,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
     var chart = new global.Chart(canvas, {
       type: 'scatter',
       data: { datasets: buildDatasets(spec) },
+      plugins: [estimateRing],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -812,12 +857,13 @@ a.src-url:hover { color: hsl(var(--ring)); }
       el.appendChild(li);
     });
 
-    if (spec.hollowKey) {
+    [[spec.hollowKey, ''], [spec.estKey, ' is-est']].forEach(function (k) {
+      if (!k[0]) return;
       var key = document.createElement('li');
       key.className = 'key';
-      key.innerHTML = '<span class="dot"></span>' + spec.hollowKey;
+      key.innerHTML = '<span class="dot' + k[1] + '"></span>' + k[0];
       el.appendChild(key);
-    }
+    });
   }
 
   function repaintLegend() {
@@ -871,14 +917,14 @@ a.src-url:hover { color: hsl(var(--ring)); }
   // it. Grouped this way rather than per-row because most sources carry several
   // models, and the repetition in a table column obscured that.
   function buildSources(el, spec) {
-    function entry(m, provider, hollow) {
-      return { name: m.name, score: m.score, src: m.src, provider: provider, hollow: hollow };
+    function entry(m, provider, hollow, est) {
+      return { name: m.name, score: m.score, src: m.src, provider: provider, hollow: hollow, est: est };
     }
 
     var models = spec.families
-      .map(function (f) { return entry({ name: f.name, score: f.score, src: f.src }, f.provider, f.hollow); })
+      .map(function (f) { return entry({ name: f.name, score: f.score, src: f.src }, f.provider, f.hollow, f.est); })
       .concat(spec.singles.map(function (s) {
-        return entry({ name: s.label, score: s.score, src: s.src }, s.provider, s.hollow);
+        return entry({ name: s.label, score: s.score, src: s.src }, s.provider, s.hollow, s.est);
       }))
       .sort(function (a, b) { return b.score - a.score; });
 
@@ -904,7 +950,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
       var chips = named.map(function (m) {
         return '<li class="src-model" data-provider="' + m.provider + '">' +
-          '<span class="swatch' + (m.hollow ? ' is-hollow' : '') + '" data-provider="' + m.provider +
+          '<span class="swatch' + (m.est ? ' is-est' : m.hollow ? ' is-hollow' : '') + '" data-provider="' + m.provider +
           '" style="--dot:' + providerColor(m.provider) + '"></span>' + m.name +
           ' <span class="src-score">' + m.score.toFixed(2) + '%</span></li>';
       }).join('');
@@ -951,7 +997,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
       // Chips colour their dot through --dot so the hollow variant can keep the
       // card ground as its fill; table swatches are filled directly.
       s.style.setProperty('--dot', c);
-      if (!s.classList.contains('is-hollow')) s.style.background = c;
+      if (!s.classList.contains('is-hollow') && !s.classList.contains('is-est')) s.style.background = c;
     });
   }
 
@@ -1011,18 +1057,23 @@ document.addEventListener('DOMContentLoaded', function () {
     codex53: { label: 'OpenAI',   url: 'https://openai.com/index/introducing-gpt-5-3-codex/' },
     grok45:  { label: 'xAI',      url: 'https://x.ai/news/grok-4-5' },
     kimi26:  { label: 'Moonshot', url: 'https://www.kimi.com/blog/kimi-k2-6' },
+    est:     { label: 'estimated — no published SWE-Bench Pro result', url: null },
     none:    { label: 'no primary source found', url: null }
   };
 
   // Two published rates for one model: default vs long-context tier, or Opus
   // 4.8 standard vs fast mode. Same score, so each pair draws as a flat run.
   var families = [
+    // xAI published no SWE-Bench Pro result for 4.6: the launch post and the model card report
+    // DeepSWE 1.1 and APEX-SWE instead. This score is therefore an estimate, not a measurement —
+    // 4.5's 64.7 plus a 15% cut in its failure rate, the gain implied by 4.6's improvement on those
+    // adjacent coding evals. Every label it carries says (est.) for that reason.
+    { name: 'Grok 4.6', provider: 'xAI', dashed: true, score: 70.0, src: 'est', points: [
+        { label: 'Grok 4.6 (est.)', tableLabel: 'Grok 4.6 (est.)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 16 },
+        { label: '> 200K', tableLabel: 'Grok 4.6 · long context > 200K (est.)', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
     { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 69.2, src: 'grok45', points: [
         { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'left', ao: 8 },
         { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
-    { name: 'Grok 4.5', provider: 'xAI', dashed: true, score: 64.7, src: 'grok45', points: [
-        { label: 'Grok 4.5', tableLabel: 'Grok 4.5', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 16 },
-        { label: '> 200K', tableLabel: 'Grok 4.5 · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
     // GitHub prints Sol at its promotional rate, 50% off list through 3 Sep 2026, so the list
     // figures are those listed rates doubled — the only relationship the page states. That list
     // price is itself OpenAI's 21 Aug reduction, held to 21 Nov 2026; the fourth point is the
@@ -1045,17 +1096,18 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
         { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] }
   ];
-  // A hollow marker means exactly one thing: the score came from Scale's own
-  // run rather than from anyone's published figure. Derive it so the source and
-  // the marker style can never drift apart.
+  // Marker style is derived from the source so the two can never drift apart:
+  // filled = someone published the figure, hollow = Scale ran it, dotted = nobody
+  // has published one. Hollow and dotted are both unfilled; the ring tells them apart.
   families.forEach(function (f) {
-    f.hollow = f.src === 'scale';
+    f.est = f.src === 'est';
+    f.hollow = f.src === 'scale' || f.est;
     f.points.forEach(function (p) { p.src = f.src; point(p, f.score); });
   });
 
   // One published rate each.
   var singles = [
-    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.3, src: 'none', al: 'right', ao: 8 },
+    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.4, src: 'grok45', al: 'right', ao: 8 },
     { label: 'Claude Opus 5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 79.2, src: 'none', al: 'right', ao: 8 },
     { label: 'Claude Opus 4.7', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 64.3, src: 'grok45', al: 'bottom', ao: 8 },
     { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, src: 'kimi26', al: 'top', ao: 8 },
@@ -1063,7 +1115,11 @@ document.addEventListener('DOMContentLoaded', function () {
     { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, src: 'codex53', al: 'bottom', ao: 8 },
     { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, src: 'scale', al: 'right', ao: 8 }
   ];
-  singles.forEach(function (s) { s.hollow = s.src === 'scale'; point(s, s.score); });
+  singles.forEach(function (s) {
+    s.est = s.src === 'est';
+    s.hollow = s.src === 'scale' || s.est;
+    point(s, s.score);
+  });
 
   ChartKit.init({
     canvasId: 'chart',
@@ -1071,6 +1127,7 @@ document.addEventListener('DOMContentLoaded', function () {
     tableId: 'table',
     sourcesId: 'sources',
     hollowKey: 'Hollow = Scale independent run',
+    estKey: 'Dotted = estimated, none published',
     modelCount: families.length + singles.length,
     sources: SOURCES,
 

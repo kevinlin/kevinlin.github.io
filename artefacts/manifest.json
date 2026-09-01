@@ -743,7 +743,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "Blended price per million tokens for each Copilot model, weighted the way an agentic session actually bills, against its SWE-Bench Pro resolve rate.",
-      "date": "2026-08-25"
+      "date": "2026-09-01"
     },
     {
       "id": "java-interview-java-release-timeline",
