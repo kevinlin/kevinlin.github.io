@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 27 August 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. Artificial Analysis now quotes GPT-5.6 Sol at the <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">reduced rates announced on 21 August 2026</a> and held at least until 21 November — $4.00 per 1M input, $0.40 cached and $20.00 output, down from $5.00 / $0.50 / $30.00 — so the Sol figures here are its published costs, no longer adjusted by hand. DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Peak output is $3.96/1M for Pro and $1.32/1M for Flash. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.265 per task for Pro and $0.112 for Flash. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 2 September 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. Artificial Analysis now quotes GPT-5.6 Sol at the <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">reduced rates announced on 21 August 2026</a> and held at least until 21 November — $4.00 per 1M input, $0.40 cached and $20.00 output, down from $5.00 / $0.50 / $30.00 — so the Sol figures here are its published costs, no longer adjusted by hand. DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Peak output is $3.96/1M for Pro and $1.32/1M for Flash. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.265 per task for Pro and $0.112 for Flash. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -730,12 +730,13 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.8154, y: 54.67, label: 'GPT-5.5 (high)', al: 'left', ao: 8 },
           { x: 1.1910, y: 56.31, label: 'GPT-5.5 (xhigh)', al: 'right', ao: 8 } ] },
       { name: 'GPT-5.6 Sol', provider: 'OpenAI', points: [
-          { x: 0.1948, y: 50.73, label: 'GPT-5.6 Sol (low)', al: 'bottom', ao: 16 },
-          { x: 0.3136, y: 55.57, label: 'GPT-5.6 Sol (medium)', al: 'left', ao: 8 },
-          { x: 0.4560, y: 57.33, label: 'GPT-5.6 Sol (high)', al: 'right', ao: 8 },
-          { x: 0.6711, y: 59.01, label: 'GPT-5.6 Sol (xhigh)', al: 'bottom', ao: 12 },
-          { x: 1.0056, y: 60.93, label: 'GPT-5.6 Sol (max)', al: 'right', ao: 8 } ] },
+          { x: 0.1799, y: 50.73, label: 'GPT-5.6 Sol (low)', al: 'bottom', ao: 16 },
+          { x: 0.2902, y: 55.57, label: 'GPT-5.6 Sol (medium)', al: 'left', ao: 8 },
+          { x: 0.4269, y: 57.33, label: 'GPT-5.6 Sol (high)', al: 'right', ao: 8 },
+          { x: 0.6279, y: 59.01, label: 'GPT-5.6 Sol (xhigh)', al: 'bottom', ao: 12 },
+          { x: 0.9530, y: 60.93, label: 'GPT-5.6 Sol (max)', al: 'top', ao: 8 } ] },
       { name: 'GPT-5.6 Terra', provider: 'OpenAI', points: [
+          { x: 0.0962, y: 41.30, label: 'GPT-5.6 Terra (low)', al: 'right', ao: 8 },
           { x: 0.1232, y: 46.76, label: 'GPT-5.6 Terra (medium)', al: 'left', ao: 8 },
           { x: 0.2276, y: 50.11, label: 'GPT-5.6 Terra (high)', al: 'right', ao: 8 },
           { x: 0.3182, y: 52.77, label: 'GPT-5.6 Terra (xhigh)', al: 'bottom', ao: 20 },
@@ -748,6 +749,12 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.1649, y: 50.94, label: 'Gemini 3.7 Flash (low)', al: 'left', ao: 8 },
           { x: 0.2629, y: 53.42, label: 'Gemini 3.7 Flash (medium)', al: 'top', ao: 20 },
           { x: 0.4022, y: 56.03, label: 'Gemini 3.7 Flash (high)', al: 'left', ao: 8 } ] },
+      { name: 'Claude Fable 5.1', provider: 'Anthropic', points: [
+          { x: 0.7736, y: 58.15, label: 'Claude Fable 5.1 (low)', tableLabel: 'Claude Fable 5.1 (low with fallback)', al: 'bottom', ao: 34 },
+          { x: 1.0006, y: 60.48, label: 'Claude Fable 5.1 (medium)', tableLabel: 'Claude Fable 5.1 (medium with fallback)', al: 'right', ao: 8 },
+          { x: 1.4299, y: 62.48, label: 'Claude Fable 5.1 (high)', tableLabel: 'Claude Fable 5.1 (high with fallback)', al: 'top', ao: 12 },
+          { x: 2.6508, y: 64.80, label: 'Claude Fable 5.1 (xhigh)', tableLabel: 'Claude Fable 5.1 (xhigh with fallback)', al: 'left', ao: 8 },
+          { x: 3.6891, y: 65.65, label: 'Claude Fable 5.1 (max)', tableLabel: 'Claude Fable 5.1 (max with fallback)', al: 'left', ao: 8 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
           { x: 0.4252, y: 52.46, label: 'Claude Opus 5 (low)', al: 'right', ao: 8 },
           { x: 0.7243, y: 58.64, label: 'Claude Opus 5 (medium)', al: 'right', ao: 8 },
@@ -765,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ],
 
     singles: [
-      { x: 3.1396, y: 62.07, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 20 },
+      { x: 3.1396, y: 62.07, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 30 },
       { x: 2.0315, y: 57.33, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
       { x: 2.2285, y: 54.96, label: 'Claude Opus 4.7 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
       { x: 0.9372, y: 60.92, label: 'Grok 4.6 (high)', provider: 'SpaceXAI', al: 'left', ao: 8 },
@@ -774,7 +781,9 @@ document.addEventListener('DOMContentLoaded', function () {
       { x: 0.0869, y: 57.46, label: 'GLM-5.3-Flash', provider: 'Z AI', al: 'right', ao: 8 },
       { x: 0.3992, y: 56.76, label: 'Muse Spark 1.2 (xhigh)', provider: 'Meta', al: 'bottom', ao: 12 },
       { x: 0.9133, y: 58.08, label: 'Qwen3.8 Max', provider: 'Alibaba', al: 'right', ao: 8 },
-      { x: 0.1387, y: 45.40, label: 'MiniMax-M3', provider: 'MiniMax', al: 'left', ao: 8 }
+      { x: 0.6792, y: 46.71, label: 'Qwen3.7 Max', provider: 'Alibaba', al: 'right', ao: 8 },
+      { x: 0.1387, y: 45.40, label: 'MiniMax-M3', provider: 'MiniMax', al: 'left', ao: 8 },
+      { x: 0.4169, y: 42.57, label: 'Claude Sonnet 5 (non-reasoning)', provider: 'Anthropic', al: 'right', ao: 8 }
     ],
 
     x: {
@@ -791,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 42, max: 65 }
+      scale: { min: 40, max: 67 }
     },
 
     tooltip: function (p) {
