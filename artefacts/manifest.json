@@ -667,7 +667,7 @@
       "id": "everything-llm-swe-bench-pro-by-lab",
       "source": "everything-llm/swe_bench_pro_by_lab.html",
       "destination": "everything-llm/swe-bench-pro-by-lab/index.html",
-      "title": "Flagship models on SWE-Bench Pro",
+      "title": "SWE-Bench Pro benchmark by frontier model labs",
       "collection": "everything-llm",
       "order": 90,
       "replacements": {
