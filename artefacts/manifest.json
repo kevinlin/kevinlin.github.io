@@ -661,7 +661,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
-      "date": "2026-09-02"
+      "date": "2026-09-03"
     },
     {
       "id": "everything-llm-swe-bench-pro-by-lab",
