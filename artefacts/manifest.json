@@ -603,6 +603,61 @@
       "date": "2026-08-22"
     },
     {
+      "id": "everything-llm-score-vs-cost-per-task",
+      "source": "everything-llm/score-vs-cost-per-task.html",
+      "destination": "everything-llm/score-vs-cost-per-task/index.html",
+      "title": "Artificial Analysis Intelligence Index: score vs. cost per task",
+      "collection": "everything-llm",
+      "order": 1,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      },
+      "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
+      "date": "2026-09-03"
+    },
+    {
+      "id": "everything-llm-score-vs-output-tokens-per-task",
+      "source": "everything-llm/score-vs-output-tokens-per-task.html",
+      "destination": "everything-llm/score-vs-output-tokens-per-task/index.html",
+      "title": "Artificial Analysis Intelligence Index: score vs. output tokens per task",
+      "collection": "everything-llm",
+      "order": 2,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      },
+      "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
+      "date": "2026-09-03"
+    },
+    {
+      "id": "everything-llm-swe-bench-pro-by-lab",
+      "source": "everything-llm/swe_bench_pro_by_lab.html",
+      "destination": "everything-llm/swe-bench-pro-by-lab/index.html",
+      "title": "SWE-Bench Pro benchmark by frontier model labs",
+      "collection": "everything-llm",
+      "order": 3,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
+      },
+      "description": "Flagship models from six labs by release date, with vendor-reported and independently verified scores drawn separately.",
+      "date": "2026-09-02"
+    },
+    {
+      "id": "everything-llm-copilot-perf-vs-price",
+      "source": "everything-llm/copilot-perf-vs-price.html",
+      "destination": "everything-llm/copilot-perf-vs-price/index.html",
+      "title": "GitHub Copilot: coding score vs. blended price",
+      "collection": "everything-llm",
+      "order": 4,
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
+      },
+      "description": "Blended price per million tokens for each Copilot model, weighted the way an agentic session actually bills, against its SWE-Bench Pro resolve rate.",
+      "date": "2026-09-03"
+    },
+    {
       "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
       "source": "everything-llm/4 Best Practices for Claude Opus 4.7.jpg",
       "destination": "everything-llm/4-best-practices-for-claude-opus-4-7.jpg",
@@ -634,47 +689,6 @@
       "replacements": {},
       "description": "Quota resets, a context-limit rollback, a reverted reasoning picker: everything OpenAI changed or undid in the five days after launch.",
       "date": "2026-07-14"
-    },
-    {
-      "id": "everything-llm-score-vs-cost-per-task",
-      "source": "everything-llm/score-vs-cost-per-task.html",
-      "destination": "everything-llm/score-vs-cost-per-task/index.html",
-      "title": "Intelligence Index: score vs. cost per task",
-      "collection": "everything-llm",
-      "order": 70,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      },
-      "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
-      "date": "2026-09-03"
-    },
-    {
-      "id": "everything-llm-score-vs-output-tokens-per-task",
-      "source": "everything-llm/score-vs-output-tokens-per-task.html",
-      "destination": "everything-llm/score-vs-output-tokens-per-task/index.html",
-      "title": "Intelligence Index: score vs. output tokens per task",
-      "collection": "everything-llm",
-      "order": 80,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      },
-      "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
-      "date": "2026-09-03"
-    },
-    {
-      "id": "everything-llm-swe-bench-pro-by-lab",
-      "source": "everything-llm/swe_bench_pro_by_lab.html",
-      "destination": "everything-llm/swe-bench-pro-by-lab/index.html",
-      "title": "SWE-Bench Pro benchmark by frontier model labs",
-      "collection": "everything-llm",
-      "order": 90,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
-      },
-      "description": "Flagship models from six labs by release date, with vendor-reported and independently verified scores drawn separately.",
-      "date": "2026-09-02"
     },
     {
       "id": "skillops-20260731-skillops-raw",
@@ -730,20 +744,6 @@
       "replacements": {},
       "description": "Claude releases at Sonnet tier and above plot above the axis, full-size GPT releases below, from March 2024 to July 2026.",
       "date": "2026-09-02"
-    },
-    {
-      "id": "everything-llm-copilot-perf-vs-price",
-      "source": "everything-llm/copilot-perf-vs-price.html",
-      "destination": "everything-llm/copilot-perf-vs-price/index.html",
-      "title": "GitHub Copilot: coding score vs. blended price",
-      "collection": "everything-llm",
-      "order": 120,
-      "replacements": {
-        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js": "../../vendor/chart.umd.min.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
-      },
-      "description": "Blended price per million tokens for each Copilot model, weighted the way an agentic session actually bills, against its SWE-Bench Pro resolve rate.",
-      "date": "2026-09-03"
     },
     {
       "id": "java-interview-java-release-timeline",
