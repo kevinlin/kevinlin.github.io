@@ -229,6 +229,24 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
   border-bottom: 1px solid rgba(244,236,216,.12);
 }
 
+/* Epigraph: a few lines of the poem itself, ahead of the encyclopedic prose.
+   Display italic against the body roman, so the quotation reads as another
+   voice; terracotta rule, where the provenance note below uses wine. */
+.entry .epigraph {
+  margin: 0 0 var(--s-5); padding-left: var(--s-4);
+  border-left: 2px solid rgba(242,164,104,.45);
+}
+.entry .epigraph p {
+  margin: 0;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 1.125rem; line-height: 1.55; color: var(--fg);
+}
+.entry .epigraph cite {
+  display: block; margin-top: var(--s-2);
+  font-size: .75rem; font-style: normal;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--fg-subtle);
+}
+
 .entry .prose { margin: 0 0 var(--s-5); color: #efe6d2; }
 
 .entry .prov {
@@ -259,6 +277,7 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
    fade-and-rise and nothing more */
 .entry { animation: entryIn 180ms var(--ease-out) both; }
 .entry h2       { animation: entryIn 220ms var(--ease-out) 40ms both; }
+.entry .epigraph{ animation: entryIn 230ms var(--ease-out) 55ms both; }
 .entry .prose   { animation: entryIn 240ms var(--ease-out) 70ms both; }
 @keyframes entryIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -293,10 +312,13 @@ body.journal-away #collapse { opacity: 0; pointer-events: none; }
   body.journal-away #journal { transform: translateY(calc(100% - 14px)); }
   body.journal-away #rail { background: linear-gradient(180deg, #100c0a, #0c0907); }
   .entry h2 { font-size: 2rem; }
+  /* the sheet is 52vh, so the quotation drops a size to keep the prose
+     nearer the fold */
+  .entry .epigraph p { font-size: 1rem; line-height: 1.5; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .entry, .entry h2, .entry .prose { animation: none; }
+  .entry, .entry h2, .entry .epigraph, .entry .prose { animation: none; }
   #journal { transition: none; }
   #collapse { transition: none; }
 }
@@ -581,102 +603,119 @@ export const STOPS = [
   { n: 1, numeral: 'I', name: 'Troy', lon: 26.239, lat: 39.957, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: 'troy',
     event: 'Odysseus leaves with 12 ships',
+    quote: { book: 'I', text: `Tell me, Muse, of that man, so ready at need, who wandered far and wide, after he had sacked the sacred citadel of Troy.` },
     prose: `After ten years of siege Troy falls to the stratagem of the wooden horse, and Odysseus, king of Ithaca and architect of that deception, sails for home with twelve ships. The Odyssey opens long after this departure and recovers the voyage in retrospect, largely through Odysseus' own telling at the Phaeacian court. Homer grants the returning fleet no easy passage: the Greeks have offended Athena by their conduct in the sack, and the sea will take ten further years before Ithaca is reached.`,
     links: { wikipedia: W + 'Troy', whe: H + 'Troy/' } },
 
   { n: 2, numeral: 'II', name: 'Ismarus', lon: 25.520, lat: 40.870, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: null,
     event: "The crew pillages the Cicones' town; the Cicones kill 76",
+    quote: { book: 'IX', text: `The wind that bare me from Ilios brought me nigh to the Cicones, even to Ismarus, whereupon I sacked their city and slew the people.` },
     prose: `The fleet's first landfall is Ismarus, a town of the Cicones on the Thracian coast. Odysseus' men sack it, killing the men and carrying off the women and goods, which is conventional conduct for a returning raiding fleet and the first sign that the crew's appetites will govern this voyage. The Cicones summon inland allies and counterattack from the plain. Homer's tally is six men lost from each of the twelve ships, seventy-two in all; the source map gives the figure as 76. The survivors put to sea.`,
     links: { wikipedia: W + 'Ismara', whe: H + 'Odysseus/' } },
 
   { n: 3, numeral: 'III', name: 'Cape Malea', lon: 23.199, lat: 36.439, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: null,
     event: 'Odysseus is blown off course',
+    quote: { book: 'IX', text: `And now I should have come to mine own country all unhurt, but the wave and the stream of the sea and the North Wind swept me from my course as I was doubling Malea.` },
     prose: `Rounding Cape Malea at the southeastern tip of the Peloponnese, the fleet meets the north wind and is driven off course. The cape was notorious in antiquity as a hazard, and a Greek proverb advised sailors rounding it to forget their homeland. This is the hinge of the poem's geography. Everything before it is ordinary coastal sailing between places a Greek audience knew; everything after belongs to myth, which is why the remaining identifications on this route are proposals rather than locations.`,
     links: { wikipedia: W + 'Cape_Maleas', whe: H + 'Odyssey/' } },
 
   { n: 4, numeral: 'IV', name: 'Cythera', lon: 23.000, lat: 36.150, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: null,
     event: 'Storms for ten days',
+    quote: { book: 'IX', text: `Thence for nine whole days was I borne by ruinous winds over the teeming deep.` },
     prose: `Blown past Cythera, the island south of Cape Malea sacred to Aphrodite, the fleet is carried across open water by storms. Homer counts nine days and gives no direction at all; the source map records ten. With that the ships leave charted water. Every landfall from here until the Phaeacians ferry Odysseus home belongs to a world that resists being placed on any map, and the scholarly attempts to place it have never converged.`,
     links: { wikipedia: W + 'Kythira', whe: H + 'Odyssey/' } },
 
   { n: 5, numeral: 'V', name: 'Lotophagi', lon: 10.900, lat: 33.800, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: null,
     event: 'The crew eats addictive flowers and wants to stay',
+    quote: { book: 'IX', text: `Now whosoever of them did eat the honey-sweet fruit of the lotus, had no more wish to bring tidings nor to come back, but there he chose to abide … forgetful of his homeward way.` },
     prose: `The land of the Lotus-eaters, whose people live on a flowering plant that erases the wish to go home. Three scouts sent ashore eat it and lose all desire to leave. Odysseus has them dragged back to the ship and bound beneath the benches. Nobody dies here. It is the mildest-looking danger in the poem and among the most serious: the voyage very nearly ends. Herodotus placed the Lotus-eaters on the North African coast, an identification that later fixed them at Djerba.`,
     links: { wikipedia: W + 'Lotus-eaters', whe: H + 'Odyssey/' } },
 
   { n: 6, numeral: 'VI', name: 'Cyclopes', lon: 15.160, lat: 37.560, prov: 'real',
     yearFrom: 1, yearTo: 1, setpiece: 'cyclops',
     event: "Odysseus blinds Polyphemus, Poseidon's son",
+    quote: { book: 'IX', text: `And we came to the land of the Cyclôpes, a froward and a lawless folk, who trusting to the deathless gods plant not aught with their hands, neither plough.` },
     prose: `Odysseus and twelve men enter the cave of Polyphemus, a one-eyed giant and a son of Poseidon, who seals them in and eats six. Odysseus gives his name as Outis, Nobody, gets the giant drunk and blinds him with a sharpened stake; the survivors escape clinging beneath the bellies of his sheep. Once clear of the shore Odysseus shouts his real name back at the cliff. Polyphemus prays to his father, and Poseidon's answering enmity is what keeps the fleet from home.`,
     links: { wikipedia: W + 'Polyphemus', whe: H + 'Polyphemus/' } },
 
   { n: 7, numeral: 'VII', name: 'Aeolia', lon: 12.430, lat: 36.850, prov: 'map',
     yearFrom: 1, yearTo: 1, setpiece: 'aeolia',
     event: 'The crew opens the bag of winds and is blown off course',
+    quote: { book: 'X', text: `So they spake, and the evil counsel of my company prevailed. They loosed the wallet, and all the winds brake forth.` },
     prose: `Aeolus, keeper of the winds, receives Odysseus hospitably and gives him a leather bag holding every wind but the west, which is left free to carry the ships home. Ithaca is in sight on the tenth day when Odysseus sleeps and his crew, suspecting hidden treasure, open the bag. The released winds drive the fleet all the way back to Aeolia, where Aeolus turns them away, reading their misfortune as proof of divine disfavour. The source map places Aeolia in the Strait of Sicily; tradition puts it at the Aeolian Islands.`,
     links: { wikipedia: W + 'Aeolus_(Odyssey)', whe: H + 'Odyssey/' } },
 
   { n: 8, numeral: 'VIII', name: 'Lamos', lon: 6.000, lat: 36.860, prov: 'map',
     yearFrom: 1, yearTo: 1, setpiece: 'lamos',
     event: 'Laestrygonians kill and eat most of the crew',
+    quote: { book: 'X', text: `And on the seventh we came to the steep stronghold of Lamos, Telepylos of the Laestrygons, where herdsman hails herdsman as he drives in his flock, and the other who drives forth answers the call.` },
     prose: `Lamos, city of the Laestrygonians, a race of giants. Its harbour is a near-enclosed basin with a narrow mouth, and eleven of the twelve ships moor inside; Odysseus alone keeps his ship at the entrance. The Laestrygonians attack from the cliffs with boulders, crushing the trapped vessels and spearing the crews in the water. Only Odysseus' ship escapes. One episode reduces the expedition from twelve ships to one, and the poem stops being the story of a fleet.`,
     links: { wikipedia: W + 'Laestrygonians', whe: H + 'Odyssey/' } },
 
   { n: 9, numeral: 'IX', name: 'Aeaea', lon: 3.890, lat: 39.760, prov: 'map',
     yearFrom: 1, yearTo: 2, setpiece: 'aeaea',
     event: 'Circe turns the crew to swine',
+    quote: { book: 'X', text: `Presently she smote them with a wand, and in the styes of the swine she penned them. So they had the head and voice, the bristles and the shape of swine, but their mind abode even as of old.` },
     prose: `The island of Circe, an enchantress and a daughter of Helios. A scouting party of twenty-two men drinks from her cup and is turned into swine. Warned by Hermes and protected by the herb moly, Odysseus resists the drug and compels her to restore them. Then he stays. The crew remains a full year; Homer says plainly that a year was gone before the men urged departure. Her parting instruction sends them further from home, to the edge of the world, to consult the dead.`,
     links: { wikipedia: W + 'Circe', whe: H + 'Circe/' } },
 
   { n: 10, numeral: 'X', name: 'Cimmerians', lon: 2.960, lat: 41.740, prov: 'map',
     yearFrom: 2, yearTo: 2, setpiece: 'underworld',
     event: 'Odysseus enters the Underworld',
+    quote: { book: 'XI', text: `There is the land and the city of the Cimmerians, shrouded in mist and cloud, and never does the shining sun look down on them with his rays … but deadly night is outspread over miserable mortals.` },
     prose: `At the world's edge, in the land of the Cimmerians where the sun never shines, Odysseus performs the rites that summon the dead. He speaks with the seer Teiresias, who gives him his route home and warns him to leave the cattle of Helios alone; with his mother Anticleia, dead of grief in his absence; and with Achilles, who says he would rather be a living man's slave than king among the dead. The episode is the poem's turning point, supplying both the way home and the terms of survival.`,
     links: { wikipedia: W + 'Nekyia', whe: H + 'Underworld/' } },
 
   { n: 11, numeral: 'XI', name: 'Sirens', lon: 9.240, lat: 38.850, prov: 'map',
     yearFrom: 2, yearTo: 2, setpiece: 'sirens',
     event: 'The crew blocks their ears with wax to avoid the song',
+    quote: { book: 'XII', text: `Hither, come hither, renowned Odysseus, great glory of the Achaeans, here stay thy barque, that thou mayest listen to the voice of us twain.` },
     prose: `The Sirens sing from their island to passing sailors, and those who listen steer onto the rocks; Homer describes a meadow heaped with the bones of men. Following Circe's instructions, Odysseus plugs his crew's ears with beeswax and has himself lashed upright to the mast so that he can hear the song and survive it, ordering the crew to tighten the ropes if he begs to be freed. They do. It is the one danger in the poem Odysseus arranges to experience on purpose.`,
     links: { wikipedia: W + 'Siren_(mythology)', whe: H + 'Sirens/' } },
 
   { n: 12, numeral: 'XII', name: 'Scylla', lon: 15.720, lat: 38.250, prov: 'real',
     yearFrom: 2, yearTo: 2, setpiece: 'strait',
     event: 'The monster eats six of the crew',
+    quote: { book: 'XII', text: `Verily she hath twelve feet all dangling down; and six necks exceeding long, and on each a hideous head, and therein three rows of teeth set thick and close, full of black death.` },
     prose: `Scylla, a cliff-dwelling monster with six heads on long necks, guards one side of a narrow strait. Circe's advice is blunt: pass close to Scylla and lose a few men, because the alternative is losing the whole ship to Charybdis opposite. Odysseus does not tell his crew what is coming. Scylla takes six men off the deck as the ship runs through, and Homer's simile compares their cries to fish hauled up on a line. Antiquity placed the strait at Messina, between Italy and Sicily.`,
     links: { wikipedia: W + 'Scylla', whe: H + 'Scylla/' } },
 
   { n: 13, numeral: 'XIII', name: 'Charybdis', lon: 15.650, lat: 38.090, prov: 'real',
     yearFrom: 2, yearTo: 2, setpiece: 'charybdis',
     event: 'The monstrous whirlpool',
+    quote: { book: 'XII', text: `And thereon is a great fig-tree growing, in fullest leaf, and beneath it mighty Charybdis sucks down black water, for thrice a day she spouts it forth, and thrice a day she sucks it down in terrible wise.` },
     prose: `Charybdis lies opposite Scylla, a whirlpool that swallows the sea three times a day and vomits it back. Odysseus passes safely on the first crossing by hugging Scylla's cliff. He meets it a second time alone, after the loss of his ship, clinging to a fig tree above the vortex until the mast and keel he had been riding are spat back up, then dropping onto them and paddling clear. The pair have named a proverb ever since, for a choice between two unavoidable dangers.`,
     links: { wikipedia: W + 'Charybdis', whe: H + 'Charybdis/' } },
 
   { n: 14, numeral: 'XIV', name: 'Thrinacia', lon: 14.600, lat: 36.720, prov: 'real',
     yearFrom: 2, yearTo: 2, setpiece: 'thrinacia',
     event: 'The crew eats the Oxen of the Sun and is punished by Zeus',
+    quote: { book: 'XII', text: `Then while as yet I was in my black ship upon the deep, I heard the lowing of the cattle being stalled and the bleating of the sheep.` },
     prose: `Thrinacia, the island pasturing the cattle of Helios, which both Teiresias and Circe warned Odysseus to leave untouched. Contrary winds hold the ship there for a month until the provisions run out, and while Odysseus sleeps his men slaughter and eat the cattle. Helios demands redress, and Zeus destroys the ship with a thunderbolt once it puts to sea. Every remaining crewman drowns and Odysseus survives alone, reducing the poem's cast to one man in the water. Thrinacia is traditionally identified with Sicily.`,
     links: { wikipedia: W + 'Thrinacia', whe: H + 'Helios/' } },
 
   { n: 15, numeral: 'XV', name: 'Ogygia', lon: 2.430, lat: 39.130, prov: 'map',
     yearFrom: 3, yearTo: 9, setpiece: 'ogygia',
     event: 'Odysseus has a seven-year stay with the nymph Calypso',
+    quote: { book: 'VII', text: `There I abode for seven years continually, and watered with my tears the imperishable raiment that Calypso gave me.` },
     prose: `The island of Calypso, a nymph who takes in the shipwrecked Odysseus and keeps him seven years, offering immortality if he will stay. Homer's account is ambivalent: Odysseus weeps on the shore by day and shares her bed at night. Only when Athena raises the matter in council does Zeus send Hermes to order his release. Seven of the journey's ten years pass here, in one place, with nothing happening, which makes this the longest and stillest stretch of the poem.`,
     links: { wikipedia: W + 'Ogygia', whe: H + 'Ogygia/' } },
 
   { n: 16, numeral: 'XVI', name: 'Scheria', lon: 9.360, lat: 41.620, prov: 'map',
     yearFrom: 10, yearTo: 10, setpiece: null,
     event: 'The Phaeacians ferry Odysseus home',
+    quote: { book: 'VI', text: `Far apart we live in the wash of the waves, the outermost of men, and no other mortals are conversant with us.` },
     prose: `The land of the Phaeacians, expert seafarers ruled by Alcinous and Arete. Odysseus washes ashore naked and exhausted, is found by their daughter Nausicaa, and is received at court without being asked his name. Over two nights he tells the story of his wanderings. Books 9 to 12 of the Odyssey are that telling. The Phaeacians then load him with gifts and carry him to Ithaca in a single night's sailing, asleep on deck, and Poseidon punishes them for it. The source map places Scheria at Corsica; other readings favour Corfu.`,
     links: { wikipedia: W + 'Scheria', whe: H + 'Odyssey/' } },
 
   { n: 17, numeral: 'XVII', name: 'Ithaca', lon: 20.650, lat: 38.400, prov: 'real',
     yearFrom: 10, yearTo: 10, setpiece: 'ithaca',
     event: 'Odysseus returns home and kills the suitors besetting Penelope',
+    quote: { book: 'XIII', text: `Lo, here is the haven of Phorcys, the ancient one of the sea, and here at the haven’s head is the olive tree with spreading leaves.` },
     prose: `Odysseus lands after twenty years away, ten at Troy and ten returning, set ashore asleep and alone. Athena disguises him as a beggar. He is recognised first by his old dog Argos and then by his nurse Eurycleia, who knows the scar on his thigh; he tests the loyalty of his household and reveals himself by stringing the bow that none of Penelope's hundred and eight suitors can bend. He kills them in the hall. Penelope tests him in turn, with a question about their marriage bed only her husband could answer.`,
     links: { wikipedia: W + 'Homer%27s_Ithaca', whe: H + 'Ithaca/' } },
 ];
@@ -904,6 +943,16 @@ export const ATTRIBUTION = {
   licence: 'CC BY-NC-ND',
 };
 
+/* The epigraphs use Butcher and Lang's prose Odyssey (1879), public domain and
+   the one nineteenth-century version that keeps the Greek names the journal
+   uses. Every quotation was checked verbatim against Project Gutenberg ebook
+   1728; an ellipsis marks the only elisions. */
+export const TRANSLATION = {
+  short: 'tr. Butcher & Lang',
+  credit: 'Quotations from the Odyssey in the prose translation of ' +
+          'S. H. Butcher and Andrew Lang (1879), public domain.',
+};
+
 export const ROUTE_NOTE =
   `The Odyssey blends myth, memory and geography in ways that resist literal mapping. ` +
   `The route shown here follows Peter T. Struck of the University of Pennsylvania. ` +
@@ -930,6 +979,8 @@ export function renderEntry(s) {
      <span class="year">${esc(yearLabel(s))}</span></p>
   <h2>${esc(s.name)}</h2>
   <p class="event">${esc(s.event)}</p>
+  <blockquote class="epigraph"><p>${esc(s.quote.text)}</p>
+     <cite>Odyssey ${esc(s.quote.book)} · ${esc(TRANSLATION.short)}</cite></blockquote>
   <p class="prose">${esc(s.prose)}</p>
   ${prov}
   <p class="links">${link(s.links.wikipedia, 'Wikipedia')}
@@ -946,7 +997,8 @@ ${STOPS.map(s => `  <li id="stop-${s.n}">${renderEntry(s)}</li>`).join('\n')}
 </ol>
 <p class="credit">${esc(ATTRIBUTION.text)}
    ${link(ATTRIBUTION.href, 'Source map')} (${esc(ATTRIBUTION.licence)}).
-   Coastlines from Natural Earth (public domain).</p>`.trim();
+   Coastlines from Natural Earth (public domain).
+   ${esc(TRANSLATION.credit)}</p>`.trim();
 }
 
 
@@ -996,6 +1048,11 @@ export function selftest(setpieceKeys = null) {
       }
     }
     return bad.length === 0 || bad.join(', ');
+  });
+  check('quotations present', () => {
+    const bad = STOPS.filter(s => !s.quote || !/^[IVX]+$/.test(s.quote.book ?? '') ||
+      (s.quote.text ?? '').trim().split(/\s+/).length < 10);
+    return bad.length === 0 || bad.map(s => s.name).join(', ');
   });
   check('projection round-trip', () => {
     const bad = STOPS.filter(s => {
@@ -2221,7 +2278,7 @@ document.getElementById('flow-note').textContent = core.FLOW_NOTE;
 document.getElementById('credit').innerHTML =
   `${core.ATTRIBUTION.text} <a href="${core.ATTRIBUTION.href}" target="_blank" ` +
   `rel="noopener noreferrer">Source map</a> (${core.ATTRIBUTION.licence}). ` +
-  `Coastlines from Natural Earth (public domain).`;
+  `Coastlines from Natural Earth (public domain). ${core.TRANSLATION.credit}`;
 
 
 /* ===================== FRAME LOOP =====================
