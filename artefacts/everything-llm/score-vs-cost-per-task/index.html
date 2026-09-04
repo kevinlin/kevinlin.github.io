@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 3 September 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. Gemini 3.8 Flash landed on 2 September 2026 and is the one model here read off <a href="https://artificialanalysis.ai/articles/gemini-3-8-flash">Artificial Analysis' launch write-up</a> rather than the index table, so its three points carry that article's rounded figures — 52 / 57 / 59 at $0.24 / $0.41 / $0.58 — not the two decimals every other row has. Artificial Analysis now quotes GPT-5.6 Sol at the <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">reduced rates announced on 21 August 2026</a> and held at least until 21 November — $4.00 per 1M input, $0.40 cached and $20.00 output, down from $5.00 / $0.50 / $30.00 — so the Sol figures here are its published costs, no longer adjusted by hand. DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Peak output is $3.96/1M for Pro and $1.32/1M for Flash. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.265 per task for Pro and $0.112 for Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured in screen space, so the rings redraw as the chart resizes. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a>, retrieved 3 September 2026. Cost per task is the provider's list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. Gemini 3.8 Flash landed on 2 September 2026 and is the one model here read off <a href="https://artificialanalysis.ai/articles/gemini-3-8-flash">Artificial Analysis' launch write-up</a> rather than the index table, so its three points carry that article's rounded figures — 52 / 57 / 59 at $0.24 / $0.41 / $0.58 — not the two decimals every other row has. Artificial Analysis now quotes GPT-5.6 Sol at the <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">reduced rates announced on 21 August 2026</a> and held at least until 21 November — $4.00 per 1M input, $0.40 cached and $20.00 output, down from $5.00 / $0.50 / $30.00 — so the Sol figures here are its published costs, no longer adjusted by hand. DeepSeek's <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Peak output is $3.96/1M for Pro and $1.32/1M for Flash. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.265 per task for Pro and $0.112 for Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot. The rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -547,7 +547,47 @@ td.num, th.num {
     pad: 12         // px of clearance between the outermost member and the ring
   };
 
-  function findHotspots(coords) {
+  // Detection runs against a fixed reference plot area — a standard widescreen
+  // desktop — rather than the live one, so a ring marks the same neighbourhood
+  // whatever window the reader has. Only the aspect ratio here does any work: the
+  // neighbourhood radius is a multiple of the median nearest-neighbour gap and both
+  // scale with the frame, so the absolute size cancels out. 4:3 is not the same
+  // picture, though. A narrower frame compresses the log-cost axis and changes who
+  // counts as a neighbour.
+  var HOT_REFERENCE = { width: 1440, height: 900 };
+
+  // Project the data onto that frame, and back again. Hotspot centres are kept in
+  // data coordinates so the live chart's own scales can place them.
+  function hotspotSpace(spec) {
+    var xs = spec.x.scale;
+    var ys = spec.y.scale;
+    var log = xs.type === 'logarithmic';
+    var x0 = log ? Math.log10(xs.min) : xs.min;
+    var x1 = log ? Math.log10(xs.max) : xs.max;
+
+    return {
+      diagonal: Math.hypot(HOT_REFERENCE.width, HOT_REFERENCE.height),
+      toFrame: function (r) {
+        return {
+          px: ((log ? Math.log10(r.x) : r.x) - x0) / (x1 - x0) * HOT_REFERENCE.width,
+          py: (1 - (r.y - ys.min) / (ys.max - ys.min)) * HOT_REFERENCE.height,
+          family: r.family
+        };
+      },
+      toData: function (px, py) {
+        var vx = x0 + (px / HOT_REFERENCE.width) * (x1 - x0);
+        return {
+          x: log ? Math.pow(10, vx) : vx,
+          y: ys.min + (1 - py / HOT_REFERENCE.height) * (ys.max - ys.min)
+        };
+      }
+    };
+  }
+
+  function findHotspots(spec, rows) {
+    var space = hotspotSpace(spec);
+    var coords = rows.map(space.toFrame);
+
     function gap(a, b) { return Math.hypot(a.px - b.px, a.py - b.py); }
     function near(p, list, r) { return list.filter(function (q) { return gap(p, q) <= r; }); }
 
@@ -580,7 +620,11 @@ td.num, th.num {
         var cx = members.reduce(function (a, q) { return a + q.px; }, 0) / members.length;
         var cy = members.reduce(function (a, q) { return a + q.py; }, 0) / members.length;
         var spread = Math.max.apply(null, members.map(function (q) { return Math.hypot(cx - q.px, cy - q.py); }));
-        found.push({ cx: cx, cy: cy, r: spread + HOT.pad, points: members.length, models: models });
+        var at = space.toData(cx, cy);
+        // Radius travels as a fraction of the frame's diagonal, so the ring keeps
+        // its proportions on a live plot of any size. `pad` is added there instead,
+        // where it can stay a true 12px of clearance.
+        found.push({ x: at.x, y: at.y, rFrac: spread / space.diagonal, points: members.length, models: models });
       }
       left = left.filter(function (q) { return members.indexOf(q) === -1; });
     }
@@ -671,7 +715,15 @@ td.num, th.num {
       ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
       ctx.clip();
 
-      findHotspots(coords).forEach(function (h) {
+      (opts.hotspots || []).forEach(function (spot0) {
+        var h = {
+          cx: sx.getPixelForValue(spot0.x),
+          cy: sy.getPixelForValue(spot0.y),
+          r: spot0.rFrac * Math.hypot(area.right - area.left, area.bottom - area.top) + HOT.pad,
+          points: spot0.points,
+          models: spot0.models
+        };
+
         ctx.beginPath();
         ctx.arc(h.cx, h.cy, h.r, 0, Math.PI * 2);
         ctx.fillStyle = withAlpha(ink, dark ? 0.095 : 0.07);
@@ -747,6 +799,10 @@ td.num, th.num {
     var t = tokens();
     var canvas = document.getElementById(spec.canvasId);
 
+    // Detection is viewport-independent, so it runs once here rather than per draw.
+    var hotRows = labelRows(spec);
+    var hotspots = findHotspots(spec, hotRows);
+
     var chart = new global.Chart(canvas, {
       type: 'scatter',
       data: { datasets: buildDatasets(spec) },
@@ -758,7 +814,7 @@ td.num, th.num {
         layout: { padding: { right: 96, top: 12, left: 4 } },
         interaction: { mode: 'nearest', intersect: true },
         plugins: {
-          hotspots: { rows: labelRows(spec) },
+          hotspots: { rows: hotRows, hotspots: hotspots },
           legend: { display: false },
           tooltip: {
             backgroundColor: isDark() ? 'rgba(20,21,25,0.96)' : 'rgba(22,23,26,0.94)',
