@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 11 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.7 Flash at low and medium, Gemini 3.8 Flash (low), GLM-5.2 and Kimi K3 (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 12 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
   </main>
 </div>
 
@@ -1033,6 +1033,9 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 1.4963, y: 43.01, label: 'Grok 4.6 (medium)', al: 'left', ao: 10 },
           { x: 1.8589, y: 44.41, label: 'Grok 4.6 (high)', al: 'top', ao: 12 },
           { x: 2.3237, y: 44.27, label: 'Grok 4.6 (xhigh)', al: 'right', ao: 10 } ] },
+      { name: 'Kimi K3', provider: 'Kimi', points: [
+          { x: 1.1463, y: 30.48, label: 'Kimi K3 (low)', al: 'right', ao: 10 },
+          { x: 2.0001, y: 43.78, label: 'Kimi K3 (max)', al: 'bottom', ao: 12 } ] },
       { name: 'Muse Spark 1.3', provider: 'Meta', points: [
           { x: 1.3678, y: 45.16, label: 'Muse Spark 1.3 (xhigh)', al: 'left', ao: 10 },
           { x: 1.6049, y: 48.17, label: 'Muse Spark 1.3 (max)', al: 'left', ao: 10 } ] },
@@ -1056,8 +1059,8 @@ document.addEventListener('DOMContentLoaded', function () {
     singles: [
       { x: 8.7460, y: 49.70, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'top', ao: 12 },
       { x: 4.0810, y: 41.99, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 10 },
-      { x: 2.0001, y: 43.78, label: 'Kimi K3 (max)', provider: 'Kimi', al: 'bottom', ao: 12 },
       { x: 2.0056, y: 44.86, label: 'GLM-5.3 (max)', provider: 'Z AI', al: 'top', ao: 12 },
+      { x: 0.9649, y: 34.01, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'bottom', ao: 20 },
       { x: 0.2533, y: 41.91, label: 'GLM-5.3-Flash', provider: 'Z AI', al: 'right', ao: 10 },
       { x: 0.8202, y: 33.90, label: 'Qwen3.8 27B', provider: 'Alibaba', al: 'right', ao: 10 },
       { x: 2.6700, y: 40.30, label: 'Qwen3.8 Max', provider: 'Alibaba', al: 'right', ao: 10 },

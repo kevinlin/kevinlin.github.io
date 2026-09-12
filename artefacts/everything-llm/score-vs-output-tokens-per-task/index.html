@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 11 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, Gemini 3.8 Flash (low), GLM-5.2 and Kimi K3 (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 12 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
   </main>
 </div>
 
@@ -761,6 +761,9 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 28466, y: 43.01, label: 'Grok 4.6 (medium)', al: 'bottom', ao: 8 },
           { x: 35835, y: 44.41, label: 'Grok 4.6 (high)', al: 'left', ao: 8 },
           { x: 37608, y: 44.27, label: 'Grok 4.6 (xhigh)', al: 'bottom', ao: 10 } ] },
+      { name: 'Kimi K3', provider: 'Kimi', points: [
+          { x: 12222, y: 30.48, label: 'Kimi K3 (low)', al: 'right', ao: 10 },
+          { x: 48455, y: 43.78, label: 'Kimi K3 (max)', al: 'bottom', ao: 8 } ] },
       { name: 'Muse Spark 1.3', provider: 'Meta', points: [
           { x: 54513, y: 45.16, label: 'Muse Spark 1.3 (xhigh)', al: 'bottom', ao: 8 },
           { x: 60200, y: 48.17, label: 'Muse Spark 1.3 (max)', al: 'bottom', ao: 8 } ] },
@@ -775,8 +778,8 @@ document.addEventListener('DOMContentLoaded', function () {
     singles: [
       { x: 66848, y: 49.70, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 8 },
       { x: 70550, y: 41.99, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
-      { x: 48455, y: 43.78, label: 'Kimi K3 (max)', provider: 'Kimi', al: 'bottom', ao: 8 },
       { x: 71128, y: 44.86, label: 'GLM-5.3 (max)', provider: 'Z AI', al: 'top', ao: 8 },
+      { x: 64317, y: 34.01, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'bottom', ao: 26 },
       { x: 68673, y: 41.91, label: 'GLM-5.3-Flash', provider: 'Z AI', al: 'left', ao: 8 },
       { x: 66783, y: 33.90, label: 'Qwen3.8 27B', provider: 'Alibaba', al: 'bottom', ao: 8 },
       { x: 62782, y: 40.30, label: 'Qwen3.8 Max', provider: 'Alibaba', al: 'bottom', ao: 10 },
