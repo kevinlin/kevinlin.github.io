@@ -69,6 +69,9 @@
     "mingpt-vs-toy-transformer/infographic-prompt.md",
     "mingpt-vs-toy-transformer/source-mingpt-vs-toy-transformer.md",
     "mingpt-vs-toy-transformer/structured-content.md",
+    "product-timeline/README.md",
+    "product-timeline/iphone-timeline.src.html",
+    "product-timeline/thumbs/",
     "star-wars/README.md",
     "star-wars/star-wars-timeline.src.html"
   ],
@@ -1019,6 +1022,17 @@
       "replacements": {},
       "description": "An interactive map of every magnitude 6.0+ quake in the Asia Pacific over the last 200 years, coloured by depth, pulled live from the USGS catalog with a bundled CSV as fallback.",
       "date": "2026-08-29"
+    },
+    {
+      "id": "product-timeline-iphone-timeline",
+      "source": "product-timeline/iphone-timeline.html",
+      "destination": "product-timeline/iphone-timeline/index.html",
+      "title": "iPhone: twenty years of releases",
+      "collection": "product-timeline",
+      "order": 20,
+      "replacements": {},
+      "description": "Fifty-five iPhone models across five product lines, 2007 to 2026, with full SoC, price, storage and finish specifications and a drag-to-compare side-by-side diff.",
+      "date": "2026-09-12"
     }
   ]
 }
