@@ -174,6 +174,7 @@ h1 em{font-style:italic;color:hsl(var(--ink-soft))}
 }
 .card:active{transform:scale(.975)}
 
+.hint b{color:hsl(var(--ink-soft));font-weight:500}
 .hint{
   max-width:1180px;margin:0 auto;padding:14px 24px 0;
   font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
@@ -232,9 +233,34 @@ dialog.wide{max-width:min(860px,calc(100vw - 32px))}
 .cmp tr.diff td{background:hsl(var(--accent)/.07)}
 .cmp tr.diff th{color:hsl(var(--accent))}
 .cmp-wrap{overflow-x:auto}
-.card[draggable="true"]{-webkit-user-drag:element}
-.card.dragging{opacity:.45}
-.card.drop{outline:2px dashed hsl(var(--accent));outline-offset:2px}
+.card[draggable="true"]{-webkit-user-drag:element;cursor:grab}
+.card[draggable="true"]:active{cursor:grabbing}
+/* hover affordance, reused as the live drop label */
+.card::before{
+  content:"⇄ compare";position:absolute;top:-8px;left:10px;z-index:2;pointer-events:none;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:2px 8px;border-radius:999px;white-space:nowrap;
+  background:hsl(var(--ink)/.08);color:hsl(var(--ink-soft));
+  opacity:0;transition:opacity 120ms var(--ease-out)
+}
+@media (hover:hover) and (pointer:fine){.card:hover::before{opacity:1}}
+/* while a drag is live: every card shows it can receive the drop */
+body.dnd .card{outline:1.5px dashed hsl(var(--ink-faint)/.45);outline-offset:3px}
+body.dnd .card::before{opacity:0}
+body.dnd .card.dragging{opacity:.4;outline-color:transparent}
+body.dnd .card.drop{outline:2px solid hsl(var(--accent));outline-offset:4px;transform:translateY(-2px)}
+body.dnd .card.drop::before{content:"drop to compare";opacity:1;background:hsl(var(--accent));color:#fff}
+/* what is being dragged, and what to do with it */
+.dnd-bar{
+  position:fixed;left:50%;bottom:24px;z-index:var(--z-modal);
+  display:none;align-items:center;gap:10px;padding:11px 18px;border-radius:999px;
+  background:hsl(var(--ink));color:hsl(var(--paper));font-size:13px;pointer-events:none;
+  box-shadow:0 6px 24px hsl(var(--ink)/.28);
+  transform:translate(-50%,10px);opacity:0;transition:opacity 160ms var(--ease-out),transform 160ms var(--ease-out)
+}
+.dnd-bar img{width:26px;height:26px;object-fit:contain;border-radius:6px;background:#fff}
+.dnd-bar b{font-weight:600}
+body.dnd .dnd-bar{display:flex;opacity:1;transform:translate(-50%,0)}
 
 footer{max-width:1180px;margin:0 auto;padding:40px 24px 64px;
   font-size:13px;color:hsl(var(--ink-faint));border-top:1px solid hsl(var(--rule));margin-top:48px}
@@ -277,7 +303,8 @@ footer a{text-underline-offset:3px}
   </div>
 </main>
 
-<p class="hint">Scroll horizontally · Tab and Enter to open a card · Drag one card onto another to compare</p>
+<p class="hint">Scroll horizontally · Tab and Enter to open a card · <b>Drag a card onto another to compare them</b></p>
+<div class="dnd-bar" id="dnd-bar" aria-hidden="true"></div>
 <div class="board" tabindex="0" role="region" aria-label="iPhone release timeline, scrollable">
   <div class="grid" id="grid"></div>
 </div>
@@ -569,6 +596,7 @@ sheet.addEventListener("close", () => { if (opener) opener.focus(); });
 
 // ---------- drag one card onto another to compare ----------
 let dragI = null, dropCard = null;
+const dndBar = document.getElementById("dnd-bar");
 const markDrop = c => { if (dropCard !== c) { dropCard?.classList.remove("drop"); dropCard = c; c?.classList.add("drop"); } };
 
 grid.addEventListener("dragstart", e => {
@@ -576,11 +604,15 @@ grid.addEventListener("dragstart", e => {
   if (!c) return;
   dragI = Number(c.dataset.i);
   c.classList.add("dragging");
+  document.body.classList.add("dnd");
+  dndBar.innerHTML = '<img src="' + (THUMBS[M[dragI][0]]||"") + '" alt="">Drop on any other card to compare with <b>' +
+                     title(dragI) + '</b>';
   e.dataTransfer.effectAllowed = "link";
   e.dataTransfer.setData("text/plain", c.dataset.i);
 });
 grid.addEventListener("dragend", e => {
   e.target.closest(".card")?.classList.remove("dragging");
+  document.body.classList.remove("dnd");
   markDrop(null); dragI = null;
 });
 grid.addEventListener("dragover", e => {
@@ -596,6 +628,7 @@ grid.addEventListener("drop", e => {
   e.preventDefault();
   const a = Number(e.dataTransfer.getData("text/plain")), b = Number(c.dataset.i);
   markDrop(null);
+  document.body.classList.remove("dnd");
   if (Number.isInteger(a) && a !== b) { opener = c; compare(a, b); }
 });
 
