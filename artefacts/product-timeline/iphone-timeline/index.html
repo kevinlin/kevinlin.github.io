@@ -471,14 +471,77 @@ const SPEC = {
  "iphone-duo":["$1,999 · est","256 GB–1 TB · est","Not confirmed","a20pro"]
 };
 
+// id -> [battery, main camera, telephoto, ultra-wide, depth]
+const CAM = {
+ "iphone-1":["1,400 mAh","2 MP, f/2.8, fixed focus","—","—","—"],
+ "iphone-3g":["1,150 mAh","2 MP, f/2.8, fixed focus","—","—","—"],
+ "iphone-3gs":["1,219 mAh","3 MP, f/2.8, autofocus","—","—","—"],
+ "iphone-4":["1,420 mAh","5 MP, f/2.8","—","—","—"],
+ "iphone-4s":["1,432 mAh","8 MP, f/2.4","—","—","—"],
+ "iphone-5":["1,440 mAh","8 MP, f/2.4","—","—","—"],
+ "iphone-5s":["1,560 mAh","8 MP, f/2.2, True Tone flash","—","—","—"],
+ "iphone-5c":["1,510 mAh","8 MP, f/2.4","—","—","—"],
+ "iphone-6":["1,810 mAh","8 MP, f/2.2, Focus Pixels","—","—","—"],
+ "iphone-6-plus":["2,915 mAh","8 MP, f/2.2, OIS","—","—","—"],
+ "iphone-6s":["1,715 mAh","12 MP, f/2.2","—","—","—"],
+ "iphone-6s-plus":["2,750 mAh","12 MP, f/2.2, OIS","—","—","—"],
+ "iphone-se":["1,624 mAh","12 MP, f/2.2","—","—","—"],
+ "iphone-7":["1,960 mAh","12 MP, f/1.8, OIS","—","—","—"],
+ "iphone-7-plus":["2,900 mAh","12 MP, f/1.8, OIS","12 MP, f/2.8, 2×","—","Dual-camera disparity"],
+ "iphone-8":["1,821 mAh","12 MP, f/1.8, OIS","—","—","—"],
+ "iphone-8-plus":["2,691 mAh","12 MP, f/1.8, OIS","12 MP, f/2.8, 2×","—","Dual-camera disparity"],
+ "iphone-x":["2,716 mAh","12 MP, f/1.8, OIS","12 MP, f/2.4, 2×, OIS","—","Dual camera + front TrueDepth"],
+ "iphone-xr":["2,942 mAh","12 MP, f/1.8, OIS","—","—","Front TrueDepth"],
+ "iphone-xs":["2,658 mAh","12 MP, f/1.8, OIS","12 MP, f/2.4, 2×, OIS","—","Dual camera + front TrueDepth"],
+ "iphone-xs-max":["3,174 mAh","12 MP, f/1.8, OIS","12 MP, f/2.4, 2×, OIS","—","Dual camera + front TrueDepth"],
+ "iphone-11":["3,110 mAh","12 MP, f/1.8, OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-11-pro":["3,046 mAh","12 MP, f/1.8, OIS","12 MP, f/2.0, 2×, OIS","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-11-pro-max":["3,969 mAh","12 MP, f/1.8, OIS","12 MP, f/2.0, 2×, OIS","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-12":["2,815 mAh","12 MP, f/1.6, OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-12-mini":["2,227 mAh","12 MP, f/1.6, OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-12-pro":["2,815 mAh","12 MP, f/1.6, OIS","12 MP, f/2.0, 2×","12 MP, f/2.4, 120°","LiDAR scanner"],
+ "iphone-12-pro-max":["3,687 mAh","12 MP, f/1.6, sensor-shift OIS","12 MP, f/2.2, 2.5×","12 MP, f/2.4, 120°","LiDAR scanner"],
+ "iphone-se-2":["1,821 mAh","12 MP, f/1.8, OIS","—","—","—"],
+ "iphone-13":["3,240 mAh","12 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-13-mini":["2,438 mAh","12 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-13-pro":["3,095 mAh","12 MP, f/1.5, sensor-shift OIS","12 MP, f/2.8, 3×, OIS","12 MP, f/1.8, macro","LiDAR scanner"],
+ "iphone-13-pro-max":["4,352 mAh","12 MP, f/1.5, sensor-shift OIS","12 MP, f/2.8, 3×, OIS","12 MP, f/1.8, macro","LiDAR scanner"],
+ "iphone-14":["3,279 mAh","12 MP, f/1.5, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-14-plus":["4,325 mAh","12 MP, f/1.5, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-14-pro":["3,200 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 3×, OIS","12 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-14-pro-max":["4,323 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 3×, OIS","12 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-se-3":["2,018 mAh","12 MP, f/1.8, OIS","—","—","—"],
+ "iphone-15":["3,349 mAh","48 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-15-plus":["4,383 mAh","48 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.4, 120°","Front TrueDepth"],
+ "iphone-15-pro":["3,274 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 3×, OIS","12 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-15-pro-max":["4,441 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 5× tetraprism, 3D OIS","12 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-16":["3,561 mAh","48 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.2, macro","Front TrueDepth"],
+ "iphone-16-plus":["4,674 mAh","48 MP, f/1.6, sensor-shift OIS","—","12 MP, f/2.2, macro","Front TrueDepth"],
+ "iphone-16-pro":["3,582 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 5× tetraprism, 3D OIS","48 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-16-pro-max":["4,685 mAh","48 MP, f/1.78, second-gen sensor-shift OIS","12 MP, f/2.8, 5× tetraprism, 3D OIS","48 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-16e":["4,005 mAh","48 MP, f/1.6, sensor-shift OIS","—","—","Front TrueDepth"],
+ "iphone-17":["3,692 mAh","48 MP, f/1.6, sensor-shift OIS","—","48 MP, f/2.2, macro","Front TrueDepth"],
+ "iphone-17-pro":["4,252 mAh","48 MP, f/1.78, sensor-shift OIS","48 MP, f/2.8, 4× (8× optical quality), 3D OIS","48 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-17-pro-max":["4,823 mAh (5,088 mAh eSIM-only)","48 MP, f/1.78, sensor-shift OIS","48 MP, f/2.8, 4× (8× optical quality), 3D OIS","48 MP, f/2.2, macro","LiDAR scanner"],
+ "iphone-air":["3,149 mAh","48 MP, f/1.6, sensor-shift OIS","—","—","Front TrueDepth"],
+ "iphone-17e":["~4,000 mAh · est","48 MP, f/1.6 · est","—","—","Front TrueDepth · est"],
+ "iphone-18-pro":["~4,300 mAh · unconfirmed","48 MP · unconfirmed","48 MP tele · unconfirmed","48 MP ultra-wide · unconfirmed","LiDAR scanner · unconfirmed"],
+ "iphone-18-pro-max":["~5,000 mAh · unconfirmed","48 MP · unconfirmed","48 MP tele · unconfirmed","48 MP ultra-wide · unconfirmed","LiDAR scanner · unconfirmed"],
+ "iphone-duo":["~5,400 mAh · unconfirmed","48 MP · unconfirmed","48 MP tele · unconfirmed","48 MP ultra-wide · unconfirmed","Front TrueDepth · unconfirmed"]
+};
+
 // every field shown in the sheet and compared side by side
 function specs(i){
   const [id,,row,,announced,released,chip,display] = M[i];
   const [price,storage,finish,soc] = SPEC[id];
   const [cpu,gpu,npu,mem] = SOC[soc];
+  const [batt,cam1,cam2,cam3,cam4] = CAM[id];
   return [["Announced",announced],["Released",released],["Product line",LINE[row]],
           ["Chip",chip],["CPU",cpu],["GPU",gpu],["Neural engine",npu],["Memory",mem],
-          ["Display",display],["Storage",storage],["US launch price",price],["Finishes",finish]];
+          ["Display",display],["Battery",batt],
+          ["Camera · standard",cam1],["Camera · telephoto",cam2],
+          ["Camera · ultra-wide",cam3],["Camera · depth",cam4],
+          ["Storage",storage],["US launch price",price],["Finishes",finish]];
 }
 function title(i){ return M[i][1] === "iPhone 1" ? "iPhone (1st generation)" : M[i][1]; }
 
@@ -578,7 +641,11 @@ function compare(a,b){
       A.map(([k,v],n) =>
         '<tr' + (v === B[n][1] ? '' : ' class="diff"') + '><th scope="row">' + k + '</th>' +
         '<td>' + v + '</td><td>' + B[n][1] + '</td></tr>').join("") +
-      '</tbody></table></div>';
+      '</tbody></table></div>' +
+    '<nav class="links" aria-label="Reference links">' +
+      '<a href="https://nanoreview.net/en/phone-compare/apple-' + M[a][0] + '-vs-apple-' + M[b][0] +
+      '" target="_blank" rel="noopener">Nanoreview comparison</a>' +
+    '</nav>';
   sheet.showModal();
 }
 
