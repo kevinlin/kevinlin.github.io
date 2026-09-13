@@ -59,8 +59,7 @@
     max-width: 1072px; margin: 0 auto; padding: 6px 16px;
     display: flex; align-items: center; gap: 8px;
   }
-  .pills { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; }
-  .pills::-webkit-scrollbar { display: none; }
+  .pills { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin; flex: 1; }
   .pills a, .step a, .src {
     min-width: 44px; min-height: 44px; padding: 0 12px;
     display: inline-flex; align-items: center; justify-content: center;
@@ -69,6 +68,7 @@
     font-variant-numeric: tabular-nums;
     transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
   }
+  .pills a { flex: none; }
   .pills a:first-child { color: var(--ink); }
   @media (hover: hover) and (pointer: fine) {
     .pills a:hover, .step a:hover, .src:hover { background: #fff; color: var(--ink); }
@@ -78,8 +78,10 @@
   main {
     max-width: 1072px; margin: 0 auto;
     padding-inline: 16px; padding-block: 24px 64px;
-    display: grid; gap: 40px;
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px;
   }
+  /* grid items default to min-width: auto, which would stretch them to the 960px diagram */
+  main > section, .principle > * { min-width: 0; }
   section { scroll-margin-top: 72px; }
   .card {
     background: var(--surface);
@@ -92,6 +94,29 @@
   .card svg { display: block; width: 100%; min-width: 960px; height: auto; }
   section:target .card { box-shadow: 0 0 0 2px var(--ring), var(--shadow); }
   .step { display: flex; justify-content: space-between; padding-top: 4px; }
+
+  /* side-notes: source text beside each diagram on wide screens, below it otherwise */
+  .principle { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px 32px; align-items: start; }
+  .note {
+    max-width: 65ch; padding-inline: 4px; color: #334155;
+    font: 15px/1.65 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  }
+  .note p { margin: 0 0 12px; text-wrap: pretty; }
+  .note-src {
+    display: inline-flex; align-items: center; min-height: 44px;
+    font: 600 12px/1 "JetBrains Mono", "SF Mono", Menlo, monospace;
+    color: var(--muted); text-decoration: none;
+    transition: color 120ms var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) { .note-src:hover { color: var(--ink); } }
+  @media (min-width: 1360px) {
+    main, .bar-inner { max-width: 1440px; }
+    #map .card { max-width: 1072px; margin-inline: auto; }
+    .principle { grid-template-columns: minmax(0, 1fr) 340px; }
+    .principle .card { grid-column: 1; grid-row: 1; }
+    .principle .note { grid-column: 2; grid-row: 1 / span 2; }
+    .principle .step { grid-column: 1; grid-row: 2; }
+  }
 
   /* overview hotspots */
   .hs { cursor: pointer; transform-box: fill-box; transform-origin: center;
@@ -116,17 +141,17 @@
 <header class="bar">
   <div class="bar-inner">
     <nav class="pills" aria-label="Principles">
-      <a href="#map">map</a>
-      <a href="#p01" aria-label="01 You are the architect, not the typist">01</a>
-      <a href="#p02" aria-label="02 Maximize agent time">02</a>
-      <a href="#p03" aria-label="03 Build your codebase for agents">03</a>
-      <a href="#p04" aria-label="04 Give agents a fast feedback loop">04</a>
-      <a href="#p05" aria-label="05 Execution is cheap, direction is everything">05</a>
-      <a href="#p06" aria-label="06 Treat code as disposable">06</a>
-      <a href="#p07" aria-label="07 Hold AI output to human standards">07</a>
-      <a href="#p08" aria-label="08 Trust the boundaries, not the agent">08</a>
-      <a href="#p09" aria-label="09 Use agents for everything">09</a>
-      <a href="#p10" aria-label="10 Continuously tune your agent setup">10</a>
+      <a href="#map">Map</a>
+      <a href="#p01">1. Architect not typist</a>
+      <a href="#p02">2. Maximize agent time</a>
+      <a href="#p03">3. Build for agents</a>
+      <a href="#p04">4. Fast feedback loop</a>
+      <a href="#p05">5. Direction over execution</a>
+      <a href="#p06">6. Code is disposable</a>
+      <a href="#p07">7. Human standards</a>
+      <a href="#p08">8. Trust the boundaries</a>
+      <a href="#p09">9. Agents for everything</a>
+      <a href="#p10">10. Tune your setup</a>
     </nav>
     <a class="src" href="https://kiro.dev/topics/frontier-engineering/" rel="noopener">source ↗</a>
   </div>
@@ -260,7 +285,7 @@
 </svg></div>
   </section>
 
-  <section id="p01" aria-labelledby="h01">
+  <section class="principle" id="p01" aria-labelledby="h01">
     <h2 id="h01" class="sr-only">01 You are the architect, not the typist</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 790" role="img" aria-labelledby="p1-title">
 <title id="p1-title">01 You are the architect, not the typist</title>
@@ -342,10 +367,17 @@
 <text x="530" y="710" font-size="12" fill="#0f172a">▸ what happens on token expiry</text>
 <text x="530" y="736" font-size="12" fill="#0f172a">▸ how to test unauthorized access</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/architect-not-typist/" rel="noopener">From kiro.dev ↗</a>
+      <p>The job is no longer writing code. It’s writing intent. We are seeing that frontier developers hand-write less than 1% of the code they produce. The rest comes from agents that they instruct, steer, and review.</p>
+      <p>The work becomes two things: defining what “done” looks like (requirements, constraints, acceptance criteria) and verifying that the output meets your intent.</p>
+      <p>The discipline of writing clear intent isn’t new, but it’s no longer optional. Describe the behavior you want, the edge cases that matter, and how to verify correctness. For example, “Add auth to this API” is not clear intent; specifying which roles can access which endpoints, what happens on token expiry, and how to test unauthorized access is. Then let the agent write the code.</p>
+      <p>Where you once spent most of your time writing code, you now spend it on intent, direction, and targeted review of what agents produce.</p>
+    </aside>
     <nav class="step" aria-label="01 navigation"><a href="#map">↑ map</a><a href="#p02">02 →</a></nav>
   </section>
 
-  <section id="p02" aria-labelledby="h02">
+  <section class="principle" id="p02" aria-labelledby="h02">
     <h2 id="h02" class="sr-only">02 Maximize agent time, minimize your involvement</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" role="img" aria-labelledby="p2-title">
 <title id="p2-title">02 Maximize agent time, minimize your involvement</title>
@@ -428,10 +460,17 @@
 <text x="44" y="694" font-size="12" font-weight="600" fill="#5b21b6">your involvement</text>
 <text x="930" y="736" font-size="12" fill="#5b21b6" text-anchor="end">shrinks to setting direction + verifying outcomes</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/maximize-agent-time/" rel="noopener">From kiro.dev ↗</a>
+      <p>Many developers are always in the loop with their coding assistant: they prompt an agent, wait 60 seconds, get code back, test it manually, paste errors back into chat, and repeat. You will never achieve high velocity this way.</p>
+      <p>Frontier developers give agents longer tasks with clear validation steps built in: “implement this feature, write tests, run them, ensure they pass, achieve 90% coverage on new code.” The agent works for 30 minutes or more while you work on something else. Agents will get things wrong along the way, and that’s fine. Let them keep looping, self-correcting, and converging on the right answer.</p>
+      <p>Keep multiple agents running in parallel on a steady stream of tasks. Review output asynchronously. The constraint on your productivity is no longer typing speed; it’s how many agents you can keep meaningfully busy at once.</p>
+      <p>As your confidence and tooling grow, push this further: run agents for hours or overnight, have agents kick off other agents, and review results the next morning. The goal is to progressively remove yourself from the loop until your involvement is limited to setting direction and verifying outcomes.</p>
+    </aside>
     <nav class="step" aria-label="02 navigation"><a href="#p01">← 01</a><a href="#map">↑ map</a><a href="#p03">03 →</a></nav>
   </section>
 
-  <section id="p03" aria-labelledby="h03">
+  <section class="principle" id="p03" aria-labelledby="h03">
     <h2 id="h03" class="sr-only">03 Build your codebase for agents</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 740" role="img" aria-labelledby="p3-title">
 <title id="p3-title">03 Build your codebase for agents</title>
@@ -526,10 +565,16 @@
   <rect x="824" y="666" width="96" height="30" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/><text x="872" y="686" fill="#64748b">module</text>
 </g>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/build-for-agents/" rel="noopener">From kiro.dev ↗</a>
+      <p>Agents are only as good as the codebase they work in. Start with fundamentals that benefit humans too: comprehensive READMEs and architecture docs, tests that describe expected behavior, clear module boundaries, strong typing, and fast builds with informative error messages. In a large legacy codebase, do this one module at a time and scope the agent to the module you’ve prepared, rather than pointing it at the whole repo.</p>
+      <p>The ROI on all of this work is far higher now, because while a new human team member onboards only once, an agent onboards every single session. Agents need explicit context that humans carry in their heads: steering files that define conventions and coding standards, skills that load task-specific procedures only when they’re needed, scripts that automate environment setup, and command line tools and MCP servers to retrieve context and take actions.</p>
+      <p>Get the agent to document its own work for future sessions. Agents should document design decisions and make liberal code comments that serve as persistent memory. The next agent session inherits the reasoning behind the code, not just the code itself.</p>
+    </aside>
     <nav class="step" aria-label="03 navigation"><a href="#p02">← 02</a><a href="#map">↑ map</a><a href="#p04">04 →</a></nav>
   </section>
 
-  <section id="p04" aria-labelledby="h04">
+  <section class="principle" id="p04" aria-labelledby="h04">
     <h2 id="h04" class="sr-only">04 Give agents a fast feedback loop</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" aria-labelledby="p4-title">
 <title id="p4-title">04 Give agents a fast feedback loop</title>
@@ -615,10 +660,17 @@
   <text x="520" y="610">codebase quality</text><text x="910" y="610" text-anchor="end" fill="#047857">↑</text>
 </g>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/fast-feedback-loop/" rel="noopener">From kiro.dev ↗</a>
+      <p>If your agent can’t run tests locally and self-correct before you ever look at the code, you’re the bottleneck. Frontier developers invest heavily in making validation fast, local, and automatable so the agent can test in a tight loop.</p>
+      <p>The agent should have access to linters and unit tests, a browser to render and visually verify UI changes, local mocks of dependent services for integration tests, and the ability to bring up the full stack on a laptop for end-to-end testing. If you use a tool to validate your own work, the agent should be able to use it too, so it can self-validate without you copy-pasting output between tools.</p>
+      <p>Property-based tests are especially valuable here: they validate that the implementation matches your intent, and they catch edge cases the agent wouldn’t think to write explicit test cases for. The agent should be able to validate its own work, find failures, and fix them without you in the loop.</p>
+      <p>Without this investment, faster code generation just means more broken builds and more bugs. With it, overall quality in the codebase actually improves because the agent validates more thoroughly and more consistently than many humans bother to.</p>
+    </aside>
     <nav class="step" aria-label="04 navigation"><a href="#p03">← 03</a><a href="#map">↑ map</a><a href="#p05">05 →</a></nav>
   </section>
 
-  <section id="p05" aria-labelledby="h05">
+  <section class="principle" id="p05" aria-labelledby="h05">
     <h2 id="h05" class="sr-only">05 Execution is cheap. Direction is everything.</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 690" role="img" aria-labelledby="p5-title">
 <title id="p5-title">05 Execution is cheap. Direction is everything.</title>
@@ -697,10 +749,17 @@
   <rect x="630" y="628" width="300" height="40" rx="20" fill="#fffbeb" stroke="#d97706"/><text x="780" y="653">ready for users' hands?</text>
 </g>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/direction-over-execution/" rel="noopener">From kiro.dev ↗</a>
+      <p>When code can be written in an afternoon, the hard part is no longer implementation. The hard part is figuring out what problem to solve, what to build, and when to change course. Implementation details are cheap to change; system design, API contracts, dependencies, and architectural tradeoffs are not. Spend your energy on those durable decisions.</p>
+      <p>Use the agent as a brainstorming partner during the design phase: have it research options, explore alternatives, and poke holes in your thinking. When two designs are both plausible, have the agent prototype both and compare them. Choices that used to be settled by debate can now be settled by evidence.</p>
+      <p>Once you’ve committed to a direction, practice spec-driven development: collaborate with the agent to write clear specs and requirements that reduce ambiguity before it starts generating code. An agent given a vague prompt will make its own decisions about tradeoffs, and you’ll spend more time undoing those choices than you saved by skipping the spec.</p>
+      <p>As you iterate, keep your attention on what matters most, such as whether the architecture will hold up under real load, whether you need to re-evaluate the design tradeoffs you made, and whether the thing you’re building is ready to put in users’ hands.</p>
+    </aside>
     <nav class="step" aria-label="05 navigation"><a href="#p04">← 04</a><a href="#map">↑ map</a><a href="#p06">06 →</a></nav>
   </section>
 
-  <section id="p06" aria-labelledby="h06">
+  <section class="principle" id="p06" aria-labelledby="h06">
     <h2 id="h06" class="sr-only">06 Treat code as disposable</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 650" role="img" aria-labelledby="p6-title">
 <title id="p6-title">06 Treat code as disposable</title>
@@ -786,10 +845,17 @@
 <rect x="30" y="584" width="900" height="44" rx="22" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
 <text x="480" y="611" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">keep asking: worth shipping, and worth the ops + maintenance after?</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/code-is-disposable/" rel="noopener">From kiro.dev ↗</a>
+      <p>Code is cheap now. Continuously evaluate whether what you’re building is worth shipping at all, and worth the operations and maintenance that follow. You can afford to prototype something in a day and walk away, or get close to production-ready in two weeks and start over when you realize it’s not the right product.</p>
+      <p>In the past, throwing away code was hard for two reasons: it felt personal because you spent months writing it, and starting over meant months more work. Both of those reasons are gone now. The important thing is to ship the right thing, not to nurse your first draft into production or avoid a re-architecture because of sunk cost.</p>
+      <p>Throw away code that isn’t serving you. The agent can build the next version before the end of the day.</p>
+      <p>Your tests at the boundaries are the exception. Unit tests get thrown away with the code, but the ones that make it safe to start over remain: end-to-end integration tests for behavior, property-based tests for invariants, and load tests for performance and concurrency at scale. Together they are the contract any rewrite has to satisfy.</p>
+    </aside>
     <nav class="step" aria-label="06 navigation"><a href="#p05">← 05</a><a href="#map">↑ map</a><a href="#p07">07 →</a></nav>
   </section>
 
-  <section id="p07" aria-labelledby="h07">
+  <section class="principle" id="p07" aria-labelledby="h07">
     <h2 id="h07" class="sr-only">07 Hold AI output to human standards</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" role="img" aria-labelledby="p7-title">
 <title id="p7-title">07 Hold AI output to human standards</title>
@@ -865,10 +931,17 @@
 <rect x="656" y="628" width="274" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
 <text x="793" y="649" font-size="12" fill="#5b21b6" text-anchor="middle">you: design, impact</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/human-standards/" rel="noopener">From kiro.dev ↗</a>
+      <p>Speed without quality is just more risk in production. You own the code that ships under your name, regardless of who or what generated it. Early on, that means reviewing agent output line by line to build confidence in what the model gets right and where it fails.</p>
+      <p>Over time, reading every line doesn’t scale, so you build an AI reviewer to take on part of that load, checking for what your team cares about, such as correctness, security, maintainability, test quality, and common bug patterns. Run the AI reviewer pre-pull-request on local changes, and run it again in CI. As your AI reviewer matures, let it handle the first few passes of feedback.</p>
+      <p>Focus your human attention on what you can judge best, such as whether the design and architecture is right, how changes will impact upstream and downstream systems, and whether the security boundaries are sound.</p>
+      <p>Extend the agent loop beyond merge: let the agent monitor the deployment, verify production behavior, and automatically start working on a fix if something regresses. Owning the outcome means staying with the change through production, not stopping at the pull request.</p>
+    </aside>
     <nav class="step" aria-label="07 navigation"><a href="#p06">← 06</a><a href="#map">↑ map</a><a href="#p08">08 →</a></nav>
   </section>
 
-  <section id="p08" aria-labelledby="h08">
+  <section class="principle" id="p08" aria-labelledby="h08">
     <h2 id="h08" class="sr-only">08 Trust the boundaries, not the agent</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 630" role="img" aria-labelledby="p8-title">
 <title id="p8-title">08 Trust the boundaries, not the agent</title>
@@ -931,10 +1004,16 @@
 
 <text x="480" y="598" font-size="13" fill="#475569" text-anchor="middle">each guardrail you automate is one less reason to stay in the loop</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/trust-the-boundaries/" rel="noopener">From kiro.dev ↗</a>
+      <p>Letting agents run autonomously for long periods requires guardrails that don’t depend on you watching. Don’t accept the false choice between letting the agent run wild on your laptop and clicking “accept” on every single tool call. Instead, constrain the agent’s access to the files, tools, network, and credentials it actually needs, and then let it run without supervision.</p>
+      <p>Start narrow, then widen it as you build confidence in the limits, until the only things you gate are the actions you can’t undo. Be especially paranoid about production: an agent should never have access to your production account or deployment credentials unless you’ve explicitly and deliberately granted it.</p>
+      <p>Layer in deterministic checks that catch problems that regular testing is unlikely to find: static application security testing to flag vulnerabilities, credential scanning to catch leaked secrets, and automated reasoning to mathematically verify that agent output matches your intent. Every guardrail you automate is one less reason to stay in the loop.</p>
+    </aside>
     <nav class="step" aria-label="08 navigation"><a href="#p07">← 07</a><a href="#map">↑ map</a><a href="#p09">09 →</a></nav>
   </section>
 
-  <section id="p09" aria-labelledby="h09">
+  <section class="principle" id="p09" aria-labelledby="h09">
     <h2 id="h09" class="sr-only">09 Use agents for everything, not just code</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 730" role="img" aria-labelledby="p9-title">
 <title id="p9-title">09 Use agents for everything, not just code</title>
@@ -1024,10 +1103,16 @@
 <text x="480" y="667" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle">same steering files · same tools · same context</text>
 <text x="480" y="690" font-size="12" fill="#475569" text-anchor="middle">clear intent · fast feedback loops · constrained access</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/agents-for-everything/" rel="noopener">From kiro.dev ↗</a>
+      <p>Once you’ve built the habits and foundations above, apply the same pattern everywhere. Design docs that used to take a week now take an afternoon. Operational investigations that took hours now take minutes. Status updates, sprint summaries, oncall reports, documentation: all of it follows the same flow.</p>
+      <p>Provide context, define the outcome, let the agent draft, then review and refine before sharing with others.</p>
+      <p>The real acceleration comes from using agents across the entire development lifecycle: planning, development, testing, deployment, and operations. Everything in this manifesto applies to all of these agents too: give them clear intent, fast feedback loops, and constrained access. A pipeline agent, an oncall agent, a documentation agent, and a third-party agent should all share much of the same setup and context. Give them the same steering files and the same tools, so they behave consistently regardless of what task they’re performing.</p>
+    </aside>
     <nav class="step" aria-label="09 navigation"><a href="#p08">← 08</a><a href="#map">↑ map</a><a href="#p10">10 →</a></nav>
   </section>
 
-  <section id="p10" aria-labelledby="h10">
+  <section class="principle" id="p10" aria-labelledby="h10">
     <h2 id="h10" class="sr-only">10 Continuously tune your agent setup</h2>
     <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" aria-labelledby="p10-title">
 <title id="p10-title">10 Continuously tune your agent setup</title>
@@ -1096,6 +1181,13 @@
 <rect x="600" y="590" width="330" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
 <text x="765" y="617" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">newer agents clean up older output</text>
 </svg></div>
+    <aside class="note" aria-label="Original text">
+      <a class="note-src" href="https://kiro.dev/topics/frontier-engineering/tune-your-setup/" rel="noopener">From kiro.dev ↗</a>
+      <p>Every time an agent makes a wrong turn or pulls you into the loop unnecessarily, ask yourself: how do I prevent this from happening again? It could be a new rule in a steering file, a skill that captures a procedure it got wrong, a command line tool that automates a manual step, an MCP server to gather the right context, or wider access to a tool or system you had previously kept out of its reach. Each of the agent’s mistakes and interruptions is an opportunity to extend its autonomy further.</p>
+      <p>This is the new daily habit of frontier engineering: you’re not just building the product, you’re constantly improving the system that builds the product.</p>
+      <p>Over time, this habit compounds. You start with agents that only run when you explicitly prompt them and require your input often. As your steering and tooling matures, agents become more autonomous and can run in the background: ambiently finding and fixing bugs, cleaning up tech debt, and improving code quality without you initiating a task.</p>
+      <p>As models improve, newer agents can clean up after what older models generated. When a new model comes out, re-evaluate whether workarounds you built for the old model’s weaknesses are still necessary. Your steering files and tools are living artifacts that evolve as fast as the models do.</p>
+    </aside>
     <nav class="step" aria-label="10 navigation"><a href="#p09">← 09</a><a href="#map">↑ map</a></nav>
   </section>
 </main>
