@@ -55,6 +55,8 @@
     "*CLAUDE.md",
     ".*",
     ".firecrawl/",
+    "ai-augmented-sdlc/diagrams/",
+    "ai-augmented-sdlc/frontier-engineering.src.html",
     "claude-tag/prompts/",
     "fable5-21days/narrative/",
     "fable5-21days/prompts/",
@@ -339,6 +341,13 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 180
+    },
+    {
+      "id": "ai-augmented-sdlc",
+      "title": "AI-Augmented SDLC",
+      "section": "Artefacts",
+      "section_order": 30,
+      "order": 10
     }
   ],
   "entries": [
@@ -1033,6 +1042,16 @@
       "replacements": {},
       "description": "Fifty-five iPhone models across five product lines, 2007 to 2026, with full SoC, price, storage and finish specifications and a drag-to-compare side-by-side diff.",
       "date": "2026-09-12"
+    },
+    {
+      "id": "ai-augmented-sdlc-frontier-engineering",
+      "source": "ai-augmented-sdlc/frontier-engineering.html",
+      "destination": "ai-augmented-sdlc/frontier-engineering/index.html",
+      "title": "Frontier Engineering Map",
+      "collection": "ai-augmented-sdlc",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-09-13"
     }
   ]
 }

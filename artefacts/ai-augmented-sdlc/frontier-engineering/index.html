@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontier Engineering Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef2f6;
+    --surface: #f8fafc;
+    --ink: #0f172a;
+    --muted: #475569;
+    --line: #dbe3ec;
+    --ring: #1d4ed8;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --shadow: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04),
+      0 4px 12px rgba(15, 23, 42, 0.05), 0 16px 32px -8px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 "JetBrains Mono", "SF Mono", Menlo, monospace;
+  }
+  a:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 8px; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .skip { position: absolute; left: 16px; top: -64px; padding: 12px 16px; background: var(--ink); color: #fff; border-radius: 8px; z-index: 30; }
+  .skip:focus { top: 8px; }
+
+  /* sticky index */
+  .bar {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(238, 242, 246, 0.86);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar-inner {
+    max-width: 1072px; margin: 0 auto; padding: 6px 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pills { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+  .pills::-webkit-scrollbar { display: none; }
+  .pills a, .step a, .src {
+    min-width: 44px; min-height: 44px; padding: 0 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 10px; font-size: 12px; font-weight: 600;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
+  }
+  .pills a:first-child { color: var(--ink); }
+  @media (hover: hover) and (pointer: fine) {
+    .pills a:hover, .step a:hover, .src:hover { background: #fff; color: var(--ink); }
+  }
+  .pills a:active, .step a:active { transform: scale(0.97); }
+
+  main {
+    max-width: 1072px; margin: 0 auto;
+    padding-inline: 16px; padding-block: 24px 64px;
+    display: grid; gap: 40px;
+  }
+  section { scroll-margin-top: 72px; }
+  .card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    transition: box-shadow 200ms var(--ease-out);
+  }
+  /* keep diagram text at its authored size (min 12px): scroll instead of shrinking */
+  .card svg { display: block; width: 100%; min-width: 960px; height: auto; }
+  section:target .card { box-shadow: 0 0 0 2px var(--ring), var(--shadow); }
+  .step { display: flex; justify-content: space-between; padding-top: 4px; }
+
+  /* overview hotspots */
+  .hs { cursor: pointer; transform-box: fill-box; transform-origin: center;
+        transition: transform 160ms var(--ease-out); }
+  .hs .hs-shape { transition: stroke-width 120ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .hs:hover { transform: translateY(-3px); }
+    .hs:hover .hs-shape { stroke-width: 3; }
+  }
+  .hs:active { transform: scale(0.98); }
+  .hs:focus-visible { outline: none; }
+  .hs:focus-visible .hs-shape { stroke: var(--ink); stroke-width: 3; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#map">Skip to map</a>
+<header class="bar">
+  <div class="bar-inner">
+    <nav class="pills" aria-label="Principles">
+      <a href="#map">map</a>
+      <a href="#p01" aria-label="01 You are the architect, not the typist">01</a>
+      <a href="#p02" aria-label="02 Maximize agent time">02</a>
+      <a href="#p03" aria-label="03 Build your codebase for agents">03</a>
+      <a href="#p04" aria-label="04 Give agents a fast feedback loop">04</a>
+      <a href="#p05" aria-label="05 Execution is cheap, direction is everything">05</a>
+      <a href="#p06" aria-label="06 Treat code as disposable">06</a>
+      <a href="#p07" aria-label="07 Hold AI output to human standards">07</a>
+      <a href="#p08" aria-label="08 Trust the boundaries, not the agent">08</a>
+      <a href="#p09" aria-label="09 Use agents for everything">09</a>
+      <a href="#p10" aria-label="10 Continuously tune your agent setup">10</a>
+    </nav>
+    <a class="src" href="https://kiro.dev/topics/frontier-engineering/" rel="noopener">source ↗</a>
+  </div>
+</header>
+
+<main>
+  <section id="map" aria-labelledby="h00">
+    <h1 id="h00" class="sr-only">Frontier Engineering: 10 principles</h1>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 740" aria-labelledby="p0-title">
+<title id="p0-title">Frontier engineering: the ten principles as one system</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p0-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p0-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p0-arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+  <marker id="p0-arrow-cyan" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0891b2"/></marker>
+</defs>
+<rect width="960" height="740" fill="#f8fafc"/><rect width="960" height="740" fill="url(#p0-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">Frontier Engineering · 10 principles</text>
+<text x="30" y="72" font-size="13" fill="#475569">You build the agent setup. The setup builds the software. Pick a principle.</text>
+
+<!-- agent setup region (08) -->
+<rect x="250" y="110" width="440" height="410" rx="16" fill="#fffbeb" fill-opacity="0.45" stroke="#d97706" stroke-width="1.5" stroke-dasharray="10,5"/>
+<text x="470" y="494" font-size="12" fill="#92400e" text-anchor="middle">the agent setup you build</text>
+
+<!-- flow -->
+<line x1="115" y1="240" x2="115" y2="288" stroke="#64748b" stroke-width="1.5" marker-end="url(#p0-arrow)"/>
+<path d="M 200,345 L 228,345 L 228,215 L 278,215" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#p0-arrow)"/>
+<line x1="660" y1="215" x2="738" y2="215" stroke="#64748b" stroke-width="1.5" marker-end="url(#p0-arrow)"/>
+<line x1="835" y1="262" x2="835" y2="298" stroke="#64748b" stroke-width="1.5" marker-end="url(#p0-arrow)"/>
+<line x1="835" y1="410" x2="835" y2="446" stroke="#64748b" stroke-width="1.5" marker-end="url(#p0-arrow)"/>
+<path d="M 835,492 L 835,562 L 624,562" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p0-arrow-orange)"/>
+<path d="M 360,562 L 270,562 L 270,524" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p0-arrow-orange)"/>
+
+<rect x="740" y="448" width="190" height="44" rx="22" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="835" y="475" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">production</text>
+
+<!-- 01 -->
+<a href="#p01" class="hs" aria-label="01 You are the architect, not the typist">
+  <rect class="hs-shape" x="30" y="130" width="170" height="110" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <circle cx="54" cy="154" r="14" fill="#6d28d9"/><text x="54" y="158" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">01</text>
+  <text x="115" y="196" font-size="14" font-weight="700" fill="#5b21b6" text-anchor="middle">YOU</text>
+  <text x="115" y="218" font-size="12" fill="#475569" text-anchor="middle">architect, not typist</text>
+</a>
+
+<!-- 05 -->
+<a href="#p05" class="hs" aria-label="05 Execution is cheap. Direction is everything.">
+  <rect class="hs-shape" x="30" y="290" width="170" height="110" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <circle cx="54" cy="314" r="14" fill="#1d4ed8"/><text x="54" y="318" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">05</text>
+  <text x="115" y="356" font-size="14" font-weight="700" fill="#1d4ed8" text-anchor="middle">DIRECTION</text>
+  <text x="115" y="378" font-size="12" fill="#475569" text-anchor="middle">spec before code</text>
+</a>
+
+<!-- 08 -->
+<a href="#p08" class="hs" aria-label="08 Trust the boundaries, not the agent">
+  <rect class="hs-shape" x="266" y="94" width="236" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <circle cx="284" cy="110" r="12" fill="#b45309"/><text x="284" y="114" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">08</text>
+  <text x="304" y="115" font-size="12" font-weight="600" fill="#92400e">trust the boundaries</text>
+</a>
+
+<!-- 02 -->
+<a href="#p02" class="hs" aria-label="02 Maximize agent time, minimize your involvement">
+  <rect class="hs-shape" x="280" y="150" width="380" height="130" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <circle cx="304" cy="174" r="14" fill="#047857"/><text x="304" y="178" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">02</text>
+  <text x="328" y="179" font-size="13" font-weight="700" fill="#065f46">AGENTS, IN PARALLEL, FOR HOURS</text>
+  <rect x="300" y="200" width="340" height="16" rx="8" fill="#a7f3d0"/>
+  <rect x="300" y="226" width="280" height="16" rx="8" fill="#a7f3d0"/>
+  <rect x="300" y="252" width="310" height="16" rx="8" fill="#a7f3d0"/>
+</a>
+
+<!-- 04 -->
+<a href="#p04" class="hs" aria-label="04 Give agents a fast feedback loop">
+  <rect class="hs-shape" x="280" y="310" width="180" height="100" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <circle cx="304" cy="334" r="14" fill="#0e7490"/><text x="304" y="338" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">04</text>
+  <text x="326" y="339" font-size="13" font-weight="700" fill="#155e75">FEEDBACK</text>
+  <path d="M 322,390 A 14,14 0 1 1 336,376" fill="none" stroke="#0891b2" stroke-width="2" marker-end="url(#p0-arrow-cyan)"/>
+  <text x="352" y="382" font-size="12" fill="#155e75">test → fix</text>
+</a>
+
+<!-- 03 -->
+<a href="#p03" class="hs" aria-label="03 Build your codebase for agents">
+  <rect class="hs-shape" x="480" y="310" width="180" height="100" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <circle cx="504" cy="334" r="14" fill="#4338ca"/><text x="504" y="338" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">03</text>
+  <text x="526" y="339" font-size="13" font-weight="700" fill="#3730a3">CODEBASE</text>
+  <text x="496" y="370" font-size="12" fill="#3730a3">docs · steering</text>
+  <text x="496" y="392" font-size="12" fill="#3730a3">skills · tools</text>
+</a>
+
+<!-- 06 -->
+<a href="#p06" class="hs" aria-label="06 Treat code as disposable">
+  <rect x="752" y="138" width="190" height="112" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect x="746" y="144" width="190" height="112" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect class="hs-shape" x="740" y="150" width="190" height="112" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+  <circle cx="764" cy="174" r="14" fill="#475569"/><text x="764" y="178" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">06</text>
+  <text x="786" y="179" font-size="13" font-weight="700" fill="#334155">CODE</text>
+  <text x="756" y="214" font-size="12" fill="#334155">disposable;</text>
+  <text x="756" y="236" font-size="12" fill="#334155">boundary tests stay</text>
+</a>
+
+<!-- 07 -->
+<a href="#p07" class="hs" aria-label="07 Hold AI output to human standards">
+  <rect class="hs-shape" x="740" y="300" width="190" height="110" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+  <circle cx="764" cy="324" r="14" fill="#be123c"/><text x="764" y="328" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">07</text>
+  <text x="786" y="329" font-size="13" font-weight="700" fill="#9f1239">REVIEW</text>
+  <text x="756" y="362" font-size="12" fill="#9f1239">AI + human,</text>
+  <text x="756" y="384" font-size="12" fill="#9f1239">through to prod</text>
+</a>
+
+<!-- 10 -->
+<a href="#p10" class="hs" aria-label="10 Continuously tune your agent setup">
+  <rect class="hs-shape" x="362" y="536" width="260" height="52" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+  <circle cx="384" cy="562" r="14" fill="#c2410c"/><text x="384" y="566" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">10</text>
+  <text x="406" y="557" font-size="13" font-weight="700" fill="#9a3412">TUNE THE SETUP</text>
+  <text x="406" y="577" font-size="12" fill="#9a3412">each mistake → a fix</text>
+</a>
+
+<!-- 09 -->
+<a href="#p09" class="hs" aria-label="09 Use agents for everything, not just code">
+  <rect class="hs-shape" x="30" y="614" width="900" height="100" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+  <circle cx="54" cy="638" r="14" fill="#0f766e"/><text x="54" y="642" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">09</text>
+  <text x="76" y="643" font-size="13" font-weight="700" fill="#115e59">AGENTS FOR EVERYTHING, NOT JUST CODE</text>
+  <g font-size="12" fill="#115e59" text-anchor="middle">
+    <rect x="50" y="662" width="160" height="34" rx="17" fill="#ffffff" stroke="#5eead4"/><text x="130" y="684">planning</text>
+    <rect x="222" y="662" width="160" height="34" rx="17" fill="#ffffff" stroke="#5eead4"/><text x="302" y="684">development</text>
+    <rect x="394" y="662" width="160" height="34" rx="17" fill="#ffffff" stroke="#5eead4"/><text x="474" y="684">testing</text>
+    <rect x="566" y="662" width="160" height="34" rx="17" fill="#ffffff" stroke="#5eead4"/><text x="646" y="684">deployment</text>
+    <rect x="738" y="662" width="160" height="34" rx="17" fill="#ffffff" stroke="#5eead4"/><text x="818" y="684">operations</text>
+  </g>
+</a>
+</svg></div>
+  </section>
+
+  <section id="p01" aria-labelledby="h01">
+    <h2 id="h01" class="sr-only">01 You are the architect, not the typist</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 790" role="img" aria-labelledby="p1-title">
+<title id="p1-title">01 You are the architect, not the typist</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p1-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p1-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p1-arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/></marker>
+</defs>
+<rect width="960" height="790" fill="#f8fafc"/><rect width="960" height="790" fill="url(#p1-grid)"/>
+
+<!-- title -->
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">01</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">You are the architect, not the typist</text>
+<text x="30" y="72" font-size="13" fill="#475569">The job is no longer writing code. It is writing intent.</text>
+
+<!-- flow arrows -->
+<line x1="170" y1="174" x2="228" y2="174" stroke="#64748b" stroke-width="1.5" marker-end="url(#p1-arrow)"/>
+<line x1="480" y1="174" x2="538" y2="174" stroke="#64748b" stroke-width="1.5" marker-end="url(#p1-arrow)"/>
+<line x1="710" y1="174" x2="758" y2="174" stroke="#64748b" stroke-width="1.5" marker-end="url(#p1-arrow)"/>
+<path d="M 845,224 L 845,270 L 355,270 L 355,243" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p1-arrow-amber)"/>
+<text x="600" y="292" font-size="12" fill="#92400e" text-anchor="middle">gap found → sharpen the intent</text>
+
+<!-- flow boxes -->
+<rect x="30" y="124" width="140" height="100" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="100" y="170" font-size="14" font-weight="600" fill="#5b21b6" text-anchor="middle">YOU</text>
+<text x="100" y="192" font-size="12" fill="#475569" text-anchor="middle">architect</text>
+
+<rect x="230" y="108" width="250" height="132" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="246" y="134" font-size="13" font-weight="700" fill="#1d4ed8">DEFINITION OF DONE</text>
+<text x="246" y="160" font-size="12" fill="#0f172a">▸ requirements, constraints</text>
+<text x="246" y="182" font-size="12" fill="#0f172a">▸ acceptance criteria</text>
+<text x="246" y="204" font-size="12" fill="#0f172a">▸ edge cases that matter</text>
+<text x="246" y="226" font-size="12" fill="#0f172a">▸ how to verify it</text>
+
+<rect x="540" y="124" width="170" height="100" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="625" y="170" font-size="14" font-weight="600" fill="#065f46" text-anchor="middle">AGENTS</text>
+<text x="625" y="192" font-size="12" fill="#475569" text-anchor="middle">write the code</text>
+
+<rect x="760" y="124" width="170" height="100" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="845" y="170" font-size="14" font-weight="600" fill="#92400e" text-anchor="middle">YOU VERIFY</text>
+<text x="845" y="192" font-size="12" fill="#475569" text-anchor="middle">meets the intent?</text>
+
+<!-- who writes the code -->
+<text x="30" y="338" font-size="13" font-weight="700" fill="#0f172a">WHO WRITES THE CODE THAT SHIPS</text>
+<rect x="30" y="352" width="900" height="38" rx="6" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+<rect x="30" y="352" width="10" height="38" rx="3" fill="#7c3aed"/>
+<text x="480" y="376" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">agents you instruct, steer and review  ·  &gt;99%</text>
+<path d="M 35,392 L 35,410 L 52,410" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="58" y="414" font-size="12" fill="#5b21b6">hand-written by frontier developers  ·  &lt;1%</text>
+
+<!-- where time goes -->
+<text x="30" y="468" font-size="13" font-weight="700" fill="#0f172a">WHERE YOUR TIME GOES</text>
+<text x="30" y="505" font-size="12" fill="#475569">before</text>
+<rect x="130" y="484" width="600" height="32" rx="6" fill="#e2e8f0" stroke="#64748b" stroke-width="1"/>
+<text x="430" y="505" font-size="12" fill="#334155" text-anchor="middle">writing code</text>
+<rect x="736" y="484" width="194" height="32" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+<text x="833" y="505" font-size="12" fill="#334155" text-anchor="middle">design, review</text>
+
+<text x="30" y="549" font-size="12" fill="#475569">now</text>
+<rect x="130" y="528" width="264" height="32" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="262" y="549" font-size="12" fill="#1d4ed8" text-anchor="middle">intent</text>
+<rect x="400" y="528" width="264" height="32" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1"/>
+<text x="532" y="549" font-size="12" fill="#5b21b6" text-anchor="middle">direction</text>
+<rect x="670" y="528" width="260" height="32" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="800" y="549" font-size="12" fill="#92400e" text-anchor="middle">targeted review</text>
+
+<!-- vague vs clear -->
+<text x="30" y="608" font-size="13" font-weight="700" fill="#0f172a">INTENT: VAGUE vs CLEAR</text>
+<rect x="30" y="624" width="420" height="136" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="50" y="652" font-size="14" font-weight="600" fill="#9f1239">✗ vague</text>
+<text x="240" y="704" font-size="14" fill="#0f172a" text-anchor="middle">"Add auth to this API"</text>
+
+<line x1="450" y1="692" x2="508" y2="692" stroke="#64748b" stroke-width="1.5" marker-end="url(#p1-arrow)"/>
+
+<rect x="510" y="624" width="420" height="136" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="530" y="652" font-size="14" font-weight="600" fill="#065f46">✓ clear</text>
+<text x="530" y="684" font-size="12" fill="#0f172a">▸ which roles reach which endpoints</text>
+<text x="530" y="710" font-size="12" fill="#0f172a">▸ what happens on token expiry</text>
+<text x="530" y="736" font-size="12" fill="#0f172a">▸ how to test unauthorized access</text>
+</svg></div>
+    <nav class="step" aria-label="01 navigation"><a href="#map">↑ map</a><a href="#p02">02 →</a></nav>
+  </section>
+
+  <section id="p02" aria-labelledby="h02">
+    <h2 id="h02" class="sr-only">02 Maximize agent time, minimize your involvement</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" role="img" aria-labelledby="p2-title">
+<title id="p2-title">02 Maximize agent time, minimize your involvement</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p2-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p2-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p2-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+</defs>
+<rect width="960" height="760" fill="#f8fafc"/><rect width="960" height="760" fill="url(#p2-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">02</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Maximize agent time, minimize your involvement</text>
+<text x="30" y="72" font-size="13" fill="#475569">The limit is how many agents you keep meaningfully busy, not typing speed.</text>
+
+<!-- A: in the loop -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#be123c">STUCK IN THE LOOP</text>
+<line x1="220" y1="160" x2="258" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<line x1="450" y1="160" x2="488" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<line x1="680" y1="160" x2="718" y2="160" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<path d="M 825,188 L 825,214 L 125,214 L 125,191" fill="none" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p2-arrow-rose)"/>
+<text x="475" y="236" font-size="12" fill="#9f1239" text-anchor="middle">repeat, and you are the bottleneck</text>
+
+<rect x="30" y="132" width="190" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="125" y="165" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">prompt agent</text>
+<rect x="260" y="132" width="190" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="355" y="165" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">wait ~60s</text>
+<rect x="490" y="132" width="190" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="585" y="165" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">test by hand</text>
+<rect x="720" y="132" width="210" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="825" y="165" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">paste errors back</text>
+
+<!-- B: frontier timeline -->
+<text x="30" y="290" font-size="13" font-weight="700" fill="#047857">FRONTIER: LONG TASKS, PARALLEL AGENTS, ASYNC REVIEW</text>
+<line x1="150" y1="318" x2="930" y2="318" stroke="#94a3b8" stroke-width="1"/>
+<text x="150" y="310" font-size="12" fill="#475569">start</text>
+<text x="500" y="310" font-size="12" fill="#475569" text-anchor="middle">30 min +</text>
+<text x="930" y="310" font-size="12" fill="#475569" text-anchor="end">hours later</text>
+<line x1="276" y1="326" x2="276" y2="500" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3"/>
+
+<text x="30" y="355" font-size="13" font-weight="600" fill="#5b21b6">you</text>
+<rect x="150" y="332" width="120" height="36" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="210" y="355" font-size="12" fill="#1d4ed8" text-anchor="middle">set direction</text>
+<rect x="282" y="332" width="498" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="531" y="355" font-size="12" fill="#475569" text-anchor="middle">working on something else</text>
+<rect x="786" y="332" width="144" height="36" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="858" y="355" font-size="12" fill="#92400e" text-anchor="middle">review async</text>
+
+<text x="30" y="405" font-size="13" font-weight="600" fill="#065f46">agent 1</text>
+<rect x="282" y="382" width="498" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="298" y="405" font-size="12" fill="#065f46">implement → write tests → run → fix</text>
+<text x="764" y="405" font-size="12" fill="#065f46" text-anchor="end">↻ pass</text>
+
+<text x="30" y="455" font-size="13" font-weight="600" fill="#065f46">agent 2</text>
+<rect x="282" y="432" width="440" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="298" y="455" font-size="12" fill="#065f46">feature · 90% coverage on new code</text>
+
+<text x="30" y="505" font-size="13" font-weight="600" fill="#065f46">agent 3</text>
+<rect x="282" y="482" width="380" height="36" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="298" y="505" font-size="12" fill="#065f46">wrong turns, self-corrects</text>
+
+<!-- C: progression -->
+<text x="30" y="574" font-size="13" font-weight="700" fill="#0f172a">PROGRESSIVELY REMOVE YOURSELF FROM THE LOOP</text>
+<line x1="170" y1="618" x2="218" y2="618" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<line x1="360" y1="618" x2="408" y2="618" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<line x1="550" y1="618" x2="598" y2="618" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<line x1="740" y1="618" x2="788" y2="618" stroke="#64748b" stroke-width="1.5" marker-end="url(#p2-arrow)"/>
+<rect x="30" y="590" width="140" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="100" y="623" font-size="12" font-weight="600" fill="#9f1239" text-anchor="middle">prompt by prompt</text>
+<rect x="220" y="590" width="140" height="56" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="290" y="623" font-size="12" font-weight="600" fill="#155e75" text-anchor="middle">30-min tasks</text>
+<rect x="410" y="590" width="140" height="56" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="480" y="623" font-size="12" font-weight="600" fill="#155e75" text-anchor="middle">parallel agents</text>
+<rect x="600" y="590" width="140" height="56" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="670" y="623" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">overnight runs</text>
+<rect x="790" y="590" width="140" height="56" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="860" y="623" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">agents → agents</text>
+
+<polygon points="30,664 930,686 930,692 30,714" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+<text x="44" y="694" font-size="12" font-weight="600" fill="#5b21b6">your involvement</text>
+<text x="930" y="736" font-size="12" fill="#5b21b6" text-anchor="end">shrinks to setting direction + verifying outcomes</text>
+</svg></div>
+    <nav class="step" aria-label="02 navigation"><a href="#p01">← 01</a><a href="#map">↑ map</a><a href="#p03">03 →</a></nav>
+  </section>
+
+  <section id="p03" aria-labelledby="h03">
+    <h2 id="h03" class="sr-only">03 Build your codebase for agents</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 740" role="img" aria-labelledby="p3-title">
+<title id="p3-title">03 Build your codebase for agents</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p3-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p3-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="740" fill="#f8fafc"/><rect width="960" height="740" fill="url(#p3-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">03</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Build your codebase for agents</text>
+<text x="30" y="72" font-size="13" fill="#475569">Agents are only as good as the codebase they work in.</text>
+
+<!-- A: onboarding -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">ONBOARDING COST</text>
+<text x="30" y="151" font-size="13" font-weight="600" fill="#5b21b6">human</text>
+<rect x="130" y="130" width="100" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="180" y="151" font-size="12" fill="#5b21b6" text-anchor="middle">onboard</text>
+<rect x="236" y="130" width="694" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+<text x="583" y="151" font-size="12" fill="#065f46" text-anchor="middle">onboards once, then carries context in their head</text>
+
+<text x="30" y="197" font-size="13" font-weight="600" fill="#065f46">agent</text>
+<g font-size="12" text-anchor="middle">
+  <rect x="130" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="153" y="197" fill="#5b21b6">load</text>
+  <rect x="178" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="219" y="197" fill="#065f46">work</text>
+  <rect x="264" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="287" y="197" fill="#5b21b6">load</text>
+  <rect x="312" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="353" y="197" fill="#065f46">work</text>
+  <rect x="398" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="421" y="197" fill="#5b21b6">load</text>
+  <rect x="446" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="487" y="197" fill="#065f46">work</text>
+  <rect x="532" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="555" y="197" fill="#5b21b6">load</text>
+  <rect x="580" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="621" y="197" fill="#065f46">work</text>
+  <rect x="666" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="689" y="197" fill="#5b21b6">load</text>
+  <rect x="714" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="755" y="197" fill="#065f46">work</text>
+  <rect x="800" y="176" width="46" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/><text x="823" y="197" fill="#5b21b6">load</text>
+  <rect x="848" y="176" width="82" height="32" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1"/><text x="889" y="197" fill="#065f46">work</text>
+</g>
+<text x="130" y="232" font-size="12" fill="#475569">onboards every session, so docs and context pay off every time</text>
+
+<!-- B: what every session loads -->
+<text x="30" y="282" font-size="13" font-weight="700" fill="#0f172a">WHAT EVERY SESSION LOADS</text>
+<line x1="330" y1="420" x2="398" y2="420" stroke="#64748b" stroke-width="1.5" marker-end="url(#p3-arrow)"/>
+<line x1="630" y1="420" x2="562" y2="420" stroke="#64748b" stroke-width="1.5" marker-end="url(#p3-arrow)"/>
+
+<rect x="30" y="296" width="300" height="252" rx="10" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="8,4"/>
+<text x="46" y="316" font-size="12" font-weight="600" fill="#334155">fundamentals · help humans too</text>
+<g font-size="12" fill="#0f172a">
+  <rect x="46" y="328" width="268" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8"/><text x="60" y="351">README + architecture docs</text>
+  <rect x="46" y="370" width="268" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8"/><text x="60" y="393">tests that describe behaviour</text>
+  <rect x="46" y="412" width="268" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8"/><text x="60" y="435">clear module boundaries</text>
+  <rect x="46" y="454" width="268" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8"/><text x="60" y="477">strong typing</text>
+  <rect x="46" y="496" width="268" height="36" rx="6" fill="#f1f5f9" stroke="#94a3b8"/><text x="60" y="519">fast builds, useful errors</text>
+</g>
+
+<rect x="400" y="378" width="160" height="84" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="480" y="414" font-size="14" font-weight="600" fill="#065f46" text-anchor="middle">AGENT</text>
+<text x="480" y="436" font-size="12" fill="#475569" text-anchor="middle">session N</text>
+
+<rect x="630" y="296" width="300" height="252" rx="10" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="8,4"/>
+<text x="646" y="316" font-size="12" font-weight="600" fill="#5b21b6">explicit agent context</text>
+<g font-size="12" fill="#0f172a">
+  <rect x="646" y="328" width="268" height="36" rx="6" fill="#f5f3ff" stroke="#a78bfa"/><text x="660" y="351">steering files · conventions</text>
+  <rect x="646" y="370" width="268" height="36" rx="6" fill="#f5f3ff" stroke="#a78bfa"/><text x="660" y="393">skills · loaded on demand</text>
+  <rect x="646" y="412" width="268" height="36" rx="6" fill="#f5f3ff" stroke="#a78bfa"/><text x="660" y="435">environment setup scripts</text>
+  <rect x="646" y="454" width="268" height="36" rx="6" fill="#f5f3ff" stroke="#a78bfa"/><text x="660" y="477">CLI tools + MCP servers</text>
+  <rect x="646" y="496" width="268" height="36" rx="6" fill="#f5f3ff" stroke="#a78bfa"/><text x="660" y="519">coding standards</text>
+</g>
+
+<!-- C: memory -->
+<text x="30" y="604" font-size="13" font-weight="700" fill="#0f172a">MEMORY ACROSS SESSIONS</text>
+<line x1="150" y1="648" x2="178" y2="648" stroke="#64748b" stroke-width="1.5" marker-end="url(#p3-arrow)"/>
+<line x1="350" y1="648" x2="378" y2="648" stroke="#64748b" stroke-width="1.5" marker-end="url(#p3-arrow)"/>
+<rect x="30" y="620" width="120" height="56" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="90" y="653" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">session N</text>
+<rect x="180" y="620" width="170" height="56" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="265" y="643" font-size="12" font-weight="600" fill="#5b21b6" text-anchor="middle">writes decisions</text>
+<text x="265" y="663" font-size="12" fill="#5b21b6" text-anchor="middle">+ code comments</text>
+<rect x="380" y="620" width="140" height="56" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="450" y="643" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">session N+1</text>
+<text x="450" y="663" font-size="12" fill="#475569" text-anchor="middle">inherits why</text>
+
+<!-- C: legacy -->
+<text x="580" y="604" font-size="13" font-weight="700" fill="#0f172a">LEGACY: ONE MODULE AT A TIME</text>
+<rect x="580" y="618" width="116" height="88" rx="8" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="638" y="722" font-size="12" fill="#065f46" text-anchor="middle">agent scope</text>
+<g font-size="12" text-anchor="middle">
+  <rect x="590" y="628" width="96" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="638" y="648" fill="#065f46">prepared</text>
+  <rect x="590" y="666" width="96" height="30" rx="5" fill="#ecfdf5" stroke="#059669"/><text x="638" y="686" fill="#065f46">agent</text>
+  <rect x="712" y="628" width="96" height="30" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/><text x="760" y="648" fill="#64748b">module</text>
+  <rect x="712" y="666" width="96" height="30" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/><text x="760" y="686" fill="#64748b">module</text>
+  <rect x="824" y="628" width="96" height="30" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/><text x="872" y="648" fill="#64748b">module</text>
+  <rect x="824" y="666" width="96" height="30" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/><text x="872" y="686" fill="#64748b">module</text>
+</g>
+</svg></div>
+    <nav class="step" aria-label="03 navigation"><a href="#p02">← 02</a><a href="#map">↑ map</a><a href="#p04">04 →</a></nav>
+  </section>
+
+  <section id="p04" aria-labelledby="h04">
+    <h2 id="h04" class="sr-only">04 Give agents a fast feedback loop</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" aria-labelledby="p4-title">
+<title id="p4-title">04 Give agents a fast feedback loop</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p4-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p4-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p4-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+  <marker id="p4-arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#059669"/></marker>
+</defs>
+<rect width="960" height="660" fill="#f8fafc"/><rect width="960" height="660" fill="url(#p4-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">04</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Give agents a fast feedback loop</text>
+<text x="30" y="72" font-size="13" fill="#475569">If the agent can't test and self-correct locally, you are the bottleneck.</text>
+
+<!-- loop -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">THE AGENT'S INNER LOOP</text>
+<line x1="200" y1="162" x2="248" y2="162" stroke="#64748b" stroke-width="1.5" marker-end="url(#p4-arrow)"/>
+<line x1="420" y1="162" x2="458" y2="162" stroke="#64748b" stroke-width="1.5" marker-end="url(#p4-arrow)"/>
+<line x1="580" y1="162" x2="648" y2="162" stroke="#059669" stroke-width="1.5" marker-end="url(#p4-arrow-green)"/>
+<text x="614" y="152" font-size="12" font-weight="600" fill="#047857" text-anchor="middle">pass</text>
+<path d="M 520,202 L 520,262 L 322,262" fill="none" stroke="#e11d48" stroke-width="1.5" marker-end="url(#p4-arrow-rose)"/>
+<text x="530" y="236" font-size="12" font-weight="600" fill="#be123c">fail</text>
+<path d="M 150,262 L 115,262 L 115,194" fill="none" stroke="#e11d48" stroke-width="1.5" marker-end="url(#p4-arrow-rose)"/>
+
+<rect x="30" y="134" width="170" height="58" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="115" y="168" font-size="14" font-weight="600" fill="#065f46" text-anchor="middle">WRITE CODE</text>
+<rect x="250" y="134" width="170" height="58" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="335" y="168" font-size="14" font-weight="600" fill="#155e75" text-anchor="middle">RUN CHECKS</text>
+<polygon points="520,122 580,162 520,202 460,162" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="520" y="167" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">pass?</text>
+<rect x="650" y="134" width="280" height="58" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="790" y="159" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">READY FOR YOU</text>
+<text x="790" y="179" font-size="12" fill="#475569" text-anchor="middle">already self-validated</text>
+<rect x="152" y="236" width="170" height="52" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="237" y="258" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">SELF-FIX</text>
+<text x="237" y="277" font-size="12" fill="#475569" text-anchor="middle">no human needed</text>
+
+<!-- toolkit -->
+<text x="30" y="340" font-size="13" font-weight="700" fill="#0f172a">WHAT THE AGENT CAN RUN ITSELF</text>
+<g text-anchor="middle">
+  <rect x="30" y="354" width="168" height="90" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <rect x="30" y="354" width="168" height="8" rx="4" fill="#0891b2"/>
+  <text x="114" y="394" font-size="13" font-weight="600" fill="#155e75">linters +</text>
+  <text x="114" y="416" font-size="12" fill="#475569">unit tests</text>
+
+  <rect x="213" y="354" width="168" height="90" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <rect x="213" y="354" width="168" height="8" rx="4" fill="#0891b2"/>
+  <text x="297" y="394" font-size="13" font-weight="600" fill="#155e75">a browser</text>
+  <text x="297" y="416" font-size="12" fill="#475569">to see UI changes</text>
+
+  <rect x="396" y="354" width="168" height="90" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <rect x="396" y="354" width="168" height="8" rx="4" fill="#0891b2"/>
+  <text x="480" y="394" font-size="13" font-weight="600" fill="#155e75">local mocks</text>
+  <text x="480" y="416" font-size="12" fill="#475569">of other services</text>
+
+  <rect x="579" y="354" width="168" height="90" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <rect x="579" y="354" width="168" height="8" rx="4" fill="#0891b2"/>
+  <text x="663" y="394" font-size="13" font-weight="600" fill="#155e75">full stack</text>
+  <text x="663" y="416" font-size="12" fill="#475569">on a laptop · e2e</text>
+
+  <rect x="762" y="354" width="168" height="90" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <rect x="762" y="354" width="168" height="8" rx="4" fill="#7c3aed"/>
+  <text x="846" y="394" font-size="13" font-weight="600" fill="#5b21b6">property tests</text>
+  <text x="846" y="416" font-size="12" fill="#475569">edge cases, intent</text>
+</g>
+<text x="480" y="476" font-size="12" fill="#475569" text-anchor="middle">if you use a tool to validate your work, the agent gets it too</text>
+
+<!-- without vs with -->
+<rect x="30" y="506" width="430" height="124" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="50" y="534" font-size="13" font-weight="700" fill="#9f1239">WITHOUT THE LOOP</text>
+<g font-size="12" fill="#0f172a">
+  <text x="50" y="562">faster code generation</text><text x="440" y="562" text-anchor="end" fill="#be123c">↑</text>
+  <text x="50" y="586">broken builds</text><text x="440" y="586" text-anchor="end" fill="#be123c">↑</text>
+  <text x="50" y="610">bugs</text><text x="440" y="610" text-anchor="end" fill="#be123c">↑</text>
+</g>
+<rect x="500" y="506" width="430" height="124" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="520" y="534" font-size="13" font-weight="700" fill="#065f46">WITH THE LOOP</text>
+<g font-size="12" fill="#0f172a">
+  <text x="520" y="562">faster code generation</text><text x="910" y="562" text-anchor="end" fill="#047857">↑</text>
+  <text x="520" y="586">validation, more consistent than most humans</text><text x="910" y="586" text-anchor="end" fill="#047857">↑</text>
+  <text x="520" y="610">codebase quality</text><text x="910" y="610" text-anchor="end" fill="#047857">↑</text>
+</g>
+</svg></div>
+    <nav class="step" aria-label="04 navigation"><a href="#p03">← 03</a><a href="#map">↑ map</a><a href="#p05">05 →</a></nav>
+  </section>
+
+  <section id="p05" aria-labelledby="h05">
+    <h2 id="h05" class="sr-only">05 Execution is cheap. Direction is everything.</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 690" role="img" aria-labelledby="p5-title">
+<title id="p5-title">05 Execution is cheap. Direction is everything.</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p5-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p5-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p5-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+  <linearGradient id="p5-cost" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#a7f3d0"/><stop offset="0.5" stop-color="#fde68a"/><stop offset="1" stop-color="#fda4af"/></linearGradient>
+</defs>
+<rect width="960" height="690" fill="#f8fafc"/><rect width="960" height="690" fill="url(#p5-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">05</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Execution is cheap. Direction is everything.</text>
+<text x="30" y="72" font-size="13" fill="#475569">When code takes an afternoon, the hard part is what to build.</text>
+
+<!-- A: cost to change -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">COST TO CHANGE LATER</text>
+<rect x="30" y="130" width="900" height="14" rx="7" fill="url(#p5-cost)"/>
+<text x="30" y="166" font-size="12" fill="#047857">cheap</text>
+<text x="930" y="166" font-size="12" fill="#be123c" text-anchor="end">expensive</text>
+<g font-size="12" text-anchor="middle">
+  <rect x="30" y="180" width="200" height="34" rx="17" fill="#ecfdf5" stroke="#059669"/><text x="130" y="202" fill="#065f46">implementation details</text>
+  <rect x="440" y="180" width="150" height="34" rx="17" fill="#fff1f2" stroke="#e11d48"/><text x="515" y="202" fill="#9f1239">dependencies</text>
+  <rect x="600" y="180" width="150" height="34" rx="17" fill="#fff1f2" stroke="#e11d48"/><text x="675" y="202" fill="#9f1239">API contracts</text>
+  <rect x="760" y="180" width="170" height="34" rx="17" fill="#fff1f2" stroke="#e11d48"/><text x="845" y="202" fill="#9f1239">system design</text>
+  <rect x="690" y="222" width="240" height="34" rx="17" fill="#fff1f2" stroke="#e11d48"/><text x="810" y="244" fill="#9f1239">architectural tradeoffs</text>
+</g>
+<text x="670" y="244" font-size="12" font-weight="600" fill="#9f1239" text-anchor="end">spend your energy here →</text>
+
+<!-- B: evidence flow -->
+<text x="30" y="304" font-size="13" font-weight="700" fill="#0f172a">SETTLE DESIGN BY EVIDENCE, THEN SPEC IT</text>
+<path d="M 200,382 L 225,382 L 225,346 L 248,346" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#p5-arrow)"/>
+<path d="M 200,382 L 225,382 L 225,418 L 248,418" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#p5-arrow)"/>
+<path d="M 400,346 L 425,346 L 425,382 L 448,382" fill="none" stroke="#64748b" stroke-width="1.5" marker-end="url(#p5-arrow)"/>
+<path d="M 400,418 L 425,418 L 425,382" fill="none" stroke="#64748b" stroke-width="1.5"/>
+<line x1="590" y1="382" x2="628" y2="382" stroke="#64748b" stroke-width="1.5" marker-end="url(#p5-arrow)"/>
+<line x1="770" y1="382" x2="808" y2="382" stroke="#64748b" stroke-width="1.5" marker-end="url(#p5-arrow)"/>
+
+<rect x="30" y="350" width="170" height="64" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="115" y="377" font-size="13" font-weight="600" fill="#5b21b6" text-anchor="middle">BRAINSTORM</text>
+<text x="115" y="398" font-size="12" fill="#475569" text-anchor="middle">research, poke holes</text>
+<rect x="250" y="320" width="150" height="52" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="325" y="343" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">PROTOTYPE A</text>
+<text x="325" y="362" font-size="12" fill="#475569" text-anchor="middle">agent-built</text>
+<rect x="250" y="392" width="150" height="52" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="325" y="415" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">PROTOTYPE B</text>
+<text x="325" y="434" font-size="12" fill="#475569" text-anchor="middle">agent-built</text>
+<rect x="450" y="350" width="140" height="64" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="520" y="377" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">COMPARE</text>
+<text x="520" y="398" font-size="12" fill="#475569" text-anchor="middle">not debate</text>
+<rect x="630" y="350" width="140" height="64" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="700" y="377" font-size="13" font-weight="600" fill="#1d4ed8" text-anchor="middle">WRITE SPEC</text>
+<text x="700" y="398" font-size="12" fill="#475569" text-anchor="middle">with the agent</text>
+<rect x="810" y="350" width="120" height="64" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="870" y="377" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">AGENT</text>
+<text x="870" y="398" font-size="12" fill="#475569" text-anchor="middle">builds</text>
+
+<!-- anti-pattern -->
+<text x="30" y="494" font-size="13" font-weight="700" fill="#be123c">SKIPPING THE SPEC</text>
+<line x1="220" y1="536" x2="268" y2="536" stroke="#e11d48" stroke-width="1.5" marker-end="url(#p5-arrow-rose)"/>
+<line x1="510" y1="536" x2="558" y2="536" stroke="#e11d48" stroke-width="1.5" marker-end="url(#p5-arrow-rose)"/>
+<rect x="30" y="508" width="190" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="125" y="541" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">vague prompt</text>
+<rect x="270" y="508" width="240" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="390" y="541" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">agent picks tradeoffs</text>
+<rect x="560" y="508" width="370" height="56" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="745" y="531" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">you undo its choices</text>
+<text x="745" y="551" font-size="12" fill="#475569" text-anchor="middle">costs more than the spec would have</text>
+
+<!-- C: watch -->
+<text x="30" y="614" font-size="13" font-weight="700" fill="#0f172a">WHILE ITERATING, KEEP ASKING</text>
+<g font-size="12" font-weight="600" fill="#92400e" text-anchor="middle">
+  <rect x="30" y="628" width="280" height="40" rx="20" fill="#fffbeb" stroke="#d97706"/><text x="170" y="653">holds under real load?</text>
+  <rect x="330" y="628" width="280" height="40" rx="20" fill="#fffbeb" stroke="#d97706"/><text x="470" y="653">tradeoffs still right?</text>
+  <rect x="630" y="628" width="300" height="40" rx="20" fill="#fffbeb" stroke="#d97706"/><text x="780" y="653">ready for users' hands?</text>
+</g>
+</svg></div>
+    <nav class="step" aria-label="05 navigation"><a href="#p04">← 04</a><a href="#map">↑ map</a><a href="#p06">06 →</a></nav>
+  </section>
+
+  <section id="p06" aria-labelledby="h06">
+    <h2 id="h06" class="sr-only">06 Treat code as disposable</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 650" role="img" aria-labelledby="p6-title">
+<title id="p6-title">06 Treat code as disposable</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p6-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p6-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p6-arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#7c3aed"/></marker>
+</defs>
+<rect width="960" height="650" fill="#f8fafc"/><rect width="960" height="650" fill="url(#p6-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">06</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Treat code as disposable</text>
+<text x="30" y="72" font-size="13" fill="#475569">Ship the right thing. Don't nurse a first draft because of sunk cost.</text>
+
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">REWRITES COME AND GO. THE CONTRACT STAYS.</text>
+
+<!-- contract arrows -->
+<g stroke="#7c3aed" stroke-width="1.5" marker-end="url(#p6-arrow-violet)">
+  <line x1="130" y1="270" x2="130" y2="234"/>
+  <line x1="360" y1="270" x2="360" y2="234"/>
+  <line x1="590" y1="270" x2="590" y2="234"/>
+  <line x1="825" y1="270" x2="825" y2="234"/>
+</g>
+<text x="146" y="258" font-size="12" fill="#5b21b6">every rewrite must pass</text>
+
+<!-- versions -->
+<g>
+  <rect x="30" y="132" width="200" height="100" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="130" y="158" font-size="14" font-weight="600" fill="#475569" text-anchor="middle">v1 · prototype</text>
+  <text x="130" y="178" font-size="12" fill="#64748b" text-anchor="middle">a day, then walk away</text>
+  <rect x="80" y="192" width="100" height="26" rx="5" fill="#fff1f2" stroke="#fda4af"/>
+  <text x="130" y="210" font-size="12" fill="#be123c" text-anchor="middle">✗ unit tests</text>
+
+  <rect x="260" y="132" width="200" height="100" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="360" y="158" font-size="14" font-weight="600" fill="#475569" text-anchor="middle">v2 · 2 weeks</text>
+  <text x="360" y="178" font-size="12" fill="#64748b" text-anchor="middle">wrong product, restart</text>
+  <rect x="310" y="192" width="100" height="26" rx="5" fill="#fff1f2" stroke="#fda4af"/>
+  <text x="360" y="210" font-size="12" fill="#be123c" text-anchor="middle">✗ unit tests</text>
+
+  <rect x="490" y="132" width="200" height="100" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="590" y="158" font-size="14" font-weight="600" fill="#475569" text-anchor="middle">v3 · re-architect</text>
+  <text x="590" y="178" font-size="12" fill="#64748b" text-anchor="middle">rebuilt the same day</text>
+  <rect x="540" y="192" width="100" height="26" rx="5" fill="#fff1f2" stroke="#fda4af"/>
+  <text x="590" y="210" font-size="12" fill="#be123c" text-anchor="middle">✗ unit tests</text>
+
+  <rect x="720" y="132" width="210" height="100" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="825" y="166" font-size="14" font-weight="600" fill="#065f46" text-anchor="middle">the right thing</text>
+  <text x="825" y="190" font-size="12" fill="#475569" text-anchor="middle">ships</text>
+</g>
+<line x1="230" y1="182" x2="258" y2="182" stroke="#64748b" stroke-width="1.5" marker-end="url(#p6-arrow)"/>
+<line x1="460" y1="182" x2="488" y2="182" stroke="#64748b" stroke-width="1.5" marker-end="url(#p6-arrow)"/>
+<line x1="690" y1="182" x2="718" y2="182" stroke="#64748b" stroke-width="1.5" marker-end="url(#p6-arrow)"/>
+
+<!-- contract band -->
+<rect x="30" y="272" width="900" height="112" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="46" y="296" font-size="13" font-weight="700" fill="#5b21b6">BOUNDARY TESTS · KEPT ACROSS EVERY REWRITE</text>
+<g text-anchor="middle">
+  <rect x="46" y="310" width="280" height="58" rx="8" fill="#ffffff" stroke="#a78bfa"/>
+  <text x="186" y="334" font-size="13" font-weight="600" fill="#5b21b6">end-to-end integration</text>
+  <text x="186" y="354" font-size="12" fill="#475569">behaviour</text>
+  <rect x="340" y="310" width="280" height="58" rx="8" fill="#ffffff" stroke="#a78bfa"/>
+  <text x="480" y="334" font-size="13" font-weight="600" fill="#5b21b6">property-based</text>
+  <text x="480" y="354" font-size="12" fill="#475569">invariants</text>
+  <rect x="634" y="310" width="280" height="58" rx="8" fill="#ffffff" stroke="#a78bfa"/>
+  <text x="774" y="334" font-size="13" font-weight="600" fill="#5b21b6">load tests</text>
+  <text x="774" y="354" font-size="12" fill="#475569">performance, concurrency at scale</text>
+</g>
+
+<!-- then vs now -->
+<text x="30" y="434" font-size="13" font-weight="700" fill="#0f172a">WHY THROWING CODE AWAY USED TO HURT</text>
+<rect x="30" y="450" width="400" height="104" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="50" y="476" font-size="13" font-weight="700" fill="#9f1239">THEN</text>
+<text x="50" y="504" font-size="12" fill="#0f172a">months of your work → feels personal</text>
+<text x="50" y="530" font-size="12" fill="#0f172a">starting over → months more work</text>
+<line x1="430" y1="502" x2="528" y2="502" stroke="#64748b" stroke-width="1.5" marker-end="url(#p6-arrow)"/>
+<rect x="530" y="450" width="400" height="104" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="550" y="476" font-size="13" font-weight="700" fill="#065f46">NOW</text>
+<text x="550" y="504" font-size="12" fill="#0f172a">code is cheap → nothing personal</text>
+<text x="550" y="530" font-size="12" fill="#0f172a">next version → by end of the day</text>
+
+<!-- keep asking -->
+<rect x="30" y="584" width="900" height="44" rx="22" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="480" y="611" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">keep asking: worth shipping, and worth the ops + maintenance after?</text>
+</svg></div>
+    <nav class="step" aria-label="06 navigation"><a href="#p05">← 05</a><a href="#map">↑ map</a><a href="#p07">07 →</a></nav>
+  </section>
+
+  <section id="p07" aria-labelledby="h07">
+    <h2 id="h07" class="sr-only">07 Hold AI output to human standards</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" role="img" aria-labelledby="p7-title">
+<title id="p7-title">07 Hold AI output to human standards</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p7-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p7-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p7-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+</defs>
+<rect width="960" height="680" fill="#f8fafc"/><rect width="960" height="680" fill="url(#p7-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">07</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Hold AI output to human standards</text>
+<text x="30" y="72" font-size="13" fill="#475569">You own the code that ships under your name, whoever generated it.</text>
+
+<!-- A: pipeline -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">OWN THE CHANGE ALL THE WAY TO PRODUCTION</text>
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#p7-arrow)">
+  <line x1="142" y1="172" x2="160" y2="172"/>
+  <line x1="274" y1="172" x2="292" y2="172"/>
+  <line x1="406" y1="172" x2="424" y2="172"/>
+  <line x1="538" y1="172" x2="556" y2="172"/>
+  <line x1="670" y1="172" x2="688" y2="172"/>
+  <line x1="802" y1="172" x2="820" y2="172"/>
+</g>
+<path d="M 878,206 L 878,250 L 86,250 L 86,209" fill="none" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p7-arrow-rose)"/>
+<text x="480" y="274" font-size="12" font-weight="600" fill="#9f1239" text-anchor="middle">regression → agent starts on the fix</text>
+
+<g text-anchor="middle">
+  <rect x="30" y="140" width="112" height="66" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="86" y="168" font-size="13" font-weight="600" fill="#065f46">AGENT</text><text x="86" y="188" font-size="12" fill="#475569">writes</text>
+  <rect x="162" y="140" width="112" height="66" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="218" y="168" font-size="13" font-weight="600" fill="#155e75">AI REVIEW</text><text x="218" y="188" font-size="12" fill="#475569">local, pre-PR</text>
+  <rect x="294" y="140" width="112" height="66" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+  <text x="350" y="168" font-size="13" font-weight="600" fill="#334155">PR</text><text x="350" y="188" font-size="12" fill="#475569">opened</text>
+  <rect x="426" y="140" width="112" height="66" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="482" y="168" font-size="13" font-weight="600" fill="#155e75">AI REVIEW</text><text x="482" y="188" font-size="12" fill="#475569">again in CI</text>
+  <rect x="558" y="140" width="112" height="66" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="614" y="168" font-size="13" font-weight="600" fill="#5b21b6">YOU</text><text x="614" y="188" font-size="12" fill="#475569">judgement</text>
+  <rect x="690" y="140" width="112" height="66" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+  <text x="746" y="168" font-size="13" font-weight="600" fill="#334155">DEPLOY</text><text x="746" y="188" font-size="12" fill="#475569">merge + ship</text>
+  <rect x="822" y="140" width="112" height="66" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="878" y="168" font-size="13" font-weight="600" fill="#92400e">AGENT</text><text x="878" y="188" font-size="12" fill="#475569">monitors prod</text>
+</g>
+
+<!-- B: who checks what -->
+<text x="30" y="326" font-size="13" font-weight="700" fill="#0f172a">WHO CHECKS WHAT</text>
+<rect x="30" y="340" width="430" height="176" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="46" y="364" font-size="13" font-weight="700" fill="#155e75">AI REVIEWER · first passes</text>
+<g font-size="12" fill="#155e75" text-anchor="middle">
+  <rect x="46" y="380" width="190" height="30" rx="15" fill="#ffffff" stroke="#67e8f9"/><text x="141" y="400">correctness</text>
+  <rect x="254" y="380" width="190" height="30" rx="15" fill="#ffffff" stroke="#67e8f9"/><text x="349" y="400">security</text>
+  <rect x="46" y="420" width="190" height="30" rx="15" fill="#ffffff" stroke="#67e8f9"/><text x="141" y="440">maintainability</text>
+  <rect x="254" y="420" width="190" height="30" rx="15" fill="#ffffff" stroke="#67e8f9"/><text x="349" y="440">test quality</text>
+  <rect x="46" y="460" width="398" height="30" rx="15" fill="#ffffff" stroke="#67e8f9"/><text x="245" y="480">common bug patterns</text>
+</g>
+<rect x="500" y="340" width="430" height="176" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="516" y="364" font-size="13" font-weight="700" fill="#5b21b6">YOU · what humans judge best</text>
+<g font-size="12" fill="#5b21b6" text-anchor="middle">
+  <rect x="516" y="380" width="398" height="30" rx="15" fill="#ffffff" stroke="#c4b5fd"/><text x="715" y="400">design + architecture right?</text>
+  <rect x="516" y="420" width="398" height="30" rx="15" fill="#ffffff" stroke="#c4b5fd"/><text x="715" y="440">impact on up/downstream systems</text>
+  <rect x="516" y="460" width="398" height="30" rx="15" fill="#ffffff" stroke="#c4b5fd"/><text x="715" y="480">security boundaries sound?</text>
+</g>
+
+<!-- C: review load over time -->
+<text x="30" y="566" font-size="13" font-weight="700" fill="#0f172a">REVIEW LOAD OVER TIME</text>
+<text x="30" y="603" font-size="12" fill="#475569">early</text>
+<rect x="130" y="582" width="800" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+<text x="530" y="603" font-size="12" fill="#5b21b6" text-anchor="middle">you read every line, learning where the model fails</text>
+<text x="30" y="649" font-size="12" fill="#475569">mature</text>
+<rect x="130" y="628" width="520" height="32" rx="6" fill="#cffafe" stroke="#0891b2" stroke-width="1"/>
+<text x="390" y="649" font-size="12" fill="#155e75" text-anchor="middle">AI reviewer handles the first passes</text>
+<rect x="656" y="628" width="274" height="32" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+<text x="793" y="649" font-size="12" fill="#5b21b6" text-anchor="middle">you: design, impact</text>
+</svg></div>
+    <nav class="step" aria-label="07 navigation"><a href="#p06">← 06</a><a href="#map">↑ map</a><a href="#p08">08 →</a></nav>
+  </section>
+
+  <section id="p08" aria-labelledby="h08">
+    <h2 id="h08" class="sr-only">08 Trust the boundaries, not the agent</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 630" role="img" aria-labelledby="p8-title">
+<title id="p8-title">08 Trust the boundaries, not the agent</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p8-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p8-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+</defs>
+<rect width="960" height="630" fill="#f8fafc"/><rect width="960" height="630" fill="url(#p8-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">08</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Trust the boundaries, not the agent</text>
+<text x="30" y="72" font-size="13" fill="#475569">Guardrails that work without you watching.</text>
+
+<!-- A: false choice -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">SKIP THE FALSE CHOICE</text>
+<g text-anchor="middle">
+  <rect x="30" y="130" width="260" height="70" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+  <text x="160" y="160" font-size="14" font-weight="600" fill="#9f1239">✗ RUN WILD</text>
+  <text x="160" y="182" font-size="12" fill="#475569">full access to your laptop</text>
+  <rect x="320" y="130" width="260" height="70" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+  <text x="450" y="160" font-size="14" font-weight="600" fill="#9f1239">✗ CLICK ACCEPT</text>
+  <text x="450" y="182" font-size="12" fill="#475569">on every tool call</text>
+  <rect x="610" y="130" width="320" height="70" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="770" y="160" font-size="14" font-weight="600" fill="#065f46">✓ SCOPED, UNSUPERVISED</text>
+  <text x="770" y="182" font-size="12" fill="#475569">only what it needs, then let it run</text>
+</g>
+
+<!-- B: widening fence -->
+<text x="30" y="244" font-size="13" font-weight="700" fill="#0f172a">START NARROW, WIDEN WITH CONFIDENCE</text>
+<rect x="45" y="260" width="500" height="290" rx="16" fill="#fffbeb" fill-opacity="0.5" stroke="#d97706" stroke-width="1.5" stroke-dasharray="10,5"/>
+<text x="61" y="282" font-size="12" font-weight="600" fill="#92400e">later: gate only what can't be undone</text>
+<rect x="115" y="300" width="360" height="210" rx="12" fill="#ecfeff" fill-opacity="0.6" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="6,4"/>
+<text x="131" y="320" font-size="12" font-weight="600" fill="#155e75">then: widen</text>
+<rect x="185" y="338" width="220" height="120" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+<text x="199" y="358" font-size="12" font-weight="600" fill="#065f46">start narrow</text>
+<rect x="225" y="374" width="140" height="46" rx="8" fill="#ffffff" stroke="#059669" stroke-width="1.5"/>
+<text x="295" y="402" font-size="14" font-weight="700" fill="#065f46" text-anchor="middle">AGENT</text>
+<text x="295" y="444" font-size="12" fill="#475569" text-anchor="middle">runs unsupervised</text>
+<text x="295" y="492" font-size="12" fill="#155e75" text-anchor="middle">files · tools · network · creds</text>
+
+<!-- production vault -->
+<line x1="546" y1="326" x2="596" y2="326" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#p8-arrow-rose)"/>
+<text x="571" y="316" font-size="14" font-weight="700" fill="#e11d48" text-anchor="middle">✗</text>
+<rect x="600" y="260" width="330" height="130" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+<rect x="624" y="302" width="34" height="28" rx="4" fill="#e11d48"/>
+<path d="M 631,302 L 631,292 A 10,10 0 0 1 651,292 L 651,302" fill="none" stroke="#e11d48" stroke-width="3"/>
+<text x="676" y="300" font-size="14" font-weight="700" fill="#9f1239">PRODUCTION</text>
+<text x="676" y="322" font-size="12" fill="#475569">accounts + deploy creds</text>
+<text x="624" y="366" font-size="12" font-weight="600" fill="#9f1239">no access unless deliberately granted</text>
+
+<!-- deterministic checks -->
+<rect x="600" y="410" width="330" height="140" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="616" y="434" font-size="13" font-weight="700" fill="#155e75">DETERMINISTIC CHECKS</text>
+<g font-size="12" fill="#155e75">
+  <rect x="616" y="446" width="298" height="28" rx="14" fill="#ffffff" stroke="#67e8f9"/><text x="632" y="465">SAST · vulnerabilities</text>
+  <rect x="616" y="480" width="298" height="28" rx="14" fill="#ffffff" stroke="#67e8f9"/><text x="632" y="499">credential scan · leaked secrets</text>
+  <rect x="616" y="514" width="298" height="28" rx="14" fill="#ffffff" stroke="#67e8f9"/><text x="632" y="533">automated reasoning · intent</text>
+</g>
+
+<text x="480" y="598" font-size="13" fill="#475569" text-anchor="middle">each guardrail you automate is one less reason to stay in the loop</text>
+</svg></div>
+    <nav class="step" aria-label="08 navigation"><a href="#p07">← 07</a><a href="#map">↑ map</a><a href="#p09">09 →</a></nav>
+  </section>
+
+  <section id="p09" aria-labelledby="h09">
+    <h2 id="h09" class="sr-only">09 Use agents for everything, not just code</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 730" role="img" aria-labelledby="p9-title">
+<title id="p9-title">09 Use agents for everything, not just code</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p9-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p9-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="730" fill="#f8fafc"/><rect width="960" height="730" fill="url(#p9-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">09</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Use agents for everything, not just code</text>
+<text x="30" y="72" font-size="13" fill="#475569">Same habits, same setup, across the whole lifecycle.</text>
+
+<!-- A: one pattern -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">ONE PATTERN FOR ANY WORK</text>
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#p9-arrow)">
+  <line x1="190" y1="162" x2="213" y2="162"/>
+  <line x1="375" y1="162" x2="398" y2="162"/>
+  <line x1="560" y1="162" x2="583" y2="162"/>
+  <line x1="745" y1="162" x2="768" y2="162"/>
+</g>
+<g text-anchor="middle">
+  <rect x="30" y="132" width="160" height="60" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="110" y="158" font-size="13" font-weight="600" fill="#1d4ed8">CONTEXT</text><text x="110" y="178" font-size="12" fill="#475569">provide it</text>
+  <rect x="215" y="132" width="160" height="60" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="295" y="158" font-size="13" font-weight="600" fill="#1d4ed8">OUTCOME</text><text x="295" y="178" font-size="12" fill="#475569">define it</text>
+  <rect x="400" y="132" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="480" y="158" font-size="13" font-weight="600" fill="#065f46">AGENT</text><text x="480" y="178" font-size="12" fill="#475569">drafts</text>
+  <rect x="585" y="132" width="160" height="60" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="665" y="158" font-size="13" font-weight="600" fill="#5b21b6">YOU</text><text x="665" y="178" font-size="12" fill="#475569">review, refine</text>
+  <rect x="770" y="132" width="160" height="60" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+  <text x="850" y="158" font-size="13" font-weight="600" fill="#115e59">SHARE</text><text x="850" y="178" font-size="12" fill="#475569">with others</text>
+</g>
+<text x="30" y="233" font-size="12" fill="#475569">applies to</text>
+<g font-size="12" fill="#115e59" text-anchor="middle">
+  <rect x="130" y="212" width="150" height="30" rx="15" fill="#ffffff" stroke="#5eead4"/><text x="205" y="232">status updates</text>
+  <rect x="290" y="212" width="150" height="30" rx="15" fill="#ffffff" stroke="#5eead4"/><text x="365" y="232">sprint summaries</text>
+  <rect x="450" y="212" width="150" height="30" rx="15" fill="#ffffff" stroke="#5eead4"/><text x="525" y="232">oncall reports</text>
+  <rect x="610" y="212" width="150" height="30" rx="15" fill="#ffffff" stroke="#5eead4"/><text x="685" y="232">documentation</text>
+  <rect x="770" y="212" width="160" height="30" rx="15" fill="#ffffff" stroke="#5eead4"/><text x="850" y="232">design docs</text>
+</g>
+
+<!-- B: time to done -->
+<text x="30" y="296" font-size="13" font-weight="700" fill="#0f172a">TIME TO DONE</text>
+<text x="30" y="345" font-size="13" font-weight="600" fill="#0f172a">design doc</text>
+<rect x="190" y="310" width="740" height="28" rx="6" fill="#e2e8f0" stroke="#94a3b8"/>
+<text x="206" y="329" font-size="12" fill="#334155">a week</text>
+<rect x="190" y="344" width="120" height="28" rx="6" fill="#d1fae5" stroke="#059669"/>
+<text x="206" y="363" font-size="12" fill="#065f46">an afternoon</text>
+
+<text x="30" y="421" font-size="13" font-weight="600" fill="#0f172a">ops investigation</text>
+<rect x="190" y="386" width="520" height="28" rx="6" fill="#e2e8f0" stroke="#94a3b8"/>
+<text x="206" y="405" font-size="12" fill="#334155">hours</text>
+<rect x="190" y="420" width="80" height="28" rx="6" fill="#d1fae5" stroke="#059669"/>
+<text x="200" y="439" font-size="12" fill="#065f46">minutes</text>
+
+<!-- C: lifecycle + shared setup -->
+<text x="30" y="500" font-size="13" font-weight="700" fill="#0f172a">ACROSS THE LIFECYCLE, ONE SHARED SETUP</text>
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#p9-arrow)">
+  <line x1="198" y1="536" x2="211" y2="536"/>
+  <line x1="381" y1="536" x2="394" y2="536"/>
+  <line x1="564" y1="536" x2="577" y2="536"/>
+  <line x1="747" y1="536" x2="760" y2="536"/>
+</g>
+<g font-size="13" font-weight="600" fill="#115e59" text-anchor="middle">
+  <rect x="30" y="514" width="168" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/><text x="114" y="541">planning</text>
+  <rect x="213" y="514" width="168" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/><text x="297" y="541">development</text>
+  <rect x="396" y="514" width="168" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/><text x="480" y="541">testing</text>
+  <rect x="579" y="514" width="168" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/><text x="663" y="541">deployment</text>
+  <rect x="762" y="514" width="168" height="44" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/><text x="846" y="541">operations</text>
+</g>
+
+<g stroke="#7c3aed" stroke-width="1.5">
+  <line x1="135" y1="620" x2="135" y2="640"/>
+  <line x1="365" y1="620" x2="365" y2="640"/>
+  <line x1="595" y1="620" x2="595" y2="640"/>
+  <line x1="825" y1="620" x2="825" y2="640"/>
+</g>
+<g font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">
+  <rect x="30" y="576" width="210" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="135" y="603">pipeline agent</text>
+  <rect x="260" y="576" width="210" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="365" y="603">oncall agent</text>
+  <rect x="490" y="576" width="210" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="595" y="603">docs agent</text>
+  <rect x="720" y="576" width="210" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="825" y="603">third-party agent</text>
+</g>
+<rect x="30" y="640" width="900" height="66" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="480" y="667" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle">same steering files · same tools · same context</text>
+<text x="480" y="690" font-size="12" fill="#475569" text-anchor="middle">clear intent · fast feedback loops · constrained access</text>
+</svg></div>
+    <nav class="step" aria-label="09 navigation"><a href="#p08">← 08</a><a href="#map">↑ map</a><a href="#p10">10 →</a></nav>
+  </section>
+
+  <section id="p10" aria-labelledby="h10">
+    <h2 id="h10" class="sr-only">10 Continuously tune your agent setup</h2>
+    <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" role="img" aria-labelledby="p10-title">
+<title id="p10-title">10 Continuously tune your agent setup</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="p10-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="p10-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="p10-arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#059669"/></marker>
+</defs>
+<rect width="960" height="660" fill="#f8fafc"/><rect width="960" height="660" fill="url(#p10-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#2563eb">10</text>
+<text x="66" y="46" font-size="20" font-weight="700" fill="#0f172a">Continuously tune your agent setup</text>
+<text x="30" y="72" font-size="13" fill="#475569">Build the product, and keep improving the system that builds it.</text>
+
+<!-- A: mistake loop -->
+<text x="30" y="116" font-size="13" font-weight="700" fill="#0f172a">EVERY MISTAKE IS A SIGNAL</text>
+<line x1="250" y1="210" x2="308" y2="210" stroke="#64748b" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<line x1="510" y1="210" x2="558" y2="210" stroke="#64748b" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<line x1="750" y1="210" x2="798" y2="210" stroke="#64748b" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<path d="M 865,242 L 865,340 L 140,340 L 140,245" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#p10-arrow-green)"/>
+<text x="500" y="362" font-size="12" font-weight="600" fill="#047857" text-anchor="middle">next task runs further on its own</text>
+
+<rect x="30" y="178" width="220" height="64" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<text x="140" y="205" font-size="13" font-weight="600" fill="#9f1239" text-anchor="middle">WRONG TURN</text>
+<text x="140" y="226" font-size="12" fill="#475569" text-anchor="middle">or needless ping</text>
+<rect x="310" y="178" width="200" height="64" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="410" y="205" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">ASK</text>
+<text x="410" y="226" font-size="12" fill="#475569" text-anchor="middle">how do I prevent it?</text>
+
+<rect x="560" y="122" width="190" height="196" rx="10" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="8,4"/>
+<text x="574" y="142" font-size="12" font-weight="600" fill="#5b21b6">add one of</text>
+<g font-size="12" fill="#5b21b6" text-anchor="middle">
+  <rect x="574" y="152" width="162" height="28" rx="14" fill="#f5f3ff" stroke="#a78bfa"/><text x="655" y="171">steering rule</text>
+  <rect x="574" y="184" width="162" height="28" rx="14" fill="#f5f3ff" stroke="#a78bfa"/><text x="655" y="203">skill</text>
+  <rect x="574" y="216" width="162" height="28" rx="14" fill="#f5f3ff" stroke="#a78bfa"/><text x="655" y="235">CLI tool</text>
+  <rect x="574" y="248" width="162" height="28" rx="14" fill="#f5f3ff" stroke="#a78bfa"/><text x="655" y="267">MCP server</text>
+  <rect x="574" y="280" width="162" height="28" rx="14" fill="#f5f3ff" stroke="#a78bfa"/><text x="655" y="299">wider access</text>
+</g>
+
+<rect x="800" y="178" width="130" height="64" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="865" y="205" font-size="13" font-weight="600" fill="#065f46" text-anchor="middle">MORE</text>
+<text x="865" y="226" font-size="12" fill="#475569" text-anchor="middle">autonomy</text>
+
+<!-- B: compounding -->
+<text x="30" y="418" font-size="13" font-weight="700" fill="#0f172a">AUTONOMY COMPOUNDS</text>
+<line x1="70" y1="600" x2="540" y2="600" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<line x1="70" y1="600" x2="70" y2="440" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<text x="540" y="622" font-size="12" fill="#475569" text-anchor="end">time</text>
+<text x="56" y="520" font-size="12" fill="#475569" text-anchor="middle" transform="rotate(-90 56 520)">autonomy</text>
+<path d="M 80,588 C 250,582 360,540 530,452" fill="none" stroke="#059669" stroke-width="2.5"/>
+<circle cx="80" cy="588" r="5" fill="#e11d48"/>
+<circle cx="530" cy="452" r="5" fill="#059669"/>
+<text x="92" y="550" font-size="12" fill="#9f1239">runs only when prompted</text>
+<text x="520" y="436" font-size="12" fill="#065f46" text-anchor="end">ambient: fixes bugs, pays down debt</text>
+
+<!-- C: new model -->
+<text x="600" y="418" font-size="13" font-weight="700" fill="#0f172a">WHEN A NEW MODEL SHIPS</text>
+<line x1="765" y1="484" x2="765" y2="506" stroke="#64748b" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<line x1="765" y1="566" x2="765" y2="588" stroke="#64748b" stroke-width="1.5" marker-end="url(#p10-arrow)"/>
+<rect x="600" y="432" width="330" height="52" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="765" y="463" font-size="13" font-weight="600" fill="#1d4ed8" text-anchor="middle">NEW MODEL</text>
+<rect x="600" y="508" width="330" height="58" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="765" y="532" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">re-check old workarounds</text>
+<text x="765" y="552" font-size="12" fill="#475569" text-anchor="middle">drop the ones it no longer needs</text>
+<rect x="600" y="590" width="330" height="44" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+<text x="765" y="617" font-size="12" font-weight="600" fill="#065f46" text-anchor="middle">newer agents clean up older output</text>
+</svg></div>
+    <nav class="step" aria-label="10 navigation"><a href="#p09">← 09</a><a href="#map">↑ map</a></nav>
+  </section>
+</main>
+</body>
+</html>
