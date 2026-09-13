@@ -11,7 +11,7 @@
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GitHub Copilot: Coding Score vs. Blended Price</title>
+<title>GitHub Copilot: Intelligence Index vs. Blended Price</title>
 <style>
 /* Shared styling for the Artificial Analysis Intelligence Index scatter charts.
    Editorial direction: warm paper ground, serif display, restrained rules,
@@ -477,8 +477,8 @@ a.src-url:hover { color: hsl(var(--ring)); }
 <div class="page">
   <header>
     <p class="kicker">GitHub Copilot &middot; Models and pricing</p>
-    <h1>Coding Score vs. Blended Price</h1>
-    <p class="subtitle">What a million tokens costs on each Copilot model once its four billing rates are weighted the way an agentic coding session actually uses them, plotted against the share of SWE-Bench Pro tasks that model resolves. The price axis is logarithmic: Fable 5 costs 45&times; what Luna does per blended million tokens. Dashed lines join one model to its other published rates: the long-context tier, Opus 4.8&rsquo;s fast mode, or, for GPT-5.6 Sol, the rate card OpenAI cut on 21 August.</p>
+    <h1>Intelligence Index vs. Blended Price</h1>
+    <p class="subtitle">What a million tokens costs on each Copilot model once its four billing rates are weighted the way an agentic coding session actually uses them, plotted against that model&rsquo;s score on the Artificial Analysis Intelligence Index v4.3. Only models this Copilot subscription can call are shown. The price axis is logarithmic: GPT-6 Astra and Opus 4.8 in fast mode each cost 45&times; what Luna does per blended million tokens. Dashed lines join one model to its other published rates: the long-context tier or Opus 4.8&rsquo;s fast mode.</p>
   </header>
 
   <main id="main">
@@ -486,7 +486,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
     <div class="card">
       <figure class="chart-wrap" style="margin:0">
-        <canvas id="chart" role="img" aria-label="Scatter chart of SWE-Bench Pro resolve rate against blended price per million tokens in US dollars for the GitHub Copilot model catalogue. Full values are in the data table below."></canvas>
+        <canvas id="chart" role="img" aria-label="Scatter chart of Artificial Analysis Intelligence Index v4.3 score against blended price per million tokens in US dollars for the GitHub Copilot model catalogue. Full values are in the data table below."></canvas>
       </figure>
     </div>
 
@@ -502,11 +502,11 @@ a.src-url:hover { color: hsl(var(--ring)); }
       <div id="sources"></div>
     </details>
 
-    <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the next point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over. <strong>GPT-5.6 Sol carries one extra point.</strong> GitHub ran Sol at 50% off list through 3 September 2026; that promotion has now lapsed, so the Sol points here are plain list rates and no longer inferred from a discount. The list price is itself a reduction: on <a href="https://community.openai.com/t/20-price-reduction-for-gpt-5-6-sol-api-codex-credits-and-chatgpt-work/1391726">21 August 2026</a> OpenAI cut Sol to $4.00 per 1M input, $0.40 cached and $20.00 output, from $5.00 / $0.50 / $30.00, and holds it there at least until 21 November. The long-context tier came down with it. The extra Sol point is the rate card that cut replaced.</p>
+    <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the next point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over.</p>
 
-    <p class="note"><strong>Score.</strong> SWE-Bench Pro resolve rate: the share of 731 public tasks where the agent&rsquo;s patch makes the failing tests pass without breaking any that already passed. <strong>Hollow markers</strong> come from Scale&rsquo;s independently run leaderboard, which uses its own SWE-agent scaffold with uncapped cost and a 250-turn limit; filled markers are figures published in a launch post or model card, at each model&rsquo;s best configuration. The two are <strong>not like-for-like</strong>: a hollow point below a filled one may be measuring the scaffold as much as the model. The <em>Score published by</em> section below links every figure to the page it was read from, because <strong>the publisher is often not the model&rsquo;s own maker</strong>. Fable 5, Opus 4.8, Opus 4.7 and GPT-5.5 are read off xAI&rsquo;s comparison chart, and GPT-5.4 off Moonshot&rsquo;s. Those tables disagree with each other. Scale scores GPT-5.4 at 59.1% and Opus 4.6 at 51.9% where Moonshot scores them 57.7% and 53.4%; OpenAI puts GPT-5.5 at 59.4% where xAI puts it at 58.6%. Opus 5 and Sonnet 5 come from Anthropic&rsquo;s own system cards, at 79.2% and 63.2%. <strong>Fable 5.1&rsquo;s 81.2% is its max-effort score</strong>, from the Fable 5.1 and Mythos 5.1 system card; that card also restates Fable 5 at 80.0%, a third of a point under the 80.4% xAI printed. <strong>Gemini 3.8 Flash&rsquo;s 61.6% is the weakest-sourced figure here.</strong> Google put no SWE-Bench Pro number in the <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/">launch post</a>, the model page or the developer guide, all of which report DeepSWE v1.1 and Terminal-Bench instead, and Scale has not run the model. The 61.6% comes from a third-party comparison table that credits it to Google&rsquo;s own docs without linking them, so it is a published figure with no primary source behind it &mdash; treat it as softer than the rest of the chart. <strong>Grok 4.6 is the one estimated point.</strong> xAI published SWE-Bench Pro prominently for Grok 4.5 and then dropped it from both the 4.6 launch post and the <a href="https://media.x.ai/v1/website/card-4p6-4cd2dc57.pdf">4.6 model card</a>, which report DeepSWE 1.1 and APEX-SWE instead. The 70% plotted here is 4.5&rsquo;s 64.7% plus a 15% cut in its failure rate &mdash; the gain implied by 4.6&rsquo;s improvement on those adjacent coding evals &mdash; with a plausible range of roughly 67 to 73. It is a prediction, not a measurement: its markers carry a <strong>dotted ring</strong> instead of a solid one, and every label it carries says (est.). Treat any gap under about two points as noise.</p>
+    <p class="note"><strong>Score.</strong> <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, taken from <a href="https://artificialanalysis.ai/models?intelligence-index-token-use=intelligence-vs-output-tokens-per-task&amp;cost=intelligence-vs-cost-per-task">Artificial Analysis&rsquo; model comparison</a> between 11 and 13 September 2026. The index is a composite of evaluations Artificial Analysis runs itself, so every model is measured the same way. It is a general intelligence score, not a coding benchmark, and v4.3 scores can&rsquo;t be compared with earlier index versions. Each reasoning-effort setting is scored separately. Every model is plotted at its highest-scoring setting, which the data table names: max for most models, xhigh for GPT-5.5 and GPT-5.3-Codex, and high for Grok 4.6, whose xhigh setting scores a little lower at 44.27. Copilot may run a model at a lower effort, so read each point as that model&rsquo;s ceiling.</p>
 
-    <p class="note"><strong>Not shown.</strong> Eleven priced Copilot models have no published SWE-Bench Pro result and so cannot be placed: Claude Sonnet 4.6, GPT-5.4 mini, GPT-5.4 nano, GPT-5 mini, Gemini 3.7 / 3.6 / 3.5 Flash &mdash; 3.7 Flash&rsquo;s 60.4% appears only in the same unsourced third-party table as 3.8 Flash&rsquo;s, and one weak figure on the chart is enough &mdash; Kimi K2.7 Code, Raptor mini, MAI-Code-1-Flash and MAI-Code-1.1-Flash. Claude Haiku 4.5, Claude Sonnet 4, Claude Sonnet 4.5, Claude Opus 4.5 and Gemini 3.1 Pro do have Scale figures, but are left off this chart. Grok 4.5 is off it too: GitHub still prices it, and xAI still publishes its 64.7%, but its rate card is identical to 4.6&rsquo;s at both tiers, so it would draw as a duplicate line. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. <strong>Claude Fable 5.1 is plotted but not yet sold through Copilot.</strong> It shipped on 1 September 2026 and GitHub&rsquo;s table still does not list it, so its point uses Anthropic&rsquo;s own rate card &mdash; $10.00 input, $0.25 cached, $50.00 output &mdash; which is what Copilot charges verbatim for every other Claude model here. Its cache-write rate is the one figure nobody publishes: $12.50 is the 1.25&times; of input that Copilot bills on every other Claude row. <strong>Gemini 3.8 Flash is the same case.</strong> It shipped on 2 September 2026 and GitHub has not listed it either, so its point uses Google&rsquo;s card &mdash; $0.75 input, $0.075 cached, $3.75 output, no charge to write the cache &mdash; which is exactly what Copilot already bills for Gemini 3.7 and 3.6 Flash. Every other rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 1 September 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note"><strong>Not shown.</strong> The chart is limited to the models the Copilot <code>/models</code> API returned for this subscription on 13 September 2026. GitHub prices several more that this plan can&rsquo;t call, so they are off the chart even where a score exists: Claude Fable 5.1, Claude Fable 5, GPT-5.4, Gemini 3.8 Flash and Grok 4.5 among them. Of the models this plan can call, GPT-5 mini, GPT-5.4 mini and MAI-Code-1.1-Flash are not in the Artificial Analysis comparison used here, so they cannot be placed. Claude Haiku 4.5 is left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 13 September 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -952,7 +952,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
         return '<li class="src-model" data-provider="' + m.provider + '">' +
           '<span class="swatch' + (m.est ? ' is-est' : m.hollow ? ' is-hollow' : '') + '" data-provider="' + m.provider +
           '" style="--dot:' + providerColor(m.provider) + '"></span>' + m.name +
-          ' <span class="src-score">' + m.score.toFixed(2) + '%</span></li>';
+          ' <span class="src-score">' + m.score.toFixed(2) + '</span></li>';
       }).join('');
 
       return '<li class="source-item' + (source.url ? '' : ' is-none') + '">' +
@@ -967,7 +967,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
     var rows = allPoints(spec);
     var head =
       '<caption>' + rows.length + ' priced rates across ' + spec.modelCount +
-      ' scored models, highest resolve rate first. Cached input, input and output are ' +
+      ' scored models, highest index score first. Cached input, input and output are ' +
       'the published per-token rates; blended weights all four billing rates by the ' +
       'coding mix. Credits below each figure, at 1 credit = $0.01.</caption>' +
       '<thead><tr><th scope="col">Model</th><th scope="col">Provider</th>' +
@@ -981,7 +981,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
       return '<tr data-provider="' + r.provider + '"><th scope="row"><span class="swatch" data-provider="' + r.provider +
         '" style="background:' + providerColor(r.provider) + '"></span>' + r.label + '</th>' +
         '<td>' + r.provider + '</td>' +
-        '<td class="num">' + r.y.toFixed(2) + '%</td>' +
+        '<td class="num">' + r.y.toFixed(2) + '</td>' +
         rateCell(r.rates.cache, true) +
         rateCell(r.rates.in, true) +
         rateCell(r.rates.out, true) +
@@ -1047,55 +1047,41 @@ document.addEventListener('DOMContentLoaded', function () {
     return p;
   }
 
-  // Where each SWE-Bench Pro figure was actually published. Every URL here was
-  // fetched and checked to carry the exact number plotted. A model's own maker
-  // is not always the publisher: several of these figures only appear in a
-  // rival's comparison table, which is why the source is named per row.
+  // Every score is Artificial Analysis Intelligence Index v4.3, read from
+  // each model's page on artificialanalysis.ai at its highest-scoring
+  // reasoning-effort setting (named in each tableLabel).
   var SOURCES = {
-    scale:   { label: 'Scale',    url: 'https://labs.scale.com/leaderboard/swe_bench_pro_public' },
-    gpt56:   { label: 'OpenAI',   url: 'https://openai.com/index/gpt-5-6/' },
-    codex53: { label: 'OpenAI',   url: 'https://openai.com/index/introducing-gpt-5-3-codex/' },
-    grok45:  { label: 'xAI',      url: 'https://x.ai/news/grok-4-5' },
-    kimi26:  { label: 'Moonshot', url: 'https://www.kimi.com/blog/kimi-k2-6' },
-    fable51: { label: 'Anthropic', url: 'https://www-cdn.anthropic.com/0339e6a7c5c7b87f5c07798616dc32c215d14235/Claude%20Fable%205.1%20%26%20Claude%20Mythos%205.1%20System%20Card.pdf' },
-    opus5:   { label: 'Anthropic', url: 'https://www.anthropic.com/claude-opus-5-system-card' },
-    sonnet5: { label: 'Anthropic', url: 'https://www.anthropic.com/claude-sonnet-5-system-card' },
-    gem38:   { label: 'DataCamp — Google publishes no SWE-Bench Pro figure of its own', url: 'https://www.datacamp.com/blog/gemini-3-8-flash-cyber' },
-    est:     { label: 'estimated — no published SWE-Bench Pro result', url: null }
+    aa: { label: 'Artificial Analysis Intelligence Index v4.3', url: 'https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index' }
   };
 
   // Two published rates for one model: default vs long-context tier, or Opus
   // 4.8 standard vs fast mode. Same score, so each pair draws as a flat run.
   var families = [
-    // xAI published no SWE-Bench Pro result for 4.6: the launch post and the model card report
-    // DeepSWE 1.1 and APEX-SWE instead. This score is therefore an estimate, not a measurement —
-    // 4.5's 64.7 plus a 15% cut in its failure rate, the gain implied by 4.6's improvement on those
-    // adjacent coding evals. Every label it carries says (est.) for that reason.
-    { name: 'Grok 4.6', provider: 'xAI', dashed: true, score: 70.0, src: 'est', points: [
-        { label: 'Grok 4.6 (est.)', tableLabel: 'Grok 4.6 (est.)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 16 },
-        { label: '> 200K', tableLabel: 'Grok 4.6 · long context > 200K (est.)', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
-    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 69.2, src: 'grok45', points: [
-        { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'left', ao: 8 },
-        { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
+    { name: 'GPT-6 Astra', provider: 'OpenAI', dashed: true, score: 52.81, src: 'aa', points: [
+        { label: 'GPT-6 Astra', tableLabel: 'GPT-6 Astra (max)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'top', ao: 12 },
+        { label: '> 272K', tableLabel: 'GPT-6 Astra (max) · long context > 272K', rates: { in: 20, cache: 2.00, cw: 25.00, out: 75 }, al: 'right', ao: 8 } ] },
+    // Grok 4.6 scores highest at high effort; xhigh comes in at 44.27.
+    { name: 'Grok 4.6', provider: 'xAI', dashed: true, score: 44.41, src: 'aa', points: [
+        { label: 'Grok 4.6', tableLabel: 'Grok 4.6 (high)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 12 },
+        { label: '> 200K', tableLabel: 'Grok 4.6 (high) · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
+    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 41.99, src: 'aa', points: [
+        { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8 (max)', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'top', ao: 8 },
+        { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (max, fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
     // GitHub's 50%-off promotion on Sol ran to 3 Sep 2026 and has now lapsed, so the default-tier
     // point is the list rate GitHub bills. That list price is itself OpenAI's 21 Aug reduction,
-    // held to 21 Nov 2026; the second point is the rate card it replaced.
-    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 64.6, src: 'gpt56', points: [
-        { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol · list, reduced to 21 Nov 2026', rates: { in: 4, cache: 0.40, cw: 5.00, out: 20 }, al: 'top', ao: 32 },
-        { label: 'before 21 Aug', tableLabel: 'GPT-5.6 Sol · list before 21 Aug 2026', rates: { in: 5, cache: 0.50, cw: 6.25, out: 30 }, al: 'top', ao: 12 },
-        { label: '> 272K', tableLabel: 'GPT-5.6 Sol · long context > 272K', rates: { in: 8, cache: 0.80, cw: 10.00, out: 30 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 63.4, src: 'gpt56', points: [
-        { label: 'GPT-5.6 Terra', tableLabel: 'GPT-5.6 Terra', rates: { in: 2, cache: 0.20, cw: 2.50, out: 12 }, al: 'bottom', ao: 20 },
-        { label: '> 272K', tableLabel: 'GPT-5.6 Terra · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
-    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 62.7, src: 'gpt56', points: [
-        { label: 'GPT-5.6 Luna', tableLabel: 'GPT-5.6 Luna', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 1.20 }, al: 'top', ao: 8 },
-        { label: '> 200K', tableLabel: 'GPT-5.6 Luna · long context > 200K', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 58.6, src: 'grok45', points: [
-        { label: 'GPT-5.5', tableLabel: 'GPT-5.5', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
-        { label: '> 272K', tableLabel: 'GPT-5.5 · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.4', provider: 'OpenAI', dashed: true, score: 57.7, src: 'kimi26', points: [
-        { label: 'GPT-5.4', tableLabel: 'GPT-5.4', rates: { in: 2.50, cache: 0.25, cw: null, out: 15 }, al: 'top', ao: 8 },
-        { label: '> 272K', tableLabel: 'GPT-5.4 · long context > 272K', rates: { in: 5, cache: 0.50, cw: null, out: 22.50 }, al: 'left', ao: 8 } ] }
+    // held to 21 Nov 2026.
+    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 47.06, src: 'aa', points: [
+        { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol (max) · list, reduced to 21 Nov 2026', rates: { in: 4, cache: 0.40, cw: 5.00, out: 20 }, al: 'top', ao: 12 },
+        { label: '> 272K', tableLabel: 'GPT-5.6 Sol (max) · long context > 272K', rates: { in: 8, cache: 0.80, cw: 10.00, out: 30 }, al: 'right', ao: 8 } ] },
+    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 42.25, src: 'aa', points: [
+        { label: 'GPT-5.6 Terra', tableLabel: 'GPT-5.6 Terra (max)', rates: { in: 2, cache: 0.20, cw: 2.50, out: 12 }, al: 'bottom', ao: 20 },
+        { label: '> 272K', tableLabel: 'GPT-5.6 Terra (max) · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
+    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 37.50, src: 'aa', points: [
+        { label: 'GPT-5.6 Luna', tableLabel: 'GPT-5.6 Luna (max)', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 1.20 }, al: 'top', ao: 8 },
+        { label: '> 200K', tableLabel: 'GPT-5.6 Luna (max) · long context > 200K', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
+    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 38.63, src: 'aa', points: [
+        { label: 'GPT-5.5', tableLabel: 'GPT-5.5 (xhigh)', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
+        { label: '> 272K', tableLabel: 'GPT-5.5 (xhigh) · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] }
   ];
   // Marker style is derived from the source so the two can never drift apart:
   // filled = someone published the figure, hollow = Scale ran it, dotted = nobody
@@ -1108,21 +1094,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // One published rate each.
   var singles = [
-    // Not in GitHub's table yet — released 1 Sep 2026, the same day the rates here were read.
-    // Rates are Anthropic's own card ($10 / $0.25 cached / $50 out); cache write is the 1.25x of
-    // input that Copilot bills on every other Claude row, so this one figure is inferred.
-    { label: 'Claude Fable 5.1', provider: 'Anthropic', tableLabel: 'Claude Fable 5.1 (max effort) · Anthropic rates, not yet on Copilot', rates: { in: 10, cache: 0.25, cw: 12.50, out: 50 }, score: 81.2, src: 'fable51', al: 'top', ao: 10 },
-    { label: 'Claude Fable 5', provider: 'Anthropic', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, score: 80.4, src: 'grok45', al: 'right', ao: 8 },
-    { label: 'Claude Opus 5', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 79.2, src: 'opus5', al: 'right', ao: 8 },
-    { label: 'Claude Opus 4.7', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 64.3, src: 'grok45', al: 'bottom', ao: 8 },
-    { label: 'Kimi K3', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 63.4, src: 'kimi26', al: 'top', ao: 8 },
-    { label: 'Claude Sonnet 5', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 63.2, src: 'sonnet5', al: 'left', ao: 20 },
-    // Not in GitHub's table yet — released 2 Sep 2026. Rates are Google's own card, which is what
-    // Copilot already bills verbatim for Gemini 3.7 and 3.6 Flash; Google charges nothing to write
-    // the cache, so `cw: null`.
-    { label: 'Gemini 3.8 Flash', provider: 'Google', tableLabel: 'Gemini 3.8 Flash · Google rates, not yet on Copilot', rates: { in: 0.75, cache: 0.075, cw: null, out: 3.75 }, score: 61.6, src: 'gem38', al: 'bottom', ao: 10 },
-    { label: 'GPT-5.3-Codex', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 56.8, src: 'codex53', al: 'bottom', ao: 8 },
-    { label: 'Claude Opus 4.6', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 51.90, src: 'scale', al: 'right', ao: 8 }
+    { label: 'Claude Opus 5', tableLabel: 'Claude Opus 5 (max)', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 50.70, src: 'aa', al: 'right', ao: 8 },
+    { label: 'Claude Opus 4.7', tableLabel: 'Claude Opus 4.7 (max)', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 40.69, src: 'aa', al: 'right', ao: 8 },
+    { label: 'Kimi K3', tableLabel: 'Kimi K3 (max)', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 43.78, src: 'aa', al: 'bottom', ao: 8 },
+    { label: 'Claude Sonnet 5', tableLabel: 'Claude Sonnet 5 (max)', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 38.36, src: 'aa', al: 'left', ao: 20 },
+    { label: 'GPT-5.3-Codex', tableLabel: 'GPT-5.3-Codex (xhigh)', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 32.50, src: 'aa', al: 'bottom', ao: 8 }
   ];
   singles.forEach(function (s) {
     s.est = s.src === 'est';
@@ -1135,8 +1111,6 @@ document.addEventListener('DOMContentLoaded', function () {
     legendId: 'legend',
     tableId: 'table',
     sourcesId: 'sources',
-    hollowKey: 'Hollow = Scale independent run',
-    estKey: 'Dotted = estimated, none published',
     modelCount: families.length + singles.length,
     sources: SOURCES,
 
@@ -1145,22 +1119,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Blended price per 1M tokens (USD)',
-      // Logarithmic: Luna blends to $0.16 and Fable 5 to $7.10, so a linear axis
-      // would pile two thirds of the field into its left quarter.
-      scale: { type: 'logarithmic', min: 0.13, max: 8.5 },
+      // Logarithmic: Luna blends to $0.16 and GPT-6 Astra's long-context tier to $12.20, so a
+      // linear axis would pile most of the field into its left quarter.
+      scale: { type: 'logarithmic', min: 0.13, max: 15 },
       tickFormat: function (v) {
-        var allowed = [0.2, 0.3, 0.5, 1, 2, 3, 5];
+        var allowed = [0.2, 0.3, 0.5, 1, 2, 3, 5, 10];
         if (allowed.indexOf(v) === -1) return null;
         return '$' + (v < 1 ? v.toFixed(2) : v.toFixed(0));
       }
     },
 
     y: {
-      title: 'SWE-Bench Pro resolve rate',
+      title: 'Artificial Analysis Intelligence Index v4.3',
       grid: true,
-      tickStep: 10,
-      scale: { min: 50, max: 85 },
-      tickFormat: function (v) { return v + '%'; }
+      tickStep: 5,
+      scale: { min: 30, max: 55 },
+      tickFormat: function (v) { return v; }
     },
 
     // Returning an array gives the tooltip one line per fact: the score, then
@@ -1171,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return ChartKit.money(v, precise) + ' (' + ChartKit.credits(v, precise) + ') / 1M';
       }
       return [
-        p.y.toFixed(2) + '% SWE-Bench Pro',
+        p.y.toFixed(2) + ' Intelligence Index',
         'Cached  ' + rate(p.rates.cache, true),
         'Input   ' + rate(p.rates.in, true),
         'Output  ' + rate(p.rates.out, true),

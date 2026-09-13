@@ -56,6 +56,7 @@
     ".*",
     ".firecrawl/",
     "ai-augmented-sdlc/diagrams/",
+    "ai-augmented-sdlc/ai-dlc-guide.src.html",
     "ai-augmented-sdlc/frontier-engineering.src.html",
     "claude-tag/prompts/",
     "fable5-21days/narrative/",
@@ -669,7 +670,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "Blended price per million tokens for each Copilot model, weighted the way an agentic session actually bills, against its SWE-Bench Pro resolve rate.",
-      "date": "2026-09-03"
+      "date": "2026-09-13"
     },
     {
       "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
@@ -1061,6 +1062,16 @@
       "title": "LLM evals explained: test cases, graders and error ranges",
       "collection": "everything-llm",
       "order": 120,
+      "replacements": {},
+      "date": "2026-09-13"
+    },
+    {
+      "id": "ai-augmented-sdlc-ai-dlc-guide",
+      "source": "ai-augmented-sdlc/ai-dlc-guide.html",
+      "destination": "ai-augmented-sdlc/ai-dlc-guide/index.html",
+      "title": "AI-DLC User Guide",
+      "collection": "ai-augmented-sdlc",
+      "order": 20,
       "replacements": {},
       "date": "2026-09-13"
     }

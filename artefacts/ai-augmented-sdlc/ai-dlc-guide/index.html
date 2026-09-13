@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC User Guide</title>
+<meta name="description" content="A practical guide to AWS's AI-Driven Development Lifecycle (AI-DLC): principles, artefacts, phases, rituals and starter prompts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f6f5f1;
+    --surface: #ffffff;
+    --ink: #16181d;
+    --ink-2: #3a404b;
+    --muted: #5a6270;
+    --line: #e2dfd6;
+    --ring: #1d4ed8;
+    --ai: #1d4ed8;
+    --ai-bg: #eff6ff;
+    --human: #92400e;
+    --human-bg: #fffbeb;
+    --inception: #155e75;
+    --inception-bg: #ecfeff;
+    --construction: #065f46;
+    --construction-bg: #ecfdf5;
+    --operations: #5b21b6;
+    --operations-bg: #f5f3ff;
+    --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --shadow: 0 0 0 1px rgba(22, 24, 29, 0.06), 0 1px 2px rgba(22, 24, 29, 0.04),
+      0 4px 12px rgba(22, 24, 29, 0.04), 0 16px 32px -12px rgba(22, 24, 29, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.7 var(--font-body);
+  }
+  a { color: var(--ai); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 4px; }
+  .skip { position: absolute; left: 16px; top: -64px; padding: 12px 16px; background: var(--ink); color: #fff; border-radius: 8px; z-index: 30; }
+  .skip:focus { top: 8px; }
+
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.15; text-wrap: balance; margin: 0; }
+  p, li, dd, td { text-wrap: pretty; }
+  p { margin: 0 0 16px; }
+  .eyebrow {
+    font: 600 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+  }
+
+  /* layout */
+  .layout {
+    max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 0 96px;
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 56px;
+  }
+  main { min-width: 0; }
+  .prose { max-width: 68ch; }
+
+  /* contents */
+  .toc { padding-block: 24px 8px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .toc a {
+    display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px;
+    border-radius: 10px; color: var(--ink-2); text-decoration: none; font-size: 15px;
+    transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out);
+  }
+  .toc a span { font: 600 12px/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media (hover: hover) and (pointer: fine) { .toc a:hover { background: var(--surface); color: var(--ink); } }
+  @media (min-width: 1320px) {
+    .layout { grid-template-columns: 248px minmax(0, 1fr); }
+    .toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding-block: 48px; }
+    .toc ol { flex-direction: column; flex-wrap: nowrap; gap: 0; }
+    .toc a { font-size: 14px; min-height: 40px; }
+  }
+
+  /* hero */
+  .hero { padding-block: 48px 40px; border-bottom: 1px solid var(--line); }
+  .hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); letter-spacing: -0.01em; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--ai); }
+  .lede { font-size: 20px; line-height: 1.6; color: var(--ink-2); max-width: 60ch; }
+  .byline { font-size: 14px; color: var(--muted); margin: 24px 0 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 32px 0 0; padding: 0; list-style: none; }
+  .stats li { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 16px 20px; }
+  .stats b { display: block; font: 700 28px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+  .stats span { font-size: 14px; color: var(--muted); }
+
+  /* chapters */
+  section.chapter { padding-block: 64px 8px; scroll-margin-top: 16px; }
+  section.chapter > h2 { font-size: clamp(1.8rem, 3.6vw, 2.4rem); margin-bottom: 20px; max-width: 30ch; }
+  h3 { font-size: 1.35rem; margin: 40px 0 12px; }
+
+  /* figures: keep diagram text at its authored size (min 12px) by scrolling instead of shrinking */
+  figure { margin: 32px 0; max-width: 960px; }
+  .card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); overflow-x: auto; }
+  .card svg { display: block; width: 100%; min-width: 960px; height: auto; }
+  figcaption { font-size: 14px; color: var(--muted); padding: 12px 4px 0; max-width: 68ch; }
+  .scroll-hint { display: none; }
+  @media (max-width: 1000px) { .scroll-hint { display: inline; } }
+
+  /* callouts */
+  .callout { border-radius: 14px; padding: 20px 24px; margin: 24px 0; max-width: 68ch; background: var(--surface); box-shadow: var(--shadow); }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+  .callout .eyebrow { margin-bottom: 8px; }
+  .callout.human { background: var(--human-bg); box-shadow: inset 4px 0 0 #d97706, var(--shadow); }
+  .callout.human .eyebrow { color: var(--human); }
+  .callout.ai { background: var(--ai-bg); box-shadow: inset 4px 0 0 #2563eb, var(--shadow); }
+  .callout.ai .eyebrow { color: var(--ai); }
+
+  ul.tight, ol.tight { padding-left: 1.25em; margin: 0 0 16px; }
+  ul.tight li, ol.tight li { margin-bottom: 6px; }
+
+  /* principles */
+  .principles { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-width: 960px; counter-reset: p; }
+  .principles li { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); padding: 18px 20px; counter-increment: p; }
+  .principles li::before { content: counter(p, decimal-leading-zero); display: block; font: 700 12px/1 var(--font-mono); color: var(--ai); margin-bottom: 10px; }
+  .principles h3 { font-size: 1.1rem; margin: 0 0 6px; }
+  .principles p { font-size: 15px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+
+  /* definitions */
+  .defs { margin: 24px 0; max-width: 960px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .defs > div { background: var(--surface); padding: 16px 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 24px; }
+  @media (min-width: 720px) { .defs > div { grid-template-columns: 200px minmax(0, 1fr); } }
+  .defs dt { font: 600 14px/1.6 var(--font-mono); }
+  .defs dd { margin: 0; font-size: 16px; color: var(--ink-2); }
+  .defs small { display: block; font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  .tag { display: inline-block; font: 600 12px/1 var(--font-mono); padding: 5px 8px; border-radius: 6px; white-space: nowrap; vertical-align: 2px; }
+  .tag.ai { background: var(--ai-bg); color: var(--ai); }
+  .tag.human { background: var(--human-bg); color: var(--human); }
+  .tag.inc { background: var(--inception-bg); color: var(--inception); }
+  .tag.con { background: var(--construction-bg); color: var(--construction); }
+  .tag.ops { background: var(--operations-bg); color: var(--operations); }
+
+  /* phase blocks */
+  .phase { border-radius: 16px; padding: 4px 24px 12px; margin: 28px 0; max-width: 960px; background: var(--surface); box-shadow: var(--shadow); }
+  .phase h3 { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+  .phase.inc { box-shadow: inset 0 4px 0 #0891b2, var(--shadow); }
+  .phase.con { box-shadow: inset 0 4px 0 #059669, var(--shadow); }
+  .phase.ops { box-shadow: inset 0 4px 0 #7c3aed, var(--shadow); }
+  .phase .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 32px; }
+  .phase h4 { font: 600 12px/1 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 16px 0 10px; }
+  .phase ul { font-size: 16px; }
+
+  /* walkthrough table */
+  .table-wrap { overflow-x: auto; margin: 24px 0; max-width: 960px; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+  caption { text-align: left; padding: 16px 20px 0; font: 600 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  th, td { text-align: left; vertical-align: top; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+  th { font: 600 12px/1.4 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td:first-child { white-space: nowrap; }
+  tr.stage td { background: #faf9f6; font: 600 13px/1.4 var(--font-mono); color: var(--ink); padding-block: 10px; }
+
+  /* code */
+  pre {
+    margin: 16px 0 24px; max-width: 960px; padding: 18px 20px; overflow-x: auto;
+    background: #1c1f26; color: #e6e8ec; border-radius: 14px;
+    font: 13px/1.65 var(--font-mono); white-space: pre-wrap; word-break: break-word;
+  }
+  pre.tree { white-space: pre; word-break: normal; }
+  pre .c { color: #9aa3b2; }
+  pre .h { color: #fbbf24; }
+  code { font: 0.88em var(--font-mono); background: #ebe8e0; padding: 2px 5px; border-radius: 4px; }
+  details.prompt { max-width: 960px; margin: 12px 0; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); }
+  details.prompt summary {
+    cursor: pointer; list-style: none; min-height: 52px; padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 600;
+  }
+  details.prompt summary::-webkit-details-marker { display: none; }
+  details.prompt summary::after { content: "+"; font: 400 20px/1 var(--font-mono); color: var(--muted); transition: transform 160ms var(--ease-out); }
+  details.prompt[open] summary::after { transform: rotate(45deg); }
+  details.prompt summary small { font: 400 13px/1.4 var(--font-mono); color: var(--muted); margin-left: 8px; }
+  details.prompt pre { margin: 0 12px 12px; }
+
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); max-width: 960px; }
+  footer ul { padding-left: 1.25em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="layout">
+  <nav class="toc" aria-label="Contents">
+    <p class="eyebrow">Contents</p>
+    <ol>
+      <li><a href="#why"><span>01</span>Why AI-DLC</a></li>
+      <li><a href="#loop"><span>02</span>The core loop</a></li>
+      <li><a href="#principles"><span>03</span>Ten principles</a></li>
+      <li><a href="#artefacts"><span>04</span>Artefacts</a></li>
+      <li><a href="#phases"><span>05</span>Phases and rituals</a></li>
+      <li><a href="#workflow"><span>06</span>The workflow</a></li>
+      <li><a href="#greenfield"><span>07</span>Green-field example</a></li>
+      <li><a href="#brownfield"><span>08</span>Brown-field</a></li>
+      <li><a href="#vocabulary"><span>09</span>Vocabulary</a></li>
+      <li><a href="#start"><span>10</span>Getting started</a></li>
+    </ol>
+  </nav>
+
+  <main id="main">
+    <header class="hero">
+      <p class="eyebrow">User guide · AWS method</p>
+      <h1>The <em>AI-Driven</em> Development Lifecycle</h1>
+      <p class="lede">AI-DLC is AWS's method for building software with AI at the centre of every step. AI writes the plan, asks what it doesn't know and does the work. People answer, correct and approve. This guide covers the ideas behind the method, its vocabulary, its three phases, and prompts you can try today.</p>
+      <p class="byline">Based on the <a href="https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/" rel="noopener">AWS DevOps blog announcement</a> (July 2025) and the <a href="https://prod.d13rzhkk8cj2z0.amplifyapp.com/" rel="noopener">AI-DLC method definition paper</a> by Raja SP, Amazon Web Services.</p>
+      <ul class="stats">
+        <li><b>3</b><span>phases: Inception, Construction, Operations</span></li>
+        <li><b>2</b><span>team rituals: Mob Elaboration, Mob Construction</span></li>
+        <li><b>Hours–days</b><span>per Bolt, instead of multi-week sprints</span></li>
+        <li><b>1 day</b><span>for a practitioner to start using it</span></li>
+      </ul>
+    </header>
+
+    <section class="chapter" id="why" aria-labelledby="h-why">
+      <p class="eyebrow">01 · Context</p>
+      <h2 id="h-why">Why AI-DLC exists</h2>
+      <div class="prose">
+        <p>Scrum and most SDLC methods were designed around people doing long-running work. Product owners, architects and developers spend much of their week on planning, meetings and other rituals. AWS argues that adding an AI assistant to that process keeps those costs in place and limits what the AI can do.</p>
+        <p>Organisations mostly use AI in one of two ways today. In <strong>AI-assisted</strong> development, AI speeds up individual tasks such as code completion, documentation or tests. In <strong>AI-autonomous</strong> development, AI is expected to produce a whole application from requirements with no human involvement. AWS reports that both give disappointing results for speed and quality.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" role="img" aria-labelledby="a1-title">
+<title id="a1-title">Where AI-DLC sits between AI-assisted and AI-autonomous development</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a1-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a1-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="440" fill="#f8fafc"/><rect width="960" height="440" fill="url(#a1-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">Where AI-DLC sits</text>
+<text x="30" y="72" font-size="13" fill="#475569">Two common ways of using AI under-deliver. AI-DLC takes the path between them.</text>
+
+<!-- axis -->
+<line x1="30" y1="122" x2="926" y2="122" stroke="#64748b" stroke-width="1.5" marker-end="url(#a1-arrow)"/>
+<text x="30" y="110" font-size="12" fill="#475569">humans do most of the work</text>
+<text x="930" y="110" font-size="12" fill="#475569" text-anchor="end">AI does most of the work</text>
+
+<!-- AI-assisted -->
+<rect x="30" y="150" width="280" height="250" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+<text x="50" y="182" font-size="14" font-weight="700" fill="#334155">AI-ASSISTED</text>
+<text x="50" y="206" font-size="12" fill="#475569">humans drive, AI helps</text>
+<g font-size="12" fill="#0f172a">
+  <text x="50" y="240">· code completion, docs, tests</text>
+  <text x="50" y="262">· AI bolted onto old rituals</text>
+  <text x="50" y="284">· humans do the heavy thinking</text>
+</g>
+<line x1="50" y1="316" x2="290" y2="316" stroke="#cbd5e1"/>
+<text x="50" y="344" font-size="12" font-weight="600" fill="#be123c">small, local speed-ups;</text>
+<text x="50" y="364" font-size="12" font-weight="600" fill="#be123c">old bottlenecks stay</text>
+
+<!-- AI-driven -->
+<rect x="340" y="140" width="280" height="270" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+<rect x="498" y="128" width="104" height="24" rx="12" fill="#2563eb"/>
+<text x="550" y="145" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">AI-DLC</text>
+<text x="360" y="182" font-size="14" font-weight="700" fill="#1d4ed8">AI-DRIVEN</text>
+<text x="360" y="206" font-size="12" fill="#475569">AI proposes, humans decide</text>
+<g font-size="12" fill="#0f172a">
+  <text x="360" y="240">· AI plans and asks questions</text>
+  <text x="360" y="262">· humans approve at key points</text>
+  <text x="360" y="284">· whole team in the loop</text>
+</g>
+<line x1="360" y1="316" x2="600" y2="316" stroke="#bfdbfe"/>
+<text x="360" y="344" font-size="12" font-weight="600" fill="#047857">faster delivery that keeps</text>
+<text x="360" y="364" font-size="12" font-weight="600" fill="#047857">human judgement and quality</text>
+
+<!-- AI-autonomous -->
+<rect x="650" y="150" width="280" height="250" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+<text x="670" y="182" font-size="14" font-weight="700" fill="#334155">AI-AUTONOMOUS</text>
+<text x="670" y="206" font-size="12" fill="#475569">AI builds, humans wait</text>
+<g font-size="12" fill="#0f172a">
+  <text x="670" y="240">· whole apps from requirements</text>
+  <text x="670" y="262">· no human in the loop</text>
+  <text x="670" y="284">· today's AI isn't reliable</text>
+</g>
+<line x1="670" y1="316" x2="910" y2="316" stroke="#cbd5e1"/>
+<text x="670" y="344" font-size="12" font-weight="600" fill="#be123c">output drifts from intent;</text>
+<text x="670" y="364" font-size="12" font-weight="600" fill="#be123c">quality suffers</text>
+</svg></div>
+        <figcaption>AI-DLC adopts the AI-driven model: AI does the planning and the heavy lifting, and developers keep responsibility for decisions and validation. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+      <div class="prose">
+        <p>The method rests on two ideas:</p>
+        <ul class="tight">
+          <li><strong>AI-powered execution with human oversight.</strong> AI builds detailed work plans, asks for clarification, and leaves critical decisions to people, who hold the business context.</li>
+          <li><strong>Dynamic team collaboration.</strong> Because AI takes on the routine work, the team spends more of its time together, solving problems and making decisions in real time.</li>
+        </ul>
+        <p>AI-DLC is aimed at complex systems: ones with many architectural trade-offs, scaling and integration needs, or several teams in a large or regulated organisation. The paper says simple apps that need few trade-offs are better built with low-code or no-code tools.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="loop" aria-labelledby="h-loop">
+      <p class="eyebrow">02 · Mental model</p>
+      <h2 id="h-loop">The core loop: AI leads, humans decide</h2>
+      <div class="prose">
+        <p>The central change in AI-DLC is who starts the conversation. With an assistant, a developer prompts the AI for each task. In AI-DLC, AI takes a high-level intent, breaks it into tasks, proposes options and trade-offs, and then stops to ask. Humans act as approvers. They answer questions, pick between options and confirm decisions at the points that matter.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="a2-title">
+<title id="a2-title">The AI-DLC core loop: AI plans, asks, humans decide, AI implements</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a2-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a2-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="520" fill="#f8fafc"/><rect width="960" height="520" fill="url(#a2-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">The core loop</text>
+<text x="30" y="72" font-size="13" fill="#475569">AI leads every activity. Humans make the calls that need business context.</text>
+<!-- legend -->
+<rect x="770" y="34" width="14" height="14" rx="3" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="792" y="46" font-size="12" fill="#475569">AI</text>
+<rect x="830" y="34" width="14" height="14" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="852" y="46" font-size="12" fill="#475569">humans</text>
+
+<!-- arrows -->
+<line x1="310" y1="165" x2="356" y2="165" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2-arrow)"/>
+<line x1="485" y1="200" x2="485" y2="286" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2-arrow)"/>
+<line x1="360" y1="325" x2="314" y2="325" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2-arrow)"/>
+<line x1="185" y1="290" x2="185" y2="204" stroke="#64748b" stroke-width="1.5" marker-end="url(#a2-arrow)"/>
+<text x="197" y="252" font-size="12" fill="#475569">next activity</text>
+<text x="497" y="252" font-size="12" fill="#475569">answers</text>
+
+<!-- loop boxes -->
+<rect x="60" y="130" width="250" height="70" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="185" y="159" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">1 · AI WRITES A PLAN</text>
+<text x="185" y="181" font-size="12" fill="#475569" text-anchor="middle">steps as a checklist file</text>
+
+<rect x="360" y="130" width="250" height="70" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="485" y="159" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">2 · AI ASKS</text>
+<text x="485" y="181" font-size="12" fill="#475569" text-anchor="middle">flags what it can't decide</text>
+
+<rect x="360" y="290" width="250" height="70" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+<text x="485" y="319" font-size="14" font-weight="600" fill="#92400e" text-anchor="middle">3 · HUMANS DECIDE</text>
+<text x="485" y="341" font-size="12" fill="#475569" text-anchor="middle">approve, correct, choose</text>
+
+<rect x="60" y="290" width="250" height="70" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="185" y="319" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">4 · AI IMPLEMENTS</text>
+<text x="185" y="341" font-size="12" fill="#475569" text-anchor="middle">one step at a time, ticks it off</text>
+
+<!-- analogy -->
+<rect x="660" y="120" width="270" height="250" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="680" y="150" font-size="13" font-weight="700" fill="#0f172a">LIKE A MAPS APP</text>
+<circle cx="690" cy="186" r="6" fill="#d97706"/>
+<text x="706" y="190" font-size="12" fill="#0f172a">you set the destination</text>
+<text x="706" y="208" font-size="12" fill="#475569">the Intent</text>
+<circle cx="690" cy="246" r="6" fill="#2563eb"/>
+<text x="706" y="250" font-size="12" fill="#0f172a">it plans the route</text>
+<text x="706" y="268" font-size="12" fill="#475569">tasks and recommendations</text>
+<circle cx="690" cy="306" r="6" fill="#d97706"/>
+<text x="706" y="310" font-size="12" fill="#0f172a">you can reroute any time</text>
+<text x="706" y="328" font-size="12" fill="#475569">oversight along the way</text>
+
+<!-- applies to -->
+<text x="30" y="428" font-size="13" font-weight="700" fill="#0f172a">THE SAME LOOP RUNS FOR EVERY ACTIVITY</text>
+<g font-size="12" fill="#1d4ed8" text-anchor="middle">
+  <rect x="30" y="444" width="106" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="83" y="464">user stories</text>
+  <rect x="146" y="444" width="56" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="174" y="464">units</text>
+  <rect x="212" y="444" width="106" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="265" y="464">domain model</text>
+  <rect x="328" y="444" width="122" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="389" y="464">logical design</text>
+  <rect x="460" y="444" width="50" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="485" y="464">code</text>
+  <rect x="520" y="444" width="56" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="548" y="464">tests</text>
+  <rect x="586" y="444" width="92" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="632" y="464">deployment</text>
+  <rect x="688" y="444" width="92" height="30" rx="15" fill="#eff6ff" stroke="#93c5fd"/><text x="734" y="464">operations</text>
+</g>
+</svg></div>
+        <figcaption>The paper compares this to a maps app. You choose the destination, the app proposes the route, and you stay in control of the journey. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+      <div class="callout human">
+        <p class="eyebrow">In practice</p>
+        <p>Every prompt in the paper's appendix follows the same loop. AI writes its plan to a markdown file with a checkbox per step. It marks any step where it needs your input, and it waits for approval before it starts. Then it works one step at a time and ticks each box as it goes. The plan file is where you review the work and redirect it.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="principles" aria-labelledby="h-principles">
+      <p class="eyebrow">03 · Foundations</p>
+      <h2 id="h-principles">Ten principles behind the method</h2>
+      <div class="prose">
+        <p>The paper lists ten principles that shape AI-DLC's phases, roles, artefacts and rituals. Knowing them helps when a situation isn't covered by the method and you need to decide what to do.</p>
+      </div>
+      <ol class="principles">
+        <li><h3>Reimagine, don't retrofit</h3><p>Stand-ups, retros and story points exist because iterations last weeks. AI cycles last hours or days, so the method starts again from first principles. In the paper's words, "we need automobiles and not the faster horse chariots."</p></li>
+        <li><h3>Reverse the conversation</h3><p>AI starts the conversation and proposes the plan. Humans validate, choose options and confirm decisions, so their time goes on oversight and risk.</p></li>
+        <li><h3>Design techniques at the core</h3><p>Scrum leaves design practice up to each team. AI-DLC builds it in, with separate flavours for DDD, BDD and TDD. The paper describes the DDD flavour.</p></li>
+        <li><h3>Match what AI can do today</h3><p>Current AI can't reliably turn intent into working code on its own. Developers keep final responsibility for validation, decisions and oversight.</p></li>
+        <li><h3>Built for complex systems</h3><p>The method targets systems with many trade-offs, integrations and teams. Simple apps with few trade-offs are better served by low-code tools.</p></li>
+        <li><h3>Keep what helps humans and AI align</h3><p>User stories stay because they act as a contract between people and AI. The risk register stays so AI plans and code comply with the organisation's risk rules.</p></li>
+        <li><h3>Easy to learn from what you know</h3><p>A practitioner should be able to start in a day. New terms map onto familiar ones: a Sprint becomes a Bolt, because the cycle is now much shorter.</p></li>
+        <li><h3>Fewer, broader roles</h3><p>With AI handling decomposition, developers work across front-end, back-end, infrastructure and security. Product owners and developers remain, and the method adds new roles only when it has to.</p></li>
+        <li><h3>Few stages, steady flow</h3><p>Fewer hand-offs keep work moving. Human checkpoints act like a loss function: they cut wasted downstream work early and stop AI code from setting like "quick-cement".</p></li>
+        <li><h3>No fixed workflows</h3><p>The method doesn't prescribe a workflow for new builds, refactors or bug fixes. AI proposes a plan for each intent, and humans adjust it level by level.</p></li>
+      </ol>
+    </section>
+
+    <section class="chapter" id="artefacts" aria-labelledby="h-artefacts">
+      <p class="eyebrow">04 · Core framework</p>
+      <h2 id="h-artefacts">The artefacts</h2>
+      <div class="prose">
+        <p>AI-DLC work flows through a small set of artefacts. Each one is saved to the repository, where it becomes context for the next step.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="a4-title">
+<title id="a4-title">AI-DLC artefacts: Intent, Units, Bolts, and the construction artefacts inside a Unit</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a4-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a4-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="a4-arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/></marker>
+</defs>
+<rect width="960" height="600" fill="#f8fafc"/><rect width="960" height="600" fill="url(#a4-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">The artefacts</text>
+<text x="30" y="72" font-size="13" fill="#475569">An Intent breaks into Units. Each Unit is built in one or more Bolts.</text>
+
+<!-- fan arrows -->
+<g stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a4-arrow)">
+  <path d="M 270,168 L 300,168 L 300,128 L 336,128"/>
+  <path d="M 300,168 L 300,196 L 336,196"/>
+  <path d="M 300,196 L 300,264 L 336,264"/>
+  <path d="M 600,196 L 630,196 L 630,132 L 666,132"/>
+  <path d="M 600,196 L 666,196"/>
+  <path d="M 630,196 L 630,260 L 666,260"/>
+</g>
+
+<!-- intent -->
+<text x="30" y="112" font-size="12" font-weight="700" fill="#475569">INTENT</text>
+<rect x="30" y="126" width="240" height="84" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="50" y="156" font-size="13" font-weight="600" fill="#92400e">"Build a cross-selling</text>
+<text x="50" y="176" font-size="13" font-weight="600" fill="#92400e">recommendation engine"</text>
+<text x="50" y="198" font-size="12" fill="#475569">a goal, feature or outcome</text>
+
+<!-- units -->
+<text x="340" y="96" font-size="12" font-weight="700" fill="#475569">UNITS</text>
+<rect x="340" y="104" width="260" height="48" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="360" y="133" font-size="12" fill="#155e75">User Data Collection</text>
+<rect x="340" y="172" width="260" height="48" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="2.5"/>
+<text x="360" y="201" font-size="12" font-weight="600" fill="#155e75">Recommendation Algorithm</text>
+<rect x="340" y="240" width="260" height="48" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="360" y="269" font-size="12" fill="#155e75">API Integration</text>
+
+<!-- bolts -->
+<text x="670" y="96" font-size="12" font-weight="700" fill="#475569">BOLTS</text>
+<rect x="670" y="112" width="260" height="40" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="690" y="137" font-size="12" fill="#1d4ed8">Bolt 1 · a few stories</text>
+<rect x="670" y="176" width="260" height="40" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="690" y="201" font-size="12" fill="#1d4ed8">Bolt 2 · runs in parallel</text>
+<rect x="670" y="240" width="260" height="40" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="690" y="265" font-size="12" fill="#1d4ed8">Bolt 3 · or in sequence</text>
+
+<!-- notes -->
+<g font-size="12" fill="#475569">
+  <text x="30" y="316">starting point for</text>
+  <text x="30" y="334">AI decomposition</text>
+  <text x="340" y="316">≈ Epic, or a DDD subdomain;</text>
+  <text x="340" y="334">loosely coupled, deploys alone</text>
+  <text x="670" y="316">≈ Sprint, but lasting</text>
+  <text x="670" y="334">hours or days, not weeks</text>
+</g>
+
+<line x1="30" y1="364" x2="930" y2="364" stroke="#cbd5e1" stroke-dasharray="4,4"/>
+
+<!-- construction chain -->
+<text x="30" y="396" font-size="13" font-weight="700" fill="#0f172a">INSIDE ONE UNIT</text>
+<g stroke="#d97706" stroke-width="2" marker-end="url(#a4-arrow-amber)">
+  <line x1="234" y1="462" x2="258" y2="462"/>
+  <line x1="466" y1="462" x2="490" y2="462"/>
+  <line x1="698" y1="462" x2="722" y2="462"/>
+</g>
+<g font-size="12">
+  <rect x="30" y="414" width="204" height="96" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="46" y="440" font-size="13" font-weight="700" fill="#065f46">DOMAIN DESIGN</text>
+  <text x="46" y="464" fill="#0f172a">business logic only</text>
+  <text x="46" y="484" fill="#475569">aggregates, entities,</text>
+  <text x="46" y="500" fill="#475569">value objects, events</text>
+
+  <rect x="262" y="414" width="204" height="96" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="278" y="440" font-size="13" font-weight="700" fill="#065f46">LOGICAL DESIGN</text>
+  <text x="278" y="464" fill="#0f172a">domain + NFRs</text>
+  <text x="278" y="484" fill="#475569">patterns (CQRS, circuit</text>
+  <text x="278" y="500" fill="#475569">breaker), ADRs</text>
+
+  <rect x="494" y="414" width="204" height="96" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="510" y="440" font-size="13" font-weight="700" fill="#065f46">CODE + UNIT TESTS</text>
+  <text x="510" y="464" fill="#0f172a">mapped to AWS services</text>
+  <text x="510" y="484" fill="#475569">AI runs the tests and</text>
+  <text x="510" y="500" fill="#475569">recommends fixes</text>
+
+  <rect x="726" y="414" width="204" height="96" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="742" y="440" font-size="13" font-weight="700" fill="#5b21b6">DEPLOYMENT UNITS</text>
+  <text x="742" y="464" fill="#0f172a">images, functions, IaC</text>
+  <text x="742" y="484" fill="#475569">tested for function,</text>
+  <text x="742" y="500" fill="#475569">security, NFRs, risk</text>
+</g>
+<text x="30" y="540" font-size="12" font-weight="600" fill="#92400e">amber arrows = a human reviews and corrects before AI moves on</text>
+<text x="30" y="566" font-size="12" fill="#475569">All artefacts are linked: a domain entity traces back to its user story and to the Intent.</text>
+</svg></div>
+        <figcaption>The example comes from the paper's green-field walkthrough: a cross-selling recommendation engine. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+      <dl class="defs">
+        <div><dt><span class="tag human">Intent</span></dt><dd>A high-level statement of what needs to be achieved. It can be a business goal, a feature or a technical outcome such as performance scaling. Everything that AI breaks down starts from an Intent.</dd></div>
+        <div><dt><span class="tag inc">Unit</span></dt><dd>A cohesive, self-contained piece of work derived from an Intent that delivers measurable value. It contains a set of user stories. AI proposes the Units and people refine them. Units are loosely coupled, so they can be built and deployed independently.<small>Similar to an Epic in Scrum or a subdomain in DDD.</small></dd></div>
+        <div><dt><span class="tag ai">Bolt</span></dt><dd>The smallest iteration: a focused build-and-validate cycle measured in hours or days. A Unit is delivered through one or more Bolts, run in parallel or one after another. AI plans the Bolts, and developers or product owners validate the plan.<small>Similar to a Sprint, but much shorter.</small></dd></div>
+        <div><dt><span class="tag con">Domain Design</span></dt><dd>The core business logic of a Unit, modelled without infrastructure. AI uses DDD building blocks: aggregates, value objects, entities, domain events, repositories and factories.</dd></div>
+        <div><dt><span class="tag con">Logical Design</span></dt><dd>The Domain Design extended to meet non-functional requirements, using architecture patterns such as CQRS or circuit breakers. AI records its choices as Architecture Decision Records (ADRs) for developers to validate.</dd></div>
+        <div><dt><span class="tag con">Code &amp; unit tests</span></dt><dd>Generated from the Logical Design and mapped to AWS services following well-architected principles. AI runs the unit tests, analyses the results and recommends fixes to the developer.</dd></div>
+        <div><dt><span class="tag ops">Deployment Unit</span></dt><dd>What gets shipped: packaged code (container images, Lambda functions), configuration (Helm charts) and infrastructure (Terraform or CloudFormation stacks). AI generates functional, security and load tests. Humans review the scenarios, then AI runs them and links failures to the code or configuration change that caused them.</dd></div>
+      </dl>
+    </section>
+
+    <section class="chapter" id="phases" aria-labelledby="h-phases">
+      <p class="eyebrow">05 · Phases &amp; rituals</p>
+      <h2 id="h-phases">Three phases, each feeding the next</h2>
+      <div class="prose">
+        <p>Development in AI-DLC runs through Inception, Construction and Operations. Each phase gives AI richer context for the next one, so its suggestions get better as the work goes on. Plans, requirements and designs are stored in the project repository, which means work can continue across sessions without losing context.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="a3-title">
+<title id="a3-title">The three AI-DLC phases: Inception, Construction, Operations, sharing one context memory</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a3-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a3-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="600" fill="#f8fafc"/><rect width="960" height="600" fill="url(#a3-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">Three phases, one growing context</text>
+<text x="30" y="72" font-size="13" fill="#475569">Each phase writes its artefacts to the repo, so the next phase starts better informed.</text>
+
+<line x1="310" y1="136" x2="336" y2="136" stroke="#64748b" stroke-width="1.5" marker-end="url(#a3-arrow)"/>
+<line x1="620" y1="136" x2="646" y2="136" stroke="#64748b" stroke-width="1.5" marker-end="url(#a3-arrow)"/>
+
+<!-- Inception -->
+<rect x="30" y="100" width="280" height="400" rx="10" fill="#ffffff" stroke="#0891b2" stroke-width="1.5"/>
+<rect x="30" y="100" width="280" height="72" rx="10" fill="#ecfeff"/>
+<rect x="30" y="100" width="280" height="8" rx="4" fill="#0891b2"/>
+<text x="50" y="136" font-size="15" font-weight="700" fill="#155e75">INCEPTION</text>
+<text x="50" y="158" font-size="12" fill="#475569">what to build, and why</text>
+<rect x="50" y="186" width="200" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/>
+<text x="150" y="204" font-size="12" font-weight="600" fill="#92400e" text-anchor="middle">Mob Elaboration</text>
+<text x="50" y="244" font-size="12" font-weight="700" fill="#1d4ed8">AI</text>
+<g font-size="12" fill="#0f172a">
+  <text x="50" y="266">asks clarifying questions</text>
+  <text x="50" y="286">writes stories, NFRs, risks</text>
+  <text x="50" y="306">groups stories into Units</text>
+  <text x="50" y="326">suggests Bolts, drafts PRFAQ</text>
+</g>
+<text x="50" y="364" font-size="12" font-weight="700" fill="#92400e">HUMANS</text>
+<g font-size="12" fill="#0f172a">
+  <text x="50" y="386">PO, devs, QA refine together</text>
+  <text x="50" y="406">trim over/under-engineering</text>
+  <text x="50" y="426">validate Units and risks</text>
+</g>
+<line x1="50" y1="448" x2="290" y2="448" stroke="#cffafe"/>
+<text x="50" y="476" font-size="12" font-weight="600" fill="#155e75">out: Units, stories, NFRs</text>
+
+<!-- Construction -->
+<rect x="340" y="100" width="280" height="400" rx="10" fill="#ffffff" stroke="#059669" stroke-width="1.5"/>
+<rect x="340" y="100" width="280" height="72" rx="10" fill="#ecfdf5"/>
+<rect x="340" y="100" width="280" height="8" rx="4" fill="#059669"/>
+<text x="360" y="136" font-size="15" font-weight="700" fill="#065f46">CONSTRUCTION</text>
+<text x="360" y="158" font-size="12" fill="#475569">how to build it</text>
+<rect x="360" y="186" width="200" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/>
+<text x="460" y="204" font-size="12" font-weight="600" fill="#92400e" text-anchor="middle">Mob Construction</text>
+<text x="360" y="244" font-size="12" font-weight="700" fill="#1d4ed8">AI</text>
+<g font-size="12" fill="#0f172a">
+  <text x="360" y="266">models the domain (DDD)</text>
+  <text x="360" y="286">adds NFRs: logical design</text>
+  <text x="360" y="306">writes ADRs, code, tests</text>
+  <text x="360" y="326">runs tests, proposes fixes</text>
+</g>
+<text x="360" y="364" font-size="12" font-weight="700" fill="#92400e">HUMANS</text>
+<g font-size="12" fill="#0f172a">
+  <text x="360" y="386">validate each model</text>
+  <text x="360" y="406">approve trade-offs</text>
+  <text x="360" y="426">review code and test cases</text>
+</g>
+<line x1="360" y1="448" x2="600" y2="448" stroke="#d1fae5"/>
+<text x="360" y="476" font-size="12" font-weight="600" fill="#065f46">out: tested Deployment Units</text>
+
+<!-- Operations -->
+<rect x="650" y="100" width="280" height="400" rx="10" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+<rect x="650" y="100" width="280" height="72" rx="10" fill="#f5f3ff"/>
+<rect x="650" y="100" width="280" height="8" rx="4" fill="#7c3aed"/>
+<text x="670" y="136" font-size="15" font-weight="700" fill="#5b21b6">OPERATIONS</text>
+<text x="670" y="158" font-size="12" fill="#475569">run it, keep it healthy</text>
+<rect x="670" y="186" width="200" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/>
+<text x="770" y="204" font-size="12" font-weight="600" fill="#92400e" text-anchor="middle">team oversight</text>
+<text x="670" y="244" font-size="12" font-weight="700" fill="#1d4ed8">AI</text>
+<g font-size="12" fill="#0f172a">
+  <text x="670" y="266">packages and deploys</text>
+  <text x="670" y="286">reads metrics, logs, traces</text>
+  <text x="670" y="306">predicts SLA breaches</text>
+  <text x="670" y="326">proposes runbook actions</text>
+</g>
+<text x="670" y="364" font-size="12" font-weight="700" fill="#92400e">HUMANS</text>
+<g font-size="12" fill="#0f172a">
+  <text x="670" y="386">approve deploy config</text>
+  <text x="670" y="406">approve mitigations</text>
+  <text x="670" y="426">check SLAs and compliance</text>
+</g>
+<line x1="670" y1="448" x2="910" y2="448" stroke="#ede9fe"/>
+<text x="670" y="476" font-size="12" font-weight="600" fill="#5b21b6">out: a running, watched system</text>
+
+<!-- context memory -->
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#a3-arrow)">
+  <line x1="170" y1="502" x2="170" y2="526"/>
+  <line x1="480" y1="502" x2="480" y2="526"/>
+  <line x1="790" y1="502" x2="790" y2="526"/>
+</g>
+<rect x="30" y="530" width="900" height="46" rx="10" fill="#f1f5f9" stroke="#64748b" stroke-width="1.5"/>
+<text x="50" y="558" font-size="13" font-weight="700" fill="#334155">CONTEXT MEMORY</text>
+<text x="200" y="558" font-size="12" fill="#475569">plans, requirements and designs saved in the repo, linked for traceability</text>
+</svg></div>
+        <figcaption>Who does what in each phase. The amber pills are the moments where the team works with AI together. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+
+      <div class="phase inc">
+        <h3><span class="tag inc">Phase 1</span>Inception</h3>
+        <p class="prose">Inception turns Intents into Units through <strong>Mob Elaboration</strong>, a group session for elaborating and breaking down requirements.</p>
+        <div class="cols">
+          <div>
+            <h4>How to run Mob Elaboration</h4>
+            <ul class="tight">
+              <li>One room, one shared screen, and a facilitator leading the session.</li>
+              <li>AI proposes a first breakdown of the Intent into user stories, acceptance criteria and Units. It aims for loose coupling and high cohesion so Units can be built in parallel.</li>
+              <li>The mob (product owner, developers, QA and other stakeholders) reviews the proposal. They fix parts that are over- or under-engineered and adjust for real-world constraints.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>What comes out</h4>
+            <ul class="tight">
+              <li>A PRFAQ</li>
+              <li>User stories</li>
+              <li>Non-functional requirements (NFRs)</li>
+              <li>Risks, matched to the organisation's risk register if one exists</li>
+              <li>Measurement criteria traced back to the business intent</li>
+              <li>Suggested Bolts for building each Unit</li>
+            </ul>
+          </div>
+        </div>
+        <p class="prose">According to the paper, Mob Elaboration compresses weeks or months of sequential requirements work into a few hours. It also aligns the team with each other and with the AI.</p>
+      </div>
+
+      <div class="phase con">
+        <h3><span class="tag con">Phase 2</span>Construction</h3>
+        <p class="prose">Construction turns Units into tested, operations-ready Deployment Units. The work moves from Domain Design to Logical Design, then to code and automated tests. At each task AI recommends options such as design patterns, UX choices and tests. Developers validate the output at every step and make the critical calls.</p>
+        <div class="cols">
+          <div>
+            <h4>Mob Construction</h4>
+            <ul class="tight">
+              <li>AI-DLC recommends putting all teams in one room, as in Mob Elaboration.</li>
+              <li>Teams exchange integration specifications that come out of the domain model stage.</li>
+              <li>Each team makes its decisions and delivers its Bolts.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Testing loop</h4>
+            <ul class="tight">
+              <li>AI runs functional, security and performance tests and highlights problems.</li>
+              <li>AI proposes fixes, for example tuning query logic for performance.</li>
+              <li>Developers review the findings, approve fixes and rerun the tests.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase ops">
+        <h3><span class="tag ops">Phase 3</span>Operations</h3>
+        <p class="prose">Operations covers deployment, observability and maintenance. AI packages Deployment Units, and developers approve the configuration and start the rollout. AI then analyses metrics, logs and traces to spot anomalies and predict SLA breaches. It links into your incident runbooks and proposes actions such as scaling, performance tuning or isolating a fault. It carries those actions out once a developer approves. Developers check that each proposal meets SLAs and compliance requirements.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="workflow" aria-labelledby="h-workflow">
+      <p class="eyebrow">06 · The workflow</p>
+      <h2 id="h-workflow">Plans inside plans</h2>
+      <div class="prose">
+        <p>Every piece of work starts with an intent. It might be a new system, an enhancement to an existing one, a modernisation or a defect fix. AI proposes a <strong>Level 1 Plan</strong> describing the workflow for that intent, and the team reviews and edits it. AI then breaks each step into <strong>Level 2</strong> subtasks, again under review, and continues down until tasks are small enough to execute.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" role="img" aria-labelledby="a5-title">
+<title id="a5-title">Recursive plans with human review acting as a loss function</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a5-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a5-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="a5-arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#e11d48"/></marker>
+</defs>
+<rect width="960" height="580" fill="#f8fafc"/><rect width="960" height="580" fill="url(#a5-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">Plans inside plans</text>
+<text x="30" y="72" font-size="13" fill="#475569">AI breaks the work down level by level. A human reviews each level before the next.</text>
+
+<!-- column headers -->
+<g font-size="12" font-weight="700" fill="#475569">
+  <text x="30" y="112">INTENT</text>
+  <text x="280" y="112">LEVEL 1 PLAN</text>
+  <text x="530" y="112">LEVEL 2 SUBTASKS</text>
+  <text x="780" y="112">EXECUTION</text>
+</g>
+
+<!-- arrows -->
+<g stroke="#64748b" stroke-width="1.5" fill="none" marker-end="url(#a5-arrow)">
+  <path d="M 230,222 L 255,222 L 255,152 L 276,152"/>
+  <path d="M 230,222 L 276,222"/>
+  <path d="M 255,222 L 255,292 L 276,292"/>
+  <path d="M 480,222 L 505,222 L 505,152 L 526,152"/>
+  <path d="M 480,222 L 526,222"/>
+  <path d="M 505,222 L 505,292 L 526,292"/>
+  <path d="M 730,152 L 755,152 L 755,222 L 776,222"/>
+  <path d="M 730,222 L 776,222"/>
+</g>
+<path d="M 730,292 L 755,292 L 755,222" stroke="#64748b" stroke-width="1.5" fill="none"/>
+
+<rect x="30" y="190" width="200" height="64" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+<text x="130" y="218" font-size="13" font-weight="600" fill="#92400e" text-anchor="middle">business intent</text>
+<text x="130" y="238" font-size="12" fill="#475569" text-anchor="middle">set by a human</text>
+
+<g font-size="13" font-weight="600" text-anchor="middle">
+  <rect x="280" y="126" width="200" height="52" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/><text x="380" y="157" fill="#155e75">inception</text>
+  <rect x="280" y="196" width="200" height="52" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/><text x="380" y="227" fill="#065f46">construction</text>
+  <rect x="280" y="266" width="200" height="52" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/><text x="380" y="297" fill="#5b21b6">operations</text>
+
+  <rect x="530" y="126" width="200" height="52" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="630" y="157" fill="#065f46">domain model</text>
+  <rect x="530" y="196" width="200" height="52" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="630" y="227" fill="#065f46">logical design</text>
+  <rect x="530" y="266" width="200" height="52" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><text x="630" y="297" fill="#065f46">code + tests</text>
+</g>
+
+<rect x="780" y="190" width="150" height="64" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="855" y="218" font-size="13" font-weight="600" fill="#1d4ed8" text-anchor="middle">AI does it</text>
+<text x="855" y="238" font-size="12" fill="#475569" text-anchor="middle">humans verify</text>
+
+<!-- review pills -->
+<g font-size="12" font-weight="600" fill="#92400e" text-anchor="middle">
+  <rect x="300" y="334" width="160" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/><text x="380" y="352">team edits plan</text>
+  <rect x="550" y="334" width="160" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/><text x="630" y="352">team checks tasks</text>
+  <rect x="780" y="334" width="150" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/><text x="855" y="352">team validates</text>
+</g>
+
+<line x1="30" y1="384" x2="930" y2="384" stroke="#cbd5e1" stroke-dasharray="4,4"/>
+<text x="30" y="416" font-size="13" font-weight="700" fill="#0f172a">WHY REVIEW EACH LEVEL: HUMAN OVERSIGHT AS A LOSS FUNCTION</text>
+
+<!-- with gate -->
+<text x="30" y="460" font-size="12" font-weight="700" fill="#065f46">caught early</text>
+<circle cx="240" cy="456" r="6" fill="#e11d48"/>
+<rect x="276" y="436" width="8" height="40" rx="3" fill="#d97706"/>
+<line x1="246" y1="456" x2="272" y2="456" stroke="#e11d48" stroke-width="1.5"/>
+<text x="300" y="460" font-size="12" fill="#475569">a one-line fix to a markdown plan; nothing downstream is wasted</text>
+
+<!-- without gate -->
+<text x="30" y="516" font-size="12" font-weight="700" fill="#9f1239">missed</text>
+<line x1="246" y1="512" x2="818" y2="512" stroke="#e11d48" stroke-width="1.5" marker-end="url(#a5-arrow-rose)"/>
+<circle cx="240" cy="512" r="6" fill="#e11d48"/>
+<circle cx="420" cy="512" r="10" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<circle cx="610" cy="512" r="15" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<circle cx="842" cy="512" r="21" fill="#fff1f2" stroke="#e11d48" stroke-width="1.5"/>
+<g font-size="12" fill="#475569" text-anchor="middle">
+  <text x="240" y="554">plan</text>
+  <text x="420" y="554">design</text>
+  <text x="610" y="554">code</text>
+  <text x="842" y="554">production</text>
+</g>
+</svg></div>
+        <figcaption>Each level is a decision point. A mistake fixed in a plan costs far less than the same mistake found in production. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+      <div class="callout ai">
+        <p class="eyebrow">Context memory</p>
+        <p>All generated artefacts are kept: intents, user stories, domain models, test plans. AI reads them as its memory across the lifecycle. The artefacts are also linked to each other, so you can trace a domain entity back to the user story that required it. That linking helps AI pull the right context at each stage.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="greenfield" aria-labelledby="h-greenfield">
+      <p class="eyebrow">07 · AI-DLC in action</p>
+      <h2 id="h-greenfield">Green-field example: a recommendation engine</h2>
+      <div class="prose">
+        <p>The paper follows a product owner whose intent is "develop a recommendation engine for cross-selling products". AI recognises this as a new application and proposes a Level 1 Plan. The team corrects it, and then the phases run as follows.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption>Step by step</caption>
+          <thead><tr><th scope="col">Who</th><th scope="col">What happens</th></tr></thead>
+          <tbody>
+            <tr class="stage"><td colspan="2">Inception · Mob Elaboration</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Asks clarifying questions such as "Who are the primary users?" and "What business outcomes should this achieve?"</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Turns the answers into user stories, NFRs and risk descriptions. The team validates and corrects them.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Groups related stories into Units: User Data Collection, Recommendation Algorithm and API Integration.</td></tr>
+            <tr><td><span class="tag human">Product owner</span></td><td>Notices that User Data Collection has no privacy requirements and adds GDPR-specific ones.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Optionally drafts a PRFAQ covering the intent, functionality and expected benefits. The team validates it together with the risks.</td></tr>
+            <tr class="stage"><td colspan="2">Construction · Mob Construction</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Opens a session and asks the developer to start on their assigned Unit.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Models the Recommendation Algorithm domain: Product, Customer, Purchase History and how they relate.</td></tr>
+            <tr><td><span class="tag human">Developers</span></td><td>Refine the model for real cases, such as new customers who have no purchase history yet.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Produces a logical design that applies scalability and fault-tolerance NFRs. It recommends an event-driven design and AWS Lambda.</td></tr>
+            <tr><td><span class="tag human">Developers</span></td><td>Accept Lambda for scalability and override the storage choice to DynamoDB for faster queries.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Generates collaborative-filtering code backed by DynamoDB, along with functional, security and performance tests.</td></tr>
+            <tr><td><span class="tag human">Developers</span></td><td>Review the code and test cases, approve AI's proposed fixes, and rerun the tests.</td></tr>
+            <tr class="stage"><td colspan="2">Operations</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Packages the module as container images or serverless functions.</td></tr>
+            <tr><td><span class="tag human">Developers</span></td><td>Approve the deployment configuration and roll out to staging, then production.</td></tr>
+            <tr><td><span class="tag ai">AI</span></td><td>Detects a latency spike at peak load and proposes scaling out. If API response times degrade, it suggests raising DynamoDB throughput or rebalancing API Gateway traffic.</td></tr>
+            <tr><td><span class="tag human">Developers</span></td><td>Approve the mitigation and watch the outcome.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="chapter" id="brownfield" aria-labelledby="h-brownfield">
+      <p class="eyebrow">08 · Existing systems</p>
+      <h2 id="h-brownfield">Brown-field: changing a system that already exists</h2>
+      <div class="prose">
+        <p>Brown-field work covers new features, NFR improvements, refactoring and defect fixes in an existing application. Inception and Operations are the same as for green-field work. Construction adds one step at the start.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" role="img" aria-labelledby="a7-title">
+<title id="a7-title">Green-field versus brown-field construction</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a7-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a7-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+  <marker id="a7-arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#d97706"/></marker>
+</defs>
+<rect width="960" height="440" fill="#f8fafc"/><rect width="960" height="440" fill="url(#a7-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">Green-field and brown-field</text>
+<text x="30" y="72" font-size="13" fill="#475569">Existing code adds one detour in Construction: AI models the code before changing it.</text>
+
+<!-- main chain arrows -->
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#a7-arrow)">
+  <line x1="190" y1="160" x2="211" y2="160"/>
+  <line x1="375" y1="160" x2="396" y2="160"/>
+  <line x1="560" y1="160" x2="581" y2="160"/>
+  <line x1="745" y1="160" x2="766" y2="160"/>
+</g>
+<text x="202" y="122" font-size="12" font-weight="600" fill="#047857" text-anchor="middle">green-field</text>
+<!-- detour arrows -->
+<g stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#a7-arrow-amber)">
+  <line x1="110" y1="190" x2="110" y2="276"/>
+  <line x1="260" y1="324" x2="286" y2="324"/>
+  <line x1="340" y1="280" x2="340" y2="194"/>
+</g>
+<text x="122" y="240" font-size="12" font-weight="600" fill="#92400e">brown-field</text>
+
+<g text-anchor="middle">
+  <rect x="30" y="130" width="160" height="60" rx="8" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+  <text x="110" y="157" font-size="13" font-weight="600" fill="#155e75">UNITS</text>
+  <text x="110" y="176" font-size="12" fill="#475569">from Inception</text>
+
+  <rect x="215" y="130" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="295" y="157" font-size="13" font-weight="600" fill="#065f46">DOMAIN MODEL</text>
+  <text x="295" y="176" font-size="12" fill="#475569">business logic</text>
+
+  <rect x="400" y="130" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="480" y="157" font-size="13" font-weight="600" fill="#065f46">LOGICAL DESIGN</text>
+  <text x="480" y="176" font-size="12" fill="#475569">NFRs, patterns</text>
+
+  <rect x="585" y="130" width="160" height="60" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="665" y="157" font-size="13" font-weight="600" fill="#065f46">CODE + TESTS</text>
+  <text x="665" y="176" font-size="12" fill="#475569">AI runs and fixes</text>
+
+  <rect x="770" y="130" width="160" height="60" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="850" y="157" font-size="13" font-weight="600" fill="#5b21b6">OPERATIONS</text>
+  <text x="850" y="176" font-size="12" fill="#475569">same as green-field</text>
+</g>
+
+<!-- detour boxes -->
+<rect x="30" y="280" width="230" height="92" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="46" y="306" font-size="13" font-weight="700" fill="#1d4ed8">AI ELEVATES THE CODE</text>
+<text x="46" y="330" font-size="12" fill="#0f172a">static: components, roles</text>
+<text x="46" y="350" font-size="12" fill="#0f172a">dynamic: key interactions</text>
+
+<rect x="290" y="280" width="210" height="92" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+<text x="306" y="306" font-size="13" font-weight="700" fill="#92400e">TEAM CORRECTS</text>
+<text x="306" y="330" font-size="12" fill="#0f172a">devs and product</text>
+<text x="306" y="350" font-size="12" fill="#0f172a">managers fix the models</text>
+
+<!-- why -->
+<rect x="540" y="264" width="390" height="124" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="560" y="292" font-size="13" font-weight="700" fill="#0f172a">WHY THE DETOUR</text>
+<text x="560" y="318" font-size="12" fill="#0f172a">Raw source code is a large, noisy context.</text>
+<text x="560" y="340" font-size="12" fill="#0f172a">A reviewed model of it is short and</text>
+<text x="560" y="358" font-size="12" fill="#0f172a">accurate, so AI's later steps are too.</text>
+</svg></div>
+        <figcaption>After the models are reviewed, the rest of Construction runs exactly as it does for a new system. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+      <div class="prose">
+        <ol class="tight">
+          <li>AI reverse-engineers the code into two kinds of model. <strong>Static models</strong> describe the components, their responsibilities and how they relate. <strong>Dynamic models</strong> show how the components interact to deliver the most important use cases.</li>
+          <li>Developers and product managers review the models and correct them.</li>
+          <li>Construction continues from the domain model as usual, working from the reviewed models.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="chapter" id="vocabulary" aria-labelledby="h-vocabulary">
+      <p class="eyebrow">09 · Vocabulary</p>
+      <h2 id="h-vocabulary">New words for familiar ideas</h2>
+      <div class="prose">
+        <p>AI-DLC keeps the relationships between Agile concepts and gives new names to the ones whose meaning has changed. Some practices are questioned but not yet replaced. The paper asks, for example, whether velocity should give way to a measure of business value.</p>
+      </div>
+      <figure>
+        <div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="a6-title">
+<title id="a6-title">Agile terms mapped to AI-DLC terms</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap'); text{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}</style>
+<defs>
+  <pattern id="a6-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="0.5"/></pattern>
+  <marker id="a6-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker>
+</defs>
+<rect width="960" height="560" fill="#f8fafc"/><rect width="960" height="560" fill="url(#a6-grid)"/>
+
+<text x="30" y="46" font-size="20" font-weight="700" fill="#0f172a">New words, familiar ideas</text>
+<text x="30" y="72" font-size="13" fill="#475569">AI-DLC renames what changed, questions what may not survive, and keeps what still works.</text>
+
+<g font-size="12" font-weight="700" fill="#475569">
+  <text x="30" y="106">AGILE / SCRUM</text>
+  <text x="350" y="106">AI-DLC</text>
+  <text x="710" y="106">STATUS</text>
+</g>
+
+<g stroke="#64748b" stroke-width="1.5" marker-end="url(#a6-arrow)">
+  <line x1="300" y1="142" x2="346" y2="142"/>
+  <line x1="300" y1="202" x2="346" y2="202"/>
+  <line x1="300" y1="262" x2="346" y2="262"/>
+  <line x1="300" y1="322" x2="346" y2="322"/>
+  <line x1="300" y1="382" x2="346" y2="382"/>
+  <line x1="300" y1="442" x2="346" y2="442"/>
+  <line x1="300" y1="502" x2="346" y2="502"/>
+</g>
+
+<g font-size="12">
+  <!-- 1 -->
+  <rect x="30" y="118" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="139" font-size="13" font-weight="600" fill="#334155">Sprint</text><text x="46" y="156" fill="#475569">weeks long</text>
+  <rect x="350" y="118" width="330" height="48" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="366" y="139" font-size="13" font-weight="600" fill="#1d4ed8">Bolt</text><text x="366" y="156" fill="#475569">hours or days of focused build-validate</text>
+  <rect x="710" y="129" width="130" height="26" rx="13" fill="#eff6ff" stroke="#2563eb"/><text x="775" y="147" font-weight="600" fill="#1d4ed8" text-anchor="middle">renamed</text>
+
+  <!-- 2 -->
+  <rect x="30" y="178" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="199" font-size="13" font-weight="600" fill="#334155">Epic</text><text x="46" y="216" fill="#475569">a large body of work</text>
+  <rect x="350" y="178" width="330" height="48" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="366" y="199" font-size="13" font-weight="600" fill="#1d4ed8">Unit</text><text x="366" y="216" fill="#475569">loosely coupled, deploys on its own</text>
+  <rect x="710" y="189" width="130" height="26" rx="13" fill="#eff6ff" stroke="#2563eb"/><text x="775" y="207" font-weight="600" fill="#1d4ed8" text-anchor="middle">renamed</text>
+
+  <!-- 3 -->
+  <rect x="30" y="238" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="259" font-size="13" font-weight="600" fill="#334155">Requirements work</text><text x="46" y="276" fill="#475569">weeks of sequential hand-offs</text>
+  <rect x="350" y="238" width="330" height="48" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="366" y="259" font-size="13" font-weight="600" fill="#1d4ed8">Mob Elaboration</text><text x="366" y="276" fill="#475569">a few hours, whole team, one screen</text>
+  <rect x="710" y="249" width="130" height="26" rx="13" fill="#eff6ff" stroke="#2563eb"/><text x="775" y="267" font-weight="600" fill="#1d4ed8" text-anchor="middle">replaced</text>
+
+  <!-- 4 -->
+  <rect x="30" y="298" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="319" font-size="13" font-weight="600" fill="#334155">Stand-ups, retros</text><text x="46" y="336" fill="#475569">built for long cycles</text>
+  <rect x="350" y="298" width="330" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="366" y="319" font-size="13" font-weight="600" fill="#92400e">Real-time validation</text><text x="366" y="336" fill="#475569">continuous feedback inside each Bolt</text>
+  <rect x="710" y="309" width="130" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/><text x="775" y="327" font-weight="600" fill="#92400e" text-anchor="middle">less relevant</text>
+
+  <!-- 5 -->
+  <rect x="30" y="358" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="379" font-size="13" font-weight="600" fill="#334155">Story points, velocity</text><text x="46" y="396" fill="#475569">effort-based measures</text>
+  <rect x="350" y="358" width="330" height="48" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="366" y="379" font-size="13" font-weight="600" fill="#92400e">Business value?</text><text x="366" y="396" fill="#475569">AI blurs easy vs hard tasks</text>
+  <rect x="710" y="369" width="130" height="26" rx="13" fill="#fffbeb" stroke="#d97706"/><text x="775" y="387" font-weight="600" fill="#92400e" text-anchor="middle">open question</text>
+
+  <!-- 6 -->
+  <rect x="30" y="418" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="439" font-size="13" font-weight="600" fill="#334155">User stories</text><text x="46" y="456" fill="#475569">what to build</text>
+  <rect x="350" y="418" width="330" height="48" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="366" y="439" font-size="13" font-weight="600" fill="#065f46">User stories</text><text x="366" y="456" fill="#475569">the contract between humans and AI</text>
+  <rect x="710" y="429" width="130" height="26" rx="13" fill="#ecfdf5" stroke="#059669"/><text x="775" y="447" font-weight="600" fill="#065f46" text-anchor="middle">kept</text>
+
+  <!-- 7 -->
+  <rect x="30" y="478" width="270" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="46" y="499" font-size="13" font-weight="600" fill="#334155">Risk register</text><text x="46" y="516" fill="#475569">organisational risk list</text>
+  <rect x="350" y="478" width="330" height="48" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="366" y="499" font-size="13" font-weight="600" fill="#065f46">Risk register</text><text x="366" y="516" fill="#475569">AI plans and code checked against it</text>
+  <rect x="710" y="489" width="130" height="26" rx="13" fill="#ecfdf5" stroke="#059669"/><text x="775" y="507" font-weight="600" fill="#065f46" text-anchor="middle">kept</text>
+</g>
+</svg></div>
+        <figcaption>The "less relevant" and "open question" rows reflect questions the paper raises. It does not define replacements for them. <span class="scroll-hint">Scroll sideways to see the full diagram.</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="chapter" id="start" aria-labelledby="h-start">
+      <p class="eyebrow">10 · Getting started</p>
+      <h2 id="h-start">Try it on your next piece of work</h2>
+      <div class="prose">
+        <p>The paper's appendix includes prompts for practising AI-DLC with any capable coding agent. AWS points to <a href="https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/context-project-rules.html" rel="noopener">Amazon Q Developer project rules</a> and <a href="https://kiro.dev/docs/steering/" rel="noopener">Kiro steering</a> as ways to apply the same instructions consistently across a team.</p>
+        <h3>1. Set up the workspace</h3>
+        <p>Start each session by telling AI where to keep its artefacts. The setup prompt creates this structure:</p>
+      </div>
+<pre class="tree" aria-label="Folder structure"><span class="h">aidlc-docs/</span>
+├── plans/              <span class="c"># every plan, approved before work starts</span>
+├── requirements/       <span class="c"># requirements and feature changes</span>
+├── story-artifacts/    <span class="c"># user stories</span>
+├── design-artifacts/   <span class="c"># architecture and design documents</span>
+└── prompts.md          <span class="c"># every prompt used, in order</span></pre>
+      <details class="prompt">
+        <summary>Setup prompt <small>adapted from Appendix A</small></summary>
+<pre>We will work on building an application today. For every front-end and back-end component we will create a project folder. All documents will reside in the aidlc-docs folder.
+
+Throughout our session I'll ask you to plan your work ahead and create an md file for the plan. You may work only after I approve said plan. These plans will always be stored in the aidlc-docs/plans folder.
+
+You will create many types of documents in md format:
+- Requirement and feature-change documents go in aidlc-docs/requirements.
+- User stories go in aidlc-docs/story-artifacts.
+- Architecture and design documents go in aidlc-docs/design-artifacts.
+- All prompts, in order, go in aidlc-docs/prompts.md.
+
+Confirm your understanding of this prompt. Create the necessary folders and files if they do not exist already.</pre>
+      </details>
+
+      <div class="prose">
+        <h3>2. Use the same shape for every task</h3>
+        <p>Every task prompt in the appendix has the same three parts. A <strong>role</strong> tells AI which expert to act as. A <strong>planning contract</strong> makes AI plan first, flag questions and wait for approval. A <strong>task</strong> says what to produce and where. Keep the contract word for word and change only the role and the task.</p>
+      </div>
+<pre><span class="h">Your role:</span> You are an experienced [product manager | software architect | software engineer | cloud architect].
+
+<span class="h">Planning contract:</span> Before you start the task below, plan the work and write your steps in [plan file].md with a checkbox for each step. If any step needs my clarification, add a note to that step so you can get my confirmation. Do not make critical decisions on your own. When the plan is ready, ask for my review and approval. After I approve, carry out the plan one step at a time, and mark each checkbox as done when you finish that step.
+
+<span class="h">Your task:</span> [what to produce, which files to read, where to write the output]</pre>
+      <div class="prose">
+        <p>After reviewing and editing the plan, reply with something short such as <code>I approve the plan. Proceed, and mark each checkbox as you complete it.</code></p>
+        <h3>3. Walk through the phases</h3>
+        <p>These task sections plug into the shape above. Each one reads the previous step's output.</p>
+      </div>
+      <details class="prompt">
+        <summary><span><span class="tag inc">Inception</span> User stories</span></summary>
+<pre>Your role: expert product manager, creating well-defined user stories that become the contract for developing the system.
+Plan file: user_stories_plan.md
+
+Your task: Build user stories for the high-level requirement described here: [describe the product].</pre>
+      </details>
+      <details class="prompt">
+        <summary><span><span class="tag inc">Inception</span> Units</span></summary>
+<pre>Your role: experienced software architect.
+Plan file: units_plan.md
+
+Your task: Refer to the user stories in mvp_user_stories.md. Group the user stories into multiple units that can be built independently. Each unit contains highly cohesive user stories that can be built by a single team. The units are loosely coupled with each other. For each unit, write its user stories and acceptance criteria in an individual md file in the design/ folder.</pre>
+      </details>
+      <details class="prompt">
+        <summary><span><span class="tag con">Construction</span> Domain (component) model</span></summary>
+<pre>Your role: experienced software engineer.
+Plan file: design/component_model.md
+
+Your task: Refer to the user stories in design/[unit_name].md. Design the component model to implement all the user stories. The model shall contain all the components, their attributes and behaviours, and how the components interact to implement the user stories. Do not generate any code yet. Write the component model into a separate md file in the design/ folder.</pre>
+      </details>
+      <details class="prompt">
+        <summary><span><span class="tag con">Construction</span> Code generation</span></summary>
+<pre>Your role: experienced software engineer.
+Plan file: [component]_code_plan.md
+
+Your task: Refer to the component design in [path/to/component].md. Generate a simple and intuitive implementation of the component in that design. Generate the classes in individual files, kept in the [package] directory.</pre>
+      </details>
+      <details class="prompt">
+        <summary><span><span class="tag ops">Operations</span> Deployment architecture</span></summary>
+<pre>Your role: experienced cloud architect.
+Plan file: deployment_plan.md
+
+Your task: Refer to the component design model, the units, the cloud architecture and the back-end code. Then:
+- Generate an end-to-end plan for deploying the back end on AWS using [CloudFormation | CDK | Terraform].
+- Document all prerequisites for the deployment.
+
+Once I approve the plan:
+- Follow the best practice of clean, simple, explainable code.
+- Put all output code in the DEPLOYMENT/ folder.
+- Validate that the generated code works as intended: create a validation plan and generate a validation report.
+- Review the validation report, fix all identified issues, and update the report.</pre>
+      </details>
+
+      <div class="prose">
+        <h3>4. Rolling it out across an organisation</h3>
+        <p>AWS positions AI-DLC as a small change from existing Agile methods and suggests two ways to adopt it:</p>
+        <ul class="tight">
+          <li><strong>Learn by practising.</strong> AI-DLC is mostly a set of rituals. Teams learn fastest by running Mob Elaboration and Mob Construction on problems they are already working on, with a guide present, rather than through documents and training. AWS Solution Architects package this approach as a field offering called the <em>AI-DLC Unicorn Gym</em>.</li>
+          <li><strong>Build it into developer tooling.</strong> Some organisations run their own orchestration platforms across the SDLC. The paper names Cognizant's FlowSource, Aspire's CodeSpell and HCL's AIForce. If AI-DLC is built into those tools, developers follow it without a separate adoption programme.</li>
+        </ul>
+        <p>You can also contact your AWS account team to discuss fitting AI-DLC to your organisation.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>An unofficial guide that summarises and illustrates publicly available AWS material. Where it names people, products or examples, they come from the sources below.</p>
+      <ul>
+        <li><a href="https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/" rel="noopener">AI-Driven Development Life Cycle: Reimagining Software Engineering</a>, AWS DevOps &amp; Developer Productivity Blog</li>
+        <li><a href="https://prod.d13rzhkk8cj2z0.amplifyapp.com/" rel="noopener">AI-Driven Development Lifecycle (AI-DLC) Method Definition</a>, Raja SP, Amazon Web Services</li>
+      </ul>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
