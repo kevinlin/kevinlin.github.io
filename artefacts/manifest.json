@@ -1053,6 +1053,16 @@
       "order": 10,
       "replacements": {},
       "date": "2026-09-13"
+    },
+    {
+      "id": "everything-llm-llm-eval-eli5",
+      "source": "everything-llm/llm-eval-eli5.html",
+      "destination": "everything-llm/llm-eval-eli5/index.html",
+      "title": "LLM evals explained: test cases, graders and error ranges",
+      "collection": "everything-llm",
+      "order": 120,
+      "replacements": {},
+      "date": "2026-09-13"
     }
   ]
 }

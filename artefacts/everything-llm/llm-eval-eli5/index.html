@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Eval, Explained</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1d1d1f; --muted:#5f5f66; --line:#dcdad3;
+  --accent:#3b5bdb; --accent-soft:#e3e8fb; --pass:#2b8a3e; --pass-soft:#e1f2e5;
+  --fail:#c92a2a; --fail-soft:#fbe4e4; --warn:#b35c00; --warn-soft:#fdf0dc;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15161a; --card:#1f2026; --ink:#ececf1; --muted:#a3a3ad; --line:#34353d;
+    --accent:#7c95f5; --accent-soft:#262d4a; --pass:#69c17c; --pass-soft:#1f3326;
+    --fail:#f07474; --fail-soft:#3b2224; --warn:#f0a24a; --warn-soft:#3a2d1c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15161a; --card:#1f2026; --ink:#ececf1; --muted:#a3a3ad; --line:#34353d;
+  --accent:#7c95f5; --accent-soft:#262d4a; --pass:#69c17c; --pass-soft:#1f3326;
+  --fail:#f07474; --fail-soft:#3b2224; --warn:#f0a24a; --warn-soft:#3a2d1c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px}
+main{max-width:980px;margin:0 auto;padding-block:32px 64px}
+section{padding-block:40px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.05;margin:0 0 12px;letter-spacing:-.02em}
+h2{font-size:clamp(1.4rem,3.5vw,2rem);margin:0 0 6px;letter-spacing:-.01em}
+h3{margin:0 0 6px;font-size:1.05rem}
+.kicker{font:600 .78rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px}
+.lede{font-size:1.2rem;max-width:44rem;margin:0}
+.sub{color:var(--muted);max-width:44rem;margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.tag{display:inline-block;font:600 .72rem/1 var(--mono);padding:4px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.pass{color:var(--pass)} .fail{color:var(--fail)} .warn{color:var(--warn)}
+svg text{fill:var(--ink);font-family:system-ui,sans-serif}
+svg .muted{fill:var(--muted)}
+.svgwrap{overflow-x:auto}
+.small{font-size:.9rem;color:var(--muted)}
+.term{font-family:var(--mono);font-size:.9em;background:var(--accent-soft);color:var(--accent);padding:1px 5px;border-radius:4px}
+button{font:600 .9rem system-ui,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+
+/* Pipeline */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pipe .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.pipe .col h3{font-size:.9rem;display:flex;gap:6px;align-items:center}
+.pipe .num{display:inline grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:700 .75rem var(--mono)}
+.pipe .col.on{border-color:var(--accent)}
+.chip{font-size:.82rem;border-radius:8px;padding:7px 9px;margin-top:8px;background:var(--bg);border:1px solid var(--line);opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease;overflow-wrap:anywhere}
+.chip.show{opacity:1;transform:none}
+.chip.p{background:var(--pass-soft);border-color:transparent}
+.chip.f{background:var(--fail-soft);border-color:transparent}
+.score{font:700 2.4rem/1 var(--mono);margin-top:10px}
+@media (max-width:700px){.pipe{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.pipe{grid-template-columns:1fr}}
+
+/* Graders */
+.meter{display:flex;gap:3px;margin:2px 0 8px}
+.meter i{flex:1;height:7px;border-radius:3px;background:var(--line)}
+.meter i.on{background:var(--accent)}
+.row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted)}
+
+/* CI */
+.ci-track{position:relative;height:150px;margin-top:14px}
+.ci-axis{position:absolute;left:0;right:0;bottom:18px;border-top:1px solid var(--line)}
+.ci-bar{position:absolute;height:22px;border-radius:11px;transition:left .25s,width .25s}
+.ci-dot{position:absolute;width:4px;height:30px;margin-left:-2px;border-radius:2px;background:var(--ink)}
+.ci-label{position:absolute;font:600 .8rem var(--mono);white-space:nowrap}
+.tick{position:absolute;bottom:0;font:.72rem var(--mono);color:var(--muted);transform:translateX(-50%)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.verdict{font-weight:600;margin:10px 0 0}
+
+/* pass@k */
+.bars{display:grid;gap:10px;margin-top:12px}
+.bar{display:grid;grid-template-columns:5.5rem 1fr 3.5rem;gap:10px;align-items:center;font-size:.9rem}
+.bar .t{height:18px;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.bar .t b{display:block;height:100%;transition:width .3s}
+
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.8rem;color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+ol.src{font-size:.88rem;color:var(--muted);padding-left:1.2rem}
+ol.src a{color:var(--accent)}
+.takeaway{font-size:1.15rem;max-width:44rem}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<main>
+
+<!-- HERO -->
+<section aria-labelledby="h-hero">
+  <div class="kicker">ELI5+ · everything-llm</div>
+  <h1 id="h-hero">LLM Eval</h1>
+  <p class="lede">An <strong>eval</strong> is a repeatable test: a fixed set of tasks, run through a model or an AI app, with every answer graded the same way, so you get a score you can compare after each change.</p>
+  <div class="svgwrap" style="margin-top:24px">
+    <svg viewBox="0 0 900 190" width="100%" role="img" aria-labelledby="hero-t hero-d" style="min-width:560px">
+      <title id="hero-t">The eval loop</title>
+      <desc id="hero-d">Test cases go into the system under test. Its outputs go to a grader. The grader produces a score. You change the prompt or model, then run the same test cases again.</desc>
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+      <g font-size="15">
+        <rect x="10" y="30" width="170" height="80" rx="12" fill="var(--card)" stroke="var(--line)"/>
+        <text x="95" y="64" text-anchor="middle" font-weight="700">Test cases</text>
+        <text x="95" y="88" text-anchor="middle" class="muted" font-size="13">input + what good looks like</text>
+        <rect x="240" y="30" width="170" height="80" rx="12" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="325" y="64" text-anchor="middle" font-weight="700">System under test</text>
+        <text x="325" y="88" text-anchor="middle" class="muted" font-size="13">model + prompt + tools</text>
+        <rect x="470" y="30" width="170" height="80" rx="12" fill="var(--card)" stroke="var(--line)"/>
+        <text x="555" y="64" text-anchor="middle" font-weight="700">Grader</text>
+        <text x="555" y="88" text-anchor="middle" class="muted" font-size="13">code, model judge, human</text>
+        <rect x="700" y="30" width="190" height="80" rx="12" fill="var(--pass-soft)" stroke="var(--pass)"/>
+        <text x="795" y="64" text-anchor="middle" font-weight="700">Score</text>
+        <text x="795" y="88" text-anchor="middle" class="muted" font-size="13">e.g. 41 / 50 pass</text>
+      </g>
+      <g stroke="var(--muted)" stroke-width="2" fill="none">
+        <line x1="182" y1="70" x2="236" y2="70" marker-end="url(#ar)"/>
+        <line x1="412" y1="70" x2="466" y2="70" marker-end="url(#ar)"/>
+        <line x1="642" y1="70" x2="696" y2="70" marker-end="url(#ar)"/>
+        <path d="M795 112 V160 H95 V114" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+      </g>
+      <text x="445" y="178" text-anchor="middle" class="muted" font-size="13">change the prompt or model → run the same cases again → compare scores</text>
+    </svg>
+  </div>
+</section>
+
+<!-- WHY -->
+<section aria-labelledby="h-why">
+  <div class="kicker">1 · The problem</div>
+  <h2 id="h-why">You can't tell if a change helped by trying it a few times</h2>
+  <p class="sub">LLM output is text that changes from run to run. A fix for one question can quietly break ten others, and a handful of manual tries won't show you that.</p>
+  <div class="svgwrap">
+    <svg viewBox="0 0 900 260" width="100%" role="img" aria-labelledby="why-t why-d" style="min-width:560px">
+      <title id="why-t">One prompt, three different answers</title>
+      <desc id="why-d">The same question sent three times returns one correct answer, one answer with the right number but wrong unit, and one wrong answer.</desc>
+      <rect x="10" y="95" width="250" height="70" rx="12" fill="var(--card)" stroke="var(--line)"/>
+      <text x="135" y="124" text-anchor="middle" font-weight="700" font-size="14">"How many days does</text>
+      <text x="135" y="145" text-anchor="middle" font-weight="700" font-size="14">a refund take?"</text>
+      <g stroke="var(--muted)" stroke-width="2" fill="none">
+        <path d="M262 130 C340 130 340 45 420 45" marker-end="url(#ar)"/>
+        <path d="M262 130 H420" marker-end="url(#ar)"/>
+        <path d="M262 130 C340 130 340 215 420 215" marker-end="url(#ar)"/>
+      </g>
+      <g font-size="14">
+        <rect x="425" y="15" width="330" height="60" rx="10" fill="var(--pass-soft)"/>
+        <text x="445" y="50">Run 1: "Up to 14 days, per policy."</text>
+        <text x="775" y="50" font-weight="700" fill="var(--pass)" style="fill:var(--pass)">correct</text>
+        <rect x="425" y="100" width="330" height="60" rx="10" fill="var(--warn-soft)"/>
+        <text x="445" y="135">Run 2: "About two weeks, usually."</text>
+        <text x="775" y="135" font-weight="700" style="fill:var(--warn)">vague</text>
+        <rect x="425" y="185" width="330" height="60" rx="10" fill="var(--fail-soft)"/>
+        <text x="445" y="220">Run 3: "Refunds take 30 days."</text>
+        <text x="775" y="220" font-weight="700" style="fill:var(--fail)">wrong</text>
+      </g>
+    </svg>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card"><h3>It varies</h3><p class="small">The same input can give different outputs, so one try proves little.</p></div>
+    <div class="card"><h3>Changes leak</h3><p class="small">Edit the prompt for one bug and other answers shift too. That's a <span class="term">regression</span>.</p></div>
+    <div class="card"><h3>"Looks fine" doesn't scale</h3><p class="small">Reading outputs by hand works for 5 examples. Teams call it a <span class="term">vibe check</span>. It fails at 500.</p></div>
+  </div>
+</section>
+
+<!-- ANALOGY -->
+<section aria-labelledby="h-analogy">
+  <div class="kicker">2 · Analogy</div>
+  <h2 id="h-analogy">Think of it as a driving test for software that talks</h2>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <span class="tag">Where the analogy holds</span>
+      <ul>
+        <li>The route is fixed, so every driver faces the same test.</li>
+        <li>The examiner uses a checklist, so the result doesn't depend on mood.</li>
+        <li>You can re-test after lessons and see if you improved.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag" style="background:var(--fail-soft);color:var(--fail)">Where it breaks</span>
+      <ul>
+        <li>A model can have seen the test questions during training. A driver can't memorise the exact traffic on test day. This is called <span class="term">contamination</span>.</li>
+        <li>You take a driving test once. A model gets re-tested after every change, and its score can move a few points from random noise alone.</li>
+        <li>For open-ended answers the "examiner" is often another LLM, and that examiner makes its own mistakes.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- MECHANISM -->
+<section aria-labelledby="h-mech">
+  <div class="kicker">3 · How it works</div>
+  <h2 id="h-mech">Four steps, run the same way every time</h2>
+  <p class="sub">Watch four test cases from a support-bot eval go through the pipeline. Two cases are graded by code, two by a rubric.</p>
+  <div class="pipe" id="pipe" aria-live="polite">
+    <div class="col" data-step="1"><h3><span class="num">1</span>Test cases</h3><div id="c1"></div></div>
+    <div class="col" data-step="2"><h3><span class="num">2</span>Run</h3><div id="c2"></div></div>
+    <div class="col" data-step="3"><h3><span class="num">3</span>Grade</h3><div id="c3"></div></div>
+    <div class="col" data-step="4"><h3><span class="num">4</span>Score</h3><div id="c4"><div class="chip" id="scoreChip"><div class="score">3/4</div><div class="small">75% pass. Case 4 goes to the bug list.</div></div></div></div>
+  </div>
+  <div class="controls">
+    <button id="play">Play</button><button id="step">Next step</button><button id="reset">Reset</button>
+    <span class="small" id="stepLabel">Step 0 of 4</span>
+  </div>
+  <div class="grid g2" style="margin-top:20px">
+    <div class="card"><h3>What a test case holds</h3><p class="small">An <strong>input</strong> (a question, a document, a task) and a way to judge the answer: an exact <strong>expected answer</strong> when one exists, or a <strong>rubric</strong> ("mentions the 14-day limit, does not promise a refund") when it doesn't. A set of these is the <span class="term">dataset</span> or <span class="term">golden set</span>.</p></div>
+    <div class="card"><h3>What you're actually testing</h3><p class="small">Rarely the raw model alone. Usually the whole setup: model, system prompt, retrieved documents, tools. Change any one of them and the score can change, so the eval should record which version it ran against.</p></div>
+  </div>
+</section>
+
+<!-- GRADERS -->
+<section aria-labelledby="h-grade">
+  <div class="kicker">4 · Grading</div>
+  <h2 id="h-grade">Three kinds of grader, each with a blind spot</h2>
+  <p class="sub">Use the cheapest grader that can tell right from wrong for that case. Most real evals mix all three.</p>
+  <div class="grid g3">
+    <div class="card">
+      <h3>Code check</h3>
+      <p class="small">Exact match, regex, JSON schema, "do the unit tests pass?"</p>
+      <div class="row"><span>Cost</span><span>low</span></div><div class="meter"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      <div class="row"><span>Handles open-ended answers</span><span>poor</span></div><div class="meter"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      <p class="small"><strong class="fail">Blind spot:</strong> marks "14 days" wrong when the expected string was "fourteen days".</p>
+    </div>
+    <div class="card">
+      <h3>Model as judge</h3>
+      <p class="small">Another LLM reads the answer and a rubric, then gives pass/fail or a score. Called <span class="term">LLM-as-a-judge</span>.</p>
+      <div class="row"><span>Cost</span><span>medium</span></div><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+      <div class="row"><span>Handles open-ended answers</span><span>good</span></div><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+      <p class="small"><strong class="fail">Blind spot:</strong> studies found judges favour longer answers, the first option shown, and sometimes their own model's writing.</p>
+    </div>
+    <div class="card">
+      <h3>Human review</h3>
+      <p class="small">A domain expert reads outputs and labels them.</p>
+      <div class="row"><span>Cost</span><span>high</span></div><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <div class="row"><span>Handles open-ended answers</span><span>best</span></div><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <p class="small"><strong class="fail">Blind spot:</strong> slow, and two experts often disagree. Best used to check that the model judge agrees with people.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NOISE -->
+<section aria-labelledby="h-noise">
+  <div class="kicker">5 · Reading the score</div>
+  <h2 id="h-noise">A score is an estimate, and small test sets give fuzzy ones</h2>
+  <p class="sub">Model A scores 78%, model B scores 82%. Is B better? Drag the slider to change how many test cases the eval has.</p>
+  <div class="card">
+    <label for="n" style="font-weight:600">Test cases: <span id="nVal" style="font-family:var(--mono)">100</span></label>
+    <input type="range" id="n" min="20" max="2000" step="10" value="100">
+    <div class="ci-track" id="ci" role="img" aria-label="Confidence intervals for two models"></div>
+    <p class="verdict" id="ciVerdict"></p>
+    <p class="small">Bars show a rough 95% range: score ± 1.96 × √(p(1−p)/n). It assumes each case is independent; if many cases are variations of the same question, the true range is wider. Running both models on the <em>same</em> cases and comparing case by case (a <span class="term">paired comparison</span>) cuts the noise.</p>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section aria-labelledby="h-agent">
+  <div class="kicker">6 · Agents and retries</div>
+  <h2 id="h-agent">"Solved it once" and "solves it every time" are different numbers</h2>
+  <p class="sub">When a task can be retried, evals report one of two metrics. They answer different questions. Below, each try succeeds with the chance you set, and tries are treated as independent.</p>
+  <div class="card">
+    <div class="grid g2">
+      <label>Chance one try succeeds: <span id="pVal" style="font-family:var(--mono)">70%</span><input type="range" id="p" min="5" max="99" value="70"></label>
+      <label>Number of tries k: <span id="kVal" style="font-family:var(--mono)">5</span><input type="range" id="k" min="1" max="10" value="5"></label>
+    </div>
+    <div class="bars">
+      <div class="bar"><span><span class="term">pass@k</span></span><div class="t"><b id="b1" style="background:var(--pass)"></b></div><span id="v1" style="font-family:var(--mono)"></span></div>
+      <div class="bar"><span><span class="term">pass^k</span></span><div class="t"><b id="b2" style="background:var(--fail)"></b></div><span id="v2" style="font-family:var(--mono)"></span></div>
+    </div>
+    <div class="grid g2" style="margin-top:14px">
+      <p class="small"><strong>pass@k</strong> = at least one of k tries works = 1 − (1−p)<sup>k</sup>. Fits a coding tool where a developer picks the one that works.</p>
+      <p class="small"><strong>pass^k</strong> = all k tries work = p<sup>k</sup>. Fits a customer-facing agent where every conversation has to go right.</p>
+    </div>
+  </div>
+  <p class="small" style="margin-top:12px">Agent evals also grade differently: the useful check is often the end state ("was the booking actually created?") instead of the wording of the final message.</p>
+</section>
+
+<!-- BENCHMARKS -->
+<section aria-labelledby="h-bench">
+  <div class="kicker">7 · Benchmarks vs your evals</div>
+  <h2 id="h-bench">Leaderboard scores tell you little about your own use case</h2>
+  <div class="tablewrap card" style="margin-top:14px">
+    <table>
+      <thead><tr><th></th><th>Public benchmark</th><th>Your own eval</th></tr></thead>
+      <tbody>
+        <tr><th>Examples</th><td>MMLU, GPQA, SWE-bench</td><td>50–500 cases pulled from your real traffic and bug reports</td></tr>
+        <tr><th>Answers</th><td>"Which model is generally stronger?"</td><td>"Did my change make my product better or worse?"</td></tr>
+        <tr><th>Main risk</th><td><span class="term">Contamination</span> (questions leaked into training data) and <span class="term">saturation</span> (top models all near 100%, so the test stops separating them)</td><td>Cases drift away from what users actually ask; the set needs updating</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:14px;border-color:var(--warn)">
+    <h3 class="warn">Goodhart's law</h3>
+    <p class="small" style="margin:0">"When a measure becomes a target, it ceases to be a good measure." If you tune a prompt until it passes your 50 cases, it may just be fitted to those 50. Keep some cases held back that you don't tune against.</p>
+  </div>
+</section>
+
+<!-- MYTHS -->
+<section aria-labelledby="h-myth">
+  <div class="kicker">8 · Common mix-ups</div>
+  <h2 id="h-myth">Mistakes that give people the wrong picture</h2>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>"A high benchmark score means it'll work for us."</h3><p class="small">Benchmarks test general skill on someone else's tasks. Your domain, format rules and edge cases need your own cases.</p></div>
+    <div class="card"><h3>"We need thousands of cases before we start."</h3><p class="small">A few dozen cases taken from real failures already catch regressions. Grow the set each time you find a new bug.</p></div>
+    <div class="card"><h3>"The LLM judge is objective."</h3><p class="small">It has biases of its own. Check it against a sample of human labels before trusting its scores.</p></div>
+    <div class="card"><h3>"One number sums it up."</h3><p class="small">An average hides which cases broke. Read the failing outputs; that's where the fixes come from.</p></div>
+  </div>
+</section>
+
+<!-- WHEN -->
+<section aria-labelledby="h-when">
+  <div class="kicker">9 · When it pays off</div>
+  <h2 id="h-when">Build an eval before you need to answer these</h2>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><h3>Swapping models</h3><p class="small">A new model version ships. Is it safe to switch?</p></div>
+    <div class="card"><h3>Editing prompts</h3><p class="small">You fixed one bug. What else moved?</p></div>
+    <div class="card"><h3>Shipping to users</h3><p class="small">Is it good enough, and how often does it fail?</p></div>
+  </div>
+  <p class="small" style="margin-top:12px">Less useful: a one-off script you'll run once and check by eye. The eval would cost more than the checking.</p>
+</section>
+
+<!-- SUMMARY -->
+<section aria-labelledby="h-sum">
+  <div class="kicker">Summary</div>
+  <h2 id="h-sum">Remember this</h2>
+  <p class="takeaway">Fixed cases → run the whole system → grade each answer the same way → read the score together with its error range and the failing cases. Rerun after every change. Your own cases tell you more than any leaderboard.</p>
+  <h3 style="margin-top:28px">Sources</h3>
+  <ol class="src">
+    <li><a href="https://www.anthropic.com/research/statistical-approach-to-model-evals">Anthropic, "A statistical approach to model evaluations"</a> (2024): error ranges, clustered questions, paired comparisons.</li>
+    <li><a href="https://arxiv.org/abs/2306.05685">Zheng et al., "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena"</a> (2023): position, verbosity and self-preference bias in LLM judges.</li>
+    <li><a href="https://arxiv.org/abs/2107.03374">Chen et al., "Evaluating Large Language Models Trained on Code"</a> (2021): the pass@k metric.</li>
+    <li><a href="https://arxiv.org/abs/2406.12045">Yao et al., "τ-bench"</a> (2024): the pass^k metric for agent reliability.</li>
+    <li><a href="https://hamel.dev/blog/posts/evals/">Hamel Husain, "Your AI Product Needs Evals"</a>: starting small from real failures.</li>
+    <li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic, "Demystifying evals for AI agents"</a>: grader types and outcome-based grading for agents.</li>
+  </ol>
+  <p class="small">The support-bot cases and the 78% vs 82% scores on this page are made-up examples for teaching, not measured results.</p>
+</section>
+
+</main>
+
+<script>
+// Pipeline animation
+const cases = [
+  {q:'Refund window?', out:'"Up to 14 days."', ok:true, how:'code: contains "14"'},
+  {q:'Reply as JSON', out:'{"status":"open"}', ok:true, how:'code: valid schema'},
+  {q:'Angry customer', out:'Calm, offers help', ok:true, how:'rubric: polite + next step'},
+  {q:'Cancel order #88', out:'"Refund issued!"', ok:false, how:'rubric: promised a refund it can\'t give'}
+];
+const cols = [1,2,3].map(i => document.getElementById('c'+i));
+cases.forEach((c, i) => {
+  cols[0].insertAdjacentHTML('beforeend', `<div class="chip" data-s="1">${i+1}. ${c.q}</div>`);
+  cols[1].insertAdjacentHTML('beforeend', `<div class="chip" data-s="2">${c.out}</div>`);
+  cols[2].insertAdjacentHTML('beforeend', `<div class="chip ${c.ok?'p':'f'}" data-s="3"><strong class="${c.ok?'pass':'fail'}">${c.ok?'PASS':'FAIL'}</strong> · ${c.how}</div>`);
+});
+document.getElementById('scoreChip').dataset.s = '4';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let step = 0, timer = null;
+function render(){
+  document.querySelectorAll('#pipe .chip').forEach(ch => {
+    const idx = [...ch.parentNode.children].indexOf(ch);
+    ch.style.transitionDelay = reduced ? '0s' : (idx * 0.12) + 's';
+    ch.classList.toggle('show', +ch.dataset.s <= step);
+  });
+  document.querySelectorAll('#pipe .col').forEach(c => c.classList.toggle('on', +c.dataset.step === step));
+  document.getElementById('stepLabel').textContent = `Step ${step} of 4`;
+}
+function stop(){ clearInterval(timer); timer = null; document.getElementById('play').textContent = 'Play'; }
+function play(){
+  if (timer) return stop();
+  if (step >= 4) step = 0;
+  document.getElementById('play').textContent = 'Pause';
+  step++; render();
+  timer = setInterval(() => { if (step >= 4) return stop(); step++; render(); }, 1400);
+}
+document.getElementById('play').onclick = play;
+document.getElementById('step').onclick = () => { stop(); step = step >= 4 ? 0 : step + 1; render(); };
+document.getElementById('reset').onclick = () => { stop(); step = 0; render(); };
+if (reduced) { step = 4; render(); }
+else {
+  render();
+  new IntersectionObserver((entries, obs) => {
+    if (entries[0].isIntersecting) { obs.disconnect(); if (step === 0) play(); }
+  }, {threshold: 0.5}).observe(document.getElementById('pipe'));
+}
+
+// Confidence intervals
+const models = [{name:'A', p:0.78, color:'var(--accent)'}, {name:'B', p:0.82, color:'var(--warn)'}];
+const lo = 0.6, hi = 1.0, pct = x => ((x - lo) / (hi - lo) * 100);
+function ci(){
+  const n = +document.getElementById('n').value;
+  document.getElementById('nVal').textContent = n;
+  const track = document.getElementById('ci');
+  let html = '<div class="ci-axis"></div>';
+  for (let t = 0.6; t <= 1.001; t += 0.1) html += `<span class="tick" style="left:${pct(t)}%">${Math.round(t*100)}%</span>`;
+  const ranges = models.map((m, i) => {
+    const h = 1.96 * Math.sqrt(m.p * (1 - m.p) / n);
+    const a = Math.max(lo, m.p - h), b = Math.min(hi, m.p + h), top = 26 + i * 52;
+    html += `<div class="ci-bar" style="left:${pct(a)}%;width:${pct(b)-pct(a)}%;top:${top}px;background:${m.color};opacity:.35"></div>`;
+    html += `<div class="ci-dot" style="left:${pct(m.p)}%;top:${top-4}px"></div>`;
+    html += `<span class="ci-label" style="left:${pct(m.p)}%;top:${top-22}px;transform:translateX(8px)">${m.name} ${Math.round(m.p*100)}% ±${(h*100).toFixed(1)}</span>`;
+    return [m.p - h, m.p + h];
+  });
+  track.innerHTML = html;
+  track.setAttribute('aria-label', `With ${n} cases, A is 78% plus or minus ${(ranges[0][1]*100-78).toFixed(1)} points, B is 82% plus or minus ${(ranges[1][1]*100-82).toFixed(1)} points.`);
+  const overlap = ranges[0][1] > ranges[1][0];
+  const v = document.getElementById('ciVerdict');
+  v.className = 'verdict ' + (overlap ? 'warn' : 'pass');
+  v.textContent = overlap
+    ? `Ranges overlap: with ${n} cases, the 4-point gap could be noise.`
+    : `Ranges no longer overlap: with ${n} cases, B's lead is unlikely to be noise alone.`;
+}
+document.getElementById('n').oninput = ci; ci();
+
+// pass@k vs pass^k
+function passk(){
+  const p = +document.getElementById('p').value / 100, k = +document.getElementById('k').value;
+  document.getElementById('pVal').textContent = Math.round(p*100) + '%';
+  document.getElementById('kVal').textContent = k;
+  const at = 1 - Math.pow(1 - p, k), all = Math.pow(p, k);
+  document.getElementById('b1').style.width = (at*100) + '%';
+  document.getElementById('b2').style.width = (all*100) + '%';
+  document.getElementById('v1').textContent = (at*100).toFixed(1) + '%';
+  document.getElementById('v2').textContent = (all*100).toFixed(1) + '%';
+}
+document.getElementById('p').oninput = passk; document.getElementById('k').oninput = passk; passk();
+</script>
+</body>
+</html>
