@@ -345,9 +345,10 @@
     {
       "id": "ai-augmented-sdlc",
       "title": "AI-Augmented SDLC",
-      "section": "Artefacts",
-      "section_order": 30,
-      "order": 10
+      "description": "Visual guides to how software delivery changes when agents do the building.",
+      "section": "Presentations and analysis",
+      "section_order": 10,
+      "order": 190
     }
   ],
   "entries": [
