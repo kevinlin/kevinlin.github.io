@@ -663,7 +663,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
       },
       "description": "Flagship models from six labs by release date, with vendor-reported and independently verified scores drawn separately.",
-      "date": "2026-09-02"
+      "date": "2026-09-23"
     },
     {
       "id": "everything-llm-copilot-perf-vs-price",
