@@ -350,6 +350,13 @@
       "section": "Presentations and analysis",
       "section_order": 10,
       "order": 190
+    },
+    {
+      "id": "structured-products",
+      "title": "Structured Products",
+      "section": "Artefacts",
+      "section_order": 30,
+      "order": 10
     }
   ],
   "entries": [
@@ -629,7 +636,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
-      "date": "2026-09-20"
+      "date": "2026-09-23"
     },
     {
       "id": "everything-llm-score-vs-output-tokens-per-task",
@@ -643,7 +650,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
-      "date": "2026-09-20"
+      "date": "2026-09-23"
     },
     {
       "id": "everything-llm-swe-bench-pro-by-lab",
@@ -758,7 +765,7 @@
       "order": 110,
       "replacements": {},
       "description": "Claude releases at Sonnet tier and above plot above the axis, full-size GPT releases below, from March 2024 to July 2026.",
-      "date": "2026-09-02"
+      "date": "2026-09-23"
     },
     {
       "id": "java-interview-java-release-timeline",
@@ -1074,6 +1081,16 @@
       "order": 20,
       "replacements": {},
       "date": "2026-09-13"
+    },
+    {
+      "id": "structured-products-barrier-reverse-convertible",
+      "source": "structured-products/barrier-reverse-convertible.html",
+      "destination": "structured-products/barrier-reverse-convertible/index.html",
+      "title": "Barrier reverse convertible",
+      "collection": "structured-products",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-09-21"
     }
   ]
 }

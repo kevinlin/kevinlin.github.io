@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 20 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 23 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
   </main>
 </div>
 
@@ -725,75 +725,91 @@ document.addEventListener('DOMContentLoaded', function () {
 
     families: [
       { name: 'GPT-6 Astra', provider: 'OpenAI', points: [
-          { x: 4433, y: 45.78, label: 'GPT-6 Astra (low)', al: 'right', ao: 8 },
-          { x: 9590, y: 49.57, label: 'GPT-6 Astra (medium)', al: 'top', ao: 8 },
+          { x: 4433, y: 45.78, label: 'GPT-6 Astra (low)', al: 'bottom', ao: 10 },
+          { x: 9590, y: 49.57, label: 'GPT-6 Astra (medium)', al: 'right', ao: 8 },
           { x: 11813, y: 50.92, label: 'GPT-6 Astra (high)', al: 'top', ao: 8 },
           { x: 16901, y: 52.39, label: 'GPT-6 Astra (xhigh)', al: 'top', ao: 8 },
           { x: 27206, y: 52.67, label: 'GPT-6 Astra (max)', al: 'top', ao: 8 } ] },
+      { name: 'GPT-6 Sol', provider: 'OpenAI', points: [
+          { x: 3358, y: 33.90, label: 'GPT-6 Sol (low)', al: 'right', ao: 8 },
+          { x: 6478, y: 39.78, label: 'GPT-6 Sol (medium)', al: 'left', ao: 8 },
+          { x: 10232, y: 42.82, label: 'GPT-6 Sol (high)', al: 'left', ao: 8 },
+          { x: 16013, y: 44.10, label: 'GPT-6 Sol (xhigh)', al: 'bottom', ao: 8 },
+          { x: 31238, y: 47.53, label: 'GPT-6 Sol (max)', al: 'right', ao: 8 } ] },
+      { name: 'GPT-6 Luna', provider: 'OpenAI', points: [
+          { x: 19771, y: 32.15, label: 'GPT-6 Luna (high)', al: 'right', ao: 8 },
+          { x: 27189, y: 33.88, label: 'GPT-6 Luna (xhigh)', al: 'right', ao: 8 },
+          { x: 50537, y: 37.26, label: 'GPT-6 Luna (max)', al: 'right', ao: 12 } ] },
+      { name: 'Claude Opus 5.5', provider: 'Anthropic', points: [
+          { x: 10151, y: 42.31, label: 'Claude Opus 5.5 (low)', tableLabel: 'Claude Opus 5.5 (low with fallback)', al: 'top', ao: 20 },
+          { x: 25745, y: 51.24, label: 'Claude Opus 5.5 (medium)', tableLabel: 'Claude Opus 5.5 (medium with fallback)', al: 'left', ao: 8 },
+          { x: 35584, y: 53.58, label: 'Claude Opus 5.5 (high)', tableLabel: 'Claude Opus 5.5 (high with fallback)', al: 'top', ao: 12 },
+          { x: 65667, y: 55.99, label: 'Claude Opus 5.5 (xhigh)', tableLabel: 'Claude Opus 5.5 (xhigh with fallback)', al: 'right', ao: 8 },
+          { x: 119166, y: 57.62, label: 'Claude Opus 5.5 (max)', tableLabel: 'Claude Opus 5.5 (max with fallback)', al: 'left', ao: 8 } ] },
       { name: 'GPT-5.6 Sol', provider: 'OpenAI', points: [
           { x: 3974, y: 33.47, label: 'GPT-5.6 Sol (low)', al: 'right', ao: 8 },
-          { x: 7874, y: 39.24, label: 'GPT-5.6 Sol (medium)', al: 'bottom', ao: 8 },
+          { x: 7874, y: 39.24, label: 'GPT-5.6 Sol (medium)', al: 'top', ao: 20 },
           { x: 13250, y: 42.35, label: 'GPT-5.6 Sol (high)', al: 'bottom', ao: 8 },
-          { x: 19576, y: 44.01, label: 'GPT-5.6 Sol (xhigh)', al: 'bottom', ao: 8 },
+          { x: 19576, y: 44.01, label: 'GPT-5.6 Sol (xhigh)', al: 'top', ao: 8 },
           { x: 29309, y: 46.97, label: 'GPT-5.6 Sol (max)', al: 'bottom', ao: 8 } ] },
       { name: 'GPT-5.6 Terra', provider: 'OpenAI', points: [
           { x: 11294, y: 34.24, label: 'GPT-5.6 Terra (high)', al: 'bottom', ao: 8 },
-          { x: 20367, y: 37.95, label: 'GPT-5.6 Terra (xhigh)', al: 'bottom', ao: 8 },
-          { x: 38897, y: 42.08, label: 'GPT-5.6 Terra (max)', al: 'bottom', ao: 8 } ] },
+          { x: 20367, y: 37.95, label: 'GPT-5.6 Terra (xhigh)', al: 'left', ao: 8 },
+          { x: 38897, y: 42.08, label: 'GPT-5.6 Terra (max)', al: 'left', ao: 8 } ] },
       { name: 'GPT-5.6 Luna', provider: 'OpenAI', points: [
           { x: 23625, y: 34.56, label: 'GPT-5.6 Luna (xhigh)', al: 'top', ao: 8 },
-          { x: 41235, y: 37.32, label: 'GPT-5.6 Luna (max)', al: 'top', ao: 8 } ] },
+          { x: 41235, y: 37.32, label: 'GPT-5.6 Luna (max)', al: 'bottom', ao: 20 } ] },
       { name: 'Claude Opus 5', provider: 'Anthropic', points: [
           { x: 14668, y: 39.35, label: 'Claude Opus 5 (low)', al: 'left', ao: 8 },
-          { x: 28977, y: 44.83, label: 'Claude Opus 5 (medium)', al: 'left', ao: 8 },
-          { x: 46239, y: 48.12, label: 'Claude Opus 5 (high)', al: 'left', ao: 8 },
-          { x: 60655, y: 49.68, label: 'Claude Opus 5 (xhigh)', al: 'top', ao: 8 },
+          { x: 28977, y: 44.83, label: 'Claude Opus 5 (medium)', al: 'right', ao: 8 },
+          { x: 46239, y: 48.12, label: 'Claude Opus 5 (high)', al: 'top', ao: 20 },
+          { x: 60655, y: 49.68, label: 'Claude Opus 5 (xhigh)', al: 'right', ao: 8 },
           { x: 72511, y: 50.78, label: 'Claude Opus 5 (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Fable 5.1', provider: 'Anthropic', points: [
           { x: 21562, y: 46.82, label: 'Claude Fable 5.1 (low)', tableLabel: 'Claude Fable 5.1 (low with fallback)', al: 'top', ao: 8 },
           { x: 27888, y: 48.92, label: 'Claude Fable 5.1 (medium)', tableLabel: 'Claude Fable 5.1 (medium with fallback)', al: 'top', ao: 8 },
-          { x: 38054, y: 51.15, label: 'Claude Fable 5.1 (high)', tableLabel: 'Claude Fable 5.1 (high with fallback)', al: 'top', ao: 8 },
-          { x: 60538, y: 53.20, label: 'Claude Fable 5.1 (xhigh)', tableLabel: 'Claude Fable 5.1 (xhigh with fallback)', al: 'left', ao: 8 },
+          { x: 38054, y: 51.15, label: 'Claude Fable 5.1 (high)', tableLabel: 'Claude Fable 5.1 (high with fallback)', al: 'right', ao: 8 },
+          { x: 60538, y: 53.20, label: 'Claude Fable 5.1 (xhigh)', tableLabel: 'Claude Fable 5.1 (xhigh with fallback)', al: 'top', ao: 10 },
           { x: 78111, y: 53.35, label: 'Claude Fable 5.1 (max)', tableLabel: 'Claude Fable 5.1 (max with fallback)', al: 'right', ao: 8 } ] },
       { name: 'Grok 4.6', provider: 'SpaceXAI', points: [
           { x: 10264, y: 35.12, label: 'Grok 4.6 (low)', al: 'top', ao: 8 },
-          { x: 28466, y: 42.84, label: 'Grok 4.6 (medium)', al: 'bottom', ao: 8 },
-          { x: 35835, y: 44.31, label: 'Grok 4.6 (high)', al: 'left', ao: 8 },
-          { x: 37608, y: 44.20, label: 'Grok 4.6 (xhigh)', al: 'bottom', ao: 10 } ] },
+          { x: 28466, y: 42.84, label: 'Grok 4.6 (medium)', al: 'left', ao: 8 },
+          { x: 35835, y: 44.31, label: 'Grok 4.6 (high)', al: 'left', ao: 20 },
+          { x: 37608, y: 44.20, label: 'Grok 4.6 (xhigh)', al: 'bottom', ao: 16 } ] },
       { name: 'Muse Spark 1.3', provider: 'Meta', points: [
           { x: 54513, y: 45.07, label: 'Muse Spark 1.3 (xhigh)', al: 'bottom', ao: 8 },
           { x: 60200, y: 48.09, label: 'Muse Spark 1.3 (max)', al: 'bottom', ao: 8 } ] },
       { name: 'Claude Sonnet 5', provider: 'Anthropic', points: [
-          { x: 65357, y: 34.38, label: 'Claude Sonnet 5 (xhigh)', al: 'top', ao: 30 },
-          { x: 117787, y: 38.16, label: 'Claude Sonnet 5 (max)', al: 'left', ao: 8 } ] },
+          { x: 65357, y: 34.38, label: 'Claude Sonnet 5 (xhigh)', al: 'bottom', ao: 8 },
+          { x: 117787, y: 38.16, label: 'Claude Sonnet 5 (max)', al: 'bottom', ao: 8 } ] },
       { name: 'Gemini 3.8 Flash', provider: 'Google', points: [
-          { x: 52599, y: 39.77, label: 'Gemini 3.8 Flash (medium)', al: 'top', ao: 8 },
-          { x: 71003, y: 40.93, label: 'Gemini 3.8 Flash (high)', al: 'right', ao: 8 } ] }
+          { x: 52599, y: 39.77, label: 'Gemini 3.8 Flash (medium)', al: 'top', ao: 16 },
+          { x: 71003, y: 40.93, label: 'Gemini 3.8 Flash (high)', al: 'right', ao: 20 } ] }
     ],
 
     singles: [
-      { x: 66848, y: 49.63, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 8 },
-      { x: 70550, y: 41.79, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'right', ao: 8 },
-      { x: 71128, y: 44.78, label: 'GLM-5.3 (max)', provider: 'Z AI', al: 'top', ao: 8 },
+      { x: 66848, y: 49.63, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 16 },
+      { x: 70550, y: 41.79, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'top', ao: 20 },
+      { x: 71128, y: 44.78, label: 'GLM-5.3 (max)', provider: 'Z AI', al: 'top', ao: 20 },
       { x: 64317, y: 33.71, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'bottom', ao: 26 },
-      { x: 68673, y: 41.81, label: 'GLM-5.3-Flash', provider: 'Z AI', al: 'left', ao: 8 },
-      { x: 48455, y: 43.59, label: 'Kimi K3 (max)', provider: 'Kimi', al: 'bottom', ao: 8 },
-      { x: 62782, y: 40.15, label: 'Qwen3.8 Max (0803)', provider: 'Alibaba', al: 'bottom', ao: 10 },
-      { x: 107730, y: 45.42, label: 'Qwen3.8 Max (0902)', provider: 'Alibaba', al: 'left', ao: 8 },
-      { x: 68602, y: 39.89, label: 'Qwen3.8 2.4T A95B', provider: 'Alibaba', al: 'right', ao: 8 },
+      { x: 68673, y: 41.81, label: 'GLM-5.3-Flash', provider: 'Z AI', al: 'right', ao: 16 },
+      { x: 48455, y: 43.59, label: 'Kimi K3 (max)', provider: 'Kimi', al: 'bottom', ao: 20 },
+      { x: 62782, y: 40.15, label: 'Qwen3.8 Max (0803)', provider: 'Alibaba', al: 'bottom', ao: 20 },
+      { x: 107730, y: 45.42, label: 'Qwen3.8 Max (0902)', provider: 'Alibaba', al: 'right', ao: 8 },
+      { x: 68602, y: 39.89, label: 'Qwen3.8 2.4T A95B', provider: 'Alibaba', al: 'right', ao: 20 },
       { x: 26882, y: 38.81, label: 'Grok 4.5 (high)', provider: 'SpaceXAI', al: 'bottom', ao: 8 },
-      { x: 47874, y: 39.58, label: 'Muse Spark 1.2 (xhigh)', provider: 'Meta', al: 'left', ao: 8 },
-      { x: 58387, y: 39.06, label: 'Gemini 3.7 Flash (high)', provider: 'Google', al: 'bottom', ao: 8 },
-      { x: 88574, y: 39.46, label: 'DeepSeek V4.1 Flash (max)', provider: 'DeepSeek', al: 'right', ao: 8 },
-      { x: 55154, y: 36.00, label: 'DeepSeek V4 Pro 0813 (max)', provider: 'DeepSeek', al: 'top', ao: 8 },
-      { x: 62054, y: 34.33, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'top', ao: 8 }
+      { x: 47874, y: 39.58, label: 'Muse Spark 1.2 (xhigh)', provider: 'Meta', al: 'left', ao: 20 },
+      { x: 58387, y: 39.06, label: 'Gemini 3.7 Flash (high)', provider: 'Google', al: 'top', ao: 8 },
+      { x: 88574, y: 39.46, label: 'DeepSeek V4.1 Flash (max)', provider: 'DeepSeek', al: 'right', ao: 20 },
+      { x: 55154, y: 36.00, label: 'DeepSeek V4 Pro 0813 (max)', provider: 'DeepSeek', al: 'right', ao: 8 },
+      { x: 62054, y: 34.33, label: 'DeepSeek V4 Flash 0731 (max)', provider: 'DeepSeek', al: 'right', ao: 8 }
     ],
 
     x: {
       title: 'Output Tokens per Task',
-      scale: { type: 'logarithmic', min: 3400, max: 135000 },
+      scale: { type: 'logarithmic', min: 3000, max: 135000 },
       tickFormat: function (v) {
-        var allowed = [4000, 5000, 6000, 7000, 8000, 9000, 10000,
+        var allowed = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
                        20000, 30000, 40000, 50000, 60000, 70000, 80000, 100000];
         if (allowed.indexOf(v) === -1) return null;
         return (v / 1000) + 'k';
@@ -804,7 +820,7 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 33, max: 55 }
+      scale: { min: 30, max: 60 }
     },
 
     tooltip: function (p) { return p.y.toFixed(2) + ' index  ·  ' + p.x.toLocaleString() + ' tokens per task'; },
