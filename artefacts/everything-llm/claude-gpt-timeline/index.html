@@ -232,7 +232,7 @@
   <header>
     <p class="eyebrow"><span class="caret" aria-hidden="true"></span>Frontier model releases · Mar 2024 — Sep 2026</p>
     <h1><span class="a">Claude</span> <span class="op">vs</span> <span class="b">GPT</span><br>release cadence</h1>
-    <p class="lede">Claude at Sonnet tier and above, from Claude 3 onward, plots <b><span class="only-h">above the line</span><span class="only-v">in amber, on round markers</span></b>. Full-size GPT releases, from GPT‑4o onward, plot <b><span class="only-h">below it</span><span class="only-v">in mint, on square ones</span></b>. Position along the axis is the actual date, so the crowding at the <span class="only-h">right</span><span class="only-v">end</span> is the acceleration itself. The figure after each date is the gap in days since that lab's previous release.</p>
+    <p class="lede">Claude at Sonnet tier and above, from Claude 3 onward, plots <b><span class="only-h">above the line</span><span class="only-v">in amber, on round markers</span></b>. Full-size GPT and o‑series releases, from GPT‑4o onward, plot <b><span class="only-h">below it</span><span class="only-v">in mint, on square ones</span></b>. Position along the axis is the actual date, so the crowding at the <span class="only-h">right</span><span class="only-v">end</span> is the acceleration itself. The figure after each date is the gap in days since that lab's previous release.</p>
     <div class="stats" id="stats"></div>
   </header>
 </div>
@@ -251,8 +251,8 @@
 
 <footer>
   <div class="rule">
-    <b>Scope</b><br>Claude entries start at Claude 3 and exclude the Haiku tier. GPT entries start at GPT‑4o and exclude mini, nano, the o‑series reasoning models, and the cheaper GPT‑6 Sol and Luna tiers. Dates are announcement dates, which occasionally run ahead of general availability.<br><br>
-    <b>Three asterisks</b><br>GPT‑5.3 shipped only as GPT‑5.3‑Codex on 5 Feb 2026. GPT‑5.6 went to a limited government-approved preview on 26 Jun 2026 and public on 9 Jul 2026; the public date is plotted. GPT‑6 Astra went to approved users on 3 Sep 2026 and public on 4 Sep; again the public date is plotted. Claude Fable 5 and Mythos 5 launched 9 Jun 2026, were suspended 12 Jun under a US export-control directive, and returned 1 Jul.
+    <b>Scope</b><br>Claude entries start at Claude 3 and exclude the Haiku tier. GPT entries start at GPT‑4o and include the o‑series reasoning models, the Astra tier, and the Sol tier below it. They exclude mini, nano, the pro variants (o1‑pro, o3‑pro), and the cheaper Terra and Luna tiers. Dates are announcement dates, which occasionally run ahead of general availability. o3 was previewed on 20 Dec 2024; its 16 Apr 2025 release is plotted.<br><br>
+    <b>Three asterisks</b><br>GPT‑5.3 shipped only as GPT‑5.3‑Codex on 5 Feb 2026. GPT‑5.6 Sol went to a limited government-approved preview on 26 Jun 2026 and public on 9 Jul 2026; the public date is plotted. GPT‑6 Astra went to approved users on 3 Sep 2026 and public on 4 Sep; again the public date is plotted. Claude Fable 5 and Mythos 5 launched 9 Jun 2026, were suspended 12 Jun under a US export-control directive, and returned 1 Jul.
   </div>
 </footer>
 
@@ -278,16 +278,20 @@ const claude = [
 ];
 const gpt = [
   ["2024-05-13","GPT-4o"],
+  ["2024-09-12","o1-preview"],
+  ["2024-12-05","o1"],
   ["2025-02-27","GPT-4.5"],
   ["2025-04-14","GPT-4.1"],
+  ["2025-04-16","o3"],
   ["2025-08-07","GPT-5"],
   ["2025-11-12","GPT-5.1"],
   ["2025-12-11","GPT-5.2"],
   ["2026-02-05","GPT-5.3-Codex"],
   ["2026-03-05","GPT-5.4"],
   ["2026-04-23","GPT-5.5"],
-  ["2026-07-09","GPT-5.6"],
-  ["2026-09-04","GPT-6 Astra"]
+  ["2026-07-09","GPT-5.6 Sol"],
+  ["2026-09-04","GPT-6 Astra"],
+  ["2026-09-22","GPT-6 Sol"]
 ];
 
 const START = new Date("2024-01-15"), END = new Date("2026-10-15");
