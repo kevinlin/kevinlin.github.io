@@ -478,7 +478,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
   <header>
     <p class="kicker">GitHub Copilot &middot; Models and pricing</p>
     <h1>Intelligence Index vs. Blended Price</h1>
-    <p class="subtitle">What a million tokens costs on each Copilot model once its four billing rates are weighted the way an agentic coding session actually uses them, plotted against that model&rsquo;s score on the Artificial Analysis Intelligence Index v4.3. Only models this Copilot subscription can call are shown. The price axis is logarithmic: GPT-6 Astra and Opus 4.8 in fast mode each cost 45&times; what Luna does per blended million tokens. Dashed lines join one model to its other published rates: the long-context tier or Opus 4.8&rsquo;s fast mode.</p>
+    <p class="subtitle">What a million tokens costs on each Copilot model once its four billing rates are weighted the way an agentic coding session actually uses them, plotted against that model&rsquo;s score on the Artificial Analysis Intelligence Index v4.3.2. Only models this Copilot subscription can call are shown. The price axis is logarithmic: Opus 4.8 in fast mode costs 100&times; what GPT-6 Luna does per blended million tokens. Dashed lines join one model to its other published rates: the long-context tier or Opus 4.8&rsquo;s fast mode.</p>
   </header>
 
   <main id="main">
@@ -486,7 +486,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
     <div class="card">
       <figure class="chart-wrap" style="margin:0">
-        <canvas id="chart" role="img" aria-label="Scatter chart of Artificial Analysis Intelligence Index v4.3 score against blended price per million tokens in US dollars for the GitHub Copilot model catalogue. Full values are in the data table below."></canvas>
+        <canvas id="chart" role="img" aria-label="Scatter chart of Artificial Analysis Intelligence Index v4.3.2 score against blended price per million tokens in US dollars for the GitHub Copilot model catalogue. Full values are in the data table below."></canvas>
       </figure>
     </div>
 
@@ -504,9 +504,9 @@ a.src-url:hover { color: hsl(var(--ring)); }
 
     <p class="note"><strong>Price.</strong> GitHub meters Copilot per token at four rates: fresh input, cached input, cache write and output. A single price therefore needs a token mix, and the blended figure weights those rates the way a long agentic coding session consumes them &mdash; <strong>14% fresh input, 70% cached input, 8% cache write, 8% output</strong>. Cached reads dominate because an agent re-sends its whole context every turn and only the delta is charged at the fresh rate. The shares sum to 100%, so the result is a true weighted average dollar-per-million-tokens. Where a vendor charges nothing for cache writes, that 8% is billed as fresh input instead. Copilot meters all of it in AI credits at 1 credit = $0.01, so the credit column is the dollar figure times 100. Points use the default price tier; the next point on each dashed line is the long-context tier, priced from the same mix and labelled with the input-token count above which it takes over.</p>
 
-    <p class="note"><strong>Score.</strong> <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, taken from <a href="https://artificialanalysis.ai/models?intelligence-index-token-use=intelligence-vs-output-tokens-per-task&amp;cost=intelligence-vs-cost-per-task">Artificial Analysis&rsquo; model comparison</a> between 11 and 13 September 2026. The index is a composite of evaluations Artificial Analysis runs itself, so every model is measured the same way. It is a general intelligence score, not a coding benchmark, and v4.3 scores can&rsquo;t be compared with earlier index versions. Each reasoning-effort setting is scored separately. Every model is plotted at its highest-scoring setting, which the data table names: max for most models, xhigh for GPT-5.5 and GPT-5.3-Codex, and high for Grok 4.6, whose xhigh setting scores a little lower at 44.27. Copilot may run a model at a lower effort, so read each point as that model&rsquo;s ceiling.</p>
+    <p class="note"><strong>Score.</strong> <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3.2, taken from <a href="https://artificialanalysis.ai/models?intelligence-index-token-use=intelligence-vs-output-tokens-per-task&amp;cost=intelligence-vs-cost-per-task">Artificial Analysis&rsquo; model comparison</a> on 24 September 2026. The index is a composite of evaluations Artificial Analysis runs itself, so every model is measured the same way. It is a general intelligence score, not a coding benchmark, and v4.3.2 scores can&rsquo;t be compared with earlier index versions. Each reasoning-effort setting is scored separately. Every model is plotted at its highest-scoring setting, which the data table names: max for most models (Artificial Analysis runs Claude Opus 5.5 as &ldquo;max with fallback&rdquo;), xhigh for GPT-5.5, GPT-5.3-Codex and Grok 4.7, and high for Grok 4.6, whose xhigh setting scores a little lower at 44.20. Copilot may run a model at a lower effort, so read each point as that model&rsquo;s ceiling.</p>
 
-    <p class="note"><strong>Not shown.</strong> The chart is limited to the models the Copilot <code>/models</code> API returned for this subscription on 13 September 2026. GitHub prices several more that this plan can&rsquo;t call, so they are off the chart even where a score exists: Claude Fable 5.1, Claude Fable 5, GPT-5.4, Gemini 3.8 Flash and Grok 4.5 among them. Of the models this plan can call, GPT-5 mini, GPT-5.4 mini and MAI-Code-1.1-Flash are not in the Artificial Analysis comparison used here, so they cannot be placed. Claude Haiku 4.5 is left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 13 September 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
+    <p class="note"><strong>Not shown.</strong> The chart is limited to the models the Copilot <code>/models</code> API returned for this subscription on 24 September 2026. GitHub prices several more that this plan can&rsquo;t call, so they are off the chart even where a score exists: Claude Fable 5.1, Claude Fable 5, GPT-6 Astra, GPT-5.4, Gemini 3.8 Flash, Grok 4.5 and Kimi K3 among them. Of the models this plan can call, GPT-5 mini, GPT-5.4 mini and MAI-Code-1.1-Flash are not in the Artificial Analysis comparison used here, so they cannot be placed. Claude Haiku 4.5 is left off this chart. Code completions and next edit suggestions are unbilled. Copilot code review does not disclose its model, so it has no rate to quote. Every rate comes from <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">GitHub Copilot models and pricing</a>, retrieved 24 September 2026; every score is attributed under <em>Score published by</em> above. Use the legend to isolate a provider: hover to preview, click to keep it, click again to release. Several can be held at once.</p>
   </main>
 </div>
 
@@ -619,7 +619,7 @@ a.src-url:hover { color: hsl(var(--ring)); }
       var o = ctx.dataset.data[ctx.dataIndex].ao;
       return o == null ? 6 : o;
     },
-    // 24 points is denser than the sibling charts, and below ~900px the labels
+    // 23 points is denser than the sibling charts, and below ~900px the labels
     // start landing on markers; the data table carries the values there.
     display: function (ctx) { return ctx.chart.width >= 900; },
     font: { family: FONT_UI, size: 12.5, weight: 500 },
@@ -1047,39 +1047,46 @@ document.addEventListener('DOMContentLoaded', function () {
     return p;
   }
 
-  // Every score is Artificial Analysis Intelligence Index v4.3, read from
+  // Every score is Artificial Analysis Intelligence Index v4.3.2, read from
   // each model's page on artificialanalysis.ai at its highest-scoring
   // reasoning-effort setting (named in each tableLabel).
   var SOURCES = {
-    aa: { label: 'Artificial Analysis Intelligence Index v4.3', url: 'https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index' }
+    aa: { label: 'Artificial Analysis Intelligence Index v4.3.2', url: 'https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index' }
   };
 
   // Two published rates for one model: default vs long-context tier, or Opus
   // 4.8 standard vs fast mode. Same score, so each pair draws as a flat run.
   var families = [
-    { name: 'GPT-6 Astra', provider: 'OpenAI', dashed: true, score: 52.81, src: 'aa', points: [
-        { label: 'GPT-6 Astra', tableLabel: 'GPT-6 Astra (max)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'top', ao: 12 },
-        { label: '> 272K', tableLabel: 'GPT-6 Astra (max) · long context > 272K', rates: { in: 20, cache: 2.00, cw: 25.00, out: 75 }, al: 'right', ao: 8 } ] },
-    // Grok 4.6 scores highest at high effort; xhigh comes in at 44.27.
-    { name: 'Grok 4.6', provider: 'xAI', dashed: true, score: 44.41, src: 'aa', points: [
-        { label: 'Grok 4.6', tableLabel: 'Grok 4.6 (high)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'top', ao: 12 },
-        { label: '> 200K', tableLabel: 'Grok 4.6 (high) · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'top', ao: 12 } ] },
-    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 41.99, src: 'aa', points: [
+    { name: 'GPT-6 Sol', provider: 'OpenAI', dashed: true, score: 47.53, src: 'aa', points: [
+        { label: 'GPT-6 Sol', tableLabel: 'GPT-6 Sol (max)', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, al: 'top', ao: 12 },
+        { label: '> 272K', tableLabel: 'GPT-6 Sol (max) · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 15 }, al: 'top', ao: 12 } ] },
+    { name: 'GPT-6 Luna', provider: 'OpenAI', dashed: true, score: 37.26, src: 'aa', points: [
+        { label: 'GPT-6 Luna', tableLabel: 'GPT-6 Luna (max)', rates: { in: 0.10, cache: 0.01, cw: 0.125, out: 0.50 }, al: 'bottom', ao: 8 },
+        { label: '> 272K', tableLabel: 'GPT-6 Luna (max) · long context > 272K', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 0.75 }, al: 'bottom', ao: 8 } ] },
+    // Grok 4.7 scores highest at xhigh; high comes in at 46.33.
+    { name: 'Grok 4.7', provider: 'xAI', dashed: true, score: 46.45, src: 'aa', points: [
+        { label: 'Grok 4.7', tableLabel: 'Grok 4.7 (xhigh)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'bottom', ao: 12 },
+        { label: '> 200K', tableLabel: 'Grok 4.7 (xhigh) · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'bottom', ao: 12 } ] },
+    // Grok 4.6 scores highest at high effort; xhigh comes in at 44.20.
+    { name: 'Grok 4.6', provider: 'xAI', dashed: true, score: 44.31, src: 'aa', points: [
+        { label: 'Grok 4.6', tableLabel: 'Grok 4.6 (high)', rates: { in: 2, cache: 0.50, cw: null, out: 6 }, al: 'bottom', ao: 12 },
+        { label: '> 200K', tableLabel: 'Grok 4.6 (high) · long context > 200K', rates: { in: 4, cache: 1.00, cw: null, out: 12 }, al: 'bottom', ao: 12 } ] },
+    { name: 'Claude Opus 4.8', provider: 'Anthropic', dashed: true, score: 41.79, src: 'aa', points: [
         { label: 'Claude Opus 4.8', tableLabel: 'Claude Opus 4.8 (max)', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, al: 'top', ao: 8 },
         { label: 'fast mode', tableLabel: 'Claude Opus 4.8 (max, fast mode)', rates: { in: 10, cache: 1.00, cw: 12.50, out: 50 }, al: 'right', ao: 8 } ] },
     // GitHub's 50%-off promotion on Sol ran to 3 Sep 2026 and has now lapsed, so the default-tier
     // point is the list rate GitHub bills. That list price is itself OpenAI's 21 Aug reduction,
     // held to 21 Nov 2026.
-    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 47.06, src: 'aa', points: [
+    { name: 'GPT-5.6 Sol', provider: 'OpenAI', dashed: true, score: 46.97, src: 'aa', points: [
         { label: 'GPT-5.6 Sol', tableLabel: 'GPT-5.6 Sol (max) · list, reduced to 21 Nov 2026', rates: { in: 4, cache: 0.40, cw: 5.00, out: 20 }, al: 'top', ao: 12 },
         { label: '> 272K', tableLabel: 'GPT-5.6 Sol (max) · long context > 272K', rates: { in: 8, cache: 0.80, cw: 10.00, out: 30 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 42.25, src: 'aa', points: [
+    { name: 'GPT-5.6 Terra', provider: 'OpenAI', dashed: true, score: 42.08, src: 'aa', points: [
         { label: 'GPT-5.6 Terra', tableLabel: 'GPT-5.6 Terra (max)', rates: { in: 2, cache: 0.20, cw: 2.50, out: 12 }, al: 'bottom', ao: 20 },
         { label: '> 272K', tableLabel: 'GPT-5.6 Terra (max) · long context > 272K', rates: { in: 4, cache: 0.40, cw: 5.00, out: 18 }, al: 'bottom', ao: 20 } ] },
-    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 37.50, src: 'aa', points: [
+    { name: 'GPT-5.6 Luna', provider: 'OpenAI', dashed: true, score: 37.32, src: 'aa', points: [
         { label: 'GPT-5.6 Luna', tableLabel: 'GPT-5.6 Luna (max)', rates: { in: 0.20, cache: 0.02, cw: 0.25, out: 1.20 }, al: 'top', ao: 8 },
         { label: '> 200K', tableLabel: 'GPT-5.6 Luna (max) · long context > 200K', rates: { in: 0.40, cache: 0.04, cw: 0.50, out: 1.80 }, al: 'right', ao: 8 } ] },
-    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 38.63, src: 'aa', points: [
+    { name: 'GPT-5.5', provider: 'OpenAI', dashed: true, score: 38.36, src: 'aa', points: [
         { label: 'GPT-5.5', tableLabel: 'GPT-5.5 (xhigh)', rates: { in: 5, cache: 0.50, cw: null, out: 30 }, al: 'bottom', ao: 8 },
         { label: '> 272K', tableLabel: 'GPT-5.5 (xhigh) · long context > 272K', rates: { in: 10, cache: 1.00, cw: null, out: 45 }, al: 'right', ao: 8 } ] }
   ];
@@ -1094,10 +1101,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // One published rate each.
   var singles = [
-    { label: 'Claude Opus 5', tableLabel: 'Claude Opus 5 (max)', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 50.70, src: 'aa', al: 'right', ao: 8 },
+    // AA labels this run "max with fallback".
+    { label: 'Claude Opus 5.5', tableLabel: 'Claude Opus 5.5 (max with fallback)', provider: 'Anthropic', rates: { in: 4, cache: 0.20, cw: 5.00, out: 20 }, score: 57.62, src: 'aa', al: 'right', ao: 8 },
+    { label: 'Claude Opus 5', tableLabel: 'Claude Opus 5 (max)', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 50.78, src: 'aa', al: 'right', ao: 8 },
     { label: 'Claude Opus 4.7', tableLabel: 'Claude Opus 4.7 (max)', provider: 'Anthropic', rates: { in: 5, cache: 0.50, cw: 6.25, out: 25 }, score: 40.69, src: 'aa', al: 'right', ao: 8 },
-    { label: 'Kimi K3', tableLabel: 'Kimi K3 (max)', provider: 'Kimi', rates: { in: 3, cache: 0.30, cw: null, out: 15 }, score: 43.78, src: 'aa', al: 'bottom', ao: 8 },
-    { label: 'Claude Sonnet 5', tableLabel: 'Claude Sonnet 5 (max)', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 38.36, src: 'aa', al: 'left', ao: 20 },
+    { label: 'Claude Sonnet 5', tableLabel: 'Claude Sonnet 5 (max)', provider: 'Anthropic', rates: { in: 2, cache: 0.20, cw: 2.50, out: 10 }, score: 38.16, src: 'aa', al: 'left', ao: 20 },
     { label: 'GPT-5.3-Codex', tableLabel: 'GPT-5.3-Codex (xhigh)', provider: 'OpenAI', rates: { in: 1.75, cache: 0.175, cw: null, out: 14 }, score: 32.50, src: 'aa', al: 'bottom', ao: 8 }
   ];
   singles.forEach(function (s) {
@@ -1119,21 +1127,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Blended price per 1M tokens (USD)',
-      // Logarithmic: Luna blends to $0.16 and GPT-6 Astra's long-context tier to $12.20, so a
+      // Logarithmic: GPT-6 Luna blends to $0.07 and Opus 4.8's fast mode to $7.10, so a
       // linear axis would pile most of the field into its left quarter.
-      scale: { type: 'logarithmic', min: 0.13, max: 15 },
+      scale: { type: 'logarithmic', min: 0.06, max: 10 },
       tickFormat: function (v) {
-        var allowed = [0.2, 0.3, 0.5, 1, 2, 3, 5, 10];
+        var allowed = [0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5, 10];
         if (allowed.indexOf(v) === -1) return null;
         return '$' + (v < 1 ? v.toFixed(2) : v.toFixed(0));
       }
     },
 
     y: {
-      title: 'Artificial Analysis Intelligence Index v4.3',
+      title: 'Artificial Analysis Intelligence Index v4.3.2',
       grid: true,
       tickStep: 5,
-      scale: { min: 30, max: 55 },
+      scale: { min: 30, max: 60 },
       tickFormat: function (v) { return v; }
     },
 
