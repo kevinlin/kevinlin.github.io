@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 23 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 29 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
   </main>
 </div>
 
@@ -747,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 65667, y: 55.99, label: 'Claude Opus 5.5 (xhigh)', tableLabel: 'Claude Opus 5.5 (xhigh with fallback)', al: 'right', ao: 8 },
           { x: 119166, y: 57.62, label: 'Claude Opus 5.5 (max)', tableLabel: 'Claude Opus 5.5 (max with fallback)', al: 'left', ao: 8 } ] },
       { name: 'GPT-5.6 Sol', provider: 'OpenAI', points: [
-          { x: 3974, y: 33.47, label: 'GPT-5.6 Sol (low)', al: 'right', ao: 8 },
+          { x: 3974, y: 33.47, label: 'GPT-5.6 Sol (low)', al: 'bottom', ao: 8 },
           { x: 7874, y: 39.24, label: 'GPT-5.6 Sol (medium)', al: 'top', ao: 20 },
           { x: 13250, y: 42.35, label: 'GPT-5.6 Sol (high)', al: 'bottom', ao: 8 },
           { x: 19576, y: 44.01, label: 'GPT-5.6 Sol (xhigh)', al: 'top', ao: 8 },
@@ -778,17 +778,23 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 37608, y: 44.20, label: 'Grok 4.6 (xhigh)', al: 'bottom', ao: 16 } ] },
       { name: 'Muse Spark 1.3', provider: 'Meta', points: [
           { x: 54513, y: 45.07, label: 'Muse Spark 1.3 (xhigh)', al: 'bottom', ao: 8 },
-          { x: 60200, y: 48.09, label: 'Muse Spark 1.3 (max)', al: 'bottom', ao: 8 } ] },
+          { x: 60200, y: 48.09, label: 'Muse Spark 1.3 (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Sonnet 5', provider: 'Anthropic', points: [
           { x: 65357, y: 34.38, label: 'Claude Sonnet 5 (xhigh)', al: 'bottom', ao: 8 },
           { x: 117787, y: 38.16, label: 'Claude Sonnet 5 (max)', al: 'bottom', ao: 8 } ] },
+      { name: 'Claude Sonnet 5.5', provider: 'Anthropic', points: [
+          { x: 13894, y: 35.84, label: 'Claude Sonnet 5.5 (low)', tableLabel: 'Claude Sonnet 5.5 (low with fallback)', al: 'right', ao: 8 },
+          { x: 19488, y: 40.74, label: 'Claude Sonnet 5.5 (medium)', tableLabel: 'Claude Sonnet 5.5 (medium with fallback)', al: 'right', ao: 8 },
+          { x: 34467, y: 46.74, label: 'Claude Sonnet 5.5 (high)', tableLabel: 'Claude Sonnet 5.5 (high with fallback)', al: 'right', ao: 8 },
+          { x: 73724, y: 51.85, label: 'Claude Sonnet 5.5 (xhigh)', tableLabel: 'Claude Sonnet 5.5 (xhigh with fallback)', al: 'right', ao: 8 },
+          { x: 192838, y: 55.98, label: 'Claude Sonnet 5.5 (max)', tableLabel: 'Claude Sonnet 5.5 (max with fallback)', al: 'left', ao: 8 } ] },
       { name: 'Gemini 3.8 Flash', provider: 'Google', points: [
           { x: 52599, y: 39.77, label: 'Gemini 3.8 Flash (medium)', al: 'top', ao: 16 },
           { x: 71003, y: 40.93, label: 'Gemini 3.8 Flash (high)', al: 'right', ao: 20 } ] }
     ],
 
     singles: [
-      { x: 66848, y: 49.63, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 16 },
+      { x: 66848, y: 49.63, label: 'Claude Fable 5 (with fallback)', provider: 'Anthropic', al: 'bottom', ao: 2 },
       { x: 70550, y: 41.79, label: 'Claude Opus 4.8 (max)', provider: 'Anthropic', al: 'top', ao: 20 },
       { x: 71128, y: 44.78, label: 'GLM-5.3 (max)', provider: 'Z AI', al: 'top', ao: 20 },
       { x: 64317, y: 33.71, label: 'GLM-5.2 (max)', provider: 'Z AI', al: 'bottom', ao: 26 },
@@ -807,10 +813,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Output Tokens per Task',
-      scale: { type: 'logarithmic', min: 3000, max: 135000 },
+      scale: { type: 'logarithmic', min: 3000, max: 200000 },
       tickFormat: function (v) {
         var allowed = [3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
-                       20000, 30000, 40000, 50000, 60000, 70000, 80000, 100000];
+                       20000, 30000, 40000, 50000, 60000, 70000, 80000, 100000, 200000];
         if (allowed.indexOf(v) === -1) return null;
         return (v / 1000) + 'k';
       }

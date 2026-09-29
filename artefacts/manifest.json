@@ -636,7 +636,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
-      "date": "2026-09-23"
+      "date": "2026-09-29"
     },
     {
       "id": "everything-llm-score-vs-output-tokens-per-task",
@@ -650,7 +650,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
-      "date": "2026-09-23"
+      "date": "2026-09-29"
     },
     {
       "id": "everything-llm-swe-bench-pro-by-lab",
@@ -663,7 +663,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js": "../../vendor/chart.umd.min.js"
       },
       "description": "Flagship models from six labs by release date, with vendor-reported and independently verified scores drawn separately.",
-      "date": "2026-09-23"
+      "date": "2026-09-27"
     },
     {
       "id": "everything-llm-copilot-perf-vs-price",
