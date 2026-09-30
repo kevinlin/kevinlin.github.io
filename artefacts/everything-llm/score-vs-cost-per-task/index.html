@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 29 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 30 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures. Claude Sonnet 5.5 (low) is kept at its 29 September figures: Artificial Analysis currently lists it with no score.</p>
   </main>
 </div>
 
@@ -1016,15 +1016,21 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 2.3088, y: 52.39, label: 'GPT-6 Astra (xhigh)', al: 'left', ao: 20 },
           { x: 3.2575, y: 52.67, label: 'GPT-6 Astra (max)', al: 'top', ao: 20 } ] },
       { name: 'GPT-6 Sol', provider: 'OpenAI', points: [
-          { x: 0.1322, y: 33.90, label: 'GPT-6 Sol (low)', al: 'right', ao: 10 },
-          { x: 0.2482, y: 39.78, label: 'GPT-6 Sol (medium)', al: 'bottom', ao: 8 },
-          { x: 0.3746, y: 42.82, label: 'GPT-6 Sol (high)', al: 'top', ao: 20 },
-          { x: 0.5319, y: 44.10, label: 'GPT-6 Sol (xhigh)', al: 'top', ao: 20 },
-          { x: 1.0564, y: 47.53, label: 'GPT-6 Sol (max)', al: 'top', ao: 8 } ] },
+          { x: 0.1326, y: 33.90, label: 'GPT-6 Sol (low)', al: 'right', ao: 10 },
+          { x: 0.2472, y: 39.78, label: 'GPT-6 Sol (medium)', al: 'bottom', ao: 8 },
+          { x: 0.3753, y: 42.82, label: 'GPT-6 Sol (high)', al: 'top', ao: 20 },
+          { x: 0.5236, y: 44.10, label: 'GPT-6 Sol (xhigh)', al: 'top', ao: 20 },
+          { x: 1.0494, y: 47.53, label: 'GPT-6 Sol (max)', al: 'top', ao: 8 } ] },
+      { name: 'GPT-6.1 Sol', provider: 'OpenAI', points: [
+          { x: 0.1308, y: 42.08, label: 'GPT-6.1 Sol (low)', al: 'left', ao: 8 },
+          { x: 0.2137, y: 47.78, label: 'GPT-6.1 Sol (medium)', al: 'left', ao: 8 },
+          { x: 0.3191, y: 50.24, label: 'GPT-6.1 Sol (high)', al: 'left', ao: 8 },
+          { x: 0.3929, y: 51.04, label: 'GPT-6.1 Sol (xhigh)', al: 'top', ao: 10 },
+          { x: 0.7242, y: 51.83, label: 'GPT-6.1 Sol (max)', al: 'top', ao: 10 } ] },
       { name: 'GPT-6 Luna', provider: 'OpenAI', points: [
-          { x: 0.0286, y: 32.15, label: 'GPT-6 Luna (high)', al: 'right', ao: 10 },
-          { x: 0.0417, y: 33.88, label: 'GPT-6 Luna (xhigh)', al: 'top', ao: 8 },
-          { x: 0.0681, y: 37.26, label: 'GPT-6 Luna (max)', al: 'right', ao: 8 } ] },
+          { x: 0.0291, y: 32.15, label: 'GPT-6 Luna (high)', al: 'right', ao: 10 },
+          { x: 0.0421, y: 33.88, label: 'GPT-6 Luna (xhigh)', al: 'top', ao: 8 },
+          { x: 0.0679, y: 37.26, label: 'GPT-6 Luna (max)', al: 'right', ao: 8 } ] },
       { name: 'Claude Opus 5.5', provider: 'Anthropic', points: [
           { x: 0.5512, y: 42.31, label: 'Claude Opus 5.5 (low)', tableLabel: 'Claude Opus 5.5 (low with fallback)', al: 'left', ao: 8 },
           { x: 1.3360, y: 51.24, label: 'Claude Opus 5.5 (medium)', tableLabel: 'Claude Opus 5.5 (medium with fallback)', al: 'left', ao: 20 },

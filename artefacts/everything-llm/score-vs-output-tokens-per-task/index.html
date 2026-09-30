@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 29 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3, retrieved 30 September 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised token spend. Output tokens per task counts reasoning plus answer tokens. DeepSeek V4.1 Flash is the one figure Artificial Analysis does not chart directly; it is recovered exactly from its published per-task output cost divided by its output price, a step that reproduces every charted count it does publish. Connected points are the same model at different reasoning-effort settings. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 token measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures. Claude Sonnet 5.5 (low) is kept at its 29 September figures: Artificial Analysis currently lists it with no score.</p>
   </main>
 </div>
 
@@ -731,15 +731,21 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 16901, y: 52.39, label: 'GPT-6 Astra (xhigh)', al: 'top', ao: 8 },
           { x: 27206, y: 52.67, label: 'GPT-6 Astra (max)', al: 'top', ao: 8 } ] },
       { name: 'GPT-6 Sol', provider: 'OpenAI', points: [
-          { x: 3358, y: 33.90, label: 'GPT-6 Sol (low)', al: 'right', ao: 8 },
-          { x: 6478, y: 39.78, label: 'GPT-6 Sol (medium)', al: 'left', ao: 8 },
-          { x: 10232, y: 42.82, label: 'GPT-6 Sol (high)', al: 'left', ao: 8 },
-          { x: 16013, y: 44.10, label: 'GPT-6 Sol (xhigh)', al: 'bottom', ao: 8 },
-          { x: 31238, y: 47.53, label: 'GPT-6 Sol (max)', al: 'right', ao: 8 } ] },
+          { x: 3374, y: 33.90, label: 'GPT-6 Sol (low)', al: 'right', ao: 8 },
+          { x: 6442, y: 39.78, label: 'GPT-6 Sol (medium)', al: 'left', ao: 8 },
+          { x: 10319, y: 42.82, label: 'GPT-6 Sol (high)', al: 'left', ao: 8 },
+          { x: 15894, y: 44.10, label: 'GPT-6 Sol (xhigh)', al: 'bottom', ao: 8 },
+          { x: 31054, y: 47.53, label: 'GPT-6 Sol (max)', al: 'right', ao: 8 } ] },
+      { name: 'GPT-6.1 Sol', provider: 'OpenAI', points: [
+          { x: 3977, y: 42.08, label: 'GPT-6.1 Sol (low)', al: 'right', ao: 8 },
+          { x: 8070, y: 47.78, label: 'GPT-6.1 Sol (medium)', al: 'left', ao: 8 },
+          { x: 13192, y: 50.24, label: 'GPT-6.1 Sol (high)', al: 'right', ao: 8 },
+          { x: 17619, y: 51.04, label: 'GPT-6.1 Sol (xhigh)', al: 'top', ao: 8 },
+          { x: 38128, y: 51.83, label: 'GPT-6.1 Sol (max)', al: 'top', ao: 8 } ] },
       { name: 'GPT-6 Luna', provider: 'OpenAI', points: [
-          { x: 19771, y: 32.15, label: 'GPT-6 Luna (high)', al: 'right', ao: 8 },
-          { x: 27189, y: 33.88, label: 'GPT-6 Luna (xhigh)', al: 'right', ao: 8 },
-          { x: 50537, y: 37.26, label: 'GPT-6 Luna (max)', al: 'right', ao: 12 } ] },
+          { x: 19769, y: 32.15, label: 'GPT-6 Luna (high)', al: 'right', ao: 8 },
+          { x: 27483, y: 33.88, label: 'GPT-6 Luna (xhigh)', al: 'right', ao: 8 },
+          { x: 50213, y: 37.26, label: 'GPT-6 Luna (max)', al: 'right', ao: 12 } ] },
       { name: 'Claude Opus 5.5', provider: 'Anthropic', points: [
           { x: 10151, y: 42.31, label: 'Claude Opus 5.5 (low)', tableLabel: 'Claude Opus 5.5 (low with fallback)', al: 'top', ao: 20 },
           { x: 25745, y: 51.24, label: 'Claude Opus 5.5 (medium)', tableLabel: 'Claude Opus 5.5 (medium with fallback)', al: 'left', ao: 8 },
