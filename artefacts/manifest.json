@@ -76,7 +76,8 @@
     "product-timeline/iphone-timeline.src.html",
     "product-timeline/thumbs/",
     "star-wars/README.md",
-    "star-wars/star-wars-timeline.src.html"
+    "star-wars/star-wars-timeline.src.html",
+    "secondary-schools/schools.src.html"
   ],
   "collections": [
     {
@@ -357,6 +358,13 @@
       "section": "Artefacts",
       "section_order": 30,
       "order": 10
+    },
+    {
+      "id": "secondary-schools",
+      "title": "Secondary Schools",
+      "section": "Artefacts",
+      "section_order": 30,
+      "order": 20
     }
   ],
   "entries": [
@@ -1091,6 +1099,16 @@
       "order": 10,
       "replacements": {},
       "date": "2026-09-21"
+    },
+    {
+      "id": "secondary-schools-schools",
+      "source": "secondary-schools/schools.html",
+      "destination": "secondary-schools/schools/index.html",
+      "title": "Punggol Secondary Schools",
+      "collection": "secondary-schools",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-10-04"
     }
   ]
 }
