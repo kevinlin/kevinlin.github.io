@@ -355,16 +355,16 @@
     {
       "id": "structured-products",
       "title": "Structured Products",
-      "section": "Artefacts",
-      "section_order": 60,
+      "section": "Finance",
+      "section_order": 45,
       "order": 10
     },
     {
       "id": "secondary-schools",
       "title": "PSLE Posting Choices",
-      "section": "Artefacts",
-      "section_order": 60,
-      "order": 20
+      "section": "Maps and timelines",
+      "section_order": 30,
+      "order": 190
     }
   ],
   "entries": [
