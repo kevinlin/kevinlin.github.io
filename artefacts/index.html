@@ -43,6 +43,7 @@
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.1);
             --tint: rgba(0, 99, 163, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.95);
             --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
         }
 
@@ -58,6 +59,7 @@
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.35);
             --tint: rgba(67, 137, 185, 0.16);
+            --nav-bg: rgba(18, 18, 18, 0.95);
         }
 
         *,
@@ -67,6 +69,7 @@
         }
 
         html {
+            scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
@@ -245,11 +248,80 @@
             flex: none;
         }
 
+        /* Section nav: links are built by script from the generated h2s, so the bar
+           stays hidden until that runs and follows the catalogue without edits here. */
+        .toc {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            margin-top: 16px;
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--border-color);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .toc ul {
+            display: flex;
+            gap: 4px;
+            /* 16px wider than the content column on each side, so the first link lines up
+               with the cards while links scrolled past the edge fade out instead of clipping. */
+            width: min(1152px, calc(100% - 16px));
+            margin: 0 auto;
+            padding: 6px 16px;
+            overflow-x: auto;
+            list-style: none;
+            scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+        }
+
+        .toc ul::-webkit-scrollbar {
+            display: none;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 12px;
+            border-radius: 4px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+
+        .toc a:hover,
+        .toc a[aria-current] {
+            background: var(--tint);
+            color: var(--primary-color);
+        }
+
+        .toc a:focus-visible {
+            outline-offset: -2px;
+        }
+
+        /* Reading progress, drawn over the bar's hairline. */
+        .toc-progress {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+
         section {
             margin-top: 56px;
         }
 
         section > h2 {
+            scroll-margin-top: 80px;
             position: relative;
             margin-bottom: 32px;
             padding-bottom: 16px;
@@ -351,6 +423,10 @@
                 padding-top: 32px;
             }
 
+            .toc ul {
+                width: 100%;
+            }
+
             section {
                 margin-top: 48px;
             }
@@ -402,6 +478,11 @@
             <span>Walk the image artefacts in 3D</span>
         </a>
     </header>
+
+    <nav class="toc" id="toc" aria-label="Sections" hidden>
+        <ul></ul>
+        <div class="toc-progress" aria-hidden="true"></div>
+    </nav>
 
     <main id="main-content">
         <!-- ARTEFACTS:START -->
@@ -717,6 +798,63 @@
                 localStorage.setItem('theme', dark ? 'light' : 'dark');
             } catch (e) {}
         });
+
+        (function () {
+            var toc = document.getElementById('toc');
+            var list = toc.querySelector('ul');
+            var progress = toc.querySelector('.toc-progress');
+            var headings = document.querySelectorAll('main section > h2[id]');
+            if (!headings.length) return;
+
+            var links = Array.prototype.map.call(headings, function (heading) {
+                var item = document.createElement('li');
+                var link = document.createElement('a');
+                link.href = '#' + heading.id;
+                link.textContent = heading.textContent;
+                item.appendChild(link);
+                list.appendChild(item);
+                return link;
+            });
+            toc.hidden = false;
+
+            var active = -1;
+            function update() {
+                var root = document.documentElement;
+                var scrollable = root.scrollHeight - window.innerHeight;
+                var done = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
+                progress.style.transform = 'scaleX(' + done + ')';
+
+                // The current section is the last one whose heading has passed the bar.
+                // At the very bottom the last section wins even if it is too short to reach it.
+                var line = toc.offsetHeight + 40;
+                var current = -1;
+                for (var i = 0; i < headings.length; i++) {
+                    if (headings[i].getBoundingClientRect().top <= line) current = i;
+                }
+                if (done === 1) current = headings.length - 1;
+                if (current === active) return;
+                if (active >= 0) links[active].removeAttribute('aria-current');
+                active = current;
+                if (active < 0) return;
+                links[active].setAttribute('aria-current', 'true');
+                // Keep the active link in view when the bar scrolls sideways on narrow screens.
+                var link = links[active];
+                list.scrollLeft = link.offsetLeft - list.offsetLeft - (list.clientWidth - link.offsetWidth) / 2;
+            }
+
+            var queued = false;
+            function schedule() {
+                if (queued) return;
+                queued = true;
+                requestAnimationFrame(function () {
+                    queued = false;
+                    update();
+                });
+            }
+            window.addEventListener('scroll', schedule, { passive: true });
+            window.addEventListener('resize', schedule);
+            update();
+        })();
     </script>
 </body>
 </html>
