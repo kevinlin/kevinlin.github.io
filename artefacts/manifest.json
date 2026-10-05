@@ -84,9 +84,9 @@
       "id": "product-timeline",
       "title": "Product Timeline",
       "description": "A visual timeline of product release over time.",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 10
+      "section": "Product management",
+      "section_order": 40,
+      "order": 30
     },
     {
       "id": "llm-performance",
@@ -94,7 +94,7 @@
       "description": "Interactive comparisons and supporting charts for model intelligence, cost, tokens, and effort.",
       "section": "LLMs and evaluation",
       "section_order": 20,
-      "order": 20
+      "order": 40
     },
     {
       "id": "loop-engineering",
@@ -102,31 +102,31 @@
       "description": "Designing a system that keeps prompting an AI toward a verifiable goal, so you stop being the one who has to prompt it.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 30
+      "order": 110
     },
     {
       "id": "travel",
       "title": "Travel",
       "description": "Maps and transportation references for travels.",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 40
+      "section": "Places and travel",
+      "section_order": 70,
+      "order": 10
     },
     {
       "id": "java-interview",
       "title": "Java Interview",
       "description": "Java, messaging, and Kubernetes interview questions",
-      "section": "Product and engineering notes",
-      "section_order": 40,
-      "order": 70
+      "section": "Software engineering",
+      "section_order": 30,
+      "order": 10
     },
     {
       "id": "star-wars",
       "title": "Star Wars",
       "description": "Interesting stuff from the Star Wars universe.",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 80
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 20
     },
     {
       "id": "claude-code-vs-codex-adoption",
@@ -134,7 +134,7 @@
       "description": "Adoption numbers for Claude Code and Codex, side by side.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 90
+      "order": 120
     },
     {
       "id": "coding-agent-war",
@@ -142,7 +142,7 @@
       "description": "A collection of artefacts tracking the race between Claude Code, Codex, and the next generation of coding agents.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 100
+      "order": 10
     },
     {
       "id": "everything-llm",
@@ -150,7 +150,7 @@
       "description": "Tracking the LLM landscape through benchmarks, performance, effort, token usage, pricing, and model trends.",
       "section": "LLMs and evaluation",
       "section_order": 20,
-      "order": 110
+      "order": 10
     },
     {
       "id": "skillops",
@@ -158,119 +158,119 @@
       "description": "SkillOps is governance layer for AI agent skills.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 120
+      "order": 30
     },
     {
       "id": "ai-buzzword",
       "title": "AI Buzzword",
       "description": "Latest AI buzzwords and trends.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 0
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 100
     },
     {
       "id": "gpt-5-6",
       "title": "GPT-5.6",
       "description": "A visual recap of its first five days.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 10
+      "section": "LLMs and evaluation",
+      "section_order": 20,
+      "order": 50
     },
     {
       "id": "claude-code",
       "title": "Claude Code",
       "description": "Visual explainers and a keyboard shortcuts reference.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 20
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 80
     },
     {
       "id": "peter-steinberger-human-taste",
       "title": "Peter Steinberger: human taste",
       "description": "Two excerpts on the role of human judgment.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 30
+      "section": "Product management",
+      "section_order": 40,
+      "order": 50
     },
     {
       "id": "people-lead-lifecycle",
       "title": "People Lead lifecycle",
       "description": "Activities across the People Lead lifecycle.",
-      "section": "Image collections",
+      "section": "People and organisation",
       "section_order": 50,
-      "order": 40
+      "order": 30
     },
     {
       "id": "ai-trend-slop",
       "title": "AI trend slop",
       "description": "A visual note on vague AI trend language.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 50
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 130
     },
     {
       "id": "flow-fabric",
       "title": "Flow Fabric",
       "description": "Application icons in browser, mobile, and high-resolution sizes.",
-      "section": "Image collections",
-      "section_order": 50,
+      "section": "Product management",
+      "section_order": 40,
       "order": 60
     },
     {
       "id": "daily-laughs",
       "title": "Daily laughs",
       "description": "Funny finds from daily life.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 70
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 30
     },
     {
       "id": "fde",
       "title": "Forward Deployed Engineer",
       "description": "Forward Deployed Engineer",
-      "section": "Image collections",
+      "section": "People and organisation",
       "section_order": 50,
-      "order": 100
+      "order": 20
     },
     {
       "id": "fable5-21days",
       "title": "Fable5 21Days",
       "description": "21 Days of Building with Fable 5.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 110
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 90
     },
     {
       "id": "product-management",
       "title": "Product management",
       "description": "Visual notes on product and design practice.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 120
+      "section": "Product management",
+      "section_order": 40,
+      "order": 40
     },
     {
       "id": "ai-native-organisation",
       "title": "AI Native Organisation",
       "description": "Explore AI Native Organisation's org structure and operating model.",
-      "section": "Image collections",
+      "section": "People and organisation",
       "section_order": 50,
-      "order": 130
+      "order": 10
     },
     {
       "id": "llm-pricing",
       "title": "LLM Pricing",
       "description": "Topic on model pricing.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 140
+      "section": "LLMs and evaluation",
+      "section_order": 20,
+      "order": 60
     },
     {
       "id": "product-builder",
       "title": "Product Builder",
       "description": "Future of software development and product building.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 150
+      "section": "Product management",
+      "section_order": 40,
+      "order": 20
     },
     {
       "id": "hermes-agent",
@@ -284,9 +284,9 @@
       "id": "product-idea",
       "title": "Product ideas",
       "description": "Product requirement documents for prototype ideas.",
-      "section": "Product and engineering notes",
+      "section": "Product management",
       "section_order": 40,
-      "order": 60
+      "order": 10
     },
     {
       "id": "claude-tag",
@@ -294,7 +294,7 @@
       "description": "Anthropic's Slack-native AI coworker: architecture, context layer and memory scopes.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 130
+      "order": 40
     },
     {
       "id": "llm-eval",
@@ -302,7 +302,7 @@
       "description": "How LLM output quality gets measured: the metrics, the maths behind them, and where the numbers mislead.",
       "section": "LLMs and evaluation",
       "section_order": 20,
-      "order": 150
+      "order": 20
     },
     {
       "id": "developer-productivity-ai-native",
@@ -310,7 +310,7 @@
       "description": "Slide captures from the GovTech STACK Meetup on building secure, standardised environments for developers and agents.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 140
+      "order": 70
     },
     {
       "id": "agent-harness",
@@ -318,31 +318,31 @@
       "description": "Monthly research digests on agent loops, loop engineering, and agent pipelines.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 160
+      "order": 20
     },
     {
       "id": "mingpt-vs-toy-transformer",
       "title": "minGPT vs toy-transformer",
       "description": "Infographic comparing minGPT and toy-transformer.",
-      "section": "Image collections",
-      "section_order": 50,
-      "order": 160
+      "section": "LLMs and evaluation",
+      "section_order": 20,
+      "order": 30
     },
     {
       "id": "homeric-epics",
       "title": "Homeric Epics",
       "description": "Maps and visual references for the Iliad and the Odyssey.",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 170
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 10
     },
     {
       "id": "earthquake-map",
       "title": "Earthquake Map",
       "description": "Two centuries of magnitude 6.0+ earthquakes around the Pacific, drawn from the USGS catalog.",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 180
+      "section": "Places and travel",
+      "section_order": 70,
+      "order": 20
     },
     {
       "id": "ai-augmented-sdlc",
@@ -350,21 +350,21 @@
       "description": "Visual guides to how software delivery changes when agents do the building.",
       "section": "AI agents and engineering",
       "section_order": 10,
-      "order": 190
+      "order": 60
     },
     {
       "id": "structured-products",
       "title": "Structured Products",
       "section": "Finance",
-      "section_order": 45,
+      "section_order": 60,
       "order": 10
     },
     {
       "id": "secondary-schools",
       "title": "PSLE Posting Choices",
-      "section": "Maps and timelines",
-      "section_order": 30,
-      "order": 190
+      "section": "Places and travel",
+      "section_order": 70,
+      "order": 30
     }
   ],
   "entries": [
@@ -1075,8 +1075,8 @@
       "source": "everything-llm/llm-eval-eli5.html",
       "destination": "everything-llm/llm-eval-eli5/index.html",
       "title": "LLM evals explained: test cases, graders and error ranges",
-      "collection": "everything-llm",
-      "order": 120,
+      "collection": "llm-eval",
+      "order": 30,
       "replacements": {},
       "date": "2026-09-13"
     },
