@@ -1109,6 +1109,61 @@
       "order": 10,
       "replacements": {},
       "date": "2026-10-04"
+    },
+    {
+      "id": "product-idea-prd-evidence-autopilot",
+      "source": "product-idea/PRD_Evidence Autopilot.md",
+      "destination": "product-idea/prd-evidence-autopilot/index.html",
+      "title": "PRD: Evidence Autopilot, then Fast Lane",
+      "collection": "product-idea",
+      "order": 20,
+      "replacements": {},
+      "description": "Product requirements for a compliance tool that builds change-board evidence from the work itself, then fast-tracks low-risk changes. Workshop-scoped build.",
+      "date": "2026-10-04"
+    },
+    {
+      "id": "product-idea-prd-luggage-packing-genie",
+      "source": "product-idea/PRD_Luggage Packing Genie.md",
+      "destination": "product-idea/prd-luggage-packing-genie/index.html",
+      "title": "PRD: Luggage Packing Genie",
+      "collection": "product-idea",
+      "order": 30,
+      "replacements": {},
+      "description": "Product requirements for a packing assistant that checks from a photo whether your things fit the suitcase, and suggests fixes tied to the itinerary when they don’t. Workshop-scoped build.",
+      "date": "2026-10-04"
+    },
+    {
+      "id": "product-idea-prd-point-and-fix",
+      "source": "product-idea/PRD_Point-and-Fix.md",
+      "destination": "product-idea/prd-point-and-fix/index.html",
+      "title": "PRD: Point-and-Fix",
+      "collection": "product-idea",
+      "order": 40,
+      "replacements": {},
+      "description": "Product requirements for a voice-and-video agent that diagnoses a faulty appliance through the phone camera and guides a fix or books a technician. Workshop-scoped build.",
+      "date": "2026-10-04"
+    },
+    {
+      "id": "product-idea-prd-try-before-you-decide",
+      "source": "product-idea/PRD_Try Before You Decide.md",
+      "destination": "product-idea/prd-try-before-you-decide/index.html",
+      "title": "PRD: Try Before You Decide",
+      "collection": "product-idea",
+      "order": 50,
+      "replacements": {},
+      "description": "Product requirements for a banking-app simulator that plays out the next 24 months of a financial choice using the customer’s own numbers. Workshop-scoped build.",
+      "date": "2026-10-04"
+    },
+    {
+      "id": "product-idea-prd-voice-first-banking",
+      "source": "product-idea/PRD_Voice-First Banking.md",
+      "destination": "product-idea/prd-voice-first-banking/index.html",
+      "title": "PRD: Voice-First Banking",
+      "collection": "product-idea",
+      "order": 60,
+      "replacements": {},
+      "description": "Product requirements for a voice banking agent that spots likely scams mid-conversation and offers to call a family member before money moves. Workshop-scoped build.",
+      "date": "2026-10-04"
     }
   ]
 }
