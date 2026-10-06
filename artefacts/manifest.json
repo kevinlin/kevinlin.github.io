@@ -77,7 +77,8 @@
     "product-timeline/thumbs/",
     "star-wars/README.md",
     "star-wars/star-wars-timeline.src.html",
-    "secondary-schools/schools.src.html"
+    "secondary-schools/schools.src.html",
+    "openai-tts/voice-research.md"
   ],
   "collections": [
     {
@@ -365,6 +366,13 @@
       "section": "Places and travel",
       "section_order": 70,
       "order": 30
+    },
+    {
+      "id": "openai-tts",
+      "title": "OpenAI TTS",
+      "section": "LLMs and evaluation",
+      "section_order": 20,
+      "order": 70
     }
   ],
   "entries": [
@@ -1164,6 +1172,17 @@
       "replacements": {},
       "description": "Product requirements for a voice banking agent that spots likely scams mid-conversation and offers to call a family member before money moves. Workshop-scoped build.",
       "date": "2026-10-04"
+    },
+    {
+      "id": "openai-tts-openai-tts-playground",
+      "source": "openai-tts/openai-tts-playground.html",
+      "destination": "openai-tts/openai-tts-playground/index.html",
+      "title": "OpenAI TTS Voice Playground",
+      "collection": "openai-tts",
+      "order": 10,
+      "replacements": {},
+      "description": "Try all 13 built-in OpenAI text-to-speech voices on your own line of text, with listening notes for each. Needs your own OpenAI API key.",
+      "date": "2026-10-06"
     }
   ]
 }

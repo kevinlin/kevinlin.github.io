@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenAI TTS Voice Playground</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    /* HSL triples, used as hsl(var(--token)) */
+    --bg: 40 33% 94%;
+    --surface: 42 45% 98%;
+    --ink: 28 18% 11%;
+    --muted: 30 8% 36%;
+    --line: 36 18% 82%;
+    --accent: 12 78% 40%;
+    --accent-ink: 42 45% 98%;
+    --shadow: 28 30% 20%;
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-body: "Avenir Next", Avenir, "Segoe UI", "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: 30 8% 8%;
+      --surface: 30 7% 12%;
+      --ink: 40 25% 90%;
+      --muted: 36 8% 62%;
+      --line: 30 6% 22%;
+      --accent: 14 88% 64%;
+      --accent-ink: 20 30% 8%;
+      --shadow: 0 0% 0%;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+  body {
+    margin: 0; padding: 48px 16px 64px;
+    background: hsl(var(--bg)); color: hsl(var(--ink));
+    font: 16px/1.55 var(--font-body);
+  }
+  .page { max-width: 1120px; margin: 0 auto; }
+
+  header { margin-bottom: 40px; }
+  .eyebrow, .field > label:not(.check), .idx, .tag, .dl, output {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .eyebrow { color: hsl(var(--accent)); margin: 0 0 12px; }
+  h1 {
+    font: 400 clamp(2.25rem, 6vw, 4rem)/1.05 var(--font-display);
+    letter-spacing: -0.02em; margin: 0 0 16px; text-wrap: balance;
+  }
+  h1 em { color: hsl(var(--accent)); }
+  .lead { margin: 0; max-width: 60ch; color: hsl(var(--muted)); text-wrap: pretty; }
+
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: start; }
+
+  /* Controls panel */
+  .panel {
+    position: sticky; top: 24px;
+    max-height: calc(100vh - 48px); overflow-y: auto; /* keep speed and stream reachable on short screens */
+    background: hsl(var(--surface)); border-radius: var(--radius); padding: 24px;
+    box-shadow:
+      0 0 0 1px hsl(var(--line)),
+      0 1px 2px hsl(var(--shadow) / 0.05),
+      0 4px 8px hsl(var(--shadow) / 0.05),
+      0 12px 24px hsl(var(--shadow) / 0.05);
+  }
+  .field + .field { margin-top: 20px; }
+  .field > label:not(.check) { display: flex; justify-content: space-between; color: hsl(var(--muted)); margin-bottom: 8px; }
+  .hint { margin: 8px 0 0; font-size: 14px; color: hsl(var(--muted)); text-wrap: pretty; }
+  input[type="password"], input[type="text"], select, textarea {
+    width: 100%; min-height: 44px; padding: 10px 12px; font: inherit; color: hsl(var(--ink));
+    background: hsl(var(--bg)); border: 1px solid hsl(var(--line)); border-radius: 8px; /* 16 - 8 nested */
+    transition: border-color 150ms var(--ease-out);
+  }
+  textarea { resize: vertical; display: block; }
+  input:disabled, textarea:disabled { opacity: 0.5; }
+  input[type="range"] { width: 100%; height: 44px; margin: 0; accent-color: hsl(var(--accent)); }
+  output { color: hsl(var(--ink)); font-variant-numeric: tabular-nums; }
+  .check { display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; }
+  .check input { width: 20px; height: 20px; margin: 0; accent-color: hsl(var(--accent)); }
+  :focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+
+  #status {
+    margin: 0 0 16px; padding: 12px 16px; border-radius: 8px; font-size: 14px;
+    color: hsl(var(--accent)); box-shadow: inset 0 0 0 1px hsl(var(--accent) / 0.5);
+  }
+  #status:empty { display: none; }
+
+  /* Voice cards */
+  .voices { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .voice {
+    position: relative; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto auto 1fr; gap: 4px 12px; align-items: end;
+    background: hsl(var(--surface)); border-radius: var(--radius); padding: 16px;
+    box-shadow:
+      0 0 0 1px hsl(var(--line)),
+      0 1px 2px hsl(var(--shadow) / 0.04),
+      0 4px 8px hsl(var(--shadow) / 0.04);
+    transition: box-shadow 200ms var(--ease-out), transform 200ms var(--ease-out), opacity 200ms var(--ease-out);
+    animation: rise 400ms var(--ease-out) both;
+    animation-delay: calc(var(--i) * 40ms);
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  .voice[data-state="playing"], .voice[data-state="loading"] {
+    box-shadow: 0 0 0 2px hsl(var(--accent)), 0 8px 24px hsl(var(--accent) / 0.18);
+  }
+  .voice.off { opacity: 0.45; }
+  @media (hover: hover) and (pointer: fine) {
+    .voice:not(.off):hover { transform: translateY(-2px); }
+    input:hover:not(:disabled), select:hover, textarea:hover { border-color: hsl(var(--muted)); }
+  }
+  .idx { grid-column: 1 / -1; color: hsl(var(--muted)); font-variant-numeric: tabular-nums; }
+  .voice h2 { grid-column: 1 / -1; margin: 0; font: 400 2rem/1.1 var(--font-display); letter-spacing: -0.01em; text-transform: capitalize; }
+  .traits, .note, .tag { grid-column: 1 / -1; }
+  .traits { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: hsl(var(--accent)); margin-top: 4px; }
+  .note { align-self: start; margin: 8px 0 12px; font-size: 15px; line-height: 1.5; color: hsl(var(--muted)); text-wrap: pretty; }
+  .tag { color: hsl(var(--muted)); letter-spacing: 0.04em; margin-bottom: 8px; }
+  .tag:empty { display: none; }
+  .about { margin: 0 0 24px; max-width: 65ch; color: hsl(var(--muted)); text-wrap: pretty; }
+  .about strong { color: hsl(var(--ink)); font-weight: 600; }
+  .tag.rec { color: hsl(var(--accent)); }
+
+  .meter { display: flex; align-items: flex-end; gap: 3px; height: 24px; }
+  .meter i { width: 3px; height: 100%; border-radius: 2px; background: hsl(var(--line)); transform: scaleY(0.2); transform-origin: bottom; }
+  .voice[data-state="playing"] .meter i { background: hsl(var(--accent)); animation: bounce 900ms ease-in-out infinite alternate; }
+  .meter i:nth-child(2) { animation-delay: -300ms !important; }
+  .meter i:nth-child(3) { animation-delay: -650ms !important; }
+  .meter i:nth-child(4) { animation-delay: -150ms !important; }
+  .meter i:nth-child(5) { animation-delay: -500ms !important; }
+  @keyframes bounce { to { transform: scaleY(1); } }
+  .dl { color: hsl(var(--muted)); position: relative; margin-left: 12px; }
+  .dl::before { content: ""; position: absolute; inset: -14px -8px; } /* 44px hit area */
+  .dl[hidden] { display: none; }
+  .foot { display: flex; align-items: flex-end; }
+
+  .play {
+    width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center;
+    background: hsl(var(--accent)); color: hsl(var(--accent-ink));
+    transition: transform 120ms var(--ease-out), background-color 150ms var(--ease-out);
+  }
+  .play:active:not(:disabled) { transform: scale(0.94); }
+  .play:disabled { cursor: not-allowed; background: hsl(var(--line)); color: hsl(var(--muted)); }
+  .play svg { width: 18px; height: 18px; fill: currentColor; grid-area: 1 / 1; display: none; }
+  .play .i-play { transform: translateX(1px); } /* optical centering */
+  .voice[data-state="idle"] .i-play, .voice[data-state="playing"] .i-stop { display: block; }
+  .spin {
+    grid-area: 1 / 1; width: 18px; height: 18px; border-radius: 50%; display: none;
+    border: 2px solid hsl(var(--accent-ink) / 0.35); border-top-color: hsl(var(--accent-ink));
+    animation: spin 700ms linear infinite;
+  }
+  .voice[data-state="loading"] .spin { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid hsl(var(--line)); font-size: 14px; color: hsl(var(--muted)); max-width: 75ch; text-wrap: pretty; }
+  footer a, .dl { color: inherit; text-underline-offset: 3px; }
+  code { font-family: var(--font-mono); font-size: 0.9em; }
+
+  @media (max-width: 860px) {
+    body { padding-top: 32px; }
+    .layout { grid-template-columns: 1fr; }
+    .panel { position: static; max-height: none; }
+    .voices { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <p class="eyebrow">OpenAI text-to-speech</p>
+    <h1>Thirteen voices, <em>one line</em>.</h1>
+    <p class="lead">Write a sentence, then press play on each built-in voice to hear how it reads.</p>
+  </header>
+
+  <div class="layout">
+    <form class="panel" id="controls" aria-label="Speech settings">
+      <div class="field">
+        <label for="key">OpenAI API key</label>
+        <input id="key" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+        <p class="hint">Sent only to api.openai.com. Kept in this tab until you close it.</p>
+      </div>
+      <div class="field">
+        <label for="input">Text to speak <span>max 4096</span></label>
+        <textarea id="input" rows="4" maxlength="4096">Today is a wonderful day to build something people love!</textarea>
+      </div>
+      <div class="field">
+        <label for="instructions">Instructions</label>
+        <textarea id="instructions" rows="2">Speak in a cheerful and positive tone.</textarea>
+        <p class="hint">Tone, accent, pacing, emotion. gpt-4o-mini-tts only.</p>
+      </div>
+      <div class="field">
+        <label for="model">Model</label>
+        <select id="model"></select>
+      </div>
+      <div class="field">
+        <label for="speed">Speed <output id="speedOut" for="speed">1.00×</output></label>
+        <input id="speed" type="range" min="0.25" max="4" step="0.05" value="1">
+      </div>
+      <div class="field">
+        <label class="check">
+          <input id="stream" type="checkbox" checked>
+          <span>Stream audio as it is generated</span>
+        </label>
+      </div>
+    </form>
+
+    <main>
+      <p id="status" role="status" aria-live="polite"></p>
+      <p class="about">
+        <strong>How to read the notes.</strong> OpenAI names its voices but does not describe them, so the
+        notes on each card come from people who have listened closely: mostly a community developer who
+        catalogued them for a voice-acting app, plus third-party samplers. Treat them as a starting point.
+        The nine older voices have a settled character. On <code>gpt-4o-mini-tts</code> the instructions box
+        can pull any voice a long way from its default, and nova, sage, shimmer and verse follow direction
+        most readily.
+      </p>
+      <div class="voices" id="voices"></div>
+    </main>
+  </div>
+
+  <footer>
+    Every voice here is AI-generated, not a human recording. Each play of a new voice or new settings is
+    one billed call to <code>/v1/audio/speech</code>; replays come from memory. Streamed takes download as
+    WAV, the rest as MP3. Sources:
+    <a href="https://developers.openai.com/api/docs/guides/text-to-speech">OpenAI text-to-speech guide</a>,
+    <a href="https://community.openai.com/t/feedback-on-voice-models-customization/1272619">community listening notes</a>,
+    <a href="https://openai.com/index/introducing-gpt-realtime/">OpenAI on marin and cedar</a>.
+  </footer>
+</div>
+
+<script type="module" id="core">
+// Voice and model lists from the OpenAI text-to-speech guide.
+export const VOICES = ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer', 'verse', 'marin', 'cedar'];
+export const MODELS = ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd'];
+export const SAMPLE_RATE = 24000; // pcm output is 24 kHz, 16-bit signed little-endian, mono
+const NEW_MODEL_ONLY = new Set(['ballad', 'verse', 'marin', 'cedar']);
+const RECOMMENDED = new Set(['marin', 'cedar']);
+
+// Listening notes, not official descriptions: OpenAI publishes none. See voice-research.md for sources.
+export const VOICE_NOTES = {
+  alloy: ['Neutral · alto · husky',
+    'The all-rounder. Balanced and hard to place, with a slightly smoky edge. It stays out of the way of the words, which is why so many apps default to it.'],
+  ash: ['Male · baritone · upbeat',
+    'A clear, conversational baritone with a little scratch in it. Sounds like a friendly colleague talking you through something.'],
+  ballad: ['Male · tenor · light British accent',
+    'Smooth and melodic, with a faint British colour out of the box. A natural fit for narration and anything read slowly.'],
+  coral: ['Female · alto to soprano · warm',
+    'Bright, friendly and very clear. Listeners rate it as one of the better voices at carrying an accent when you ask for one.'],
+  echo: ['Male · tenor · energetic',
+    'Warm and lively by default, with a resonant tone. Good when you want energy without the voice sounding like an advert.'],
+  fable: ['Alto · English / New Zealand accent',
+    'The storyteller. It arrives with a soft English or New Zealand lilt and careful enunciation, so it suits fiction and audiobooks.'],
+  nova: ['Female · alto · bright',
+    'Upbeat and approachable, the usual pick for tutorials and product voices. It takes direction well, so it can calm down when told to.'],
+  onyx: ['Male · bass-baritone · husky',
+    'The deepest of the set. A little husky, with a wide range and a serious, authoritative default that suits documentary narration.'],
+  sage: ['Female · soprano · calm',
+    'Composed and unhurried, with a thoughtful quality. Very responsive to direction, which makes it a good base for guided or reflective reading.'],
+  shimmer: ['Female · alto to contralto · soft',
+    'Gentle and soothing, the most intimate of the older voices. Works for quiet, personal content more than for announcements.'],
+  verse: ['Tenor · expressive',
+    'The actor. Listeners call it the most responsive voice to direction, so try it first when the instructions ask for a strong character or emotion.'],
+  marin: ['Female · natural · newest',
+    'One of the two newest voices, which OpenAI says bring its biggest gains in natural-sounding speech. There is little independent description yet, so judge it by ear.'],
+  cedar: ['Male · warm · newest',
+    'Released alongside marin and recommended by OpenAI for quality. Third-party listeners describe a warm, steady, composed delivery.'],
+};
+
+export const supports = (model, voice) => model === 'gpt-4o-mini-tts' || !NEW_MODEL_ONLY.has(voice);
+
+export function buildBody({ model, voice, input, instructions, speed, stream }) {
+  const body = { model, voice, input };
+  // instructions are ignored by tts-1 / tts-1-hd, so leave them out
+  if (model === 'gpt-4o-mini-tts' && instructions.trim()) body.instructions = instructions.trim();
+  if (speed !== 1) body.speed = speed;
+  // raw pcm has no container, so chunks can be played the moment they arrive
+  if (stream) body.response_format = 'pcm';
+  return body;
+}
+
+// 44-byte RIFF header so a finished pcm stream can be replayed and downloaded as .wav
+export function wavHeader(dataBytes) {
+  const v = new DataView(new ArrayBuffer(44));
+  const ascii = (offset, s) => [...s].forEach((c, i) => v.setUint8(offset + i, c.charCodeAt(0)));
+  ascii(0, 'RIFF'); v.setUint32(4, 36 + dataBytes, true); ascii(8, 'WAVE');
+  ascii(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, SAMPLE_RATE, true); v.setUint32(28, SAMPLE_RATE * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  ascii(36, 'data'); v.setUint32(40, dataBytes, true);
+  return v.buffer;
+}
+
+if (typeof document !== 'undefined') {
+  const $ = (id) => document.getElementById(id);
+  const audio = new Audio();
+  const cache = new Map(); // JSON request body -> blob URL
+  let active = null; // { card, abort, ctx } for the take that is loading or playing
+
+  for (const m of MODELS) $('model').add(new Option(m));
+  $('controls').addEventListener('submit', (e) => e.preventDefault());
+
+  // sessionStorage can throw in private windows; the page works without it
+  try { $('key').value = sessionStorage.getItem('openai-key') || ''; } catch {}
+  $('key').addEventListener('change', () => {
+    try { sessionStorage.setItem('openai-key', $('key').value.trim()); } catch {}
+  });
+  $('speed').addEventListener('input', () => {
+    $('speedOut').textContent = `${Number($('speed').value).toFixed(2)}×`;
+  });
+
+  function setState(card, state) {
+    card.dataset.state = state;
+    const verb = { idle: 'Play', loading: 'Cancel', playing: 'Stop' }[state];
+    card.querySelector('.play').setAttribute('aria-label', `${verb} ${card.dataset.voice}`);
+  }
+
+  function stopAll() {
+    audio.pause();
+    if (!active) return;
+    active.abort.abort();
+    active.ctx?.close();
+    setState(active.card, 'idle');
+    active = null;
+  }
+  audio.addEventListener('ended', stopAll);
+
+  // Plays pcm chunks through Web Audio as they arrive; resolves with a wav blob URL of the whole take.
+  async function playStream(res, { card, abort, ctx }) {
+    const reader = res.body.getReader();
+    const chunks = [];
+    let carry = new Uint8Array(0); // a chunk can end halfway through a 16-bit sample
+    let nextStart = 0;
+    let last = null;
+    for (;;) {
+      const { done, value } = await reader.read();
+      abort.signal.throwIfAborted(); // a chunk already in flight can land after Stop
+      if (done) break;
+      chunks.push(value);
+      const bytes = new Uint8Array(carry.length + value.length);
+      bytes.set(carry);
+      bytes.set(value, carry.length);
+      const usable = bytes.length & ~1;
+      carry = bytes.slice(usable);
+      if (!usable) continue;
+      const pcm = new Int16Array(bytes.buffer, 0, usable / 2);
+      const buffer = ctx.createBuffer(1, pcm.length, SAMPLE_RATE);
+      const out = buffer.getChannelData(0);
+      for (let i = 0; i < pcm.length; i++) out[i] = pcm[i] / 32768;
+      last = ctx.createBufferSource();
+      last.buffer = buffer;
+      last.connect(ctx.destination);
+      nextStart = Math.max(nextStart, ctx.currentTime + 0.05);
+      last.start(nextStart);
+      nextStart += buffer.duration;
+      setState(card, 'playing');
+    }
+    const finish = () => { if (!abort.signal.aborted) stopAll(); };
+    if (last && ctx.currentTime < nextStart) last.onended = finish;
+    else finish();
+    const size = chunks.reduce((n, c) => n + c.length, 0);
+    return URL.createObjectURL(new Blob([wavHeader(size), ...chunks], { type: 'audio/wav' }));
+  }
+
+  async function onPlay(card, voice) {
+    const wasActive = active?.card === card;
+    stopAll();
+    if (wasActive) return;
+
+    $('status').textContent = '';
+    if (!$('key').value.trim()) { $('status').textContent = 'Paste your OpenAI API key first.'; $('key').focus(); return; }
+    if (!$('input').value.trim()) { $('status').textContent = 'Type some text to speak.'; $('input').focus(); return; }
+
+    const body = buildBody({
+      model: $('model').value, voice, input: $('input').value, instructions: $('instructions').value,
+      speed: Number($('speed').value), stream: $('stream').checked,
+    });
+    const cacheKey = JSON.stringify(body);
+    const streaming = body.response_format === 'pcm' && !cache.has(cacheKey);
+    const abort = new AbortController();
+    // the AudioContext has to be created inside the click, before any await
+    const take = active = { card, abort, ctx: streaming ? new AudioContext({ sampleRate: SAMPLE_RATE }) : null };
+    setState(card, 'loading');
+
+    try {
+      let url = cache.get(cacheKey);
+      if (!url) {
+        const res = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${$('key').value.trim()}`, 'Content-Type': 'application/json' },
+          body: cacheKey,
+          signal: abort.signal,
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          throw new Error(err?.error?.message || `Request failed (${res.status})`);
+        }
+        url = streaming ? await playStream(res, take) : URL.createObjectURL(await res.blob());
+        cache.set(cacheKey, url);
+      }
+      const dl = card.querySelector('.dl');
+      const ext = body.response_format === 'pcm' ? 'wav' : 'mp3';
+      dl.href = url;
+      dl.download = `${voice}.${ext}`;
+      dl.textContent = ext;
+      dl.setAttribute('aria-label', `Download ${voice} as ${ext}`);
+      dl.hidden = false;
+      if (streaming || abort.signal.aborted) return; // a streamed take is already playing
+      audio.src = url;
+      await audio.play();
+      if (!abort.signal.aborted) setState(card, 'playing');
+    } catch (e) {
+      if (abort.signal.aborted) return; // stopped or replaced by another take
+      stopAll();
+      $('status').textContent = `${voice}: ${e.message}`;
+    }
+  }
+
+  VOICES.forEach((voice, i) => {
+    const card = document.createElement('article');
+    card.className = 'voice';
+    card.dataset.voice = voice;
+    card.style.setProperty('--i', i);
+    card.innerHTML = `<span class="idx">${String(i + 1).padStart(2, '0')} / ${VOICES.length}</span>
+      <h2>${voice}</h2>
+      <span class="traits">${VOICE_NOTES[voice][0]}</span>
+      <p class="note">${VOICE_NOTES[voice][1]}</p>
+      <span class="tag"></span>
+      <div class="foot">
+        <span class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <a class="dl" hidden></a>
+      </div>
+      <button class="play" type="button">
+        <svg class="i-play" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 2.5v13l11-6.5z"/></svg>
+        <svg class="i-stop" viewBox="0 0 18 18" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="1.5"/></svg>
+        <span class="spin" aria-hidden="true"></span>
+      </button>`;
+    setState(card, 'idle');
+    card.querySelector('.play').addEventListener('click', () => onPlay(card, voice));
+    $('voices').append(card);
+  });
+
+  function onModelChange() {
+    const model = $('model').value;
+    $('instructions').disabled = model !== 'gpt-4o-mini-tts';
+    for (const card of $('voices').children) {
+      const voice = card.dataset.voice;
+      const ok = supports(model, voice);
+      if (!ok && active?.card === card) stopAll();
+      card.classList.toggle('off', !ok);
+      card.querySelector('.play').disabled = !ok;
+      const tag = card.querySelector('.tag');
+      tag.textContent = !ok ? 'gpt-4o-mini-tts only' : RECOMMENDED.has(voice) ? 'Recommended for quality' : '';
+      tag.classList.toggle('rec', ok && RECOMMENDED.has(voice));
+    }
+  }
+  $('model').addEventListener('change', onModelChange);
+  onModelChange();
+}
+</script>
+</body>
+</html>
