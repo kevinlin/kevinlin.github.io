@@ -78,7 +78,8 @@
     "star-wars/README.md",
     "star-wars/star-wars-timeline.src.html",
     "secondary-schools/schools.src.html",
-    "openai-tts/voice-research.md"
+    "openai-tts/voice-research.md",
+    "long-march/work/"
   ],
   "collections": [
     {
@@ -373,6 +374,14 @@
       "section": "LLMs and evaluation",
       "section_order": 20,
       "order": 70
+    },
+    {
+      "id": "long-march",
+      "title": "The Long March",
+      "description": "An animated map of the Long March, 1934–1936: the routes of the Red Army's 1st, 2nd and 4th Front Armies and the main events.",
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 40
     }
   ],
   "entries": [
@@ -1183,6 +1192,16 @@
       "replacements": {},
       "description": "Try all 13 built-in OpenAI text-to-speech voices on your own line of text, with listening notes for each. Needs your own OpenAI API key.",
       "date": "2026-10-06"
+    },
+    {
+      "id": "long-march-long-march",
+      "source": "long-march/long-march.html",
+      "destination": "long-march/long-march/index.html",
+      "title": "二万五千里长征 · Animated map",
+      "collection": "long-march",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-10-08"
     }
   ]
 }
