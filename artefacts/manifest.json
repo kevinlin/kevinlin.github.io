@@ -79,7 +79,8 @@
     "star-wars/star-wars-timeline.src.html",
     "secondary-schools/schools.src.html",
     "openai-tts/voice-research.md",
-    "long-march/work/"
+    "long-march/work/",
+    "cross-module-access.svg"
   ],
   "collections": [
     {
@@ -661,7 +662,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "What one full run of the Intelligence Index costs at each reasoning-effort setting, against the score it buys. Log cost axis.",
-      "date": "2026-10-08"
+      "date": "2026-10-10"
     },
     {
       "id": "everything-llm-score-vs-output-tokens-per-task",
@@ -675,7 +676,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js": "../../vendor/chartjs-plugin-datalabels.min.js"
       },
       "description": "How many output tokens each model spends on one index task, against the score it reaches. Log token axis.",
-      "date": "2026-10-08"
+      "date": "2026-10-10"
     },
     {
       "id": "everything-llm-swe-bench-pro-by-lab",
@@ -1202,6 +1203,17 @@
       "order": 10,
       "replacements": {},
       "date": "2026-10-08"
+    },
+    {
+      "id": "product-idea-proposal-add-emergency-and-delegation",
+      "source": "product-idea/proposal_add-emergency-and-delegation.md",
+      "destination": "product-idea/proposal-add-emergency-and-delegation/index.html",
+      "title": "Proposal: Emergency Response and Care Delegation",
+      "collection": "product-idea",
+      "order": 70,
+      "replacements": {},
+      "description": "Change proposal for an eldercare app: an offline emergency surface that always works, and scoped, revocable caregiver access to a resident’s record.",
+      "date": "2026-08-04"
     }
   ]
 }

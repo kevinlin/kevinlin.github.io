@@ -348,7 +348,7 @@ td.num, th.num {
       </div>
     </details>
 
-    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3.2, retrieved 8 October 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.7 Flash at low and medium, and Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures. Claude Sonnet 5.5 costs less per task than in the 30 September version because its cache-read price halved, from $0.20 to $0.10 per million tokens.</p>
+    <p class="note">Source: <a href="https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index">Artificial Analysis Intelligence Index</a> v4.3.2, retrieved 10 October 2026. Scores are not comparable with earlier versions of this chart: v4.3 added AutomationBench-AA, dropped 𝜏³-Banking and moved Terminal-Bench to v4.0, which pulled the whole field down by roughly three points and raised cost per task. Cost per task is the provider’s list price for the tokens one index task consumes, including cached input. Solid lines connect the same model at different reasoning-effort settings. DeepSeek’s <a href="https://api-docs.deepseek.com/quick_start/pricing/">peak / off-peak pricing</a> is in effect, so each dashed DeepSeek line spans the two rates for one model: peak hours are 01:00–04:00 and 06:00–10:00 UTC, and every off-peak rate is half its peak counterpart. Artificial Analysis quotes the peak rate only — its published figure is the right-hand point of each pair, $0.674 per task for V4 Pro, $0.265 for V4.1 Flash and $0.220 for V4 Flash. Shaded circles mark the most congested parts of the field: neighbourhoods where at least four different models sit within one nearest-neighbour gap of each other. Each caption gives the points inside its ring and how many distinct models they come from, so an effort ladder does not read as a crowd. Congestion is measured on a fixed 1440 by 900 reference plot, so the rings do not shift with the window. Use the legend to isolate a lab: hover to preview, click to keep it, click again to release. Several can be held at once. Models in the same comparison but absent here have a v4.3 score and no published v4.3 cost measurement yet — Gemini 3.8 Flash (low). GPT-5.5 Pro has neither. They return when Artificial Analysis publishes their figures. Claude Sonnet 5.5 costs less per task than in the 30 September version because its cache-read price halved, from $0.20 to $0.10 per million tokens.</p>
   </main>
 </div>
 
@@ -1013,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.8175, y: 45.78, label: 'GPT-6 Astra (low)', al: 'right', ao: 8 },
           { x: 1.5406, y: 49.57, label: 'GPT-6 Astra (medium)', al: 'left', ao: 20 },
           { x: 1.7253, y: 50.92, label: 'GPT-6 Astra (high)', al: 'right', ao: 20 },
-          { x: 2.3088, y: 52.39, label: 'GPT-6 Astra (xhigh)', al: 'left', ao: 20 },
+          { x: 2.3088, y: 52.39, label: 'GPT-6 Astra (xhigh)', al: 'top', ao: 10 },
           { x: 3.2575, y: 52.67, label: 'GPT-6 Astra (max)', al: 'top', ao: 20 } ] },
       { name: 'GPT-6 Sol', provider: 'OpenAI', points: [
           { x: 0.1328, y: 34.15, label: 'GPT-6 Sol (low)', al: 'right', ao: 10 },
@@ -1070,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.3452, y: 35.87, label: 'Claude Sonnet 5.5 (low)', tableLabel: 'Claude Sonnet 5.5 (low with fallback)', al: 'top', ao: 12 },
           { x: 0.4833, y: 40.84, label: 'Claude Sonnet 5.5 (medium)', tableLabel: 'Claude Sonnet 5.5 (medium with fallback)', al: 'left', ao: 6 },
           { x: 0.8844, y: 46.75, label: 'Claude Sonnet 5.5 (high)', tableLabel: 'Claude Sonnet 5.5 (high with fallback)', al: 'left', ao: 6 },
-          { x: 2.0120, y: 51.90, label: 'Claude Sonnet 5.5 (xhigh)', tableLabel: 'Claude Sonnet 5.5 (xhigh with fallback)', al: 'top', ao: 26 },
+          { x: 2.0120, y: 51.90, label: 'Claude Sonnet 5.5 (xhigh)', tableLabel: 'Claude Sonnet 5.5 (xhigh with fallback)', al: 'left', ao: 8 },
           { x: 5.4609, y: 56.00, label: 'Claude Sonnet 5.5 (max)', tableLabel: 'Claude Sonnet 5.5 (max with fallback)', al: 'right', ao: 6 } ] },
       { name: 'DeepSeek V4.1 Flash', provider: 'DeepSeek', dashed: true, points: [
           { x: 0.1326, y: 39.46, label: 'DeepSeek V4.1 Flash (off-peak)', tableLabel: 'DeepSeek V4.1 Flash (max) · off-peak', al: 'left', ao: 8 },
@@ -1097,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', function () {
       { x: 2.1559, y: 39.89, label: 'Qwen3.8 2.4T A95B', provider: 'Alibaba', al: 'bottom', ao: 20 },
       { x: 0.8807, y: 38.81, label: 'Grok 4.5 (high)', provider: 'SpaceXAI', al: 'bottom', ao: 20 },
       { x: 0.9747, y: 39.58, label: 'Muse Spark 1.2 (xhigh)', provider: 'Meta', al: 'bottom', ao: 12 },
-      { x: 0.9253, y: 39.06, label: 'Gemini 3.7 Flash (high)', provider: 'Google', al: 'top', ao: 20 }
+      { x: 1.9903, y: 52.56, label: 'Gemini 4 Argon (high)', provider: 'Google', al: 'left', ao: 8 }
     ],
 
     x: {
