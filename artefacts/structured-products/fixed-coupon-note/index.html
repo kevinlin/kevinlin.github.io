@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fixed Coupon Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reading column of numbered lifecycle stages, then a term-sheet rail beside one simulated trade.
+   Tokens are shared with barrier-reverse-convertible.html so the collection reads as one set. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#6E7A84;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* knock-in / loss */
+  --call:#215B49;       /* knock-out / par */
+  --path:#1F4E63;       /* worst performer, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#85939C;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#85939C;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:32px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,5.2vw,44px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:17px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:64ch}
+.toc{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:8px}
+.toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;color:var(--path);text-decoration:none;border-bottom:1px solid var(--rule)}
+.toc a:hover{border-bottom-color:var(--path)}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:26px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:68ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:68ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+
+/* outcomes + verdict share one grid of cells */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:23px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:15.5px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}   /* outcome on its own row, so the four figures fill the next */
+#schedule td:first-child{white-space:nowrap}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.d{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.off td{color:var(--ink-3)}
+.pill{display:inline-block;font-family:var(--font-mono);font-size:11px;padding:1px 8px;border:1px solid var(--rule);color:var(--ink-2);white-space:nowrap}
+.pill.ko{border-color:var(--call);color:var(--call)}
+.pill.ki{border-color:var(--breach);color:var(--breach)}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- lifecycle stepper ---------- */
+.stepper{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+@media (max-width:880px){.stepper{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:480px){.stepper{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stepper button{width:100%;height:100%;min-height:64px;text-align:left;background:var(--surface);border:none;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:background-color 120ms var(--ease-out)}
+.stepper .no{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.stepper .t{font-weight:600;font-size:13.5px;line-height:1.25}
+@media (hover:hover){.stepper button:hover{background:var(--surface-2)}}
+.stepper button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+.stepper button[aria-pressed=true] .no{color:inherit;opacity:.8}
+.stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:24px 32px;padding:20px}
+@media (max-width:880px){.stage{grid-template-columns:1fr}}
+.stage > div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage h3{font-family:var(--font-display);font-size:22px;font-weight:600}
+.stage h4{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:500;margin-top:6px}
+.stage p{color:var(--ink-2)}
+.stage ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--font-mono);font-size:11.5px;padding:3px 8px;background:var(--paper);border:1px solid var(--rule);cursor:pointer}
+@media (hover:hover){.chip:hover{border-color:var(--path);color:var(--path)}}
+.stage-nav{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.btn{min-height:36px;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:288px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:16px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+.what{width:18px;height:18px;flex:none;border-radius:50%;border:1px solid var(--rule);background:transparent;font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--ink-3);cursor:pointer;padding:0;position:relative}
+.what::before{content:"";position:absolute;inset:-8px}
+@media (hover:hover){.what:hover{border-color:var(--path);color:var(--path)}}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:24px;margin:0;cursor:pointer}
+input[type=range]:disabled{opacity:.35;cursor:default}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:32px;background:transparent;border:none;border-right:1px solid var(--rule);padding:5px 4px;font-family:var(--font-mono);font-size:11px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:13px;color:var(--breach);flex-basis:100%;min-height:1.5em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption,.cap{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+.panel{padding:16px 4px 4px}
+.panel .cap{margin-inline:12px}
+svg{display:block;width:100%;height:auto;max-width:100%}
+#chart{touch-action:pan-y}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+text{font-family:var(--font-mono);font-size:11px;fill:var(--ink-3)}
+text.lvl{font-weight:500}
+text.rd{font-size:12px;font-weight:500;fill:var(--ink)}
+@media (max-width:640px){.plot svg{min-width:600px} text{font-size:15px} text.rd{font-size:15px}}
+
+/* ---------- field reference ---------- */
+.filter{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.filter input{font:inherit;padding:8px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.fgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px 32px;align-items:start}
+.fgroup{min-width:0}
+.fgroup h3{padding-bottom:8px;border-bottom:1px solid var(--rule)}
+details{border-bottom:1px solid var(--rule-soft)}
+summary{cursor:pointer;padding:9px 0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary .nm{font-weight:600;font-size:14px}
+summary .nm::before{content:"+";font-family:var(--font-mono);color:var(--ink-3);display:inline-block;width:16px}
+details[open] summary .nm::before{content:"−"}
+summary .st{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+details .body{padding:0 0 14px 16px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2)}
+details .aka{font-style:italic;color:var(--ink-3)}
+details.hit{background:var(--surface-2)}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:6px}
+.q .opts button{text-align:left;padding:8px 10px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:13.5px}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .why{font-size:13.5px;color:var(--ink-2)}
+.disclaimer{font-size:12px;line-height:1.6;color:var(--ink-3);max-width:84ch;border-top:1px solid var(--rule);padding-top:20px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · yield enhancement · trade lifecycle</div>
+    <h1>Fixed Coupon Note</h1>
+    <p class="standfirst">A fixed coupon note pays the same coupon every month whatever the shares do, and puts the client's capital at risk in exchange. This page follows one note from price request to redemption and names every field a placement flow has to carry along the way.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#product">The product</a>
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#workbench">One trade, start to finish</a>
+      <a href="#fields">Field reference</a>
+      <a href="#drivers">What moves the coupon</a>
+      <a href="#check">Check yourself</a>
+    </nav>
+  </header>
+
+  <section id="product">
+    <div class="sec-head"><h2>What the client is buying</h2></div>
+    <div class="prose">
+      <p>The client lends money to an issuer for a few months. Inside the same note, the client also agrees to buy a share at the strike price if things go badly. The coupon is the payment for taking that risk, which is why it is much higher than a deposit rate. The best case is par plus coupons. The worst case is owning a share that has fallen a long way, bought at the strike.</p>
+      <p>Most notes are linked to two or three shares at once, and every test looks at the worst performer of the basket. Most also carry two barriers. The knock-out barrier ends the trade early when the shares are doing well. The knock-in barrier decides whether a fall in the shares can reach the client's capital at all.</p>
+      <p>You will see the product called FCN, fixed coupon ELN or FCELN in Asia, and an autocallable barrier reverse convertible in Europe. The structure is the same and the local habits differ.</p>
+    </div>
+    <div class="cells">
+      <div class="cell" style="--tone:var(--call)"><span class="k">Outcome 1</span><span class="v sm">Knocked out early</span><span class="n">On an observation date every share closes at or above the knock-out barrier. The client gets par back plus the coupons so far, and the trade is over.</span></div>
+      <div class="cell" style="--tone:var(--path)"><span class="k">Outcome 2</span><span class="v sm">Redeemed at par at maturity</span><span class="n">No knock-out. At final valuation the worst performer is at or above the strike, or the knock-in barrier was never breached. Par plus every coupon.</span></div>
+      <div class="cell" style="--tone:var(--breach)"><span class="k">Outcome 3</span><span class="v sm">Converted into shares</span><span class="n">No knock-out, the knock-in happened, and the worst performer finishes below the strike. The client receives that share, bought at the strike price, plus every coupon.</span></div>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Close relative</th><th>Client pays</th><th>Income</th><th>Does income depend on the shares?</th></tr></thead>
+        <tbody>
+          <tr><td>Classic ELN</td><td>A discount to par, for example 97%</td><td>The discount, earned when the note redeems at 100%</td><td>No coupon exists</td></tr>
+          <tr><td><strong>Fixed coupon note</strong></td><td>Par</td><td>A fixed coupon every period while the note is alive</td><td>No. Only a knock-out stops it, by ending the note</td></tr>
+          <tr><td>Phoenix or conditional coupon note</td><td>Par</td><td>A coupon only when the worst performer is above a coupon barrier on that date</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="lifecycle">
+    <div class="sec-head">
+      <h2>The lifecycle, stage by stage</h2>
+      <p class="lead">Eight stages in the order they happen. Pick one to see what happens, who acts, which fields get their value there, and what a placement system has to do. Field names open their entry in the reference further down.</p>
+    </div>
+    <ol class="stepper" id="stepper"></ol>
+    <div class="card stage" id="stage" aria-live="polite"></div>
+  </section>
+
+  <section id="workbench">
+    <div class="sec-head">
+      <h2>One trade, start to finish</h2>
+      <p class="lead">A sample note of HKD 1,000,000 traded on 12 October 2026. Change the terms on the left and the same market path is settled again under the new terms. The scenario buttons look for a path that ends the way you ask.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail"></aside>
+      <div class="bench">
+        <div class="scenarios">
+          <span class="mono-label">Show me a path that</span>
+          <button type="button" class="btn" data-want="ko">knocks out early</button>
+          <button type="button" class="btn" data-want="par">runs to maturity at par</button>
+          <button type="button" class="btn" data-want="recovered">knocks in, then recovers</button>
+          <button type="button" class="btn" data-want="delivery">ends in shares</button>
+          <button type="button" class="btn solid" data-want="any">Random path</button>
+          <span class="msg" id="msg" role="status"></span>
+        </div>
+
+        <figure class="card">
+          <figcaption><span>Closing price, % of initial price</span><span id="legend"></span></figcaption>
+          <div class="plot">
+            <svg id="chart" viewBox="0 0 780 340" role="img" aria-labelledby="chartTitle"><title id="chartTitle">Simulated closing prices of the basket against the knock-out barrier, strike and knock-in barrier</title></svg>
+          </div>
+        </figure>
+
+        <div class="cells" id="verdict" aria-live="polite"></div>
+
+        <div class="card panel">
+          <div class="cap"><span>Fixed on trade date</span><span>percentages become prices</span></div>
+          <div class="scroll"><table id="fixings"></table></div>
+        </div>
+
+        <div class="card panel">
+          <div class="cap"><span>Event schedule of this note</span><span>HKD, cash flows seen from the client</span></div>
+          <div class="scroll"><table id="schedule"></table></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="fields">
+    <div class="sec-head">
+      <h2>Field reference</h2>
+      <p class="lead">Every field on the term sheet and the order ticket, with the other names you will meet for it and the stage where it gets its value.</p>
+    </div>
+    <div class="filter">
+      <label class="mono-label" for="fieldFilter">Filter fields</label>
+      <input type="search" id="fieldFilter" placeholder="for example barrier, date, coupon" autocomplete="off">
+    </div>
+    <div class="fgroups" id="fgroups"></div>
+  </section>
+
+  <section id="drivers">
+    <div class="sec-head">
+      <h2>What moves the coupon</h2>
+      <p class="lead">The coupon is the price of the risk the client takes on. Anything that makes a loss more likely, or the note longer-lived, lets the issuer pay more. This is why the pricing screen feels like a set of levers.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Change</th><th>Coupon</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>More volatile shares</td><td class="up-arrow">Higher</td><td>A bigger chance of finishing below the strike.</td></tr>
+          <tr><td>More shares in the basket</td><td class="up-arrow">Higher</td><td>Only one of them has to fall for the client to lose.</td></tr>
+          <tr><td>Shares that move less alike</td><td class="up-arrow">Higher</td><td>With low correlation the worst performer tends to end further from the rest.</td></tr>
+          <tr><td>Lower strike</td><td class="down-arrow">Lower</td><td>The client buys the share cheaper, so the loss starts later and is smaller.</td></tr>
+          <tr><td>Lower knock-in barrier</td><td class="down-arrow">Lower</td><td>The shares have to fall further before capital is exposed.</td></tr>
+          <tr><td>European knock-in in place of American</td><td class="down-arrow">Lower</td><td>Only the last day counts, so a dip in the middle of the life is forgiven.</td></tr>
+          <tr><td>No knock-in barrier</td><td class="up-arrow">Higher</td><td>Any finish below the strike converts into shares.</td></tr>
+          <tr><td>Higher knock-out barrier</td><td class="up-arrow">Higher</td><td>The note is harder to call, stays alive longer and carries the downside for longer.</td></tr>
+          <tr><td>Higher dividends on the shares</td><td class="up-arrow">Higher</td><td>The client does not receive them. The issuer pays part of their value back as coupon.</td></tr>
+          <tr><td>Higher interest rates, or an issuer that pays more to borrow</td><td class="up-arrow">Higher</td><td>The note is also a loan to the issuer. A weaker issuer pays more, and the client takes more credit risk.</td></tr>
+          <tr><td>Higher distributor fee</td><td class="down-arrow">Lower</td><td>The fee comes out of the same pot as the coupon.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases of the kind a test suite for the flow would contain.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <p class="disclaimer">For learning only. Prices are simulated with a zero-drift random walk, so the coupon here is something you type in and has not been priced. The date schedule skips weekends and knows no public holidays. Conventions differ between issuers: rounding, whether touching a barrier counts as breaching it, how dates roll, how the coupon is treated on a knock-out. The term sheet of the actual note is always the reference. Issuer credit risk, fees and bid-offer are left out. Not an offer or advice.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core: no DOM above the marker line, imported by test/fixed-coupon-note.test.mjs ============
+export const UNDERLYINGS = [
+  { name: "Stock A", init: 320.00, volK: 0.8 },
+  { name: "Stock B", init: 88.50, volK: 1.0 },
+  { name: "Stock C", init: 152.40, volK: 1.25 }
+];
+export const NOTIONAL = 1000000;
+export const LAG = 5;   // business days from a fixing to the matching payment
+const DAY = 86400000;
+const utc = (y, m, d) => new Date(Date.UTC(y, m, d));
+const isWeekend = d => d.getUTCDay() % 6 === 0;
+const round2 = x => Math.round(x * 100) / 100;
+
+// ponytail: weekends only. A real flow needs the calendar of every exchange and settlement currency involved.
+export function following(d){ let x = new Date(d); while (isWeekend(x)) x = new Date(+x + DAY); return x; }
+export function addBusinessDays(d, n){ let x = new Date(d); while (n > 0){ x = new Date(+x + DAY); if (!isWeekend(x)) n--; } return x; }
+export function addMonths(d, m){
+  const y = d.getUTCFullYear(), mo = d.getUTCMonth() + m;
+  const lastDay = utc(y, mo + 1, 0).getUTCDate();
+  return following(utc(y, mo, Math.min(d.getUTCDate(), lastDay)));
+}
+
+// Monthly observations counted from the trade date; each pays LAG business days later.
+export function buildSchedule(tenor, tradeDate){
+  const obs = [];
+  for (let k = 1; k <= tenor; k++){
+    const date = addMonths(tradeDate, k);
+    obs.push({ k, date, payDate: addBusinessDays(date, LAG) });
+  }
+  const days = [];
+  for (let d = new Date(tradeDate); d <= obs[tenor - 1].date; d = new Date(+d + DAY)) if (!isWeekend(d)) days.push(d);
+  obs.forEach(o => { o.idx = days.findIndex(d => +d === +o.date); });
+  return { tradeDate, issueDate: addBusinessDays(tradeDate, LAG), days, obs, n: days.length - 1, maturityDate: obs[tenor - 1].payDate };
+}
+
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(r){ const u = 1 - r(), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+// Correlated zero-drift paths in % of initial price. Always three, so the path stays put when the basket size changes.
+export function simulate(t, sched, seed){
+  const r = mulberry32(seed >>> 0), rho = t.corr / 100, dt = 1 / 252;
+  const paths = UNDERLYINGS.map(() => { const p = new Float64Array(sched.n + 1); p[0] = 100; return p; });
+  for (let d = 1; d <= sched.n; d++){
+    const market = gauss(r);
+    paths.forEach((p, i) => {
+      const v = t.vol / 100 * UNDERLYINGS[i].volK;
+      const z = Math.sqrt(rho) * market + Math.sqrt(1 - rho) * gauss(r);
+      p[d] = p[d - 1] * Math.exp(-0.5 * v * v * dt + v * Math.sqrt(dt) * z);
+    });
+  }
+  return paths;
+}
+
+// Settle one note on one set of paths. Convention used here: knock-out at or above, knock-in strictly below.
+export function evaluate(t, sched, paths){
+  const n = sched.n, ki = Math.min(t.ki, t.strike);
+  const worstAt = d => { let w = 0; for (let i = 1; i < t.n; i++) if (paths[i][d] < paths[w][d]) w = i; return w; };
+  const lvl = d => paths[worstAt(d)][d];
+
+  // "every share at or above the barrier" is the same test as "worst performer at or above"
+  let koIdx = -1;
+  if (t.koType === "daily"){
+    const from = t.nonCall === 0 ? 1 : sched.obs[t.nonCall - 1].idx + 1;
+    for (let d = from; d < n; d++) if (lvl(d) >= t.ko){ koIdx = d; break; }
+  } else {
+    for (let k = t.nonCall; k < sched.obs.length - 1; k++) if (lvl(sched.obs[k].idx) >= t.ko){ koIdx = sched.obs[k].idx; break; }
+  }
+  const endIdx = koIdx >= 0 ? koIdx : n;
+
+  let kiIdx = -1;
+  if (t.kiType === "american"){ for (let d = 1; d <= endIdx; d++) if (lvl(d) < ki){ kiIdx = d; break; } }
+  else if (t.kiType === "european" && koIdx < 0 && lvl(n) < ki) kiIdx = n;
+
+  const perPeriod = NOTIONAL * t.cpn / 100 / 12;
+  const rows = [];
+  let coupons = 0, prev = 0;
+  for (const o of sched.obs){
+    let row;
+    if (koIdx >= 0 && prev >= koIdx) row = { ...o, state: "cancelled", coupon: 0 };
+    else if (koIdx > prev && koIdx < o.idx)   // daily knock-out between two coupon dates: coupon accrues to that day
+      row = { k: o.k, idx: koIdx, date: sched.days[koIdx], payDate: addBusinessDays(sched.days[koIdx], LAG), state: "ko",
+              coupon: perPeriod * (koIdx - prev) / (o.idx - prev) };
+    else row = { ...o, coupon: perPeriod,
+                 state: o.idx === koIdx ? "ko" : o.idx === n ? "final" : (t.koType === "periodic" && o.k <= t.nonCall) ? "noncall" : "alive" };
+    if (row.state !== "cancelled"){ row.worst = worstAt(row.idx); row.level = paths[row.worst][row.idx]; }
+    coupons += row.coupon;
+    rows.push(row);
+    prev = o.idx;
+  }
+
+  const worst = worstAt(endIdx), finalLevel = paths[worst][endIdx], u = UNDERLYINGS[worst];
+  const strikePrice = round2(u.init * t.strike / 100), finalPrice = round2(u.init * finalLevel / 100);
+  const armed = t.kiType === "none" || kiIdx >= 0;
+  let outcome, red = { cash: NOTIONAL, shares: 0, residual: 0, value: NOTIONAL };
+  if (koIdx >= 0) outcome = "ko";
+  else if (!armed || finalLevel >= t.strike) outcome = kiIdx >= 0 ? "recovered" : "par";
+  else {
+    outcome = "delivery";
+    const exact = NOTIONAL / strikePrice;
+    if (t.settle === "physical"){
+      const shares = Math.floor(exact), residual = (exact - shares) * finalPrice;
+      red = { cash: 0, shares, residual, value: shares * finalPrice + residual };
+    } else red = { cash: exact * finalPrice, shares: 0, residual: 0, value: exact * finalPrice };
+  }
+  return { koIdx, kiIdx, endIdx, rows, coupons, outcome, worst, finalLevel, strikePrice, finalPrice, red, ki, total: coupons + red.value };
+}
+
+export function findSeed(t, sched, want, start){
+  for (let s = start + 1; s <= start + 4000; s++)
+    if (want === "any" || evaluate(t, sched, simulate(t, sched, s)).outcome === want) return s;
+  return null;
+}
+
+// ---------- content ----------
+const STAGES = [
+  { t: "Structure", when: "Days or minutes before the trade",
+    what: "The adviser and the client decide what to build: which shares, how long, how much, and where to put the strike and the two barriers. Nothing exists yet. The result of this stage is a set of parameters with one of them left blank for the issuers to fill in.",
+    who: "Client, relationship manager or investment adviser, the distributor's product desk.",
+    fields: ["underlyings","basket","currency","tenor","strike","ko","koobs","noncall","kitype","ki","cpnfreq","settletype","solve"],
+    flow: ["Offer only what is on the shelf: approved underlyings, tenors, barrier ranges and issuers.",
+           "Validate the combination before it goes out: knock-in below strike, strike at or below knock-out, non-call period shorter than the tenor.",
+           "Work out the product risk rating from the parameters. It changes when a barrier moves.",
+           "Keep the structure as a draft that can be copied and changed. Advisers price several variants side by side."] },
+  { t: "Price", when: "Minutes before the trade",
+    what: "The structure goes to several issuers as a request for quote. Each one answers with a value for the blank parameter, usually the coupon, or declines. Quotes are indicative until someone asks for a firm one. A firm quote lasts from seconds to a few minutes because the shares keep moving.",
+    who: "The distributor's dealing desk or a multi-issuer pricing platform, and the issuers' trading desks.",
+    fields: ["issuer","solve","coupon","issueprice","fee","quote","notional"],
+    flow: ["Send one request to many issuers and line the answers up on identical terms.",
+           "Show each issuer's credit quality and the client's existing exposure to it next to the coupon. The highest coupon often comes from the weakest issuer.",
+           "Track quote expiry and refuse orders against a stale quote.",
+           "Carry the distributor fee through to the client disclosure."] },
+  { t: "Order", when: "Before execution",
+    what: "The client agrees to the terms and the distributor checks that it may sell this note to this client. The order is either to trade now at the quoted terms, or a limit order that waits for a better coupon or a lower share price.",
+    who: "Client, adviser, the distributor's suitability and compliance controls.",
+    fields: ["ordertype","notional","riskrating","quote"],
+    flow: ["Run suitability: risk profile against product risk rating, knowledge of and experience with derivatives, concentration in the issuer and in the shares, investor classification, selling restrictions.",
+           "Give the client the indicative term sheet and the required risk disclosures, and record that they received them.",
+           "Reserve the cash. Check that the account can hold the shares if they are delivered: market access, tax forms, custody.",
+           "Respect cut-off times. A note that fixes on today's close has to be placed before that market closes.",
+           "Record who said what and when. Orders are often taken by phone and have to be reconstructable later."] },
+  { t: "Trade date", when: "T",
+    what: "The distributor executes with the chosen issuer. The initial price of each share is fixed, and the strike and barriers turn from percentages into prices. The issuer creates the note, gives it an ISIN and sends final terms. From this moment the client is committed, although no money has moved.",
+    who: "Dealing desk, issuer, calculation agent.",
+    fields: ["tradedate","initprice","strike","ko","ki","coupon","isin","calcagent","obsdates","cpndates","bdc"],
+    flow: ["Handle all three results of an order: filled, not filled, filled for part of the size.",
+           "Store both the percentage and the fixed price of every level, with the rounding the issuer used. Later checks compare closing prices with these prices.",
+           "Take the date schedule from the final terms. Recomputing it from the tenor goes wrong, because holidays and issuer conventions move dates.",
+           "Reconcile the issuer's confirmation against the order before booking.",
+           "Send the client a trade confirmation and the final term sheet."] },
+  { t: "Issue date", when: "About one to two weeks after T",
+    what: "The client pays the notional times the issue price and the note arrives in their custody account. Coupons start to accrue. The gap is longer than for a share purchase because each note is a new security that has to be documented and set up at the clearing system.",
+    who: "Operations and settlements, custodian, the issuer's paying agent.",
+    fields: ["issuedate","issueprice","notional","isin"],
+    flow: ["Debit the cash and create the position on the same day.",
+           "Start valuing the position for statements, using the issuer's indicative bid price.",
+           "Load the event calendar for the life of the note: every observation, every coupon, the final valuation."] },
+  { t: "Observation", when: "Issue date to final valuation",
+    what: "The note is alive. A coupon is paid on each coupon date. On each knock-out observation the closing prices are compared with the knock-out barrier, and if every share is at or above it the note redeems early at par. With an American knock-in, every daily close is also compared with the knock-in barrier. In flat or rising markets most notes end at this stage.",
+    who: "Calculation agent, operations, and the adviser who has to call the client.",
+    fields: ["perf","obsdates","cpndates","cpnko","kievent","adjust","disruption","secondary"],
+    flow: ["Post coupons and early redemptions from the issuer's notices, and reconcile them with the amounts you expected.",
+           "Tell the client when a knock-in happens. It changes what they own even though no cash moves.",
+           "Apply corporate action adjustments to the stored initial, strike and barrier prices.",
+           "Support a sale before maturity: ask the issuer for a bid, show it to the client, execute and settle. This is a small trade flow of its own.",
+           "Close the position and the rest of the calendar when the note knocks out."] },
+  { t: "Final valuation", when: "A few business days before maturity",
+    what: "If the note was never knocked out, the closing prices on this day decide the redemption. The worst performer is identified. If it is at or above the strike, or the knock-in never happened, the client gets par. Otherwise the client gets the worst performer at the strike price.",
+    who: "Calculation agent, operations.",
+    fields: ["finalval","perf","kievent","shares","residual","settletype"],
+    flow: ["Compute the entitlement yourself and compare it with the issuer's notice: number of shares, cash for the fraction, last coupon.",
+           "Tell the client before the shares arrive. Many clients want to sell them on the delivery date.",
+           "Check again that the account can receive this share."] },
+  { t: "Maturity", when: "A few business days after final valuation",
+    what: "The last coupon is paid together with either par in cash or the shares. The note position closes. If shares were delivered, a new equity position opens with the strike price as its cost.",
+    who: "Operations, custodian.",
+    fields: ["maturity","shares","residual","costs"],
+    flow: ["Book the shares at the strike price as cost, so that later profit and loss is right.",
+           "Charge delivery costs such as stamp duty where they apply.",
+           "Report the result of the whole trade: coupons received, redemption, total return."] }
+];
+
+// [id, group, name, other names, definition, options or typical values, stage number]
+const FIELDS = [
+  ["issuer","Parties and identifiers","Issuer","guarantor, obligor","The bank or issuing vehicle that owes the client the coupons and the redemption. The note is unsecured debt, so if the issuer fails the client can lose everything, whatever the shares did.","Chosen from the quotes that come back. An issuing vehicle usually comes with a guarantor, and the guarantor's credit is the one that matters.",2],
+  ["distributor","Parties and identifiers","Distributor","dealer, placing bank","The private bank or broker that sells the note to the client and owns the suitability decision.","One per trade. It is paid through the fee built into the price.",2],
+  ["calcagent","Parties and identifiers","Calculation agent","determination agent","Decides fixings, barrier events, corporate action adjustments and what happens on a disrupted day. Its notices are the record that lifecycle processing follows.","Usually the issuer or one of its affiliates.",4],
+  ["isin","Parties and identifiers","ISIN","series number, security ID","The identifier of the note. Every FCN is made to order, so the ISIN is created by the trade.","Does not exist before the trade date. The flow needs its own product ID from the first draft onwards.",4],
+
+  ["underlyings","Underlying","Underlying shares","reference assets, basket","The listed shares the note is linked to, each identified by exchange code, RIC or Bloomberg ticker.","One to four shares is typical. ETFs and indices are also used, and an index cannot be delivered.",1],
+  ["basket","Underlying","Basket type","worst-of, laggard","How several shares combine. In a worst-of basket every barrier test and the final redemption use the worst-performing share on that day.","Single underlying, or worst-of. Worst-of is the norm for baskets.",1],
+  ["initprice","Underlying","Initial price","initial fixing, spot reference, initial level","The price of each share that every percentage on the term sheet refers to.","The official close on the trade date, or the live price at the moment of execution. Sometimes an average.",4],
+  ["perf","Underlying","Performance and worst performer","laggard, worst-of level","Closing price divided by initial price, for each share. The worst performer is the share with the lowest ratio on the day being tested, and it can change from one day to the next.","Computed on each observation, not stored on the term sheet.",6],
+
+  ["currency","Economics","Note currency","settlement currency","The currency of the notional, the coupons and any cash redemption.","Usually the currency the shares trade in. If it differs, the term sheet says which exchange rate applies to the payoff and to a share delivery.",1],
+  ["notional","Economics","Notional amount","principal, nominal, investment amount","The size of the client's investment. Coupons and share entitlements are computed from it.","A multiple of the denomination, the smallest unit of the note. Issuers set a minimum size for each trade.",3],
+  ["issueprice","Economics","Issue price","offer price","The percentage of the notional the client pays.","100% for an FCN. A classic ELN is sold at a discount and pays no coupon.",2],
+  ["coupon","Economics","Coupon rate","fixed coupon, yield p.a.","The fixed rate, quoted per year, paid on every coupon date while the note is alive. It does not depend on the shares.","Usually the value the issuers compete on. Indicative at the price stage, final on the trade date.",2],
+  ["cpnfreq","Economics","Coupon frequency and day count","payment frequency, day count fraction","How often the coupon is paid and how a period is turned into a fraction of a year. Amount = notional × rate × fraction.","Monthly is the most common, then quarterly. Day count is 30/360, Act/365 or Act/360 as the term sheet says.",1],
+  ["cpnko","Economics","Coupon on knock-out","accrued coupon, guaranteed coupon","What the client gets for the period in which the note knocks out.","Either the full coupon of that period, or the coupon accrued up to the early redemption date.",1],
+  ["tenor","Economics","Tenor","maturity, term","The scheduled life from issue date to maturity date. The actual life is shorter if the note knocks out.","3 to 12 months is most common. Longer notes exist.",1],
+  ["fee","Economics","Distributor fee","upfront fee, commission, re-offer spread","The distributor's income. The issuer sells the note to the distributor below the issue price, and the difference is the fee.","Many jurisdictions require it to be disclosed to the client before the trade.",2],
+
+  ["strike","Barriers and levels","Strike price","exercise price, conversion price","The price at which the client buys the worst performer when redemption is not at par. It also sets how many shares are delivered.","Quoted as a percentage of the initial price, commonly 80% to 100%. Becomes a price on the trade date.",1],
+  ["ko","Barriers and levels","Knock-out barrier","autocall level, call level, early redemption trigger","If every share closes at or above this level on a knock-out observation, the note redeems early at par.","Commonly 95% to 110% of the initial price.",1],
+  ["koobs","Barriers and levels","Knock-out observation","autocall frequency","Which days are tested for a knock-out.","Periodic, on each scheduled observation date, or daily. In the daily variant with memory, each share is ticked off once it has closed at or above the barrier, and the note is called when the last one is ticked.",1],
+  ["noncall","Barriers and levels","Non-call period","knock-out lock-out, guaranteed period","An opening period with no knock-out test. It guarantees the client that many coupons.","Often one month. Sometimes none.",1],
+  ["kitype","Barriers and levels","Knock-in type","barrier type, AKI, EKI","When the knock-in barrier is tested.","None: the strike alone decides. European: only on the final valuation date. American: on every day of the life, usually on the close and sometimes on any traded price.",1],
+  ["ki","Barriers and levels","Knock-in barrier","KI level, downside barrier, protection barrier","The level that exposes the client's capital. While no share has breached it, the note redeems at par even if a share ends below the strike.","Below the strike, commonly 50% to 80% of the initial price.",1],
+  ["kievent","Barriers and levels","Knock-in event","barrier event, barrier breach","The fact that the barrier has been breached. Once it has happened it cannot be undone, even if the shares recover.","A yes or no flag with a date. Whether touching the barrier counts as breaching it depends on the term sheet.",6],
+
+  ["tradedate","Dates","Trade date","strike date, pricing date, initial fixing date","The day the trade is executed and the initial prices are fixed.","One date. The observation schedule is counted from here or from the issue date.",4],
+  ["issuedate","Dates","Issue date","settlement date, payment date","The day the client pays and the note is delivered. Coupon accrual starts.","Commonly one to two weeks after the trade date.",5],
+  ["obsdates","Dates","Observation dates","valuation dates, autocall dates","The scheduled days on which closing prices are compared with the knock-out barrier.","A list in the final terms, one per period. A date that is not a trading day for one of the shares is moved.",4],
+  ["cpndates","Dates","Coupon payment dates","interest payment dates","The days on which coupons reach the client. An early redemption is paid on the coupon date that follows the knock-out.","A list in the final terms, each a few business days after its observation date.",4],
+  ["finalval","Dates","Final valuation date","final fixing date, expiry date","The day whose closing prices decide the redemption.","A few business days before maturity.",7],
+  ["maturity","Dates","Maturity date","redemption date","The day the cash or the shares reach the client.","Fixed in the final terms.",8],
+  ["bdc","Dates","Business day convention","calendars, date roll","Which calendars count and how a date that falls on a non-business day is moved.","Following or modified following. A basket across several markets needs the calendar of every exchange, plus the calendar of the payment currency.",1],
+
+  ["settletype","Settlement","Settlement type","delivery method","What the client receives when redemption is not at par.","Physical: shares of the worst performer. Cash: the value of those shares. Sometimes the issuer may choose.",1],
+  ["shares","Settlement","Share entitlement","number of shares, conversion ratio","Notional divided by the strike price, rounded down to whole shares.","Some markets trade in board lots. The term sheet says whether odd lots are delivered or paid in cash.",7],
+  ["residual","Settlement","Fractional share cash","residual amount, cash in lieu","The fraction of a share lost to rounding, paid in cash at the final price.","Small, but it has to reconcile to the cent.",7],
+  ["costs","Settlement","Delivery costs","stamp duty, transfer costs","Taxes and fees on the transfer of delivered shares, paid by the investor.","Depends on the market of the share.",8],
+
+  ["solve","Order and pricing","Solve-for variable","the unknown, solving parameter","The one term left blank in the price request. Issuers answer with the value at which they will trade.","Usually the coupon. Also the strike, the knock-in level or the issue price.",2],
+  ["quote","Order and pricing","Quote and validity","RFQ response, firm price","An issuer's answer to the request. Indicative quotes cannot be traded. A firm quote can, until it expires.","Identified by a quote ID with an expiry time.",2],
+  ["ordertype","Order and pricing","Order type","market order, limit order","Trade now at the quoted terms, or wait for a condition.","Market, or limit on the coupon or on a share price, with a good-till date.",3],
+  ["riskrating","Order and pricing","Product risk rating","PRR, risk class","The distributor's own grade for this note, derived from the shares, tenor, barriers and issuer, and matched against the client's risk profile.","A scale defined by each distributor.",3],
+  ["secondary","Order and pricing","Secondary market price","unwind price, bid","What the issuer will pay to buy the note back before maturity. It is usually available in normal markets, and the issuer has no obligation to quote. The price can be well below par.","A percentage of the notional, quoted on request.",6],
+  ["adjust","Order and pricing","Adjustment events","corporate actions, extraordinary events","Splits, bonus issues, rights issues, special dividends, mergers and delistings. The calculation agent adjusts the initial, strike and barrier prices, replaces the share or redeems the note early.","Arrive as issuer notices at any time during the life.",6],
+  ["disruption","Order and pricing","Market disruption","disrupted day, postponement","If trading in a share is suspended on an observation day, the observation is postponed, often for that share only, up to a maximum number of days.","Defined in the issuer's programme documents.",6]
+];
+
+const QUIZ = [
+  { ask: "Worst-of A, B, C. Strike 90%, European knock-in 70%. Never knocked out. Final levels: A 105%, B 88%, C 72%. What does the client receive at maturity?",
+    opts: ["Par in cash", "Shares of Stock B", "Shares of Stock C"], right: 0,
+    why: "C is the worst performer at 72%, which is still above the 70% barrier. No knock-in means par, even though two shares ended below the strike." },
+  { ask: "Same note with an American knock-in at 70%. C closed at 68% in month two. Final levels: A 105%, B 95%, C 92%.",
+    opts: ["Shares of Stock C, because it knocked in", "Par in cash", "92% of the notional in cash"], right: 1,
+    why: "The knock-in happened and stays on record, but the worst performer finished at 92%, above the 90% strike. Both conditions are needed for a conversion." },
+  { ask: "Monthly knock-out at 100%. On the third observation date A is at 108%, B at 101% and C at 99%.",
+    opts: ["Knocked out, two of three are above", "Knocked out, the average is above 100%", "No knock-out"], right: 2,
+    why: "Every share has to be at or above the barrier, which is the same as testing the worst performer." },
+  { ask: "Notional 1,000,000. The worst performer had an initial price of 80.00 and the strike is 90%. Shares are delivered. How many?",
+    opts: ["12,500", "13,888", "13,889"], right: 1,
+    why: "Strike price is 72.00. 1,000,000 ÷ 72.00 = 13,888.89, rounded down to 13,888 shares. The 0.89 of a share is paid in cash at the final price." },
+  { ask: "One share falls 30% in the first month and stays there. The note has not been knocked out. What happens to the monthly coupon?",
+    opts: ["It is still paid in full", "It stops until the share recovers", "It is paid only at maturity"], right: 0,
+    why: "That is what fixed means. A note whose coupon depends on a barrier is a phoenix or conditional coupon note." },
+  { ask: "The client places an order at 2 pm for a note that fixes on today's close. Which values can the order ticket not show yet?",
+    opts: ["Strike and barrier percentages", "Strike and barrier prices, and the share entitlement", "The tenor and the settlement type"], right: 1,
+    why: "Percentages are agreed before the trade. Prices only exist once the initial price is fixed, and the entitlement needs the strike price." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  const $ = id => document.getElementById(id);
+  const TRADE = utc(2026, 9, 12);
+  const fmtDate = d => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const px = x => x.toFixed(2);
+  const pct = (x, d = 1) => x.toFixed(d) + "%";
+  const signed = x => (x >= 0 ? "+" : "") + pct(x);
+  const fieldById = Object.fromEntries(FIELDS.map(f => [f[0], f]));
+
+  // ---------- lifecycle stepper ----------
+  let stage = 0;
+  $("stepper").innerHTML = STAGES.map((s, i) =>
+    `<li><button type="button" data-i="${i}" aria-pressed="false"><span class="no">${i + 1}</span><span class="t">${s.t}</span></button></li>`).join("");
+  function showStage(i){
+    stage = i;
+    const s = STAGES[i];
+    $("stepper").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+    $("stage").innerHTML =
+      `<div><span class="eyebrow">Stage ${i + 1} of ${STAGES.length} · ${s.when}</span><h3>${s.t}</h3><p>${s.what}</p>
+         <h4>Who acts</h4><p>${s.who}</p>
+         <div class="stage-nav"><button type="button" class="btn" data-go="${i - 1}" ${i === 0 ? "disabled" : ""}>Previous</button>
+         <button type="button" class="btn solid" data-go="${i + 1}" ${i === STAGES.length - 1 ? "disabled" : ""}>Next stage</button></div></div>
+       <div><h4>Fields set or used here</h4><div class="chips">${s.fields.map(id =>
+           `<button type="button" class="chip" data-field="${id}">${fieldById[id][2]}</button>`).join("")}</div>
+         <h4>What the placement flow has to do</h4><ul>${s.flow.map(x => `<li>${x}</li>`).join("")}</ul></div>`;
+  }
+  $("stepper").addEventListener("click", e => { const b = e.target.closest("button"); if (b) showStage(+b.dataset.i); });
+  $("stage").addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (b) showStage(+b.dataset.go); });
+  showStage(0);
+
+  // ---------- field reference ----------
+  const groups = [...new Set(FIELDS.map(f => f[1]))];
+  $("fgroups").innerHTML = groups.map(g =>
+    `<div class="fgroup"><h3 class="mono-label">${g}</h3>${FIELDS.filter(f => f[1] === g).map(([id, , name, aka, def, opts, st]) =>
+      `<details id="f-${id}"><summary><span class="nm">${name}</span><span class="st">${st} · ${STAGES[st - 1].t}</span></summary>
+         <div class="body"><p class="aka">Also: ${aka}</p><p>${def}</p><p>${opts}</p></div></details>`).join("")}</div>`).join("");
+  function filterFields(q){
+    q = q.trim().toLowerCase();
+    document.querySelectorAll("#fgroups details").forEach(d => { d.hidden = !!q && !d.textContent.toLowerCase().includes(q); });
+    document.querySelectorAll(".fgroup").forEach(g => { g.hidden = !g.querySelector("details:not([hidden])"); });
+  }
+  $("fieldFilter").addEventListener("input", e => filterFields(e.target.value));
+  function openField(id){
+    $("fieldFilter").value = ""; filterFields("");
+    const d = $("f-" + id);
+    d.open = true;
+    d.classList.add("hit");
+    setTimeout(() => d.classList.remove("hit"), 1800);
+    d.scrollIntoView({ block: "center", behavior: "smooth" });
+    d.querySelector("summary").focus({ preventScroll: true });
+  }
+  document.addEventListener("click", e => { const b = e.target.closest("[data-field]"); if (b) openField(b.dataset.field); });
+
+  // ---------- quiz ----------
+  $("quiz").innerHTML = QUIZ.map((q, i) =>
+    `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+      `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+  $("quiz").addEventListener("click", e => {
+    const b = e.target.closest("button[data-q]"); if (!b) return;
+    const q = QUIZ[+b.dataset.q], card = b.closest(".q"), ok = +b.dataset.o === q.right;
+    card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+    const why = card.querySelector(".why");
+    why.textContent = (ok ? "Correct. " : "Not this one. ") + q.why;
+    why.hidden = false;
+  });
+
+  // ---------- workbench: terms rail ----------
+  const T = { n: 3, tenor: 6, cpn: 14, strike: 90, ko: 100, koType: "periodic", nonCall: 1, kiType: "american", ki: 65, settle: "physical", vol: 32, corr: 45 };
+  // [key, label, field id, min, max, step, format, swatch] or [key, label, field id, [[value, text], ...]]
+  const TERMS = [
+    ["n", "Underlyings", "basket", [[1, "Single"], [2, "Worst of 2"], [3, "Worst of 3"]]],
+    ["tenor", "Tenor", "tenor", 3, 12, 3, v => v + " months"],
+    ["cpn", "Coupon p.a.", "coupon", 0, 30, 0.5, v => pct(v)],
+    ["strike", "Strike", "strike", 70, 100, 1, v => v + "%", "sw-strike"],
+    ["ko", "Knock-out barrier", "ko", 100, 115, 1, v => v + "%", "sw-ko"],
+    ["koType", "Knock-out observation", "koobs", [["periodic", "Monthly"], ["daily", "Daily"]]],
+    ["nonCall", "Non-call period", "noncall", [[0, "None"], [1, "1 month"], [2, "2 months"]]],
+    ["kiType", "Knock-in type", "kitype", [["none", "None"], ["european", "European"], ["american", "American"]]],
+    ["ki", "Knock-in barrier", "ki", 50, 90, 1, v => v + "%", "sw-ki"],
+    ["settle", "Settlement", "settletype", [["physical", "Shares"], ["cash", "Cash"]]]
+  ];
+  const MARKET = [
+    ["vol", "Volatility of the shares", null, 10, 60, 1, v => v + "%"],
+    ["corr", "Correlation between them", null, 0, 95, 5, v => v + "%"]
+  ];
+  const control = ([key, label, field, a, max, step, fmt, sw]) => {
+    const help = field ? `<button type="button" class="what" data-field="${field}" aria-label="What is ${label.toLowerCase()}?">?</button>` : "";
+    const swatch = sw ? `<span class="swatch ${sw}"></span>` : "";
+    return Array.isArray(a)
+      ? `<div class="term"><div class="term-head"><span class="lbl">${label}${help}</span></div>
+           <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+      : `<div class="term"><div class="term-head"><span class="lbl">${swatch}<label for="${key}">${label}</label>${help}</span><output id="${key}Out" for="${key}"></output></div>
+           <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+  };
+  $("rail").innerHTML = `<h3 class="mono-label">Indicative terms</h3>${TERMS.map(control).join("")}
+    <h3 class="mono-label">Market assumptions, not on the term sheet</h3>${MARKET.map(control).join("")}`;
+  const sliders = [...TERMS, ...MARKET].filter(c => !Array.isArray(c[3]));
+  function syncControls(){
+    if (T.ki > T.strike) T.ki = T.strike;                   // a knock-in above the strike has no meaning
+    for (const [key, , , min, max, , fmt] of sliders){
+      const inp = $(key);
+      inp.value = T[key];
+      inp.style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+      $(key + "Out").textContent = fmt(T[key]);
+    }
+    $("ki").disabled = T.kiType === "none";
+    if (T.kiType === "none") $("kiOut").textContent = "none";
+    $("rail").querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.v === String(T[g.dataset.key])))));
+  }
+  $("rail").addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; run(); } });
+  $("rail").addEventListener("click", e => {
+    const b = e.target.closest(".seg button"); if (!b) return;
+    const v = b.dataset.v;
+    T[b.parentNode.dataset.key] = isNaN(+v) ? v : +v;
+    run();
+  });
+
+  // ---------- workbench: one simulated trade ----------
+  let sched, paths, res, seed = 0;
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const chart = $("chart");
+  let geo = null, hoverG = null;
+
+  function drawChart(){
+    while (chart.lastChild.nodeName !== "title") chart.removeChild(chart.lastChild);
+    const nar = narrow(), W = 780, H = 340, x0 = nar ? 58 : 46, x1 = W - (nar ? 150 : 108), y0 = H - 34, y1 = 24;
+    const n = sched.n, end = res.endIdx, hasKi = T.kiType !== "none";
+    let lo = Math.min(60, T.strike - 8, hasKi ? res.ki - 8 : 100), hi = Math.max(120, T.ko + 8);
+    for (let i = 0; i < T.n; i++) for (let d = 0; d <= end; d++){ lo = Math.min(lo, paths[i][d] - 3); hi = Math.max(hi, paths[i][d] + 3); }
+    const X = d => x0 + d / n * (x1 - x0), Y = v => y0 + (v - lo) / (hi - lo) * (y1 - y0);
+    const add = (tag, attrs, text) => chart.appendChild(el(tag, attrs, text));
+
+    // the zone where capital is exposed: all life for an American knock-in, only the last day otherwise
+    const dangerTop = Y(hasKi ? res.ki : T.strike), dangerX = T.kiType === "american" ? x0 : x1 - 12;
+    add("rect", { x: dangerX, y: dangerTop, width: x1 - dangerX, height: Math.max(0, y0 - dangerTop), fill: "var(--shade)" });
+
+    const step = hi - lo > 90 ? 20 : 10;
+    for (let g = Math.ceil(lo / step) * step; g <= hi; g += step){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, g + "%");
+    }
+    for (const o of sched.obs){
+      add("line", { x1: X(o.idx), x2: X(o.idx), y1: y0, y2: y0 + 5, stroke: "var(--ink-3)", "stroke-width": 1 });
+      if (!(nar && sched.obs.length > 6 && o.k % 2)) add("text", { x: X(o.idx), y: y0 + 18, "text-anchor": "middle" }, "M" + o.k);
+    }
+    add("line", { x1: x0, x2: x1, y1: y0, y2: y0, stroke: "var(--ink-3)", "stroke-width": 1 });
+    add("text", { x: x1, y: H - 2, "text-anchor": "end" }, "monthly observation dates");
+
+    // knock-out barrier only exists where it is tested: after the non-call period, on dates or every day
+    const callable = sched.obs.filter(o => o.k > T.nonCall && o.idx < n);
+    if (T.koType === "daily"){
+      const from = T.nonCall === 0 ? 1 : sched.obs[T.nonCall - 1].idx + 1;
+      add("line", { x1: X(from), x2: x1, y1: Y(T.ko), y2: Y(T.ko), stroke: "var(--call)", "stroke-width": 1.5, "stroke-dasharray": "7 4" });
+    } else {
+      add("line", { x1: x0, x2: x1, y1: Y(T.ko), y2: Y(T.ko), stroke: "var(--call)", "stroke-width": 1, "stroke-dasharray": "1 4" });
+      for (const o of callable) add("rect", { x: X(o.idx) - 4, y: Y(T.ko) - 4, width: 8, height: 8, fill: "var(--call)", transform: `rotate(45 ${X(o.idx)} ${Y(T.ko)})` });
+    }
+    add("line", { x1: x0, x2: x1, y1: Y(100), y2: Y(100), stroke: "var(--ink-3)", "stroke-width": 1, "stroke-dasharray": "1 3" });
+    add("line", { x1: x0, x2: x1, y1: Y(T.strike), y2: Y(T.strike), stroke: "var(--brass)", "stroke-width": 1.5 });
+    if (hasKi) add("line", { x1: x0, x2: x1, y1: Y(res.ki), y2: Y(res.ki), stroke: "var(--breach)", "stroke-width": 1.5,
+                             "stroke-dasharray": "4 3", opacity: T.kiType === "european" ? ".45" : "1" });
+
+    // level labels, nudged apart when levels sit close together
+    const labels = [
+      { v: 100, c: "var(--ink-3)", s: "Initial 100%" },
+      { v: T.ko, c: "var(--call)", s: "Knock-out " + T.ko + "%" },
+      { v: T.strike, c: "var(--brass)", s: "Strike " + T.strike + "%" }
+    ];
+    if (hasKi) labels.push({ v: res.ki, c: "var(--breach)", s: "Knock-in " + res.ki + "%" });
+    labels.forEach(l => { l.y = Y(l.v) + 4; });
+    labels.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < labels.length; i++) labels[i].y = Math.max(labels[i].y, labels[i - 1].y + (nar ? 18 : 13));
+    for (const l of labels) add("text", { x: x1 + 9, y: l.y, fill: l.c, "class": "lvl" }, l.s);
+
+    // paths: the final worst performer carries the outcome, so it is the heavy line
+    const pts = i => { let s = ""; for (let d = 0; d <= end; d++) s += X(d).toFixed(1) + "," + Y(paths[i][d]).toFixed(1) + " "; return s; };
+    for (let i = 0; i < T.n; i++) if (i !== res.worst) add("polyline", { points: pts(i), fill: "none", stroke: "var(--ink-3)", "stroke-width": 1.1, "stroke-linejoin": "round" });
+    add("polyline", { points: pts(res.worst), fill: "none", stroke: "var(--path)", "stroke-width": 2.2, "stroke-linejoin": "round" });
+
+    const mark = (d, color, label, dy) => {
+      let w = 0; for (let i = 1; i < T.n; i++) if (paths[i][d] < paths[w][d]) w = i;
+      add("circle", { cx: X(d), cy: Y(paths[w][d]), r: 4.5, fill: color });
+      add("text", { x: Math.min(X(d), x1 - 28), y: Y(paths[w][d]) + dy, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    if (res.kiIdx >= 0) mark(res.kiIdx, "var(--breach)", "knock-in", 18);
+    if (res.koIdx >= 0) mark(res.koIdx, "var(--call)", "knock-out", -12);
+
+    hoverG = add("g", { "pointer-events": "none" });
+    geo = { X, Y, x0, x1, y0, y1, W };
+    $("legend").innerHTML = T.n === 1 ? `<b>${UNDERLYINGS[0].name}</b>`
+      : `heavy line: <b>${UNDERLYINGS[res.worst].name}</b>, worst performer at the end`;
+  }
+  function readout(d){
+    while (hoverG.firstChild) hoverG.removeChild(hoverG.firstChild);
+    if (d === null) return;
+    hoverG.appendChild(el("line", { x1: geo.X(d), x2: geo.X(d), y1: geo.y1, y2: geo.y0, stroke: "var(--ink-3)", "stroke-width": 1, "stroke-dasharray": "2 3" }));
+    const parts = UNDERLYINGS.slice(0, T.n).map((u, i) => u.name.slice(-1) + " " + pct(paths[i][d]));
+    hoverG.appendChild(el("text", { x: geo.x0, y: 14, "class": "rd" }, fmtDate(sched.days[d]) + "  ·  " + parts.join("  ·  ")));
+  }
+  chart.addEventListener("pointermove", e => {
+    const r = chart.getBoundingClientRect(), vx = (e.clientX - r.left) / r.width * geo.W;
+    const d = Math.round((vx - geo.x0) / (geo.x1 - geo.x0) * sched.n);
+    readout(Math.max(0, Math.min(res.endIdx, d)));
+  });
+  chart.addEventListener("pointerleave", () => readout(null));
+
+  const HEAD = { ko: "Knocked out early", par: "Redeemed at par", recovered: "Knocked in, redeemed at par", delivery: T => T.settle === "physical" ? "Converted into shares" : "Redeemed below par" };
+  function drawVerdict(){
+    const u = UNDERLYINGS[res.worst], r = res.red, ret = 100 * (res.total - NOTIONAL) / NOTIONAL, held = res.finalLevel - 100;
+    const tone = res.outcome === "ko" ? "var(--call)" : res.outcome === "delivery" ? "var(--breach)" : "var(--path)";
+    const head = typeof HEAD[res.outcome] === "function" ? HEAD[res.outcome](T) : HEAD[res.outcome];
+    const reason = ({
+      ko: () => `Every share closed at or above ${T.ko}% on ${fmtDate(sched.days[res.koIdx])}.`,
+      par: () => T.kiType === "none" || res.finalLevel >= T.strike
+        ? `${u.name} finished at ${pct(res.finalLevel)}, at or above the ${T.strike}% strike.`
+        : `${u.name} finished at ${pct(res.finalLevel)}, below the strike, but the knock-in barrier was never breached.`,
+      recovered: () => `The barrier was breached on ${fmtDate(sched.days[res.kiIdx])}, then ${u.name} finished at ${pct(res.finalLevel)}, above the strike.`,
+      delivery: () => `${u.name} finished at ${pct(res.finalLevel)}, below the ${T.strike}% strike` + (T.kiType === "none" ? "." : ", and the knock-in happened.")
+    })[res.outcome]();
+    const redemption = r.shares
+      ? [`${money(r.shares)} shares`, `${u.name} at ${px(res.strikePrice)}, now ${px(res.finalPrice)}. Worth ${money(r.value)} with ${money(r.residual)} cash for the fraction.`]
+      : [money(r.cash), r.cash < NOTIONAL ? `Notional × ${px(res.finalPrice)} ÷ ${px(res.strikePrice)}` : "Par, in cash"];
+    const cell = (k, v, n, cls = "", lead = "") => `<div class="cell"${lead ? ` style="--tone:${lead}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+    $("verdict").innerHTML =
+      cell("Outcome", head, reason, "sm", tone) +
+      cell("Coupons received", money(res.coupons), `${pct(T.cpn)} p.a. on ${money(NOTIONAL)}`) +
+      cell("Redemption", redemption[0], redemption[1], r.shares ? "sm" : "") +
+      cell("Total return", signed(ret), "coupons plus redemption, on the notional", ret >= 0 ? "up" : "down") +
+      cell("Holding the share instead", signed(held), `${u.name} over the same period, without dividends`, held >= 0 ? "up" : "down");
+  }
+
+  function drawFixings(){
+    const hasKi = T.kiType !== "none", lvl = (u, p) => px(Math.round(u.init * p) / 100);
+    $("fixings").innerHTML = `<thead><tr><th>Underlying</th><th class="num">Initial price</th><th class="num">Strike ${T.strike}%</th><th class="num">Knock-out ${T.ko}%</th><th class="num">Knock-in ${hasKi ? res.ki + "%" : ""}</th><th class="num">Shares if converted</th></tr></thead><tbody>` +
+      UNDERLYINGS.slice(0, T.n).map(u => `<tr><td>${u.name}</td><td class="num">${px(u.init)}</td><td class="num">${lvl(u, T.strike)}</td><td class="num">${lvl(u, T.ko)}</td>
+        <td class="num">${hasKi ? lvl(u, res.ki) : "none"}</td><td class="num">${money(Math.floor(NOTIONAL / (Math.round(u.init * T.strike) / 100)))}</td></tr>`).join("") + "</tbody>";
+  }
+
+  function drawSchedule(){
+    const name = r => `${UNDERLYINGS[r.worst].name} ${pct(r.level)}`, r = res.red;
+    const lines = [
+      [0, "Trade date", sched.tradeDate, "100.0%", `<span class="pill">Initial prices fixed</span>`, "", ""],
+      [0, "Issue date", sched.issueDate, "", `<span class="pill">Client pays</span>`, "−" + money(NOTIONAL), sched.issueDate]
+    ];
+    if (T.kiType === "american" && res.kiIdx >= 0){
+      let w = 0; for (let i = 1; i < T.n; i++) if (paths[i][res.kiIdx] < paths[w][res.kiIdx]) w = i;
+      lines.push([res.kiIdx - 0.5, "Knock-in event", sched.days[res.kiIdx], `${UNDERLYINGS[w].name} ${pct(paths[w][res.kiIdx])}`, `<span class="pill ki">Closed below ${res.ki}%</span>`, "no cash moves", ""]);
+    }
+    for (const row of res.rows){
+      const last = row.state === "ko" || row.state === "final";
+      const check = {
+        cancelled: `<span class="pill">Cancelled</span>`,
+        noncall: `<span class="pill">Non-call period</span>`,
+        alive: T.koType === "daily" ? `<span class="pill">Coupon date</span>` : `<span class="pill">Below knock-out, continues</span>`,
+        ko: `<span class="pill ko">Knocked out</span>`,
+        final: `<span class="pill ${res.outcome === "delivery" ? "ki" : "ko"}">${res.outcome === "delivery" ? (r.shares ? "Shares delivered" : "Redeemed below par") : "Par"}</span>`
+      }[row.state];
+      let flow = row.coupon ? "+" + money(row.coupon) : "";
+      if (last) flow += r.shares ? `<br>+${money(r.shares)} ${UNDERLYINGS[res.worst].name} shares<br>+${money(r.residual)} for the fraction` : `<br>+${money(r.cash)}`;
+      lines.push([row.idx, row.state === "final" ? "Final valuation" : row.state === "ko" && T.koType === "daily" ? "Knock-out day" : "Observation " + row.k,
+        row.date, row.state === "cancelled" ? "" : name(row), check, flow, row.state === "cancelled" ? "" : row.payDate, row.state === "cancelled"]);
+    }
+    lines.sort((a, b) => a[0] - b[0]);
+    $("schedule").innerHTML = `<thead><tr><th>Event</th><th>Date</th><th>Worst performer</th><th>Result</th><th class="num">Cash flow</th><th>Paid on</th></tr></thead><tbody>` +
+      lines.map(([, ev, date, worst, check, flow, pay, off]) => `<tr${off ? ' class="off"' : ""}><td>${ev}</td><td class="d">${fmtDate(date)}</td><td>${worst}</td><td>${check}</td><td class="num">${flow}</td><td class="d">${pay ? fmtDate(pay) : ""}</td></tr>`).join("") + "</tbody>";
+  }
+
+  function run(){
+    syncControls();
+    sched = buildSchedule(T.tenor, TRADE);
+    paths = simulate(T, sched, seed);
+    res = evaluate(T, sched, paths);
+    drawChart(); drawVerdict(); drawFixings(); drawSchedule();
+  }
+
+  const IMPOSSIBLE = {
+    recovered: "No such path on these terms. A recovery needs an American knock-in: a breach during the life followed by a finish above the strike.",
+    ko: "No such path found. Try a lower knock-out barrier or a shorter non-call period.",
+    par: "No such path found on these terms.",
+    delivery: "No such path found. Try a higher strike, a higher knock-in barrier or more volatile shares."
+  };
+  document.querySelector(".scenarios").addEventListener("click", e => {
+    const b = e.target.closest("[data-want]"); if (!b) return;
+    const want = b.dataset.want;
+    const found = findSeed(T, buildSchedule(T.tenor, TRADE), want, want === "any" ? Math.floor(Math.random() * 1e9) : seed);
+    $("msg").textContent = found === null ? IMPOSSIBLE[want] : "";
+    if (found !== null){ seed = found; run(); }
+  });
+
+  let wasNarrow = narrow();
+  window.addEventListener("resize", () => { if (narrow() !== wasNarrow){ wasNarrow = narrow(); run(); } });
+
+  seed = findSeed(T, buildSchedule(T.tenor, TRADE), "delivery", 0) ?? 1;   // open on the outcome that shows every mechanism
+  run();
+}
+</script>
+</body>
+</html>

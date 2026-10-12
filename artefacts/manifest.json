@@ -1214,6 +1214,16 @@
       "replacements": {},
       "description": "Change proposal for an eldercare app: an offline emergency surface that always works, and scoped, revocable caregiver access to a resident’s record.",
       "date": "2026-08-04"
+    },
+    {
+      "id": "structured-products-fixed-coupon-note",
+      "source": "structured-products/fixed-coupon-note.html",
+      "destination": "structured-products/fixed-coupon-note/index.html",
+      "title": "Fixed coupon note",
+      "collection": "structured-products",
+      "order": 20,
+      "replacements": {},
+      "date": "2026-10-12"
     }
   ]
 }
