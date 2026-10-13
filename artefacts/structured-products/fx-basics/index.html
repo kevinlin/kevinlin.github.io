@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Foreign Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Shared look of the structured-products collection: bone paper, square cards, Spectral over IBM Plex.
+   Copied into every page of the set so each file stays self-contained. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#5A6670;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* loss */
+  --call:#215B49;       /* knock-out / gain */
+  --path:#1F4E63;       /* the note, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --lift-2: 0 1px 1px rgba(26,33,41,.04), 0 4px 8px rgba(26,33,41,.05), 0 12px 24px rgba(26,33,41,.06);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+    --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--path)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--ink);color:var(--paper);padding:8px 12px;font-size:14px;z-index:10}
+.skip:focus{top:8px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+main{display:flex;flex-direction:column;gap:48px;min-width:0}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.masthead,main > section{animation:rise 360ms var(--ease-out) both}
+main > section:nth-child(1){animation-delay:60ms}
+main > section:nth-child(2){animation-delay:120ms}
+main > section:nth-child(n+3){animation-delay:180ms}
+
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:18px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:65ch}
+.toc{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}
+.toc a{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;min-height:36px;box-shadow:inset 0 -1px 0 var(--rule);transition:box-shadow 120ms var(--ease-out)}
+@media (hover:hover){.toc a:hover{box-shadow:inset 0 -2px 0 var(--path)}}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:65ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+.note{font-size:14px;color:var(--ink-2);max-width:75ch;border-left:2px solid var(--brass);padding-left:12px}
+
+/* cells: outcomes and verdicts share one grid */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td strong{font-weight:600}
+td:first-child{min-width:9ch}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;font-size:14px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out),border-color 130ms var(--ease-out),transform 120ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:active:not(:disabled),.seg button:active,.q .opts button:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+@media (min-width:881px){.termsheet{position:sticky;top:16px}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:20px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term:last-child{border-bottom:none}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:32px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:44px;background:transparent;border:none;border-right:1px solid var(--rule);padding:6px 4px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:14px;color:var(--breach);flex-basis:100%;min-height:1.6em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.plot svg{touch-action:pan-y}
+svg text{font-family:var(--font-mono);font-size:11.5px;fill:var(--ink-3)}
+svg text.lvl{font-weight:500}
+@media (max-width:640px){.plot svg{min-width:600px} svg text{font-size:15px}}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.q .opts button{text-align:left;min-height:44px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14.5px;transition:border-color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+@media (hover:hover){.q .opts button:hover{border-color:var(--path)}}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.right::after{content:" ✓"}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .opts button.wrong::after{content:" ✗"}
+.q .why{font-size:14.5px;color:var(--ink-2)}
+
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;color:var(--ink-2);max-width:80ch}
+.disclaimer{font-size:13px;line-height:1.6;color:var(--ink-3);max-width:80ch;border-top:1px solid var(--rule);padding-top:20px}
+.next{display:flex;flex-wrap:wrap;gap:8px}
+.next a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only ---------- */
+.verdict .cell:first-child{grid-column:1/-1}
+.bars{display:flex;flex-direction:column;gap:10px;padding:20px}
+.bar{display:grid;grid-template-columns:minmax(120px,170px) 1fr 52px;gap:12px;align-items:center;font-size:14px}
+.bar i{display:block;height:14px;background:var(--path);width:calc(var(--w) * 1%)}
+.bar .track{background:var(--surface-2)}
+.bar b{font-family:var(--font-mono);font-weight:500;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<a class="skip" href="#workbench">Skip to the workbench</a>
+<div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/">ELN</a><a href="../equity-linked-note/#koeln">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/">ELI</a><a href="../barrier-reverse-convertible/">BRC</a><span class="sep" aria-hidden="true"></span><a href="../fx-basics/" aria-current="page">FX</a><a href="../currency-linked-investment/">CLI</a><a href="../fx-accumulator/">ACC</a><a href="../fx-accumulator/#tarf">TARF</a><span class="sep" aria-hidden="true"></span><a href="../tokenized-gold/">GOLD</a></span>
+  </nav>
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · FX · the building blocks</div>
+    <h1>Foreign Exchange</h1>
+    <p class="standfirst">Every FX product is built from four contracts: spot, forward, swap and option. This page covers how a rate is quoted, why the forward rate differs from the spot rate, and what an option pays. The currency-linked investment and the accumulator on the next pages are combinations of these.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#what">Reading a rate</a>
+      <a href="#blocks">The four contracts</a>
+      <a href="#workbench">Workbench</a>
+      <a href="#build">What gets built from them</a>
+      <a href="#words">Terms</a>
+      <a href="#check">Check yourself</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+<main>
+  <section id="what">
+    <div class="sec-head"><h2>A rate is the price of the first currency</h2></div>
+    <div class="prose">
+      <p>A currency pair is written with two codes. EUR/USD 1.1000 means one euro costs 1.1000 US dollars. The first currency is the base currency, the thing being priced. The second is the quote currency, the money it is priced in. When the number goes up, the base currency has become more expensive.</p>
+      <p>Every statement about a rate depends on that order. A structured product that pays out "if the rate is above the strike" means the base currency is strong. Read the pair first, then the level.</p>
+      <p>A dealer quotes two rates: a bid, at which the dealer buys the base currency, and a higher offer, at which the dealer sells it. The gap is the spread, and it is how a customer pays for the trade. Most pairs are quoted to four decimal places, and the fourth is called a pip. Pairs against the yen are quoted to two.</p>
+      <p>The amounts on the two sides are linked by the rate. Buying EUR 1,000,000 at 1.1000 means paying USD 1,100,000. If the rate then moves to 1.1100, the euros are worth USD 10,000 more: 100 pips on one million.</p>
+    </div>
+    <div class="cells">
+      <div class="cell"><span class="k">Daily turnover</span><span class="v">$9.6 trillion</span><span class="n">Trading in over-the-counter FX markets per day in April 2025, up 28% from 2022. From the BIS survey.</span></div>
+      <div class="cell"><span class="k">The dollar</span><span class="v">89.2%</span><span class="n">Share of all trades with the US dollar on one side. The euro is in 28.9% and the yen in 16.8%.</span></div>
+      <div class="cell"><span class="k">Where</span><span class="v">75%</span><span class="n">Share of trading handled by sales desks in four places: the United Kingdom, the United States, Singapore and Hong Kong.</span></div>
+    </div>
+  </section>
+
+  <section id="blocks">
+    <div class="sec-head">
+      <h2>The four contracts</h2>
+      <p class="lead">The bars are each instrument's share of daily turnover in the BIS survey of April 2025.</p>
+    </div>
+    <div class="card bars" role="img" aria-label="Share of daily FX turnover: FX swaps 42%, spot 31%, outright forwards 19%, options 7%, currency swaps 2%">
+      <div class="bar"><span>FX swaps</span><span class="track"><i style="--w:42"></i></span><b>42%</b></div>
+      <div class="bar"><span>Spot</span><span class="track"><i style="--w:31"></i></span><b>31%</b></div>
+      <div class="bar"><span>Outright forwards</span><span class="track"><i style="--w:19"></i></span><b>19%</b></div>
+      <div class="bar"><span>Options</span><span class="track"><i style="--w:7"></i></span><b>7%</b></div>
+      <div class="bar"><span>Currency swaps</span><span class="track"><i style="--w:2"></i></span><b>2%</b></div>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Contract</th><th>What is agreed</th><th>When the currencies change hands</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Spot</strong></td><td>An exchange at today's rate.</td><td>Two business days later, for most pairs.</td><td>Converting money now.</td></tr>
+          <tr><td><strong>Outright forward</strong></td><td>An exchange at a rate fixed today.</td><td>On a later date: a week, a month, a year.</td><td>Locking in a future rate. Both sides are obliged.</td></tr>
+          <tr><td><strong>FX swap</strong></td><td>A spot exchange and the reverse forward exchange, as one deal.</td><td>Now, and back again on the later date.</td><td>Borrowing one currency against another for a period. No exchange rate view.</td></tr>
+          <tr><td><strong>Option</strong></td><td>The right, with no obligation, to exchange at a strike rate. The buyer pays a premium for it.</td><td>On expiry, and only if the buyer chooses.</td><td>Protection or a view with a limited cost. The seller takes the other side for the premium.</td></tr>
+          <tr><td><strong>Currency swap</strong></td><td>An exchange of principal now and back at the same rate later, with interest paid both ways in between.</td><td>Over years.</td><td>Long-term funding in another currency.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="workbench">
+    <div class="sec-head">
+      <h2>Workbench: the forward rate and the option</h2>
+      <p class="lead">EUR/USD on EUR 1,000,000. The rates are made up for the example. Change the two interest rates and watch which way the forward moves. Then look at one option from the buyer's side and from the seller's.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail" aria-label="Market and option terms"></aside>
+      <div class="bench">
+        <figure class="card">
+          <figcaption><span>Forward rate by maturity</span><b id="legendF"></b></figcaption>
+          <div class="plot">
+            <svg id="chartF" viewBox="0 0 780 300" role="img" aria-labelledby="chartFTitle"><title id="chartFTitle">EUR/USD forward rate for maturities from today to 360 days</title></svg>
+          </div>
+        </figure>
+        <div class="cells verdict" id="verdictF" aria-live="polite"></div>
+        <figure class="card">
+          <figcaption><span>Option result at expiry, pips per euro</span><b id="legendO"></b></figcaption>
+          <div class="plot">
+            <svg id="chartO" viewBox="0 0 780 320" role="img" aria-labelledby="chartOTitle"><title id="chartOTitle">Profit or loss of the option at expiry against the EUR/USD rate on that day</title></svg>
+          </div>
+        </figure>
+        <div class="cells verdict" id="verdictO" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="prose">
+      <p>The forward rate is arithmetic and holds no forecast. Someone who needs dollars in three months can agree a forward today. Or they can sell euros for dollars at spot and put the dollars on deposit. Both routes must cost the same, or dealers would take the difference. So the forward is the spot rate adjusted for the interest earned on each currency over the period.</p>
+      <p>The currency with the lower interest rate is worth more in the forward market than at spot. Holding it earns less, and the forward price makes up for that. The BIS calls this relation, covered interest parity, the closest thing to a physical law in international finance. It also reports that since 2008 the forward has drifted from the formula by a small amount called the cross-currency basis. For learning the products, the formula is close enough.</p>
+    </div>
+    <p class="note">Formula from the BIS article, for a period shorter than a year. Forward = spot × (1 + quote currency rate × days ÷ 360) ÷ (1 + base currency rate × days ÷ 360). Forward points = forward − spot, quoted in pips.</p>
+  </section>
+
+  <section id="build">
+    <div class="sec-head">
+      <h2>What gets built from them</h2>
+      <p class="lead">The structured products on the next pages contain nothing new. Each one packages forwards and options so that the customer sells some optionality and is paid for it in a better rate or a higher yield.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Product</th><th>Made of</th><th>The customer is paid with</th><th>The customer gives up</th></tr></thead>
+        <tbody>
+          <tr><td><strong><a href="../currency-linked-investment/">Currency-Linked Investment</a></strong></td><td>A deposit and one sold option</td><td>Interest well above the deposit rate</td><td>The choice of currency at maturity</td></tr>
+          <tr><td><strong><a href="../fx-accumulator/">Accumulator</a></strong></td><td>A strip of bought calls and twice as many sold puts, with a knock-out</td><td>A strike better than the forward rate</td><td>Gains after a rally, and double losses after a fall</td></tr>
+          <tr><td><strong><a href="../fx-accumulator/#tarf">TARF</a></strong></td><td>The same strip, ended by a profit target</td><td>A strike better than the forward rate</td><td>All gains beyond the target</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The seller's view of the option in the workbench is the one to keep in mind. In every product above the customer is on that side: a small sure amount, and a loss that grows with the move.</p>
+  </section>
+
+  <section id="words">
+    <div class="sec-head"><h2>Terms</h2></div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Term</th><th>Also called</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Base currency</strong></td><td>Currency 1</td><td>The first currency of the pair. The rate is its price.</td></tr>
+          <tr><td><strong>Quote currency</strong></td><td>Currency 2, terms currency</td><td>The second currency of the pair. The rate is expressed in it.</td></tr>
+          <tr><td><strong>Spot rate</strong></td><td>Spot</td><td>Today's rate for exchange in two business days.</td></tr>
+          <tr><td><strong>Pip</strong></td><td>Point</td><td>The fourth decimal place, 0.0001. The second, 0.01, for yen pairs.</td></tr>
+          <tr><td><strong>Bid and offer</strong></td><td>Bid and ask</td><td>The dealer's buying and selling rates for the base currency.</td></tr>
+          <tr><td><strong>Forward points</strong></td><td>Swap points</td><td>Forward rate minus spot rate. Positive when the base currency has the lower interest rate.</td></tr>
+          <tr><td><strong>Call and put</strong></td><td></td><td>A call is the right to buy the base currency at the strike. A put is the right to sell it. A EUR call is also a USD put.</td></tr>
+          <tr><td><strong>Strike</strong></td><td>Strike rate, exercise rate</td><td>The rate at which an option can be used.</td></tr>
+          <tr><td><strong>Premium</strong></td><td></td><td>What the buyer pays the seller for an option, at the start.</td></tr>
+          <tr><td><strong>Fixing</strong></td><td>Expiry cut, reference rate</td><td>The published rate at a stated time that decides whether an option is used.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases on EUR/USD.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="sources">
+      <li><a href="https://www.bis.org/publications/202509-commentary-otc-derivatives">Bank for International Settlements, OTC foreign exchange turnover in April 2025</a>, Triennial Central Bank Survey, September 2025. Turnover, the share of each instrument and currency, and what each instrument is used for.</li>
+      <li><a href="https://www.bis.org/publications/qr-201609/covered-interest-parity-lost-understanding-cross-currency-basis">Borio, McCauley, McGuire and Sushko, Covered interest parity lost: understanding the cross-currency basis</a>, BIS Quarterly Review, September 2016. The parity formula, how an FX swap works, forward points and the basis.</li>
+    </ul>
+  </section>
+</main>
+
+  <nav class="next" aria-label="Read next">
+    <a class="btn" href="../currency-linked-investment/">Next: Currency-Linked Investment</a>
+    <a class="btn" href="../fx-accumulator/">Then: FX Accumulator and TARF</a>
+    <a class="btn" href="../">Back to the overview</a>
+  </nav>
+
+  <p class="disclaimer">For learning only. Quoting conventions, the two-day spot settlement and the option payoffs are standard market practice and are not taken from the two sources. The workbench uses simple interest on a 360-day year for both currencies, ignores bid and offer spreads and the cross-currency basis, and takes the option premium as an input without pricing it. Not an offer or a recommendation.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core, imported by test/fx-basics.test.mjs ============
+// Covered interest parity with simple interest. spot and the result are quote currency per unit of base; rates in % a year.
+export const forward = (spot, rBase, rQuote, days, basis = 360) => spot * (1 + rQuote / 100 * days / basis) / (1 + rBase / 100 * days / basis);
+export const points = (spot, fwd, pip = 0.0001) => (fwd - spot) / pip;
+// An option on the base currency at expiry, per unit of base, in quote currency.
+// o = { type: "call" | "put", side: 1 bought | -1 sold, strike, premium }
+export const optionPnl = (o, st) => o.side * (Math.max(o.type === "call" ? st - o.strike : o.strike - st, 0) - o.premium);
+export const breakeven = o => o.type === "call" ? o.strike + o.premium : o.strike - o.premium;
+
+// ---------- content ----------
+const QUIZ = [
+  { ask: "EUR/USD moves from 1.1000 to 1.1100. Which currency has strengthened?",
+    opts: ["The euro", "The dollar", "Neither, the pair is a ratio"], right: 0,
+    why: "The rate is the price of the base currency, the euro, in dollars. One euro now costs more dollars." },
+  { ask: "You bought EUR 1,000,000 at 1.1000 and the rate is now 1.0950. What is the result?",
+    opts: ["A gain of USD 5,000", "A loss of USD 5,000", "A loss of EUR 5,000"], right: 1,
+    why: "50 pips against you on one million of the base currency: 1,000,000 × 0.0050, in the quote currency." },
+  { ask: "Spot is 1.1000. Euro deposits pay 2% and dollar deposits pay 4%. Where is the 90-day forward?",
+    opts: ["Below spot, about 1.0945", "At spot, 1.1000", "Above spot, about 1.1055"], right: 2,
+    why: "The euro has the lower rate, so it is worth more forward. 1.1000 × (1 + 4% × 90 ÷ 360) ÷ (1 + 2% × 90 ÷ 360) = 1.1055." },
+  { ask: "That forward is 55 pips above spot. What does it say about where the market expects the euro to go?",
+    opts: ["That it will rise 55 pips", "Nothing. It comes from the two interest rates.", "That it will fall 55 pips"], right: 1,
+    why: "The forward is the spot rate adjusted for interest. Any other forward price would let a dealer lock in a free profit with two deposits." },
+  { ask: "You sold a EUR put with a strike of 1.0800 for a premium of 100 pips. At expiry the rate is 1.0500. What is the result per euro?",
+    opts: ["A gain of 100 pips", "A loss of 200 pips", "A loss of 300 pips"], right: 1,
+    why: "The buyer sells you euros at 1.0800 that are worth 1.0500, which costs you 300 pips. You keep the 100 pips of premium." },
+  { ask: "Which FX contract has the largest daily turnover?",
+    opts: ["Spot", "FX swaps", "Options"], right: 1,
+    why: "FX swaps were 42% of turnover in April 2025, about $4 trillion a day. They are used to fund one currency with another and carry no exchange rate view." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  // ---------- helpers shared by the FX and gold pages of the set (copied in, so the file stays self-contained) ----------
+  const $ = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const signedMoney = x => (x >= 0 ? "+" : "−") + money(Math.abs(x));
+  const cell = (k, v, n, cls = "", tone = "") => `<div class="cell"${tone ? ` style="--tone:${tone}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+  const ticks = (a, b, step) => { const out = []; for (let v = a; v <= b + step / 1e6; v += step) out.push(+v.toFixed(8)); return out; };
+
+  function mountQuiz(QUIZ){
+    $("quiz").innerHTML = QUIZ.map((q, i) =>
+      `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+        `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+    $("quiz").addEventListener("click", e => {
+      const b = e.target.closest("button[data-q]"); if (!b) return;
+      const q = QUIZ[+b.dataset.q], card = b.closest(".q");
+      card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+      const why = card.querySelector(".why");
+      why.textContent = (+b.dataset.o === q.right ? "Correct. " : "Not this one. ") + q.why;
+      why.hidden = false;
+    });
+  }
+
+  // Terms rail. A row is [key, label, min, max, step, swatch] for a slider or [key, label, [[value, text], ...]] for a switch;
+  // a string alone is a group heading. Returns sync(), which pushes the state T back into the controls.
+  function mountRail(TERMS, T, fmt, onChange){
+    const rail = $("rail");
+    rail.innerHTML = TERMS.map(c => {
+      if (typeof c === "string") return `<h3 class="mono-label">${c}</h3>`;
+      const [key, label, a, max, step, sw] = c;
+      return Array.isArray(a)
+        ? `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${label}</span></div>
+             <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+        : `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${sw ? `<span class="swatch ${sw}"></span>` : ""}<label for="${key}">${label}</label></span><output id="${key}Out" for="${key}"></output></div>
+             <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+    }).join("");
+    const sliders = TERMS.filter(c => Array.isArray(c) && !Array.isArray(c[2]));
+    rail.addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; onChange(e.target.id); } });
+    rail.addEventListener("click", e => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      T[b.parentNode.dataset.key] = b.dataset.v; onChange(b.parentNode.dataset.key);
+    });
+    return () => {
+      for (const [key, , min, max] of sliders){
+        $(key).value = T[key];
+        $(key).style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+        $(key + "Out").textContent = fmt(key, T[key]);
+      }
+      rail.querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.v === String(T[g.dataset.key])))));
+    };
+  }
+  const showRow = (key, on) => { document.querySelector(`[data-row="${key}"]`).hidden = !on; };
+
+  // Chart frame: clears the svg, draws grid and axis labels, returns scales and drawing helpers.
+  // o = { x: [min, max], y: [min, max], xt: [...ticks], yt: [...ticks], xf, yf, xlabel, zero, right }
+  function frame(svg, o){
+    while (svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
+    const nar = narrow(), W = 780, H = +svg.getAttribute("viewBox").split(" ")[3];
+    const x0 = nar ? 84 : 66, x1 = W - (o.right ?? 24), y0 = H - 46, y1 = 58;
+    const X = v => x0 + (v - o.x[0]) / (o.x[1] - o.x[0]) * (x1 - x0), Y = v => y0 + (v - o.y[0]) / (o.y[1] - o.y[0]) * (y1 - y0);
+    const add = (tag, attrs, text) => svg.appendChild(el(tag, attrs, text));
+    for (const g of o.yt){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: g === o.zero ? "var(--ink-3)" : "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, o.yf(g));
+    }
+    for (const v of o.xt) add("text", { x: X(v), y: y0 + 18, "text-anchor": "middle" }, o.xf(v));
+    add("text", { x: x1, y: H - 3, "text-anchor": "end" }, o.xlabel);
+    let lastX = -999, row = 0;
+    const vline = (v, color, label) => {   // call left to right; a label too close to the previous one takes the next row up
+      if (v < o.x[0] || v > o.x[1]) return;
+      row = X(v) - lastX < (nar ? 120 : 84) ? row + 1 : 0; lastX = X(v);
+      add("line", { x1: X(v), x2: X(v), y1: y0, y2: y1 - 4 - 14 * row, stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: X(v), y: y1 - 8 - 14 * row, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    const hline = (v, color, label) => {
+      if (v < o.y[0] || v > o.y[1]) return;
+      add("line", { x1: x0, x2: x1, y1: Y(v), y2: Y(v), stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: x1 - 4, y: Y(v) - 5, "text-anchor": "end", fill: color, "class": "lvl" }, label);
+    };
+    const clamp = v => Math.max(o.y[0], Math.min(o.y[1], v));
+    const line = (pts, color = "var(--path)", dash = "", width = 2.5) => add("polyline", { points: pts.map(([a, b]) => X(a).toFixed(1) + "," + Y(clamp(b)).toFixed(1)).join(" "), fill: "none", stroke: color, "stroke-width": width, "stroke-linejoin": "round", "stroke-dasharray": dash });
+    const dot = (a, b, color = "var(--ink)", r = 6.5) => add("circle", { cx: X(a), cy: Y(clamp(b)), r, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
+    return { X, Y, add, vline, hline, line, dot, x0, x1, y0, y1 };
+  }
+  const onNarrowChange = fn => { let was = narrow(); window.addEventListener("resize", () => { if (narrow() !== was){ was = narrow(); fn(); } }); };
+
+  mountQuiz(QUIZ);
+  const N = 1000000;
+  const T = { spot: 1.1, rBase: 2, rQuote: 4, days: "90", type: "put", side: "-1", strike: 1.08, premium: 100, st: 1.05 };
+  const TERMS = [
+    "Market today",
+    ["spot", "EUR/USD spot", 1, 1.3, 0.0005],
+    ["rBase", "Euro interest rate", 0, 8, 0.05],
+    ["rQuote", "Dollar interest rate", 0, 8, 0.05],
+    ["days", "Forward maturity", [["30", "30d"], ["90", "90d"], ["180", "180d"], ["360", "360d"]]],
+    "Option on the euro",
+    ["type", "Type", [["call", "Call"], ["put", "Put"]]],
+    ["side", "Your side", [["1", "Bought"], ["-1", "Sold"]]],
+    ["strike", "Strike", 1, 1.3, 0.0025, "sw-strike"],
+    ["premium", "Premium", 0, 400, 5],
+    ["st", "EUR/USD at expiry", 0.9, 1.4, 0.0025]
+  ];
+  const sync = mountRail(TERMS, T, (key, v) => key === "premium" ? v + " pips" : key[0] === "r" ? v.toFixed(2) + "%" : v.toFixed(4), () => run());
+  const pips = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(1) + " pips";
+
+  function drawForward(){
+    const days = +T.days, F = d => forward(T.spot, T.rBase, T.rQuote, d), f360 = F(360);
+    const half = Math.max(0.01, Math.ceil(Math.abs(f360 - T.spot) * 100 + 0.2) / 100), a = T.spot - half, b = T.spot + half;
+    const f = frame($("chartF"), { x: [0, 360], y: [a, b], xt: ticks(0, 360, 60), yt: ticks(a, b, half / 2), zero: T.spot,
+      xf: v => v + "d", yf: g => g.toFixed(4), xlabel: "days to maturity" });
+    f.vline(days, "var(--brass)", T.days + " days");
+    f.line(ticks(0, 360, 30).map(d => [d, F(d)]));
+    f.dot(0, T.spot, "var(--ink-3)", 5);
+    f.dot(days, F(days));
+    $("legendF").textContent = "grey dot: spot · black dot: the forward";
+    const fwd = F(days), pts = points(T.spot, fwd), gap = T.rQuote - T.rBase;
+    $("verdictF").innerHTML =
+      cell("Why", gap === 0 ? "Forward equals spot" : gap > 0 ? "The euro trades at a forward premium" : "The euro trades at a forward discount",
+        gap === 0 ? "Both currencies earn the same interest, so there is nothing to adjust."
+          : `Euros earn ${Math.abs(gap).toFixed(2)}% a year ${gap > 0 ? "less" : "more"} than dollars. The forward price ${gap > 0 ? "adds" : "takes off"} that difference for ${days} days.`, "sm", "var(--path)") +
+      cell(`${days}-day forward`, fwd.toFixed(4), `Spot ${T.spot.toFixed(4)} × ${(1 + T.rQuote / 100 * days / 360).toFixed(5)} ÷ ${(1 + T.rBase / 100 * days / 360).toFixed(5)}`) +
+      cell("Forward points", pips(pts), "Forward minus spot. This is what a dealer quotes for an FX swap.") +
+      cell("EUR 1,000,000 forward", "USD " + money(N * fwd), `Against USD ${money(N * T.spot)} at spot. The difference is USD ${money(Math.abs(N * (fwd - T.spot)))}.`, "sm") +
+      cell("As an FX swap", "Sell at spot, buy back forward", `EUR 1,000,000 out today and back in ${days} days. The points are what it costs or earns to hold dollars in place of euros for that time.`, "sm");
+  }
+
+  function drawOption(){
+    const o = { type: T.type, side: +T.side, strike: T.strike, premium: T.premium / 10000 }, be = breakeven(o);
+    const P = x => optionPnl(o, x) * 10000;
+    const f = frame($("chartO"), { x: [0.9, 1.4], y: [-1500, 1500], xt: ticks(0.9, 1.4, 0.1), yt: ticks(-1500, 1500, 500), zero: 0,
+      xf: v => v.toFixed(2), yf: g => (g > 0 ? "+" : "") + g, xlabel: "EUR/USD at expiry" });
+    const marks = [[be, "var(--breach)", "break-even"], [T.strike, "var(--brass)", "strike"]].sort((p, q) => p[0] - q[0]);
+    for (const m of marks) f.vline(...m);
+    f.line([[0.9, P(0.9)], [T.strike, P(T.strike)], [1.4, P(1.4)]]);
+    f.dot(T.st, P(T.st));
+    $("legendO").textContent = `${o.side > 0 ? "bought" : "sold"} EUR ${T.type} · strike ${T.strike.toFixed(4)}`;
+    const r = P(T.st), used = T.type === "call" ? T.st > T.strike : T.st < T.strike, you = o.side > 0;
+    $("verdictO").innerHTML =
+      cell("At expiry", used ? "The option is used" : "The option expires unused",
+        used ? `The buyer ${T.type === "call" ? "buys" : "sells"} euros at ${T.strike.toFixed(4)} when the market is at ${T.st.toFixed(4)}. ${you ? "You are the buyer." : "You are the seller and must take the other side."}`
+             : `The market at ${T.st.toFixed(4)} is better for the buyer than the strike. ${you ? "You have lost the premium and nothing more." : "You keep the premium."}`, "sm", r >= 0 ? "var(--call)" : "var(--breach)") +
+      cell("Result per euro", pips(r), `${used ? `${(Math.abs(T.st - T.strike) * 10000).toFixed(0)} pips of payout` : "No payout"}, and ${T.premium} pips of premium ${you ? "paid" : "received"}.`, r >= 0 ? "up" : "down") +
+      cell("On EUR 1,000,000", (r >= 0 ? "+" : "−") + "USD " + money(Math.abs(r) * N / 10000), "Pips × notional ÷ 10,000.", r >= 0 ? "up" : "down") +
+      cell("Break-even", be.toFixed(4), `Strike ${T.type === "call" ? "plus" : "minus"} the premium.`) +
+      cell(you ? "Most you can lose" : "Most you can gain", T.premium + " pips", you ? "The premium. The gain is open-ended." : "The premium. The loss grows with the move.", "sm");
+  }
+
+  function run(){ sync(); drawForward(); drawOption(); }
+  onNarrowChange(run);
+  run();
+}
+</script>
+</body>
+</html>

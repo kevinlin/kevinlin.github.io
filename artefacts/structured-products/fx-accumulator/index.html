@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FX Accumulator and TARF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Shared look of the structured-products collection: bone paper, square cards, Spectral over IBM Plex.
+   Copied into every page of the set so each file stays self-contained. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#5A6670;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* loss */
+  --call:#215B49;       /* knock-out / gain */
+  --path:#1F4E63;       /* the note, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --lift-2: 0 1px 1px rgba(26,33,41,.04), 0 4px 8px rgba(26,33,41,.05), 0 12px 24px rgba(26,33,41,.06);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+    --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--path)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--ink);color:var(--paper);padding:8px 12px;font-size:14px;z-index:10}
+.skip:focus{top:8px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+main{display:flex;flex-direction:column;gap:48px;min-width:0}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.masthead,main > section{animation:rise 360ms var(--ease-out) both}
+main > section:nth-child(1){animation-delay:60ms}
+main > section:nth-child(2){animation-delay:120ms}
+main > section:nth-child(n+3){animation-delay:180ms}
+
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:18px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:65ch}
+.toc{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}
+.toc a{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;min-height:36px;box-shadow:inset 0 -1px 0 var(--rule);transition:box-shadow 120ms var(--ease-out)}
+@media (hover:hover){.toc a:hover{box-shadow:inset 0 -2px 0 var(--path)}}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:65ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+.note{font-size:14px;color:var(--ink-2);max-width:75ch;border-left:2px solid var(--brass);padding-left:12px}
+
+/* cells: outcomes and verdicts share one grid */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td strong{font-weight:600}
+td:first-child{min-width:9ch}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;font-size:14px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out),border-color 130ms var(--ease-out),transform 120ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:active:not(:disabled),.seg button:active,.q .opts button:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+@media (min-width:881px){.termsheet{position:sticky;top:16px}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:20px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term:last-child{border-bottom:none}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:32px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:44px;background:transparent;border:none;border-right:1px solid var(--rule);padding:6px 4px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:14px;color:var(--breach);flex-basis:100%;min-height:1.6em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.plot svg{touch-action:pan-y}
+svg text{font-family:var(--font-mono);font-size:11.5px;fill:var(--ink-3)}
+svg text.lvl{font-weight:500}
+@media (max-width:640px){.plot svg{min-width:600px} svg text{font-size:15px}}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.q .opts button{text-align:left;min-height:44px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14.5px;transition:border-color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+@media (hover:hover){.q .opts button:hover{border-color:var(--path)}}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.right::after{content:" ✓"}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .opts button.wrong::after{content:" ✗"}
+.q .why{font-size:14.5px;color:var(--ink-2)}
+
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;color:var(--ink-2);max-width:80ch}
+.disclaimer{font-size:13px;line-height:1.6;color:var(--ink-3);max-width:80ch;border-top:1px solid var(--rule);padding-top:20px}
+.next{display:flex;flex-wrap:wrap;gap:8px}
+.next a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only ---------- */
+#verdict .cell:first-child{grid-column:1/-1}
+details.fixings{padding:0}
+details.fixings summary{cursor:pointer;padding:12px 16px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em;min-height:44px;display:flex;align-items:center}
+details.fixings[open] summary{border-bottom:1px solid var(--rule-soft)}
+details.fixings tr.x2 td{color:var(--breach)}
+details.fixings tr.end td{font-weight:600}
+</style>
+</head>
+<body>
+<a class="skip" href="#workbench">Skip to the workbench</a>
+<div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/">ELN</a><a href="../equity-linked-note/#koeln">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/">ELI</a><a href="../barrier-reverse-convertible/">BRC</a><span class="sep" aria-hidden="true"></span><a href="../fx-basics/">FX</a><a href="../currency-linked-investment/">CLI</a><a href="../fx-accumulator/" aria-current="page">ACC</a><a href="../fx-accumulator/#tarf">TARF</a><span class="sep" aria-hidden="true"></span><a href="../tokenized-gold/">GOLD</a></span>
+  </nav>
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · leveraged FX · accumulator, TARF</div>
+    <h1>FX Accumulator and TARF</h1>
+    <p class="standfirst">An accumulator is a contract to buy a currency every week at a rate better than today's. It ends early if the currency rises, and it makes the investor buy double if the currency falls. A target redemption forward works the same way and ends once the investor's gains reach a set total.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#what">What it is</a>
+      <a href="#workbench">Workbench</a>
+      <a href="#inside">What is inside</a>
+      <a href="#tarf">TARF</a>
+      <a href="#family">The family</a>
+      <a href="#margin">Margin</a>
+      <a href="#words">Terms</a>
+      <a href="#check">Check yourself</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+<main>
+  <section id="what">
+    <div class="sec-head"><h2>A good rate, on terms that favour the bank</h2></div>
+    <div class="prose">
+      <p>The investor agrees to buy a fixed amount of one currency against another on a schedule, weekly or monthly, for up to a year. The price is the strike rate, set below the market rate on the trade date. No premium is paid at the start. The investor posts margin, and every period the two currencies change hands.</p>
+      <p>Two features pay for the favourable strike. The first is the knock-out. If the market reaches the knock-out rate, the contract ends and nothing more is bought, so a rally stops the gains. The second is gearing. On any fixing where the market is below the strike, the investor buys twice the amount, still at the strike. The contract never ends because of losses.</p>
+      <p>So the investor's gains are limited and counted once, and the losses run for the full tenor at double size. The Hong Kong Monetary Authority tells banks not to describe an accumulator as a way to buy an asset at a discount, and to give it the highest risk rating.</p>
+      <p>In DBS's booklet the investor can lose up to the maximum notional amount, which is the periodic amount times the gearing times the number of fixings. That is far more than the margin posted.</p>
+    </div>
+    <div class="cells">
+      <div class="cell" style="--tone:var(--call)"><span class="k">At or above the knock-out</span><span class="v sm">The contract ends</span><span class="n">Only what was settled before the knock-out counts. No more purchases.</span></div>
+      <div class="cell" style="--tone:var(--path)"><span class="k">At or above the strike</span><span class="v sm">Buy 1× at the strike</span><span class="n">The market is higher than the price paid, so this fixing shows a gain.</span></div>
+      <div class="cell" style="--tone:var(--breach)"><span class="k">Below the strike</span><span class="v sm">Buy 2× at the strike</span><span class="n">The market is lower than the price paid, on twice the amount.</span></div>
+    </div>
+  </section>
+
+  <section id="workbench">
+    <div class="sec-head">
+      <h2>Workbench: one contract, fixing by fixing</h2>
+      <p class="lead">DBS's example: buy EUR 100,000 a week against US dollars for 26 weeks. Spot 1.4300, strike 1.4000, knock-out 1.4600, gearing 2×. The first three paths reproduce the booklet's scenarios. Switch the product to the target version to see the same paths end on a profit target.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail" aria-label="Terms"></aside>
+      <div class="bench">
+        <div class="scenarios" id="presets">
+          <button type="button" class="btn" data-path="rally">Rally, knock-out after 6 weeks</button>
+          <button type="button" class="btn" data-path="range">8 weeks above, 18 below</button>
+          <button type="button" class="btn" data-path="fall">Below the strike all the way</button>
+          <button type="button" class="btn" data-path="random">New random path</button>
+        </div>
+        <figure class="card">
+          <figcaption><span>EUR/USD at each weekly fixing</span><b id="legend"></b></figcaption>
+          <div class="plot">
+            <svg id="chart" viewBox="0 0 780 380" role="img" aria-labelledby="chartTitle"><title id="chartTitle">EUR/USD over 26 weekly fixings against the strike and the knock-out rate, with the amount bought at each fixing</title></svg>
+          </div>
+        </figure>
+        <div class="cells" id="verdict" aria-live="polite"></div>
+        <details class="card fixings">
+          <summary>Every fixing</summary>
+          <div class="scroll"><table id="rows"></table></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="inside">
+    <div class="sec-head">
+      <h2>What is inside</h2>
+      <p class="lead">The HKMA describes an accumulator as a series of options or forward contracts in one contract, written by the customer. The split below is the usual way to read each fixing and is not taken from a term sheet.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Piece, per fixing</th><th>Investor's side</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Call at the strike</strong></td><td class="up-arrow">Bought, 1×</td><td>Above the strike the investor buys at the strike and gains the difference.</td></tr>
+          <tr><td><strong>Put at the strike</strong></td><td class="down-arrow">Sold, 2×</td><td>Below the strike the investor must buy twice the amount at the strike.</td></tr>
+          <tr><td><strong>Knock-out</strong></td><td class="down-arrow">Given to the bank</td><td>Cancels every remaining call and put once the market reaches the knock-out rate. The calls are the valuable ones at that point.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>The investor sells two puts for each call bought, and accepts a knock-out that removes the calls when they are worth most. The value of all that is spent on one thing: moving the strike below the forward rate. No cash changes hands at the start because the pieces are priced to cancel out, with the bank's margin inside.</p>
+      <p>This also explains the mark-to-market. DBS warns that the contract can lose value when implied volatility rises, even if the exchange rate has not moved. The investor is a net seller of options, and options cost more when volatility is higher.</p>
+    </div>
+  </section>
+
+  <section id="tarf">
+    <div class="sec-head">
+      <h2>TARF: a knock-out on total gains</h2>
+      <p class="lead">A target redemption forward, or target accumulator, has no knock-out rate. It ends when the investor's gains, added up fixing by fixing, reach the target. Losing fixings do not count towards the target and do not end anything.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Crédit Agricole CIB's example</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Client</td><td>An exporter selling US dollars against Indian rupees, so this one is a decumulator</td></tr>
+          <tr><td>Notional</td><td>USD 1,000,000 a month, twelve monthly fixings</td></tr>
+          <tr><td>Strike</td><td>83.30 rupees per dollar</td></tr>
+          <tr><td>Fixing at or below the strike</td><td>Client sells USD 1,000,000 at the strike</td></tr>
+          <tr><td>Fixing above the strike</td><td>Client sells USD 2,000,000 at the strike. Gearing 2×.</td></tr>
+          <tr><td>Gain counted at a fixing</td><td>The higher of strike − fixing and zero, times the notional</td></tr>
+          <tr><td>Cumulative profit cap</td><td>INR 600,000. The contract ends when the counted gains reach it.</td></tr>
+          <tr><td>Last settlement</td><td>The cap minus the gains counted so far</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>Take fixings of 83.00, 83.10 and 83.05. The first counts 0.30 × 1,000,000 = INR 300,000. The second adds 200,000. The third would add 250,000 and take the total past the cap, so the client is paid only the remaining 100,000 and the other nine fixings are cancelled. The client's best case over the whole year is INR 600,000.</p>
+      <p>Now take a rupee that weakens to 86 and stays there. Every month the client sells USD 2,000,000 at 83.30 when the market pays 86.00. That is INR 5,400,000 a month given up, for twelve months, with no target in sight.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Target type, from DBS</th><th>When it ends</th><th>The last fixing</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Uncapped</strong></td><td>Total gain reaches the target</td><td>Paid in full, so the total can end above the target.</td></tr>
+          <tr><td><strong>Capped</strong></td><td>Total gain reaches the target</td><td>Adjusted so the total gain equals the target exactly.</td></tr>
+          <tr><td><strong>Discrete</strong></td><td>A set number of winning fixings has occurred</td><td>Counted as one more winning fixing, whatever its size.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="family">
+    <div class="sec-head">
+      <h2>The family</h2>
+      <p class="lead">The same parts, pointed in different directions. Names and rules from the DBS product booklet.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Product</th><th>The investor's view</th><th>Each fixing</th><th>Ends early when</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Accumulator</strong></td><td>The currency will hold or rise a little</td><td>Buys at a strike below spot. Double below the strike.</td><td>The rate is at or above the knock-out</td></tr>
+          <tr><td><strong>Decumulator</strong></td><td>The currency will hold or fall a little</td><td>Sells at a strike above spot. Double above the strike.</td><td>The rate is at or below the knock-out</td></tr>
+          <tr><td><strong>Target accumulator or decumulator</strong></td><td>As above</td><td>As above</td><td>Total gains reach the target</td></tr>
+          <tr><td><strong>Pivot accumulator</strong></td><td>The rate will stay inside a range</td><td>Below the pivot rate it settles as an accumulator at the lower strike. At or above the pivot it settles as a decumulator at the upper strike.</td><td>Total gains reach the target, if it has one</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Minimum accumulation. Some knock-out accumulators guarantee that a minimum amount is exchanged even if the knock-out happens right after the trade date. It gives the investor a few sure fixings at the strike.</p>
+  </section>
+
+  <section id="margin">
+    <div class="sec-head">
+      <h2>Margin</h2>
+      <p class="lead">The investor does not pay the notional up front. DBS asks for an initial margin of 10% of the remaining maximum notional, plus the whole of any mark-to-market loss.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>DBS's example: USD/JPY, USD 100,000 a week, 52 weeks, strike 100.00, gearing 2×</th><th class="num">Maximum notional</th><th class="num">Initial margin</th><th class="num">Mark-to-market loss</th><th class="num">Margin required</th></tr></thead>
+        <tbody>
+          <tr><td>Day 1</td><td class="num">10,400,000</td><td class="num">1,040,000</td><td class="num">0</td><td class="num">1,040,000</td></tr>
+          <tr><td>Day 5</td><td class="num">10,400,000</td><td class="num">1,040,000</td><td class="num">100,000</td><td class="num">1,140,000</td></tr>
+          <tr><td>Day 7, after the first fixing</td><td class="num">10,200,000</td><td class="num">1,020,000</td><td class="num">200,000</td><td class="num">1,220,000</td></tr>
+          <tr><td>Day 30, and the bank raises the initial margin to 30%</td><td class="num">9,600,000</td><td class="num">2,880,000</td><td class="num">300,000</td><td class="num">3,180,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose">
+      <p>The last row is the one to remember. The bank sets the margin percentage and may change it, and it sets the mark-to-market value with its own pricing model. A margin call arrives at short notice, and positions can be closed out at a loss if it is not met.</p>
+      <p>The HKMA requires banks to sell accumulators only to professional investors, to measure the customer's exposure on the full notional amount, and to offer simpler alternatives with the reason for choosing the accumulator on record.</p>
+    </div>
+  </section>
+
+  <section id="words">
+    <div class="sec-head"><h2>Terms</h2></div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Term</th><th>Also called</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Currency pair</strong></td><td>Currency 1 / Currency 2</td><td>The rate is the amount of Currency 2 for one unit of Currency 1. The investor accumulates Currency 1.</td></tr>
+          <tr><td><strong>Strike rate</strong></td><td></td><td>The rate of every exchange. Below spot for an accumulator, above spot for a decumulator.</td></tr>
+          <tr><td><strong>Knock-out rate</strong></td><td>KO barrier</td><td>Ends the contract when the market reaches it.</td></tr>
+          <tr><td><strong>Gearing ratio</strong></td><td>Leverage, multiplier</td><td>How many times the periodic amount is exchanged when the rate is on the wrong side of the strike. Usually 2.</td></tr>
+          <tr><td><strong>Notional amount per FX transaction</strong></td><td>Periodic amount</td><td>The 1× amount exchanged at each fixing.</td></tr>
+          <tr><td><strong>Maximum notional amount</strong></td><td></td><td>Periodic amount × gearing × number of fixings. The size of the commitment and the base for margin.</td></tr>
+          <tr><td><strong>Expiration date</strong></td><td>Fixing date, observation</td><td>A day on which the spot rate is compared with the strike. Settlement usually follows two business days later.</td></tr>
+          <tr><td><strong>Target redemption limit</strong></td><td>Target, cumulative profit cap</td><td>The total gain that ends a TARF.</td></tr>
+          <tr><td><strong>TARF</strong></td><td>TRF, target redemption forward, target accumulator</td><td>The version that ends on gains reaching the target.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases. Unless a case says otherwise: buy EUR 100,000 a week for 26 weeks, strike 1.4000, knock-out 1.4600, gearing 2×.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="sources">
+      <li><a href="https://www.dbs.com.hk/iwov-resources/pdf/investments/6.%20Product%20Booklet%20-%20OTC%20AQ%20DQ_Target%20AQ%20DQ_Pivot%20Target%20AQ%20DQ%20on%20FX%20en.pdf">DBS Bank (Hong Kong), Product booklet: OTC accumulator and decumulator, target and pivot versions, on foreign exchange</a>, 2017. The rules for each product, the EUR/USD scenarios in the workbench, the three target types and the margin example.</li>
+      <li><a href="https://brdr.hkma.gov.hk/eng/doc-ldg/docId/getPdf/20250317-2-EN/20250317-2-EN.pdf">Hong Kong Monetary Authority, Guidance on selling of accumulators</a>, March 2025. The definition, the professional-investor rule, the risk rating and the warning against calling it a discount purchase.</li>
+      <li><a href="https://www.ca-cib.com/sites/default/files/2024-07/CACIB_PDS_Target_Redemption_Forward_0.pdf">Crédit Agricole CIB, Product disclosure document: target redemption forward</a>, 2024. The USD/INR example and the cumulative profit cap.</li>
+      <li><a href="https://www.ifec.org.hk/web/en/blog/2022/12/accumulators-and-decumulators-2.page">IFEC, Understand the contracts of accumulators</a>, 2022. Background on contract terms and the multiplier.</li>
+    </ul>
+  </section>
+</main>
+
+  <nav class="next" aria-label="Read next">
+    <a class="btn" href="../currency-linked-investment/">Before this: Currency-Linked Investment</a>
+    <a class="btn" href="../fx-basics/">Back to FX basics</a>
+    <a class="btn" href="../">Back to the overview</a>
+  </nav>
+
+  <p class="disclaimer">For learning only. The workbench observes the knock-out at each weekly fixing, while real contracts may observe it continuously. It values gains and losses by simple arithmetic against the spot rate and does not model mark-to-market, margin calls, bid and offer spreads or the bank's credit risk. Terms differ by bank, and the term sheet is the reference. Not an offer or a recommendation.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core, imported by test/fx-accumulator.test.mjs ============
+// t = { side: 1 buys Currency 1, -1 sells it; strike; notional per fixing; gearing;
+//       ko: knock-out rate or null; target: total gain per unit of notional that ends a TARF, or null; capped }
+// path = the spot rate at each fixing. Convention: the knock-out is tested at the fixing, before that fixing settles.
+export function run(t, path){
+  const rows = []; let counted = 0, net = 0, amount = 0, status = "ran to the end";
+  for (let i = 0; i < path.length; i++){
+    const spot = path[i], edge = t.side * (spot - t.strike);         // above zero: the strike beats the market
+    if (t.ko != null && t.side * (spot - t.ko) >= 0){ rows.push({ i, spot, mult: 0, gain: 0, net, event: "ko" }); status = "knocked out"; break; }
+    const mult = edge >= 0 ? 1 : t.gearing;
+    let gain = mult * t.notional * edge, event = "";
+    if (t.target != null && edge > 0){
+      if (counted + gain >= t.target * t.notional - 1e-9){
+        if (t.capped) gain = t.target * t.notional - counted;
+        event = "target"; status = "target reached";
+      }
+      counted += gain;
+    }
+    net += gain; amount += mult * t.notional;
+    rows.push({ i, spot, mult, gain, net, event });
+    if (event) break;
+  }
+  return { rows, status, amount, net, counted, settled: rows.filter(r => r.mult).length };
+}
+// DBS's way of valuing an accumulator: everything bought is held and valued at one later spot rate
+export const heldPnl = (t, amount, spot) => t.side * amount * (spot - t.strike);
+export const maxNotional = (t, n) => t.notional * t.gearing * n;
+
+// the three DBS paths; i runs 0 to 25
+export const PATHS = {
+  rally: i => i < 6 ? 1.432 + 0.004 * i + 0.003 * Math.sin(i * 2) : i === 6 ? 1.463 : Math.min(1.49, 1.465 + 0.002 * (i - 6)),
+  range: i => i === 25 ? 1.37 : i < 8 ? 1.428 - 0.003 * i + 0.002 * Math.sin(i * 2) : 1.394 - (i - 8) * 0.024 / 17 + 0.003 * Math.sin(i * 2),
+  fall: i => 1.395 - i * 0.0038
+};
+export const makePath = (name, n = 26) => Array.from({ length: n }, (_, i) => +PATHS[name](i).toFixed(4));
+
+// ---------- content ----------
+const QUIZ = [
+  { ask: "EUR/USD fixes at 1.4200 this week. What happens?",
+    opts: ["The investor buys EUR 100,000 at 1.4000", "The investor buys EUR 200,000 at 1.4000", "The investor buys EUR 100,000 at 1.4200"], right: 0,
+    why: "1.4200 is at or above the strike and below the knock-out, so the 1× amount is bought at the strike. The market is 0.02 higher, a gain of USD 2,000 on this fixing." },
+  { ask: "EUR/USD fixes at 1.3500 this week.",
+    opts: ["Nothing, the contract is suspended below the strike", "The investor buys EUR 100,000 at 1.3500", "The investor buys EUR 200,000 at 1.4000"], right: 2,
+    why: "Below the strike the gearing applies. EUR 200,000 costs USD 280,000 and is worth USD 270,000, a loss of USD 10,000 on this fixing." },
+  { ask: "The rate is at or above the strike for 8 fixings and below it for 18, with no knock-out. How many euros has the investor bought?",
+    opts: ["EUR 2.6 million", "EUR 4.4 million", "EUR 5.2 million"], right: 1,
+    why: "8 × 100,000 + 18 × 200,000 = 4.4 million. This is DBS's scenario 1(a)." },
+  { ask: "The rate stays below the strike for all 26 weeks and ends at 1.3000. The investor has held every euro bought. What is the result?",
+    opts: ["A loss of USD 260,000", "A loss of USD 520,000", "A loss limited to the margin of EUR 520,000"], right: 1,
+    why: "5.2 million euros bought at 1.4000 and worth 1.3000: 5,200,000 × 0.10. The margin is collateral and does not limit the loss." },
+  { ask: "After 6 weeks of fixings between the strike and the knock-out, the rate reaches 1.4600. What is the most the investor has accumulated?",
+    opts: ["EUR 600,000", "EUR 1.2 million", "EUR 2.6 million"], right: 0,
+    why: "Six fixings at or above the strike are six 1× amounts. The knock-out ends the contract, so a rally stops the gains when they are largest." },
+  { ask: "A capped TARF: sell USD 1,000,000 a month at 83.30, cap INR 600,000. The first two fixings counted INR 500,000 of gains. The third fixes at 83.05.",
+    opts: ["The client is paid INR 250,000 and the contract continues", "The client is paid INR 100,000 and the contract ends", "The client is paid INR 250,000 and the contract ends"], right: 1,
+    why: "The third fixing would add 250,000 and pass the cap. With a capped target the last payment is the cap minus what was already counted, and the remaining fixings are cancelled." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  // ---------- helpers shared by the FX and gold pages of the set (copied in, so the file stays self-contained) ----------
+  const $ = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const signedMoney = x => (x >= 0 ? "+" : "−") + money(Math.abs(x));
+  const cell = (k, v, n, cls = "", tone = "") => `<div class="cell"${tone ? ` style="--tone:${tone}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+  const ticks = (a, b, step) => { const out = []; for (let v = a; v <= b + step / 1e6; v += step) out.push(+v.toFixed(8)); return out; };
+
+  function mountQuiz(QUIZ){
+    $("quiz").innerHTML = QUIZ.map((q, i) =>
+      `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+        `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+    $("quiz").addEventListener("click", e => {
+      const b = e.target.closest("button[data-q]"); if (!b) return;
+      const q = QUIZ[+b.dataset.q], card = b.closest(".q");
+      card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+      const why = card.querySelector(".why");
+      why.textContent = (+b.dataset.o === q.right ? "Correct. " : "Not this one. ") + q.why;
+      why.hidden = false;
+    });
+  }
+
+  // Terms rail. A row is [key, label, min, max, step, swatch] for a slider or [key, label, [[value, text], ...]] for a switch;
+  // a string alone is a group heading. Returns sync(), which pushes the state T back into the controls.
+  function mountRail(TERMS, T, fmt, onChange){
+    const rail = $("rail");
+    rail.innerHTML = TERMS.map(c => {
+      if (typeof c === "string") return `<h3 class="mono-label">${c}</h3>`;
+      const [key, label, a, max, step, sw] = c;
+      return Array.isArray(a)
+        ? `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${label}</span></div>
+             <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+        : `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${sw ? `<span class="swatch ${sw}"></span>` : ""}<label for="${key}">${label}</label></span><output id="${key}Out" for="${key}"></output></div>
+             <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+    }).join("");
+    const sliders = TERMS.filter(c => Array.isArray(c) && !Array.isArray(c[2]));
+    rail.addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; onChange(e.target.id); } });
+    rail.addEventListener("click", e => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      T[b.parentNode.dataset.key] = b.dataset.v; onChange(b.parentNode.dataset.key);
+    });
+    return () => {
+      for (const [key, , min, max] of sliders){
+        $(key).value = T[key];
+        $(key).style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+        $(key + "Out").textContent = fmt(key, T[key]);
+      }
+      rail.querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.v === String(T[g.dataset.key])))));
+    };
+  }
+  const showRow = (key, on) => { document.querySelector(`[data-row="${key}"]`).hidden = !on; };
+
+  // Chart frame: clears the svg, draws grid and axis labels, returns scales and drawing helpers.
+  // o = { x: [min, max], y: [min, max], xt: [...ticks], yt: [...ticks], xf, yf, xlabel, zero, right }
+  function frame(svg, o){
+    while (svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
+    const nar = narrow(), W = 780, H = +svg.getAttribute("viewBox").split(" ")[3];
+    const x0 = nar ? 84 : 66, x1 = W - (o.right ?? 24), y0 = H - 46, y1 = 58;
+    const X = v => x0 + (v - o.x[0]) / (o.x[1] - o.x[0]) * (x1 - x0), Y = v => y0 + (v - o.y[0]) / (o.y[1] - o.y[0]) * (y1 - y0);
+    const add = (tag, attrs, text) => svg.appendChild(el(tag, attrs, text));
+    for (const g of o.yt){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: g === o.zero ? "var(--ink-3)" : "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, o.yf(g));
+    }
+    for (const v of o.xt) add("text", { x: X(v), y: y0 + 18, "text-anchor": "middle" }, o.xf(v));
+    add("text", { x: x1, y: H - 3, "text-anchor": "end" }, o.xlabel);
+    let lastX = -999, row = 0;
+    const vline = (v, color, label) => {   // call left to right; a label too close to the previous one takes the next row up
+      if (v < o.x[0] || v > o.x[1]) return;
+      row = X(v) - lastX < (nar ? 120 : 84) ? row + 1 : 0; lastX = X(v);
+      add("line", { x1: X(v), x2: X(v), y1: y0, y2: y1 - 4 - 14 * row, stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: X(v), y: y1 - 8 - 14 * row, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    const hline = (v, color, label) => {
+      if (v < o.y[0] || v > o.y[1]) return;
+      add("line", { x1: x0, x2: x1, y1: Y(v), y2: Y(v), stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: x1 - 4, y: Y(v) - 5, "text-anchor": "end", fill: color, "class": "lvl" }, label);
+    };
+    const clamp = v => Math.max(o.y[0], Math.min(o.y[1], v));
+    const line = (pts, color = "var(--path)", dash = "", width = 2.5) => add("polyline", { points: pts.map(([a, b]) => X(a).toFixed(1) + "," + Y(clamp(b)).toFixed(1)).join(" "), fill: "none", stroke: color, "stroke-width": width, "stroke-linejoin": "round", "stroke-dasharray": dash });
+    const dot = (a, b, color = "var(--ink)", r = 6.5) => add("circle", { cx: X(a), cy: Y(clamp(b)), r, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
+    return { X, Y, add, vline, hline, line, dot, x0, x1, y0, y1 };
+  }
+  const onNarrowChange = fn => { let was = narrow(); window.addEventListener("resize", () => { if (narrow() !== was){ was = narrow(); fn(); } }); };
+
+  mountQuiz(QUIZ);
+  const N = 26, NOTIONAL = 100000, SPOT0 = 1.43;
+  const T = { product: "acc", strike: 1.4, ko: 1.46, gearing: "2", target: 0.1, capped: "yes" };
+  let pathName = "range", path = makePath("range"), seed = 7;
+  const terms = () => ({ side: 1, strike: T.strike, notional: NOTIONAL, gearing: +T.gearing,
+    ko: T.product === "acc" ? T.ko : null, target: T.product === "tarf" ? T.target : null, capped: T.capped === "yes" });
+  const TERMS = [
+    "Product",
+    ["product", "Ends early on", [["acc", "Knock-out rate"], ["tarf", "Profit target"]]],
+    "Terms",
+    ["strike", "Strike rate", 1.36, 1.43, 0.0025, "sw-strike"],
+    ["ko", "Knock-out rate", 1.44, 1.5, 0.0025, "sw-ko"],
+    ["target", "Target, total gain per euro", 0.02, 0.3, 0.01, "sw-ko"],
+    ["capped", "Target type", [["yes", "Capped"], ["no", "Uncapped"]]],
+    ["gearing", "Gearing below the strike", [["1", "1×"], ["2", "2×"]]]
+  ];
+  const sync = mountRail(TERMS, T, (key, v) => key === "target" ? `${v.toFixed(2)} · USD ${money(v * NOTIONAL)}` : v.toFixed(4), () => draw());
+
+  function randomPath(){   // a seeded walk of about 1.2% a week, so a path can be read again after a slider moves
+    let a = seed++ * 2654435761 >>> 0, s = SPOT0;
+    const rnd = () => { a = a + 0x6D2B79F5 | 0; let x = Math.imul(a ^ a >>> 15, 1 | a); x ^= x + Math.imul(x ^ x >>> 7, 61 | x); return ((x ^ x >>> 14) >>> 0) / 4294967296; };
+    return Array.from({ length: N }, () => +(s *= 1 + 0.012 * (rnd() + rnd() + rnd() - 1.5) * 1.6).toFixed(4));
+  }
+  $("presets").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    pathName = b.dataset.path;
+    path = pathName === "random" ? randomPath() : makePath(pathName);
+    draw();
+  });
+  const usd = x => (x >= 0 ? "+" : "−") + "USD " + money(Math.abs(x));
+
+  function drawChart(t, r){
+    const lo = Math.min(1.28, ...path) - 0.01, hi = Math.max(1.5, ...path) + 0.01, a = Math.floor(lo * 50) / 50, b = Math.ceil(hi * 50) / 50;
+    const f = frame($("chart"), { x: [0.5, N + 0.5], y: [a, b], xt: ticks(2, N, 2), yt: ticks(a, b, 0.04),
+      xf: v => "wk " + v, yf: g => g.toFixed(2), xlabel: "weekly fixing" });
+    f.hline(SPOT0, "var(--ink-3)", "spot on the trade date");
+    f.hline(T.strike, "var(--brass)", "strike");
+    if (t.ko != null) f.hline(t.ko, "var(--call)", "knock-out");
+    const live = r.rows.length, pts = path.map((s, i) => [i + 1, s]);
+    f.line(pts.slice(0, live));
+    if (live < N) f.line(pts.slice(live - 1), "var(--ink-3)", "4 4", 1.5);
+    for (const row of r.rows){
+      if (row.mult) f.dot(row.i + 1, row.spot, row.mult > 1 ? "var(--breach)" : "var(--path)", row.mult > 1 ? 6 : 4);
+      if (row.event) f.add("path", { d: `M${f.X(row.i + 1)},${f.Y(row.spot) - 22} l-7,-11 h14 z`, fill: "var(--call)" });
+    }
+    $("legend").textContent = "small dot: buys 1× · large red dot: buys " + T.gearing + "× · triangle: contract ends";
+  }
+
+  function drawVerdict(t, r){
+    const last = r.rows[r.rows.length - 1], paid = r.amount * T.strike, final = path[N - 1], held = heldPnl(t, r.amount, final), max = maxNotional(t, N);
+    const head = r.status === "knocked out"
+      ? ["Knocked out in week " + (last.i + 1), "var(--call)", `EUR/USD fixed at ${last.spot.toFixed(4)}, at or above the knock-out of ${T.ko.toFixed(4)}. Nothing is bought that week or after.`]
+      : r.status === "target reached"
+      ? ["Target reached in week " + (last.i + 1), "var(--call)", `The counted gains reached ${T.target.toFixed(2)} per euro. The other ${N - r.rows.length} fixings are cancelled.`]
+      : ["Ran all 26 weeks", r.net >= 0 ? "var(--path)" : "var(--breach)", t.ko != null ? "The rate never reached the knock-out, so every fixing settled." : "The gains never reached the target, so every fixing settled."];
+    const geared = r.rows.filter(x => x.mult > 1).length;
+    $("verdict").innerHTML =
+      cell("Outcome", head[0], head[2], "sm", head[1]) +
+      cell("Euros bought", "EUR " + money(r.amount), `${r.settled - geared} fixings at 1× and ${geared} at ${T.gearing}×, for USD ${money(paid)} at the strike.`, "sm") +
+      cell("If each amount is sold at its fixing", usd(r.net), "The sum of every fixing's gain or loss against the spot rate that week.", r.net >= 0 ? "up" : "down") +
+      cell("If everything is held to week 26", usd(held), `EUR ${money(r.amount)} × (${final.toFixed(4)} − ${T.strike.toFixed(4)}). DBS values its scenarios this way.`, held >= 0 ? "up" : "down") +
+      cell("Commitment at the start", "EUR " + money(max), `The maximum notional. Initial margin at 10% is EUR ${money(max / 10)}.`, "sm");
+    $("rows").innerHTML = `<thead><tr><th>Week</th><th class="num">Spot</th><th>Buys</th><th class="num">Gain or loss</th><th class="num">Running total</th></tr></thead><tbody>` +
+      r.rows.map(x => `<tr class="${x.mult > 1 ? "x2" : ""}${x.event ? " end" : ""}"><td>${x.i + 1}</td><td class="num">${x.spot.toFixed(4)}</td><td>${
+        x.event === "ko" ? "Knocked out" : `EUR ${money(x.mult * NOTIONAL)}${x.event ? ", target reached" : ""}`}</td><td class="num">${x.mult ? signedMoney(x.gain) : ""}</td><td class="num">${signedMoney(x.net)}</td></tr>`).join("") + "</tbody>";
+  }
+
+  function draw(){
+    showRow("ko", T.product === "acc"); showRow("target", T.product === "tarf"); showRow("capped", T.product === "tarf");
+    sync();
+    const t = terms(), r = run(t, path);
+    drawChart(t, r); drawVerdict(t, r);
+  }
+  onNarrowChange(draw);
+  draw();
+}
+</script>
+</body>
+</html>

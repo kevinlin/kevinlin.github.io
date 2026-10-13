@@ -1121,7 +1121,11 @@
         "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     },
@@ -1235,7 +1239,11 @@
         "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     },
@@ -1252,7 +1260,11 @@
         "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     },
@@ -1269,7 +1281,11 @@
         "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     },
@@ -1286,7 +1302,11 @@
         "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     },
@@ -1303,7 +1323,95 @@
         "href=\"fixed-coupon-note.html": "href=\"fixed-coupon-note/",
         "href=\"bonus-enhanced-note.html": "href=\"bonus-enhanced-note/",
         "href=\"equity-linked-investment.html": "href=\"equity-linked-investment/",
-        "href=\"barrier-reverse-convertible.html": "href=\"barrier-reverse-convertible/"
+        "href=\"barrier-reverse-convertible.html": "href=\"barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"tokenized-gold/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-currency-linked-investment",
+      "source": "structured-products/currency-linked-investment.html",
+      "destination": "structured-products/currency-linked-investment/index.html",
+      "title": "Currency-linked investment",
+      "collection": "structured-products",
+      "order": 45,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-fx-accumulator",
+      "source": "structured-products/fx-accumulator.html",
+      "destination": "structured-products/fx-accumulator/index.html",
+      "title": "FX accumulator and TARF",
+      "collection": "structured-products",
+      "order": 50,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-fx-basics",
+      "source": "structured-products/fx-basics.html",
+      "destination": "structured-products/fx-basics/index.html",
+      "title": "Foreign exchange basics",
+      "collection": "structured-products",
+      "order": 40,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-tokenized-gold",
+      "source": "structured-products/tokenized-gold.html",
+      "destination": "structured-products/tokenized-gold/index.html",
+      "title": "Tokenized gold",
+      "collection": "structured-products",
+      "order": 60,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/",
+        "href=\"fx-basics.html": "href=\"../fx-basics/",
+        "href=\"currency-linked-investment.html": "href=\"../currency-linked-investment/",
+        "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
+        "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
       "date": "2026-10-13"
     }

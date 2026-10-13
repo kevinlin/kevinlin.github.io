@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tokenized Gold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Shared look of the structured-products collection: bone paper, square cards, Spectral over IBM Plex.
+   Copied into every page of the set so each file stays self-contained. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#5A6670;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* loss */
+  --call:#215B49;       /* knock-out / gain */
+  --path:#1F4E63;       /* the note, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --lift-2: 0 1px 1px rgba(26,33,41,.04), 0 4px 8px rgba(26,33,41,.05), 0 12px 24px rgba(26,33,41,.06);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+    --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--path)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--ink);color:var(--paper);padding:8px 12px;font-size:14px;z-index:10}
+.skip:focus{top:8px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+main{display:flex;flex-direction:column;gap:48px;min-width:0}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.masthead,main > section{animation:rise 360ms var(--ease-out) both}
+main > section:nth-child(1){animation-delay:60ms}
+main > section:nth-child(2){animation-delay:120ms}
+main > section:nth-child(n+3){animation-delay:180ms}
+
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:18px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:65ch}
+.toc{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}
+.toc a{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;min-height:36px;box-shadow:inset 0 -1px 0 var(--rule);transition:box-shadow 120ms var(--ease-out)}
+@media (hover:hover){.toc a:hover{box-shadow:inset 0 -2px 0 var(--path)}}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:65ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+.note{font-size:14px;color:var(--ink-2);max-width:75ch;border-left:2px solid var(--brass);padding-left:12px}
+
+/* cells: outcomes and verdicts share one grid */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td strong{font-weight:600}
+td:first-child{min-width:9ch}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;font-size:14px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out),border-color 130ms var(--ease-out),transform 120ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:active:not(:disabled),.seg button:active,.q .opts button:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+@media (min-width:881px){.termsheet{position:sticky;top:16px}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:20px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term:last-child{border-bottom:none}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:32px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:44px;background:transparent;border:none;border-right:1px solid var(--rule);padding:6px 4px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:14px;color:var(--breach);flex-basis:100%;min-height:1.6em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.plot svg{touch-action:pan-y}
+svg text{font-family:var(--font-mono);font-size:11.5px;fill:var(--ink-3)}
+svg text.lvl{font-weight:500}
+@media (max-width:640px){.plot svg{min-width:600px} svg text{font-size:15px}}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.q .opts button{text-align:left;min-height:44px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14.5px;transition:border-color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+@media (hover:hover){.q .opts button:hover{border-color:var(--path)}}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.right::after{content:" ✓"}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .opts button.wrong::after{content:" ✗"}
+.q .why{font-size:14.5px;color:var(--ink-2)}
+
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;color:var(--ink-2);max-width:80ch}
+.disclaimer{font-size:13px;line-height:1.6;color:var(--ink-3);max-width:80ch;border-top:1px solid var(--rule);padding-top:20px}
+.next{display:flex;flex-wrap:wrap;gap:8px}
+.next a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only ---------- */
+#verdict .cell:first-child{grid-column:1/-1}
+.chains{display:flex;flex-direction:column;gap:20px}
+.chain{padding:16px;display:flex;flex-direction:column;gap:12px}
+.chain .links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
+.chain .link{position:relative;border:1px solid var(--rule);background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.chain .link:not(:last-child)::after{content:"→";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-family:var(--font-mono)}
+.chain .link .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.chain .link b{font-weight:600;font-size:15px;line-height:1.35}
+.chain .link span:last-child{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.chain .link.metal{border-color:var(--brass);border-top-width:3px}
+@media (max-width:760px){.chain .links{grid-template-columns:1fr}.chain .link:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-25px;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<a class="skip" href="#cost">Skip to the cost explorer</a>
+<div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/">ELN</a><a href="../equity-linked-note/#koeln">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/">ELI</a><a href="../barrier-reverse-convertible/">BRC</a><span class="sep" aria-hidden="true"></span><a href="../fx-basics/">FX</a><a href="../currency-linked-investment/">CLI</a><a href="../fx-accumulator/">ACC</a><a href="../fx-accumulator/#tarf">TARF</a><span class="sep" aria-hidden="true"></span><a href="../tokenized-gold/" aria-current="page">GOLD</a></span>
+  </nav>
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · digital assets · tokenized gold</div>
+    <h1>Tokenized Gold</h1>
+    <p class="standfirst">A gold token is an entry on a digital ledger that stands for a weight of gold in a vault. Its price follows gold one for one. It has no strike, barrier or coupon, so the questions to ask are about the wrapper: who holds the metal, what the holder can claim, and what it costs to get in and out.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#what">What it is</a>
+      <a href="#chain">Who holds what</a>
+      <a href="#forms">Three tokens</a>
+      <a href="#cost">Cost explorer</a>
+      <a href="#risks">Risks</a>
+      <a href="#words">Terms</a>
+      <a href="#check">Check yourself</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+<main>
+  <section id="what">
+    <div class="sec-head"><h2>Gold in a vault, a record on a ledger</h2></div>
+    <div class="prose">
+      <p>An issuer buys gold bars and stores them. It then creates tokens on a ledger, each one standing for a set weight of that gold, and sells them. The ledger records who holds how many. When a token changes hands, the claim on the gold moves with it and the bars stay where they are.</p>
+      <p>This is an old arrangement on new record-keeping. A gold savings account and a share in a gold fund do the same job. Tokens change three things: the unit can be very small, a transfer settles in minutes, and with some tokens the holder can move the record without going through the issuer.</p>
+      <p>Tokens come in two kinds, and they differ more than the shared name suggests. A bank token lives on the bank's own ledger. It can be bought, sold and transferred only inside that bank, at the bank's price. A public-chain token lives on a network such as Ethereum. Anyone with a wallet can hold it, and it trades on crypto exchanges at whatever price buyers and sellers agree.</p>
+      <p>On this set of pages it is the one product with no option inside. A fall of 10% in gold is a fall of 10% in the token. The yield is zero.</p>
+    </div>
+    <div class="cells">
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Question 1</span><span class="v sm">Whose gold is it?</span><span class="n">Ownership of metal, or a promise from the issuer. And whether specific bars are set aside for holders.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Question 2</span><span class="v sm">How do I get out?</span><span class="n">Sell to the issuer, sell on a market, or take the metal. Each token allows a different mix.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Question 3</span><span class="v sm">What does it cost?</span><span class="n">A margin on each trade, a yearly fee, or both. Which is cheaper depends on how long the gold is held.</span></div>
+    </div>
+  </section>
+
+  <section id="chain">
+    <div class="sec-head">
+      <h2>Who holds what</h2>
+      <p class="lead">Between the holder and the bar there are always the same three things: an account or wallet, a ledger, and an issuer with a vault. The two kinds of token fill them differently.</p>
+    </div>
+    <div class="chains">
+      <div class="card chain">
+        <div class="mono-label">Bank token · HSBC Gold Token</div>
+        <div class="links">
+          <div class="link"><span class="k">Holder</span><b>HSBC investment account</b><span>A Hong Kong resident customer, using the app or online banking.</span></div>
+          <div class="link"><span class="k">Ledger</span><b>HSBC's own distributed ledger</b><span>Records XGT. One XGT is 0.001 troy ounce.</span></div>
+          <div class="link"><span class="k">Issuer</span><b>HSBC</b><span>Sells, buys back and sets both prices. There is no other market.</span></div>
+          <div class="link metal"><span class="k">Metal</span><b>Bars in HSBC's vault</b><span>Fractional ownership. The holder cannot take delivery.</span></div>
+        </div>
+      </div>
+      <div class="card chain">
+        <div class="mono-label">Public-chain token · Pax Gold, Tether Gold</div>
+        <div class="links">
+          <div class="link"><span class="k">Holder</span><b>A wallet, or an exchange account</b><span>Whoever controls the wallet's key controls the token.</span></div>
+          <div class="link"><span class="k">Ledger</span><b>A public blockchain</b><span>Ethereum for both. One token is one fine troy ounce.</span></div>
+          <div class="link"><span class="k">Issuer</span><b>Paxos, or TG Commodities</b><span>Creates and redeems tokens for verified customers. Everyone else trades on exchanges.</span></div>
+          <div class="link metal"><span class="k">Metal</span><b>London Good Delivery bars</b><span>Held by a custodian. Redeemable in whole bars.</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Allocated and unallocated. Allocated gold is specific bars set aside for the holders, identified by serial number. Unallocated gold is a balance the provider owes, with no bar behind any one customer. Paxos and Tether both describe their backing as allocated and let a holder look up the bars linked to a wallet address. This definition is standard market usage and is not quoted from the sources.</p>
+  </section>
+
+  <section id="forms">
+    <div class="sec-head">
+      <h2>Three tokens, side by side</h2>
+      <p class="lead">Each column is what the issuer says about its own product on the pages listed under sources, read in October 2026.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th></th><th>HSBC Gold Token (XGT)</th><th>Pax Gold (PAXG)</th><th>Tether Gold (XAUT)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Issuer</strong></td><td>HSBC, in Hong Kong</td><td>Paxos Trust Company, regulated by the US Office of the Comptroller of the Currency</td><td>TG Commodities, S.A. de C.V.</td></tr>
+          <tr><td><strong>One token is</strong></td><td>0.001 troy ounce</td><td>1 fine troy ounce</td><td>1 fine troy ounce, divisible to six decimal places</td></tr>
+          <tr><td><strong>Ledger</strong></td><td>HSBC's own distributed ledger</td><td>Ethereum and Solana</td><td>Ethereum and BNB Chain</td></tr>
+          <tr><td><strong>What the holder has</strong></td><td>Fractional ownership of the gold, with the limits set out in the Principal Brochure</td><td>Ownership of the underlying gold, held in custody by Paxos</td><td>An undivided interest in gold on a specific bar, which the issuer may move to another bar</td></tr>
+          <tr><td><strong>Where the gold is</strong></td><td>HSBC's vault, insured</td><td>LBMA vaults in London, audited monthly</td><td>With a custodian. Delivery is offered in Switzerland.</td></tr>
+          <tr><td><strong>Smallest purchase</strong></td><td>0.001 troy ounce</td><td>0.01 troy ounce from Paxos</td><td>50 tokens from the issuer. Less on exchanges.</td></tr>
+          <tr><td><strong>Taking the metal</strong></td><td>Not possible at any time</td><td>Yes, as London Good Delivery bars</td><td>Yes, in steps of one bar of up to 430 ounces</td></tr>
+          <tr><td><strong>Selling</strong></td><td>Back to HSBC only, at HSBC's price</td><td>To Paxos for US dollars at the gold price, or on an exchange</td><td>On an exchange. Or redeem a bar and have the issuer try to sell it in the Swiss market.</td></tr>
+          <tr><td><strong>Transfers</strong></td><td>To another HSBC customer by mobile number. The recipient has 13 days to accept.</td><td>To any wallet. Paxos charges no on-chain transfer fee.</td><td>To any wallet. The network's own fee applies.</td></tr>
+          <tr><td><strong>Fees</strong></td><td>A margin inside the price: at most 2% in gold trading hours, at most 5% outside. No storage fee.</td><td>No custody fee. Other fees were not read for this page.</td><td>0.25% to buy from the issuer and 0.25% to redeem, plus delivery or brokerage. USD 150 to be verified. No storage fee listed.</td></tr>
+          <tr><td><strong>Who can use it</strong></td><td>HSBC Hong Kong customers with an investment account and a Hong Kong address. Not US persons.</td><td>Not available in the EU</td><td>Verified customers for dealing with the issuer</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Other ways to hold gold, from Paxos's comparison</th><th>Yearly custody fee</th><th>Smallest size</th><th>Settles</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Major gold ETFs</strong></td><td>0.19% to 0.40%</td><td>One share</td><td>Two days after the trade</td></tr>
+          <tr><td><strong>A London 400-ounce bar</strong></td><td>0.05% to 0.25%</td><td>One bar</td><td>Two days after the trade</td></tr>
+          <tr><td><strong>Unallocated gold</strong></td><td>0% to 0.10%</td><td>Varies</td><td>Two days after the trade</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">The second table is an issuer comparing itself with its competitors. The fee ranges are still useful for the cost explorer below.</p>
+  </section>
+
+  <section id="cost">
+    <div class="sec-head">
+      <h2>Cost explorer</h2>
+      <p class="lead">A margin is paid once on the way in and once on the way out. A custody fee is paid every year. Set how much gold and for how long, and see where the lines cross. The gold price is your assumption and matters only for the fixed fee.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail" aria-label="Holding and fee assumptions"></aside>
+      <div class="bench">
+        <figure class="card">
+          <figcaption><span>Total cost of holding, % of the amount</span><b id="legend"></b></figcaption>
+          <div class="plot">
+            <svg id="chart" viewBox="0 0 780 360" role="img" aria-labelledby="chartTitle"><title id="chartTitle">Total cost of holding gold through a bank token, an issuer-bought public token and a gold ETF, against years held</title></svg>
+          </div>
+        </figure>
+        <div class="cells" id="verdict" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="risks">
+    <div class="sec-head">
+      <h2>What can go wrong</h2>
+      <p class="lead">From HSBC's risk warning and Tether Gold's terms and risk disclosure.</p>
+    </div>
+    <div class="cells">
+      <div class="cell" style="--tone:var(--breach)"><span class="k">Gold itself</span><span class="v sm">No protection</span><span class="n">The token falls when gold falls. HSBC states that the holder can lose the entire investment in the worst case.</span></div>
+      <div class="cell" style="--tone:var(--breach)"><span class="k">One buyer</span><span class="v sm">The issuer sets the exit</span><span class="n">An HSBC token can be sold only to HSBC, at its price, and HSBC may suspend dealing. Tether states it has no obligation to buy back tokens or bars.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Price gap</span><span class="v sm">Token and gold can differ</span><span class="n">On an exchange a token may trade above or below an ounce of gold. Only someone able to redeem whole bars can close the gap.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Off-hours</span><span class="v sm">Convenience costs</span><span class="n">HSBC's margin cap rises from 2% to 5% outside gold trading hours in London and Hong Kong.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">The chain</span><span class="v sm">Keys and forks</span><span class="n">A public-chain token is controlled by a wallet key. Tether's terms also warn that a blockchain can split into two versions.</span></div>
+      <div class="cell" style="--tone:var(--brass)"><span class="k">Not a deposit</span><span class="v sm">Not a time deposit</span><span class="n">HSBC states the token is not a time deposit and is not equivalent to one.</span></div>
+    </div>
+  </section>
+
+  <section id="words">
+    <div class="sec-head"><h2>Terms</h2></div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Troy ounce</strong></td><td>The unit for weighing precious metals, written toz. About 31.1 grams.</td></tr>
+          <tr><td><strong>London Good Delivery bar</strong></td><td>The bar that meets the London Bullion Market Association's standard. It weighs roughly 400 troy ounces, and no two weigh the same.</td></tr>
+          <tr><td><strong>LBMA</strong></td><td>London Bullion Market Association, which sets the standard for bars and vaults.</td></tr>
+          <tr><td><strong>Token</strong></td><td>A unit recorded on a digital ledger. Here, a claim on a set weight of gold.</td></tr>
+          <tr><td><strong>Distributed ledger</strong></td><td>A record kept in step across several computers. A bank can run a private one. A public blockchain is one that anyone can read and use.</td></tr>
+          <tr><td><strong>Fractional ownership</strong></td><td>Owning a share of a bar and not a whole bar.</td></tr>
+          <tr><td><strong>Redemption</strong></td><td>Giving tokens back to the issuer for metal or for money.</td></tr>
+          <tr><td><strong>Bank margin</strong></td><td>The amount HSBC adds to its selling price and takes off its buying price. It is the only charge on the HSBC token.</td></tr>
+          <tr><td><strong>Attestation</strong></td><td>An accountant's report that the gold held matches the tokens issued. Paxos publishes one each month.</td></tr>
+          <tr><td><strong>Wallet</strong></td><td>Software or hardware that holds the key controlling tokens on a public chain.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="sources">
+      <li><a href="https://www.hsbc.com.hk/investments/products/gold-token/">HSBC Hong Kong, HSBC Gold Token</a>. The unit, fractional ownership, the ban on physical delivery, selling back to the bank, transfers, the margin caps, eligibility and the risk warning. The Principal Brochure and Key Facts Statement were not read.</li>
+      <li><a href="https://www.paxos.com/pax-gold">Paxos, Pax Gold</a>. Backing, custody, redemption, the chains, and the comparison with ETFs, bars and unallocated gold.</li>
+      <li><a href="https://gold.tether.to/legal/feeschedule">Tether Gold, Terms of sale and service, fee schedule and risk disclosure</a>, and its <a href="https://gold.tether.to/faq">FAQ</a>. The nature of the holder's interest, the 430-token redemption rule, delivery in Switzerland, the fees and the price-gap and fork risks.</li>
+    </ul>
+  </section>
+</main>
+
+  <nav class="next" aria-label="Read next">
+    <a class="btn" href="../fx-basics/">Foreign Exchange</a>
+    <a class="btn" href="../equity-linked-note/">Start the notes from the ELN</a>
+    <a class="btn" href="../">Back to the overview</a>
+  </nav>
+
+  <p class="disclaimer">For learning only. Everything here is taken from the issuers' own public pages, which are marketing and legal documents and change without notice. The cost explorer adds fees with no compounding, holds the gold price flat, treats HSBC's margin as charged on both the purchase and the sale, and leaves out brokerage, exchange spreads, network fees and tax. Not an offer or a recommendation.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core, imported by test/tokenized-gold.test.mjs ============
+// c = { entry, exit: one-off charges in % of the amount; annual: % a year; fixed: a flat amount of money }
+export const totalCost = (c, amount, years) => amount * (c.entry + c.exit + c.annual * years) / 100 + (c.fixed || 0);
+export const costPct = (c, amount, years) => 100 * totalCost(c, amount, years) / amount;
+// years after which b has cost as much as a; null when b never catches up
+export function crossover(a, b, amount){
+  const perYear = b.annual - a.annual;
+  if (perYear <= 0) return null;
+  const y = (costPct(a, amount, 0) - costPct(b, amount, 0)) / perYear;
+  return y > 0 ? y : null;
+}
+// what an amount of gold is in each token, and whether it reaches Tether Gold's limits
+export const XGT_PER_OUNCE = 1000, XAUT_MIN_BUY = 50, XAUT_BAR = 430;
+export const xgt = ounces => Math.round(ounces * XGT_PER_OUNCE);
+
+// ---------- content ----------
+const QUIZ = [
+  { ask: "A customer holds 2,500 XGT. How much gold is that?",
+    opts: ["2,500 troy ounces", "2.5 troy ounces", "0.25 troy ounces"], right: 1,
+    why: "One XGT is 0.001 troy ounce. 2,500 × 0.001 = 2.5." },
+  { ask: "The same customer wants to collect that gold as a small bar from HSBC.",
+    opts: ["Possible for a fee", "Possible above one ounce", "Not possible"], right: 2,
+    why: "HSBC states that investors cannot take physical delivery at any time. The only exit is selling the tokens back to the bank." },
+  { ask: "Someone holds 100 Tether Gold tokens and asks the issuer for the metal.",
+    opts: ["They receive 100 ounces in small bars", "They cannot. Redemption is in whole bars of up to 430 ounces.", "They receive a 400-ounce bar and owe the difference"], right: 1,
+    why: "The fee schedule allows redemption in increments of 430 tokens, adjusted to the actual weight of the bar. With 100 tokens the way out is an exchange." },
+  { ask: "A bank token charges a 2% margin on the way in and 2% on the way out, with no storage fee. A gold ETF charges 0.40% a year. Ignoring dealing costs on the ETF, after how many years has the ETF cost as much?",
+    opts: ["5 years", "10 years", "It never does"], right: 1,
+    why: "The token costs 4% in total, whenever it is sold. 4% ÷ 0.40% a year = 10 years. For shorter holdings the yearly fee is cheaper." },
+  { ask: "Gold falls 10% while you hold a gold token. What happens to the token's value?",
+    opts: ["It falls about 10%", "It is protected at the purchase price", "It falls less, because tokens are backed by bars"], right: 0,
+    why: "The backing is what makes the token follow gold. There is no option or barrier in it, so the full move passes through." },
+  { ask: "A public-chain gold token trades on an exchange 1% below the gold price. Who can profit from closing that gap?",
+    opts: ["Any holder, by redeeming one token", "Only someone able to redeem whole bars with the issuer", "Nobody, the gap is a pricing error"], right: 1,
+    why: "Redemption for metal is in whole bars. A small holder can only sell at the exchange price, so a token can stay away from the gold price for a while." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  // ---------- helpers shared by the FX and gold pages of the set (copied in, so the file stays self-contained) ----------
+  const $ = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const signedMoney = x => (x >= 0 ? "+" : "−") + money(Math.abs(x));
+  const cell = (k, v, n, cls = "", tone = "") => `<div class="cell"${tone ? ` style="--tone:${tone}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+  const ticks = (a, b, step) => { const out = []; for (let v = a; v <= b + step / 1e6; v += step) out.push(+v.toFixed(8)); return out; };
+
+  function mountQuiz(QUIZ){
+    $("quiz").innerHTML = QUIZ.map((q, i) =>
+      `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+        `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+    $("quiz").addEventListener("click", e => {
+      const b = e.target.closest("button[data-q]"); if (!b) return;
+      const q = QUIZ[+b.dataset.q], card = b.closest(".q");
+      card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+      const why = card.querySelector(".why");
+      why.textContent = (+b.dataset.o === q.right ? "Correct. " : "Not this one. ") + q.why;
+      why.hidden = false;
+    });
+  }
+
+  // Terms rail. A row is [key, label, min, max, step, swatch] for a slider or [key, label, [[value, text], ...]] for a switch;
+  // a string alone is a group heading. Returns sync(), which pushes the state T back into the controls.
+  function mountRail(TERMS, T, fmt, onChange){
+    const rail = $("rail");
+    rail.innerHTML = TERMS.map(c => {
+      if (typeof c === "string") return `<h3 class="mono-label">${c}</h3>`;
+      const [key, label, a, max, step, sw] = c;
+      return Array.isArray(a)
+        ? `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${label}</span></div>
+             <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+        : `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${sw ? `<span class="swatch ${sw}"></span>` : ""}<label for="${key}">${label}</label></span><output id="${key}Out" for="${key}"></output></div>
+             <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+    }).join("");
+    const sliders = TERMS.filter(c => Array.isArray(c) && !Array.isArray(c[2]));
+    rail.addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; onChange(e.target.id); } });
+    rail.addEventListener("click", e => {
+      const b = e.target.closest(".seg button"); if (!b) return;
+      T[b.parentNode.dataset.key] = b.dataset.v; onChange(b.parentNode.dataset.key);
+    });
+    return () => {
+      for (const [key, , min, max] of sliders){
+        $(key).value = T[key];
+        $(key).style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+        $(key + "Out").textContent = fmt(key, T[key]);
+      }
+      rail.querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+        b.setAttribute("aria-pressed", String(b.dataset.v === String(T[g.dataset.key])))));
+    };
+  }
+  const showRow = (key, on) => { document.querySelector(`[data-row="${key}"]`).hidden = !on; };
+
+  // Chart frame: clears the svg, draws grid and axis labels, returns scales and drawing helpers.
+  // o = { x: [min, max], y: [min, max], xt: [...ticks], yt: [...ticks], xf, yf, xlabel, zero, right }
+  function frame(svg, o){
+    while (svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
+    const nar = narrow(), W = 780, H = +svg.getAttribute("viewBox").split(" ")[3];
+    const x0 = nar ? 84 : 66, x1 = W - (o.right ?? 24), y0 = H - 46, y1 = 58;
+    const X = v => x0 + (v - o.x[0]) / (o.x[1] - o.x[0]) * (x1 - x0), Y = v => y0 + (v - o.y[0]) / (o.y[1] - o.y[0]) * (y1 - y0);
+    const add = (tag, attrs, text) => svg.appendChild(el(tag, attrs, text));
+    for (const g of o.yt){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: g === o.zero ? "var(--ink-3)" : "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, o.yf(g));
+    }
+    for (const v of o.xt) add("text", { x: X(v), y: y0 + 18, "text-anchor": "middle" }, o.xf(v));
+    add("text", { x: x1, y: H - 3, "text-anchor": "end" }, o.xlabel);
+    let lastX = -999, row = 0;
+    const vline = (v, color, label) => {   // call left to right; a label too close to the previous one takes the next row up
+      if (v < o.x[0] || v > o.x[1]) return;
+      row = X(v) - lastX < (nar ? 120 : 84) ? row + 1 : 0; lastX = X(v);
+      add("line", { x1: X(v), x2: X(v), y1: y0, y2: y1 - 4 - 14 * row, stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: X(v), y: y1 - 8 - 14 * row, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    const hline = (v, color, label) => {
+      if (v < o.y[0] || v > o.y[1]) return;
+      add("line", { x1: x0, x2: x1, y1: Y(v), y2: Y(v), stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: x1 - 4, y: Y(v) - 5, "text-anchor": "end", fill: color, "class": "lvl" }, label);
+    };
+    const clamp = v => Math.max(o.y[0], Math.min(o.y[1], v));
+    const line = (pts, color = "var(--path)", dash = "", width = 2.5) => add("polyline", { points: pts.map(([a, b]) => X(a).toFixed(1) + "," + Y(clamp(b)).toFixed(1)).join(" "), fill: "none", stroke: color, "stroke-width": width, "stroke-linejoin": "round", "stroke-dasharray": dash });
+    const dot = (a, b, color = "var(--ink)", r = 6.5) => add("circle", { cx: X(a), cy: Y(clamp(b)), r, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
+    return { X, Y, add, vline, hline, line, dot, x0, x1, y0, y1 };
+  }
+  const onNarrowChange = fn => { let was = narrow(); window.addEventListener("resize", () => { if (narrow() !== was){ was = narrow(); fn(); } }); };
+
+  mountQuiz(QUIZ);
+  const T = { ounces: 10, years: 3, price: 4000, margin: 2, etf: 0.4 };
+  const TERMS = [
+    "Holding",
+    ["ounces", "Gold held", 1, 500, 1],
+    ["years", "Years held", 0, 15, 0.5],
+    ["price", "Gold price, your assumption", 2000, 6000, 50],
+    "Fees",
+    ["margin", "HSBC margin, each way", 0.1, 5, 0.1, "sw-strike"],
+    ["etf", "ETF custody fee a year", 0.19, 0.4, 0.01, "sw-ko"]
+  ];
+  const sync = mountRail(TERMS, T, (key, v) => key === "ounces" ? v + " oz" : key === "years" ? v.toFixed(1) : key === "price" ? "USD " + money(v) + " an ounce" :
+    key === "margin" ? v.toFixed(1) + "%" + (v > 2 ? " · outside trading hours" : v === 2 ? " · the cap in trading hours" : "") : v.toFixed(2) + "%", () => run());
+  const pct = x => x.toFixed(2) + "%";
+
+  function run(){
+    sync();
+    const amount = T.ounces * T.price;
+    const bank = { entry: T.margin, exit: T.margin, annual: 0 }, xaut = { entry: 0.25, exit: 0.25, annual: 0, fixed: 150 }, etf = { entry: 0, exit: 0, annual: T.etf };
+    const direct = T.ounces >= XAUT_MIN_BUY, top = Math.max(6, Math.ceil(costPct(bank, amount, 0) / 2) * 2 + 2);
+    const f = frame($("chart"), { x: [0, 15], y: [0, top], xt: ticks(0, 15, 3), yt: ticks(0, top, 2), zero: 0,
+      xf: v => v + "y", yf: g => g + "%", xlabel: "years held", right: 130 });
+    const series = [[bank, "var(--brass)", "HSBC Gold Token"], [etf, "var(--call)", "Gold ETF"]];
+    if (direct) series.push([xaut, "var(--path)", "XAUT from issuer"]);
+    f.vline(T.years, "var(--ink-3)", T.years.toFixed(1) + " years");
+    for (const [c, color, name] of series){
+      f.line([[0, costPct(c, amount, 0)], [15, costPct(c, amount, 15)]], color);
+      f.add("text", { x: f.x1 + 8, y: f.Y(Math.min(top, costPct(c, amount, 15))) + 4, fill: color, "class": "lvl" }, name);
+      f.dot(T.years, costPct(c, amount, T.years), color, 5.5);
+    }
+    $("legend").textContent = "USD " + money(amount) + " of gold";
+
+    const cross = crossover(bank, etf, amount), cheapest = series.map(s => [costPct(s[0], amount, T.years), s[2]]).sort((p, q) => p[0] - q[0])[0];
+    $("verdict").innerHTML =
+      cell("Cheapest over " + T.years.toFixed(1) + " years", cheapest[1], cross == null ? "The token's margin is already below the ETF's fee for any holding period." :
+        `The HSBC token's margin is paid once. The ETF's fee overtakes it after ${cross.toFixed(1)} years.`, "sm", "var(--path)") +
+      cell("HSBC Gold Token", pct(costPct(bank, amount, T.years)), `USD ${money(totalCost(bank, amount, T.years))}. ${money(xgt(T.ounces))} XGT, bought and sold at ${T.margin.toFixed(1)}% each way.`) +
+      cell("Gold ETF", pct(costPct(etf, amount, T.years)), `USD ${money(totalCost(etf, amount, T.years))}. ${T.etf.toFixed(2)}% a year, before dealing costs.`) +
+      (direct
+        ? cell("XAUT from the issuer", pct(costPct(xaut, amount, T.years)), `USD ${money(totalCost(xaut, amount, T.years))}. 0.25% to buy, 0.25% to redeem and USD 150 to be verified. ${T.ounces >= XAUT_BAR ? "Enough for a bar." : `Redeeming needs ${XAUT_BAR} tokens, so the exit is an exchange and its spread.`}`)
+        : cell("XAUT from the issuer", "Not available", `The issuer sells from ${XAUT_MIN_BUY} tokens. Below that the token is bought on an exchange at the exchange's price and spread.`, "sm")) +
+      cell("Taking the metal", T.ounces >= XAUT_BAR ? "Possible on a public chain" : "Not at this size", "HSBC never delivers. Pax Gold and Tether Gold deliver whole bars of roughly 400 ounces.", "sm");
+  }
+  onNarrowChange(run);
+  run();
+}
+</script>
+</body>
+</html>
