@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equity-Linked Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Shared look of the structured-products collection: bone paper, square cards, Spectral over IBM Plex.
+   Copied into every page of the set so each file stays self-contained. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#5A6670;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* loss */
+  --call:#215B49;       /* knock-out / gain */
+  --path:#1F4E63;       /* the note, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --lift-2: 0 1px 1px rgba(26,33,41,.04), 0 4px 8px rgba(26,33,41,.05), 0 12px 24px rgba(26,33,41,.06);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+    --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--path)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--ink);color:var(--paper);padding:8px 12px;font-size:14px;z-index:10}
+.skip:focus{top:8px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+main{display:flex;flex-direction:column;gap:48px;min-width:0}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.masthead,main > section{animation:rise 360ms var(--ease-out) both}
+main > section:nth-child(1){animation-delay:60ms}
+main > section:nth-child(2){animation-delay:120ms}
+main > section:nth-child(n+3){animation-delay:180ms}
+
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:18px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:65ch}
+.toc{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}
+.toc a{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;min-height:36px;box-shadow:inset 0 -1px 0 var(--rule);transition:box-shadow 120ms var(--ease-out)}
+@media (hover:hover){.toc a:hover{box-shadow:inset 0 -2px 0 var(--path)}}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:65ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+.note{font-size:14px;color:var(--ink-2);max-width:75ch;border-left:2px solid var(--brass);padding-left:12px}
+
+/* cells: outcomes and verdicts share one grid */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td strong{font-weight:600}
+td:first-child{min-width:9ch}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;font-size:14px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out),border-color 130ms var(--ease-out),transform 120ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:active:not(:disabled),.seg button:active,.q .opts button:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+@media (min-width:881px){.termsheet{position:sticky;top:16px}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:20px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term:last-child{border-bottom:none}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:32px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:44px;background:transparent;border:none;border-right:1px solid var(--rule);padding:6px 4px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:14px;color:var(--breach);flex-basis:100%;min-height:1.6em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.plot svg{touch-action:pan-y}
+svg text{font-family:var(--font-mono);font-size:11.5px;fill:var(--ink-3)}
+svg text.lvl{font-weight:500}
+@media (max-width:640px){.plot svg{min-width:600px} svg text{font-size:15px}}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.q .opts button{text-align:left;min-height:44px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14.5px;transition:border-color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+@media (hover:hover){.q .opts button:hover{border-color:var(--path)}}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.right::after{content:" ✓"}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .opts button.wrong::after{content:" ✗"}
+.q .why{font-size:14.5px;color:var(--ink-2)}
+
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;color:var(--ink-2);max-width:80ch}
+.disclaimer{font-size:13px;line-height:1.6;color:var(--ink-3);max-width:80ch;border-top:1px solid var(--rule);padding-top:20px}
+.next{display:flex;flex-wrap:wrap;gap:8px}
+.next a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only ---------- */
+tr.now td{background:var(--surface-2);font-weight:500}
+.scenarios .msg:empty{display:none}
+</style>
+</head>
+<body>
+<a class="skip" href="#workbench">Skip to the workbench</a>
+<div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/" aria-current="page">ELN</a><a href="../equity-linked-note/#koeln" aria-current="page">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/">ELI</a><a href="../barrier-reverse-convertible/">BRC</a></span>
+  </nav>
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · yield enhancement · ELN and KOELN</div>
+    <h1>Equity-Linked Note</h1>
+    <p class="standfirst">An ELN is bought below its face value and repays the face value if a share holds above a strike price. If the share ends below the strike, the investor gets the share. A knock-out ELN adds one rule: the note ends early, at face value, as soon as the share rallies to a set price.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#what">What it is</a>
+      <a href="#yield">The yield</a>
+      <a href="#workbench">Workbench</a>
+      <a href="#koeln">What the knock-out adds</a>
+      <a href="#dates">Dates and terms</a>
+      <a href="#check">Check yourself</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+<main>
+  <section id="what">
+    <div class="sec-head"><h2>A deposit and a sold put in one note</h2></div>
+    <div class="prose">
+      <p>The investor pays a price below 100% of the notional, for example 97%. The note pays no coupon. On the final valuation date one closing price decides the result. If the share closes at or above the strike price, the note repays 100% in cash and the investor keeps the 3% difference. If the share closes below the strike price, the investor receives shares instead of cash: the notional divided by the strike price.</p>
+      <p>That is what a person gets who places a deposit and, at the same time, sells a put option on the share. The discount is the deposit interest plus the option premium. The premium is the larger part, which is why the yield is far above a deposit rate.</p>
+      <p>The trade is a view that the share will stay flat or rise a little. A strong rally earns the investor nothing extra, because the gain stops at the discount. A fall is carried in full below the strike price.</p>
+    </div>
+    <div class="cells">
+      <div class="cell" style="--tone:var(--call)"><span class="k">KOELN only</span><span class="v sm">Knocked out early</span><span class="n">On an observation day the share closes at or above the knock-out price. The note repays 100% a few days later and is over.</span></div>
+      <div class="cell" style="--tone:var(--path)"><span class="k">Outcome 1</span><span class="v sm">Redeemed at par</span><span class="n">The share closes at or above the strike price on the final valuation date. The investor receives 100% in cash.</span></div>
+      <div class="cell" style="--tone:var(--breach)"><span class="k">Outcome 2</span><span class="v sm">Converted into shares</span><span class="n">The share closes below the strike price. The investor receives notional ÷ strike price shares, each now worth less than the strike.</span></div>
+    </div>
+    <p class="note">Issuers differ on the edge case. UBS and uSMART pay par when the share closes at or above the strike price. BOCI's example pays par only when it closes above. This page uses at or above. Read the term sheet for the note in front of you.</p>
+  </section>
+
+  <section id="yield">
+    <div class="sec-head">
+      <h2>The yield is the discount, turned into a yearly rate</h2>
+      <p class="lead">An ELN is quoted by its price and by a yield per year. The two are the same fact. The formula below is the one BOCI and MFG print, and it reproduces the UBS figures too.</p>
+    </div>
+    <div class="cells">
+      <div class="cell"><span class="k">Formula</span><span class="v sm">(100 ÷ note price − 1) × 365 ÷ days</span><span class="n">Days run from the issue date to the day the money comes back.</span></div>
+      <div class="cell"><span class="k">BOCI bull ELN</span><span class="v">14.32% p.a.</span><span class="n">Price 98.76%, 32 days, strike at 92% of spot.</span></div>
+      <div class="cell"><span class="k">UBS knock-out ELN</span><span class="v">12.29% p.a.</span><span class="n">Price 99%, 30 days, strike at 80%, held to maturity.</span></div>
+      <div class="cell"><span class="k">Break-even price</span><span class="v sm">strike price × note price</span><span class="n">Strike 315 at a price of 94.5% gives 297.68. Below that the delivered shares are worth less than the investor paid.</span></div>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Change to the terms</th><th>Discount</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>A more volatile share</td><td class="up-arrow">Deeper</td><td>The put the investor sells is worth more.</td></tr>
+          <tr><td>A higher strike price</td><td class="up-arrow">Deeper</td><td>The share has less room to fall before the investor has to buy it.</td></tr>
+          <tr><td>A longer tenor</td><td class="up-arrow">Deeper</td><td>More time for the share to fall. The yearly rate does not always rise with it.</td></tr>
+          <tr><td>Adding a knock-out</td><td class="down-arrow">Smaller</td><td>The put can disappear before maturity. BOCI and MFG both state that a KOELN yields less than a plain ELN with the same strike and tenor.</td></tr>
+          <tr><td>Worst of a basket in place of one share</td><td class="up-arrow">Deeper</td><td>Only one share has to fall. UBS calls this linking to the laggard.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead">The first three rows are standard option pricing and are not taken from a source. The last two are.</p>
+  </section>
+
+  <section id="workbench">
+    <div class="sec-head">
+      <h2>Workbench: one note, one price path</h2>
+      <p class="lead">A note of 1,000,000 on one share with an initial price of 50.00. Set the terms, then draw price paths until you have seen each outcome. Switch between the plain ELN and the KOELN on the same path to see what the knock-out changes.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail" aria-label="Terms"></aside>
+      <div class="bench">
+        <div class="scenarios">
+          <button type="button" class="btn solid" data-want="any">New path</button>
+          <button type="button" class="btn" data-want="ko" id="wantKo">Find a knock-out</button>
+          <button type="button" class="btn" data-want="par">Find a redemption at par</button>
+          <button type="button" class="btn" data-want="delivery">Find a conversion into shares</button>
+          <span class="msg" id="msg" role="status"></span>
+        </div>
+        <figure class="card">
+          <figcaption><span>Daily closing price, % of the initial price</span><b id="pathNote"></b></figcaption>
+          <div class="plot">
+            <svg id="chart" viewBox="0 0 780 340" role="img" aria-labelledby="chartTitle"><title id="chartTitle">Simulated daily closing prices of the share against the strike price and the knock-out price</title></svg>
+          </div>
+        </figure>
+        <div class="cells" id="verdict" aria-live="polite"></div>
+        <figure class="card">
+          <figcaption><span>Profit or loss at maturity, % of notional</span><b id="payNote"></b></figcaption>
+          <div class="plot">
+            <svg id="payoff" viewBox="0 0 780 260" role="img" aria-labelledby="payTitle"><title id="payTitle">Profit or loss at maturity against the final price of the share, compared with holding the share</title></svg>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="koeln">
+    <div class="sec-head">
+      <h2>What the knock-out adds</h2>
+      <p class="lead">A KOELN is the same note with one more level, set above the initial price. UBS calls it the callable price. If the share reaches it on an observation day, the note is redeemed early at 100%.</p>
+    </div>
+    <div class="prose">
+      <p>The investor earns the whole discount in less time, so the yearly rate of the finished trade is higher. The amount of money is the same. The cost is that the cash comes back early, into a market that has just risen, and the investor has to find something else to do with it.</p>
+      <p>Before the knock-out, nothing is different from a plain ELN. If the share never reaches the knock-out price, the strike price decides at maturity as usual. The knock-out does not protect against a fall.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Days from issue to repayment</th><th class="num">Return</th><th class="num">Yield p.a.</th><th>What happened</th></tr></thead>
+        <tbody id="ladder"></tbody>
+      </table>
+    </div>
+    <p class="lead">The table uses the note price from the workbench. Set the price to 99% and the tenor to one month and it shows the figures of the UBS example: 36.87% a year for a knock-out repaid after 10 days, and 12.29% at maturity.</p>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th></th><th>Plain ELN</th><th>Knock-out ELN</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Levels</strong></td><td>Strike price</td><td>Strike price and knock-out price</td></tr>
+          <tr><td><strong>Days that count</strong></td><td>The final valuation date only</td><td>Every observation day, then the final valuation date</td></tr>
+          <tr><td><strong>Life of the note</strong></td><td>Known on the trade date</td><td>Unknown. It can end on the first observation day.</td></tr>
+          <tr><td><strong>Discount, same strike and tenor</strong></td><td>Larger</td><td>Smaller</td></tr>
+          <tr><td><strong>Best case</strong></td><td>100% at maturity</td><td>100% early, and the same discount earned in days or weeks</td></tr>
+          <tr><td><strong>Worst case</strong></td><td colspan="2">Shares bought at the strike price that are worth far less, or nothing if the issuer fails</td></tr>
+          <tr><td><strong>A system has to</strong></td><td>Value one closing price</td><td>Check the price on every observation day, send an early redemption notice and cancel the rest of the calendar</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">How the knock-out is observed changes the odds. A daily-close knock-out ignores a price that spikes during the day and falls back. A continuous knock-out, which BOCI describes, looks at every traded price and so ends the note more easily. This page models the daily close.</p>
+  </section>
+
+  <section id="dates">
+    <div class="sec-head">
+      <h2>Dates and terms</h2>
+      <p class="lead">Four dates carry an ELN. The example dates are from BOCI's one-month bull ELN, whose 32 days run from the settlement date to the maturity date.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Date</th><th>Example</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Trade date</strong></td><td>28 May 2020</td><td>The price, the strike and the initial price of the share are fixed.</td></tr>
+          <tr><td><strong>Settlement date</strong>, issue date</td><td>11 Jun 2020</td><td>The investor pays the note price. Yield days start here.</td></tr>
+          <tr><td><strong>Final valuation date</strong>, observation date</td><td>9 Jul 2020</td><td>The closing price is compared with the strike price.</td></tr>
+          <tr><td><strong>Maturity date</strong></td><td>13 Jul 2020</td><td>Cash or shares reach the investor. Stamp duty and levies on delivered shares are the investor's cost.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Term</th><th>Also called</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Notional</td><td>Denomination, nominal amount</td><td>The amount repaid at par, and the base for the number of shares.</td></tr>
+          <tr><td>Note price</td><td>Issue price, purchase price</td><td>What the investor pays, as a percentage of the notional. Below 100%.</td></tr>
+          <tr><td>Initial price</td><td>Initial fixing, spot at execution</td><td>The share price on the trade date. Levels are percentages of it.</td></tr>
+          <tr><td>Strike price</td><td>Conversion price</td><td>The price at which the investor buys the share if it closes below.</td></tr>
+          <tr><td>Knock-out price</td><td>Callable price, KO level</td><td>KOELN only. Reaching it on an observation day ends the note at par.</td></tr>
+          <tr><td>Observation day</td><td>KO observation</td><td>KOELN only. Daily close, another interval, or continuous during trading hours.</td></tr>
+          <tr><td>Early redemption date</td><td>Early redemption settlement date</td><td>KOELN only. A few business days after the knock-out. Yield days end here.</td></tr>
+          <tr><td>Settlement method</td><td>Physical or cash</td><td>Shares at the strike price, or their cash value: notional × final price ÷ strike price.</td></tr>
+          <tr><td>Yield</td><td>Annualised yield</td><td>The discount as a yearly rate. It is earned only if the note redeems at par.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases. The numbers come from the uSMART, UBS and BOCI examples.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="sources">
+      <li><a href="https://www.ubs.com/global/en/wealthmanagement/regulatory/product-document-library/_jcr_content/root/contentarea/mainpar/toplevelgrid/col_1/table_2097763084.0023438471.file/dGFibGVUZXh0PS9jb250ZW50L2RhbS9hc3NldHMvd20vZ2xvYmFsL2RvYy9rby1lcXVpdHktbGlua2VkLW5vdGVzLnBkZg==/ko-equity-linked-notes.pdf">UBS, Knock-Out Equity Linked Note fact sheet</a>. The three redemption scenarios, daily-close observation at or above the callable price, and the yield tables for a note priced at 99%.</li>
+      <li><a href="https://www.bocionline.com/en/info_center/education/ETN/index.shtml">BOCI, Equity Linked Notes</a>. The yield formula, the dates of the bull ELN example and the continuous KO bull ELN priced at 97.29%.</li>
+      <li><a href="https://www.mfghk.com/investor-education/equity-linked-notes/">MFG, Equity Linked Notes</a>. The same examples, and the description of a KO ELN as a deposit plus a sold put.</li>
+      <li><a href="https://sg.usmartsecurities.com/news/7201487513788236291">uSMART Securities, Equity-Linked Notes guide</a>. The 94.5% example with physical and cash settlement, and the KOELN and worst-of names.</li>
+    </ul>
+  </section>
+</main>
+
+  <nav class="next" aria-label="Read next">
+    <a class="btn" href="../fixed-coupon-note/">Next: Fixed Coupon Note</a>
+    <a class="btn" href="../equity-linked-investment/">The Hong Kong retail form: ELI</a>
+    <a class="btn" href="../">Back to the overview</a>
+  </nav>
+
+  <p class="disclaimer">For learning only. Prices are simulated with a zero-drift random walk, so the note price here is something you type in and has not been priced. A month is 21 trading days and calendar days are estimated from them. The model leaves out fees, dividends, issuer credit risk and the price movement between final valuation and delivery. Conventions differ by issuer, and the term sheet of the actual note is the reference. Not an offer or a recommendation.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core, imported by test/equity-linked-note.test.mjs ============
+export const DPM = 21, DPY = 252;                               // trading days per month and per year
+export const calDays = d => Math.round(d * 365 / DPY);          // trading days -> calendar days, an estimate
+// The formula BOCI and MFG print: (100 / note price - 1) x 365 / days
+export const yieldPa = (price, days) => (100 / price - 1) * 365 / days;
+export const breakEven = t => t.strike * t.price / 100;         // % of the initial price
+
+export function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const gauss = r => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
+// One closing price per trading day, in % of the initial price. Zero drift.
+export function simulate(months, vol, seed){
+  const n = months * DPM, r = mulberry32(seed >>> 0), v = vol / 100, dt = 1 / DPY, path = new Float64Array(n + 1);
+  path[0] = 100;
+  for (let d = 1; d <= n; d++) path[d] = path[d - 1] * Math.exp(-0.5 * v * v * dt + v * Math.sqrt(dt) * gauss(r));
+  return path;
+}
+
+// Settle one note on one path. t = { price, strike, ko }, all in %; ko is null for a plain ELN.
+// Convention: knock-out on a daily close AT OR ABOVE the level, par on a final close AT OR ABOVE the strike (UBS wording).
+export function settle(t, path, notional, initPrice){
+  const n = path.length - 1, paid = notional * t.price / 100;
+  let koIdx = -1;
+  if (t.ko != null) for (let d = 1; d <= n; d++) if (path[d] >= t.ko){ koIdx = d; break; }
+  const endIdx = koIdx >= 0 ? koIdx : n, level = path[endIdx];
+  let r;
+  if (koIdx >= 0 || level >= t.strike) r = { outcome: koIdx >= 0 ? "ko" : "par", shares: 0, residual: 0, value: notional };
+  else {
+    const strikePrice = initPrice * t.strike / 100, finalPrice = initPrice * level / 100;
+    const exact = notional / strikePrice, shares = Math.floor(exact + 1e-9), residual = (exact - shares) * finalPrice;
+    r = { outcome: "delivery", shares, residual, value: shares * finalPrice + residual, strikePrice, finalPrice };
+  }
+  const days = calDays(endIdx);
+  return { ...r, koIdx, endIdx, level, paid, days, profit: r.value - paid, flat: r.value / paid - 1,
+           annual: r.outcome === "delivery" ? null : yieldPa(t.price, days) };
+}
+// profit or loss at maturity in % of notional, if the note was never knocked out
+export const pnl = (t, x) => (x >= t.strike ? 100 : 100 * x / t.strike) - t.price;
+
+// ---------- content ----------
+const QUIZ = [
+  { ask: "ELN of 1,000,000 bought at 94.5%. Initial price 350, strike price 315. The share closes at 280 and the note settles in shares. What arrives?",
+    opts: ["3,174 shares and cash for 0.6 of a share", "2,857 shares", "945,000 in cash"], right: 0,
+    why: "1,000,000 ÷ 315 = 3,174.6. The whole shares are delivered and the fraction is paid in cash at the closing price. At 280 the package is worth 888,889, which is 56,111 less than the 945,000 paid." },
+  { ask: "The same note. The share closes at 600, far above the initial price of 350. What is the investor's gain?",
+    opts: ["714,286, the rise of the share", "55,000", "250,000"], right: 1,
+    why: "The note repays 1,000,000 against 945,000 paid. The gain stops at the discount, however far the share rises." },
+  { ask: "The same note. Below which closing price has the investor lost money?",
+    opts: ["315.00, the strike price", "330.75", "297.68"], right: 2,
+    why: "Break-even is strike price × note price: 315 × 94.5% = 297.68. Between 297.68 and 315 the investor receives shares and is still ahead." },
+  { ask: "KOELN bought at 99% with a 30-day tenor. The share closes above the knock-out price and the note repays 10 days after issue. What is the yield of the finished trade?",
+    opts: ["12.29% a year", "36.87% a year", "1.01% a year"], right: 1,
+    why: "(100 ÷ 99 − 1) × 365 ÷ 10 = 36.87%. The return in money is the same 1.01% as at maturity. It was earned in a third of the time." },
+  { ask: "KOELN with a daily-close knock-out at 105. The share trades at 106 in the morning and closes at 104.50. Is the note knocked out?",
+    opts: ["Yes, it touched 106", "No, only the close counts", "Yes, but only half is redeemed"], right: 1,
+    why: "A daily-close observation looks at one price a day. Under a continuous knock-out the same morning would have ended the note." },
+  { ask: "Two notes on the same share, with the same strike price and tenor. One is a plain ELN, the other a KOELN. Which has the lower price, that is, the deeper discount?",
+    opts: ["The plain ELN", "The KOELN", "They cost the same"], right: 0,
+    why: "The put inside a KOELN can disappear when the share rallies, so it is worth less. BOCI and MFG both state that the KOELN yields less." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  const $ = id => document.getElementById(id);
+  const NOTIONAL = 1000000, INIT = 50, TRIES = 600;
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const px = p => (INIT * p / 100).toFixed(2);
+  const pct = (x, dp = 2) => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(dp) + "%";
+
+  // ---------- quiz ----------
+  $("quiz").innerHTML = QUIZ.map((q, i) =>
+    `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+      `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+  $("quiz").addEventListener("click", e => {
+    const b = e.target.closest("button[data-q]"); if (!b) return;
+    const q = QUIZ[+b.dataset.q], card = b.closest(".q");
+    card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+    const why = card.querySelector(".why");
+    why.textContent = (+b.dataset.o === q.right ? "Correct. " : "Not this one. ") + q.why;
+    why.hidden = false;
+  });
+
+  // ---------- terms rail ----------
+  // the KOELN link in the collection nav lands here with the knock-out switched on
+  const T = { mode: location.hash === "#koeln" ? "koeln" : "eln", price: 97, strike: 92, ko: 105, months: "3", vol: 30 };
+  let seed = 20261013;
+  // [key, label, min, max, step, swatch] or [key, label, [[value, text], ...]]; a string alone is a group heading
+  const TERMS = [
+    "Indicative terms",
+    ["mode", "Product", [["eln", "Plain ELN"], ["koeln", "KOELN"]]],
+    ["price", "Note price", 85, 99.5, 0.5],
+    ["strike", "Strike price", 70, 100, 1, "sw-strike"],
+    ["ko", "Knock-out price", 100, 120, 1, "sw-ko"],
+    ["months", "Tenor", [["1", "1 month"], ["3", "3 months"], ["6", "6 months"]]],
+    "Market assumption, not on the term sheet",
+    ["vol", "Volatility of the share", 10, 70, 5]
+  ];
+  $("rail").innerHTML = TERMS.map(c => {
+    if (typeof c === "string") return `<h3 class="mono-label">${c}</h3>`;
+    const [key, label, a, max, step, sw] = c;
+    return Array.isArray(a)
+      ? `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${label}</span></div>
+           <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+      : `<div class="term" data-row="${key}"><div class="term-head"><span class="lbl">${sw ? `<span class="swatch ${sw}"></span>` : ""}<label for="${key}">${label}</label></span><output id="${key}Out" for="${key}"></output></div>
+           <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+  }).join("");
+  const sliders = TERMS.filter(c => Array.isArray(c) && !Array.isArray(c[2]));
+  const isKo = () => T.mode === "koeln";
+  const terms = () => ({ price: T.price, strike: T.strike, ko: isKo() ? T.ko : null });
+
+  function syncControls(){
+    document.querySelector('[data-row="ko"]').hidden = !isKo();
+    $("wantKo").hidden = !isKo();
+    for (const [key, , min, max] of sliders){
+      $(key).value = T[key];
+      $(key).style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+      $(key + "Out").textContent = key === "price" ? T.price.toFixed(1) + "%" : key === "vol" ? T.vol + "%" : `${T[key]}% · ${px(T[key])}`;
+    }
+    $("rail").querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.v === T[g.dataset.key]))));
+  }
+  $("rail").addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; $("msg").textContent = ""; run(); } });
+  $("rail").addEventListener("click", e => {
+    const b = e.target.closest(".seg button"); if (!b) return;
+    T[b.parentNode.dataset.key] = b.dataset.v; $("msg").textContent = ""; run();
+  });
+  const WANT = { ko: "knocks out", par: "redeems at par", delivery: "converts into shares" };
+  document.querySelector(".scenarios").addEventListener("click", e => {
+    const b = e.target.closest("button[data-want]"); if (!b) return;
+    const want = b.dataset.want;
+    $("msg").textContent = "";
+    for (let i = 1; i <= TRIES; i++){
+      const s = seed + i;
+      if (want === "any" || settle(terms(), simulate(+T.months, T.vol, s), NOTIONAL, INIT).outcome === want){ seed = s; return run(); }
+    }
+    $("msg").textContent = `No path in ${TRIES} tries ${WANT[want]} on these terms. Move a level or the volatility and try again.`;
+  });
+
+  // ---------- charts ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const clear = svg => { while (svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild); };
+
+  function drawPath(path, r){
+    const svg = $("chart"); clear(svg);
+    const nar = narrow(), W = 780, H = 340, x0 = nar ? 62 : 50, x1 = W - (nar ? 168 : 128), y0 = H - 36, y1 = 28, n = path.length - 1;
+    const add = (tag, attrs, text) => svg.appendChild(el(tag, attrs, text));
+    const levels = [[T.strike, "var(--brass)", "strike"], [100, "var(--ink-3)", "initial"]];
+    if (isKo()) levels.push([T.ko, "var(--call)", "knock-out"]);
+    const all = [...path, ...levels.map(l => l[0])];
+    const lo = Math.floor((Math.min(...all) - 3) / 10) * 10, hi = Math.ceil((Math.max(...all) + 3) / 10) * 10, stepY = hi - lo > 80 ? 20 : 10;
+    const X = d => x0 + d / n * (x1 - x0), Y = v => y0 + (v - lo) / (hi - lo) * (y1 - y0);
+
+    add("rect", { x: x0, y: Y(T.strike), width: x1 - x0, height: y0 - Y(T.strike), fill: "var(--shade)" });
+    for (let g = lo; g <= hi; g += stepY){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, g + "%");
+    }
+    for (let m = 0; m <= +T.months; m++)
+      add("text", { x: X(m * DPM), y: y0 + 18, "text-anchor": m === 0 ? "start" : m === +T.months ? "end" : "middle" }, m === 0 ? "issue" : m === +T.months ? "final valuation" : "month " + m);
+
+    // level lines; labels on the right are pushed apart when two levels sit close together
+    let lastY = Infinity;
+    for (const [v, color, label] of levels.sort((a, b) => a[0] - b[0])){
+      add("line", { x1: x0, x2: x1, y1: Y(v), y2: Y(v), stroke: color, "stroke-width": 1.25, "stroke-dasharray": "4 3" });
+      const ty = Math.min(Y(v) + 4, lastY - (nar ? 17 : 14)); lastY = ty;
+      add("text", { x: x1 + 8, y: ty, fill: color, "class": "lvl" }, `${label} ${px(v)}`);
+    }
+    const pts = (from, to) => { let s = ""; for (let d = from; d <= to; d++) s += X(d).toFixed(1) + "," + Y(path[d]).toFixed(1) + " "; return s; };
+    if (r.endIdx < n) add("polyline", { points: pts(r.endIdx, n), fill: "none", stroke: "var(--ink-3)", "stroke-width": 1.25, "stroke-dasharray": "2 4" });
+    add("polyline", { points: pts(0, r.endIdx), fill: "none", stroke: "var(--path)", "stroke-width": 2.25, "stroke-linejoin": "round" });
+    const tone = r.outcome === "ko" ? "var(--call)" : r.outcome === "delivery" ? "var(--breach)" : "var(--path)";
+    add("circle", { cx: X(r.endIdx), cy: Y(r.level), r: 6, fill: tone, stroke: "var(--surface)", "stroke-width": 2 });
+    $("pathNote").textContent = r.outcome === "ko" ? `knocked out on trading day ${r.koIdx} · the dotted line is the share afterwards` : `final close ${px(r.level)}`;
+  }
+
+  function drawPayoff(r){
+    const svg = $("payoff"); clear(svg);
+    const nar = narrow(), W = 780, H = 260, x0 = nar ? 62 : 50, x1 = W - (nar ? 168 : 128), y0 = H - 36, y1 = 46;
+    const xa = 40, xb = 140, lo = -60, hi = 20, t = terms(), max = 100 - T.price;
+    const X = v => x0 + (v - xa) / (xb - xa) * (x1 - x0), Y = v => y0 + (v - lo) / (hi - lo) * (y1 - y0);
+    const add = (tag, attrs, text) => svg.appendChild(el(tag, attrs, text));
+    for (let g = lo; g <= hi; g += 20){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: g === 0 ? "var(--ink-3)" : "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, (g > 0 ? "+" : "") + g + "%");
+    }
+    for (let v = xa; v <= xb; v += 20) add("text", { x: X(v), y: y0 + 18, "text-anchor": "middle" }, px(v));
+    let lastX = -999, row = 0;
+    const vline = (v, color, label) => {   // called left to right; a label too close to the previous one takes the next row up
+      row = X(v) - lastX < (nar ? 110 : 80) ? row + 1 : 0; lastX = X(v);
+      add("line", { x1: X(v), x2: X(v), y1: y0, y2: y1 - 4 - 14 * row, stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: X(v), y: y1 - 8 - 14 * row, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    vline(breakEven(t), "var(--breach)", "break-even");
+    vline(T.strike, "var(--brass)", "strike");
+    add("line", { x1: X(xa), y1: Y(xa - 100), x2: X(100 + hi), y2: Y(hi), stroke: "var(--ink-3)", "stroke-width": 1.5, "stroke-dasharray": "5 4" });
+    add("text", { x: X(100 + hi) + 6, y: Y(hi) + 4 }, "the share");
+    add("polyline", { points: [[xa, pnl(t, xa)], [T.strike, max], [xb, max]].map(([a, b]) => X(a).toFixed(1) + "," + Y(b).toFixed(1)).join(" "),
+                      fill: "none", stroke: "var(--path)", "stroke-width": 2.5, "stroke-linejoin": "round" });
+    add("text", { x: x1 + 8, y: Y(max) + 4, fill: "var(--call)", "class": "lvl" }, "maximum " + pct(max, 1));
+    if (r.outcome !== "ko"){
+      const x = Math.max(xa, Math.min(xb, r.level));
+      add("circle", { cx: X(x), cy: Y(Math.max(lo, pnl(t, x))), r: 6, fill: "var(--ink)", stroke: "var(--surface)", "stroke-width": 2 });
+    }
+    $("payNote").textContent = r.outcome === "ko" ? "this note ended early, so the line no longer applies to it" : isKo() ? "applies only when the note is never knocked out" : "solid: the note · dashed: holding the share";
+  }
+
+  function drawVerdict(r){
+    const cell = (k, v, n, cls = "", tone = "") => `<div class="cell"${tone ? ` style="--tone:${tone}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+    const head = { ko: ["Knocked out early", "var(--call)", `The share closed at ${px(r.level)} on trading day ${r.koIdx}, at or above the knock-out price of ${px(T.ko)}. The note repays 100% and is over.`],
+                   par: ["Redeemed at par", "var(--path)", `The final close of ${px(r.level)} is at or above the strike price of ${px(T.strike)}.`],
+                   delivery: ["Converted into shares", "var(--breach)", `The final close of ${px(r.level)} is below the strike price of ${px(T.strike)}, so the investor buys the share at the strike.`] }[r.outcome];
+    const receives = r.outcome === "delivery"
+      ? [`${money(r.shares)} shares`, `${money(NOTIONAL)} ÷ ${r.strikePrice.toFixed(2)}. Worth ${money(r.value)} at ${r.finalPrice.toFixed(2)}` + (r.residual >= 0.5 ? `, including ${money(r.residual)} cash for the fraction.` : "."), "sm"]
+      : [money(NOTIONAL), `in cash, about ${r.days} days after issue`, ""];
+    $("verdict").innerHTML =
+      cell("Outcome", head[0], head[2], "sm", head[1]) +
+      cell("Investor paid", money(r.paid), `${T.price.toFixed(1)}% of ${money(NOTIONAL)}`) +
+      cell("Investor receives", receives[0], receives[1], receives[2]) +
+      cell("Profit or loss", (r.profit >= 0 ? "+" : "−") + money(Math.abs(r.profit)), pct(100 * r.flat) + " on the money paid", r.profit >= 0 ? "up" : "down") +
+      (r.annual == null
+        ? cell("Yield", "None", "The quoted yield is earned only when the note redeems at par. The result now depends on what the shares do next.", "sm")
+        : cell("Yield of this trade", (100 * r.annual).toFixed(2) + "% p.a.", `the same discount, earned in about ${r.days} days`));
+  }
+
+  function drawLadder(r){
+    const full = calDays(+T.months * DPM), rows = [5, 10, 20, 30, 60, 90].filter(d => d <= full - 5).map(d => [d, "Knocked out"]);
+    rows.push([full, "Held to maturity, closed at or above the strike"]);
+    $("ladder").innerHTML = rows.map(([d, what]) =>
+      `<tr${r.outcome !== "delivery" && isKo() && d === r.days ? ' class="now"' : ""}><td>${d}</td><td class="num">${pct(100 * (100 / T.price - 1))}</td><td class="num">${(100 * yieldPa(T.price, d)).toFixed(2)}%</td><td>${what}</td></tr>`).join("");
+  }
+
+  function run(){
+    if (T.ko < 100) T.ko = 100;
+    syncControls();
+    const path = simulate(+T.months, T.vol, seed), r = settle(terms(), path, NOTIONAL, INIT);
+    drawPath(path, r); drawPayoff(r); drawVerdict(r); drawLadder(r);
+  }
+  let wasNarrow = narrow();
+  window.addEventListener("resize", () => { if (narrow() !== wasNarrow){ wasNarrow = narrow(); run(); } });
+  window.addEventListener("hashchange", () => { if (location.hash === "#koeln"){ T.mode = "koeln"; run(); } });
+  run();
+}
+</script>
+</body>
+</html>

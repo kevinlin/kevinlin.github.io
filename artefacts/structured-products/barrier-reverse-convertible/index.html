@@ -282,11 +282,28 @@ text.rd{font-size:12px;font-weight:500;fill:var(--ink)}
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;
     transition-duration:.01ms!important}
 }
+/* ---------- collection patch: shared nav, label contrast, press feedback ---------- */
+:root{--ink-3:#5A6670}
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+.family{margin-bottom:0}
+button:active:not(:disabled){transform:scale(.97)}
 </style>
 </head>
 <body>
 <a class="skip" href="#charts">Skip to the charts</a>
 <div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/">ELN</a><a href="../equity-linked-note/#koeln">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/">ELI</a><a href="../barrier-reverse-convertible/" aria-current="page">BRC</a></span>
+  </nav>
 
   <header class="masthead">
     <div class="eyebrow">Structured products · yield enhancement</div>

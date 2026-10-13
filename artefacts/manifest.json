@@ -1115,8 +1115,15 @@
       "title": "Barrier reverse convertible",
       "collection": "structured-products",
       "order": 10,
-      "replacements": {},
-      "date": "2026-09-21"
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+      },
+      "date": "2026-10-13"
     },
     {
       "id": "secondary-schools-schools",
@@ -1222,8 +1229,15 @@
       "title": "Fixed coupon note",
       "collection": "structured-products",
       "order": 20,
-      "replacements": {},
-      "date": "2026-10-12"
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+      },
+      "date": "2026-10-13"
     },
     {
       "id": "structured-products-equity-linked-investment",
@@ -1232,7 +1246,65 @@
       "title": "Equity-linked investment",
       "collection": "structured-products",
       "order": 30,
-      "replacements": {},
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-bonus-enhanced-note",
+      "source": "structured-products/bonus-enhanced-note.html",
+      "destination": "structured-products/bonus-enhanced-note/index.html",
+      "title": "Bonus enhanced note",
+      "collection": "structured-products",
+      "order": 25,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-equity-linked-note",
+      "source": "structured-products/equity-linked-note.html",
+      "destination": "structured-products/equity-linked-note/index.html",
+      "title": "Equity-linked note and knock-out ELN",
+      "collection": "structured-products",
+      "order": 15,
+      "replacements": {
+        "href=\"index.html\"": "href=\"../\"",
+        "href=\"equity-linked-note.html": "href=\"../equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"../fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"../bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"../equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"../barrier-reverse-convertible/"
+      },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "structured-products-index",
+      "source": "structured-products/index.html",
+      "destination": "structured-products/index.html",
+      "title": "Structured products overview",
+      "collection": "structured-products",
+      "order": 1,
+      "replacements": {
+        "href=\"index.html\"": "href=\"./\"",
+        "href=\"equity-linked-note.html": "href=\"equity-linked-note/",
+        "href=\"fixed-coupon-note.html": "href=\"fixed-coupon-note/",
+        "href=\"bonus-enhanced-note.html": "href=\"bonus-enhanced-note/",
+        "href=\"equity-linked-investment.html": "href=\"equity-linked-investment/",
+        "href=\"barrier-reverse-convertible.html": "href=\"barrier-reverse-convertible/"
+      },
       "date": "2026-10-13"
     }
   ]

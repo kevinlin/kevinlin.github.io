@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Structured Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Shared look of the structured-products collection: bone paper, square cards, Spectral over IBM Plex.
+   Copied into every page of the set so each file stays self-contained. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#5A6670;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* loss */
+  --call:#215B49;       /* knock-out / gain */
+  --path:#1F4E63;       /* the note, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --lift-2: 0 1px 1px rgba(26,33,41,.04), 0 4px 8px rgba(26,33,41,.05), 0 12px 24px rgba(26,33,41,.06);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+    --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#8E9BA4;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  --lift-2: 0 1px 1px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.28), 0 14px 28px rgba(0,0,0,.26);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:24px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--path)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.skip{position:absolute;left:16px;top:-48px;background:var(--ink);color:var(--paper);padding:8px 12px;font-size:14px;z-index:10}
+.skip:focus{top:8px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+main{display:flex;flex-direction:column;gap:48px;min-width:0}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.masthead,main > section{animation:rise 360ms var(--ease-out) both}
+main > section:nth-child(1){animation-delay:60ms}
+main > section:nth-child(2){animation-delay:120ms}
+main > section:nth-child(n+3){animation-delay:180ms}
+
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:18px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:65ch}
+.toc{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}
+.toc a{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;text-decoration:none;display:inline-flex;align-items:center;min-height:36px;box-shadow:inset 0 -1px 0 var(--rule);transition:box-shadow 120ms var(--ease-out)}
+@media (hover:hover){.toc a:hover{box-shadow:inset 0 -2px 0 var(--path)}}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:28px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:65ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+.note{font-size:14px;color:var(--ink-2);max-width:75ch;border-left:2px solid var(--brass);padding-left:12px}
+
+/* cells: outcomes and verdicts share one grid */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td strong{font-weight:600}
+td:first-child{min-width:9ch}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{min-height:44px;font-size:14px;font-weight:500;padding:8px 14px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out),border-color 130ms var(--ease-out),transform 120ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:active:not(:disabled),.seg button:active,.q .opts button:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:296px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+@media (min-width:881px){.termsheet{position:sticky;top:16px}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:20px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term:last-child{border-bottom:none}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:14px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:32px;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-top:-6.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:44px;background:transparent;border:none;border-right:1px solid var(--rule);padding:6px 4px;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:14px;color:var(--breach);flex-basis:100%;min-height:1.6em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+svg{display:block;width:100%;height:auto;max-width:100%}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.plot svg{touch-action:pan-y}
+svg text{font-family:var(--font-mono);font-size:11.5px;fill:var(--ink-3)}
+svg text.lvl{font-weight:500}
+@media (max-width:640px){.plot svg{min-width:600px} svg text{font-size:15px}}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.q .opts button{text-align:left;min-height:44px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14.5px;transition:border-color 120ms var(--ease-out),transform 120ms var(--ease-out)}
+@media (hover:hover){.q .opts button:hover{border-color:var(--path)}}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.right::after{content:" ✓"}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .opts button.wrong::after{content:" ✗"}
+.q .why{font-size:14.5px;color:var(--ink-2)}
+
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14.5px;color:var(--ink-2);max-width:80ch}
+.disclaimer{font-size:13px;line-height:1.6;color:var(--ink-3);max-width:80ch;border-top:1px solid var(--rule);padding-top:20px}
+.next{display:flex;flex-wrap:wrap;gap:8px}
+.next a.btn{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only: the product cards ---------- */
+.family .home[aria-current]::before{content:none}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.product{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px;transition:box-shadow 160ms var(--ease-out),transform 160ms var(--ease-out),border-color 160ms var(--ease-out)}
+.product .step{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;gap:8px}
+.product .abbr{font-family:var(--font-display);font-weight:600;font-size:40px;line-height:1;letter-spacing:-.01em}
+.product h3{font-family:var(--font-ui);font-size:16px;font-weight:600}
+.product h3 a{color:inherit;text-decoration:none}
+.product h3 a::after{content:"";position:absolute;inset:0}          /* the whole card is the link */
+.product p{font-size:14.5px;color:var(--ink-2)}
+.product .adds{font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--rule-soft);padding-top:12px;margin-top:auto}
+.product .adds b{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:500;display:block;margin-bottom:2px}
+.product .go{font-family:var(--font-mono);font-size:12.5px;color:var(--path)}
+.product svg{border-bottom:1px solid var(--rule-soft)}
+.product:focus-within{outline:2px solid var(--ring);outline-offset:2px}
+.product h3 a:focus-visible{outline:none}
+@media (hover:hover) and (pointer:fine){.product:hover{transform:translateY(-2px);box-shadow:var(--lift-2);border-color:var(--path)}}
+.product:active{transform:scale(.99)}
+.glyph .zero{stroke:var(--rule);stroke-width:1}
+.glyph .pay{fill:none;stroke:var(--path);stroke-width:2.25;stroke-linejoin:round;stroke-linecap:round}
+.glyph .lvl-strike{stroke:var(--brass);stroke-width:1;stroke-dasharray:3 3}
+.glyph .lvl-ko{stroke:var(--call);stroke-width:1;stroke-dasharray:3 3}
+.glyph .lvl-ki{stroke:var(--breach);stroke-width:1;stroke-dasharray:3 3}
+.glyph .jump{stroke:var(--path);stroke-width:1;stroke-dasharray:2 3}
+.products.minor{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.products.minor .abbr{font-size:28px}
+.key{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:13.5px;color:var(--ink-2)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{display:inline-block;width:16px;border-top:2px dashed var(--c)}
+.key i.solid{border-top-style:solid}
+</style>
+</head>
+<body>
+<a class="skip" href="#products">Skip to the products</a>
+<div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="./" aria-current="page">Structured products</a>
+    <span class="links"><a href="equity-linked-note/">ELN</a><a href="equity-linked-note/#koeln">KOELN</a><a href="fixed-coupon-note/">FCN</a><a href="bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="equity-linked-investment/">ELI</a><a href="barrier-reverse-convertible/">BRC</a></span>
+  </nav>
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · equity-linked notes · overview</div>
+    <h1>Structured Products</h1>
+    <p class="standfirst">Four notes that private banks in Asia sell on single shares and baskets: ELN, KOELN, FCN and BEN. In every one of them the investor sells a put option on a share. They differ in how the investor is paid for it and in what can end the note early.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#products">The four notes</a>
+      <a href="#compare">Side by side</a>
+      <a href="#words">One idea, many names</a>
+      <a href="#more">Related pages</a>
+    </nav>
+  </header>
+
+<main>
+  <section id="products">
+    <div class="sec-head">
+      <h2>The four notes, in reading order</h2>
+      <p class="lead">Each one adds a feature to the one before it, so the order matters the first time through. The small chart on each card is profit or loss at maturity against the final price of the share.</p>
+    </div>
+    <div class="key" aria-hidden="true">
+      <span><i class="solid" style="--c:var(--path)"></i>the note</span>
+      <span><i style="--c:var(--brass)"></i>strike</span>
+      <span><i style="--c:var(--call)"></i>knock-out</span>
+      <span><i style="--c:var(--breach)"></i>knock-in</span>
+    </div>
+    <div class="products">
+
+      <article class="card product">
+        <div class="step"><span>Step 1</span><span>Yield enhancement</span></div>
+        <svg class="glyph" viewBox="0 0 240 96" role="img" aria-label="Payoff shape: a loss below the strike, then flat at a small gain"><line class="zero" x1="8" x2="232" y1="56" y2="56"/><line class="lvl-strike" x1="112" x2="112" y1="8" y2="88"/><polyline class="pay" points="16,88 112,44 224,44"/></svg>
+        <div class="abbr">ELN</div>
+        <h3><a href="equity-linked-note/">Equity-Linked Note</a></h3>
+        <p>Bought below face value. Repays face value if the share closes at or above the strike on the last day. Otherwise the investor gets the share at the strike price.</p>
+        <p class="adds"><b>The base case</b>A deposit plus a sold put. The discount is the whole income.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+
+      <article class="card product">
+        <div class="step"><span>Step 2</span><span>Yield enhancement</span></div>
+        <svg class="glyph" viewBox="0 0 240 96" role="img" aria-label="Payoff shape: as the ELN, ending at a knock-out level above the initial price"><line class="zero" x1="8" x2="232" y1="56" y2="56"/><line class="lvl-strike" x1="112" x2="112" y1="8" y2="88"/><line class="lvl-ko" x1="184" x2="184" y1="8" y2="88"/><polyline class="pay" points="16,88 112,46 184,46"/><circle cx="184" cy="46" r="4.5" fill="var(--call)"/></svg>
+        <div class="abbr">KOELN</div>
+        <h3><a href="equity-linked-note/#koeln">Knock-Out ELN</a></h3>
+        <p>An ELN that is redeemed early at face value as soon as the share closes at or above a knock-out price.</p>
+        <p class="adds"><b>Adds to the ELN</b>A knock-out level and daily observation. Same discount, earned sooner if the share rallies.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+
+      <article class="card product">
+        <div class="step"><span>Step 3</span><span>Yield enhancement</span></div>
+        <svg class="glyph" viewBox="0 0 240 96" role="img" aria-label="Payoff shape: flat at the coupon down to a knock-in barrier, then a drop into a loss"><line class="zero" x1="8" x2="232" y1="56" y2="56"/><line class="lvl-ki" x1="72" x2="72" y1="8" y2="88"/><line class="lvl-strike" x1="112" x2="112" y1="8" y2="88"/><line class="lvl-ko" x1="184" x2="184" y1="8" y2="88"/><polyline class="pay" points="16,88 72,60"/><line class="jump" x1="72" x2="72" y1="60" y2="36"/><polyline class="pay" points="72,36 184,36"/><circle cx="184" cy="36" r="4.5" fill="var(--call)"/></svg>
+        <div class="abbr">FCN</div>
+        <h3><a href="fixed-coupon-note/">Fixed Coupon Note</a></h3>
+        <p>Bought at face value. Pays a fixed coupon every month while it is alive, usually on the worst share of a basket.</p>
+        <p class="adds"><b>Adds to the KOELN</b>Coupons in place of the discount, a basket, and a knock-in barrier that keeps the put switched off until it is breached.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+
+      <article class="card product">
+        <div class="step"><span>Step 4</span><span>Participation</span></div>
+        <svg class="glyph" viewBox="0 0 240 96" role="img" aria-label="Payoff shape: a loss below the strike, a jump up to the bonus at the strike, then rising with the share"><line class="zero" x1="8" x2="232" y1="56" y2="56"/><line class="lvl-strike" x1="96" x2="96" y1="8" y2="88"/><polyline class="pay" points="16,88 96,56"/><line class="jump" x1="96" x2="96" y1="56" y2="36"/><polyline class="pay" points="96,36 176,36 224,10"/></svg>
+        <div class="abbr">BEN</div>
+        <h3><a href="bonus-enhanced-note/">Bonus Enhanced Note</a></h3>
+        <p>Bought at face value, with no coupon. At maturity it pays a bonus, or the rise of the worst share if that is higher. Below the strike the bonus is lost.</p>
+        <p class="adds"><b>Swaps in</b>One large payment on the last day and an uncapped upside, in place of the FCN's monthly coupon and knock-out.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="sec-head">
+      <h2>Side by side</h2>
+      <p class="lead">The rows are the questions to ask of any note in this family. Typical values, from the sources on each page.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th></th><th>ELN</th><th>KOELN</th><th>FCN</th><th>BEN</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Investor pays</strong></td><td>A discounted price, for example 97%</td><td>A discounted price, a little higher than the ELN's</td><td>100%</td><td>100%</td></tr>
+          <tr><td><strong>Income</strong></td><td>The discount</td><td>The discount</td><td>A fixed coupon each period</td><td>None during the life. A bonus at maturity.</td></tr>
+          <tr><td><strong>Best case</strong></td><td>100% at maturity</td><td>100% within days</td><td>100% plus every coupon</td><td>100% plus the rise of the worst share, with no cap</td></tr>
+          <tr><td><strong>Gain when shares rally</strong></td><td>Capped at the discount</td><td>Capped at the discount</td><td>Capped at the coupons paid before the knock-out</td><td>Uncapped</td></tr>
+          <tr><td><strong>When it goes wrong</strong></td><td>Final close below the strike</td><td>No knock-out, and final close below the strike</td><td>No knock-out, a knock-in, and final close below the strike</td><td>Final close below the strike</td></tr>
+          <tr><td><strong>What the investor then gets</strong></td><td colspan="2">The share, bought at the strike price</td><td>The worst share at the strike price. The coupons are kept.</td><td>The worst share at the strike price. No bonus.</td></tr>
+          <tr><td><strong>Can end early</strong></td><td>No</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+          <tr><td><strong>Days that count</strong></td><td>The last day</td><td>Every observation day</td><td>Every observation day</td><td>The last day</td></tr>
+          <tr><td><strong>Usual underlying</strong></td><td>One share</td><td>One share, or the worst of a basket</td><td>The worst of two or three shares</td><td>One share, or the worst of a basket</td></tr>
+          <tr><td><strong>Usual tenor</strong></td><td>Two weeks to 12 months</td><td>Short. About a month in the UBS and BOCI examples.</td><td>3 to 12 months</td><td>From one month</td></tr>
+          <tr><td><strong>The investor's view</strong></td><td>Flat or slightly up</td><td>Flat, with a rally possible</td><td>Flat or slightly up, and wants income</td><td>Flat to strongly up, and can wait for the payment</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">All four carry the same two risks that no level removes. The issuer can fail, and the investor is then an unsecured creditor. And selling the note before maturity can return far less than was paid.</p>
+  </section>
+
+  <section id="words">
+    <div class="sec-head">
+      <h2>One idea, many names</h2>
+      <p class="lead">Issuers and regions use different words for the same field. The first column is the name these pages use.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>On these pages</th><th>Also called</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Notional</strong></td><td>Denomination, nominal amount, principal</td><td>The face value. Par is 100% of it.</td></tr>
+          <tr><td><strong>Issue price</strong></td><td>Note price, purchase price</td><td>What the investor pays. Below 100% for an ELN.</td></tr>
+          <tr><td><strong>Initial price</strong></td><td>Initial fixing, initial spot price, spot at execution</td><td>The share price on the trade date. Every level is a percentage of it.</td></tr>
+          <tr><td><strong>Strike price</strong></td><td>Conversion price, reference stock price</td><td>The price at which the investor buys the share when things go wrong.</td></tr>
+          <tr><td><strong>Knock-out barrier</strong></td><td>KO price, callable price, call price, autocall level</td><td>A level above the strike. Reaching it on an observation day ends the note at par.</td></tr>
+          <tr><td><strong>Knock-in barrier</strong></td><td>KI level, airbag level, downside barrier</td><td>A level below the strike. The investor's capital is exposed only after it is breached.</td></tr>
+          <tr><td><strong>Worst performer</strong></td><td>Laggard, worst-performing stock</td><td>The basket share with the lowest price relative to its initial price.</td></tr>
+          <tr><td><strong>Coupon</strong></td><td>Distribution, bonus coupon</td><td>Income on top of par. Paid every period on an FCN, once at maturity on a BEN.</td></tr>
+          <tr><td><strong>Final valuation date</strong></td><td>Observation date, final fixing date</td><td>The day whose closing price decides the settlement.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="more">
+    <div class="sec-head">
+      <h2>Related pages</h2>
+      <p class="lead">Two more pages in this set cover the same mechanism under other rule books.</p>
+    </div>
+    <div class="products minor">
+      <article class="card product">
+        <div class="step"><span>Hong Kong retail</span><span>Sale lifecycle</span></div>
+        <div class="abbr">ELI</div>
+        <h3><a href="equity-linked-investment/">Equity-Linked Investment</a></h3>
+        <p>The form of the ELN that may be sold to the public in Hong Kong. Same payoff, with cooling-off periods, a cancel window and issuer market making.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+      <article class="card product">
+        <div class="step"><span>Europe</span><span>Yield enhancement</span></div>
+        <div class="abbr">BRC</div>
+        <h3><a href="barrier-reverse-convertible/">Barrier Reverse Convertible</a></h3>
+        <p>The European name for an FCN on one share. A simulator for the strike, the knock-in barrier and the knock-out trigger, with the odds of each outcome.</p>
+        <span class="go" aria-hidden="true">Open the page →</span>
+      </article>
+    </div>
+  </section>
+</main>
+
+  <p class="disclaimer">For learning only. These pages describe common market practice as read from issuer and regulator explainers in October 2026. Terms differ by issuer, and the term sheet of the actual note is the reference. Not an offer or a recommendation.</p>
+</div>
+</body>
+</html>

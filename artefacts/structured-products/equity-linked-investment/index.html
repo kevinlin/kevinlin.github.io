@@ -221,10 +221,27 @@ details.hit{background:var(--surface-2)}
 .sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2);max-width:84ch}
 .tag{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--rule);padding:0 6px;white-space:nowrap}
 td strong{font-weight:600}
+/* ---------- collection patch: shared nav, label contrast, press feedback ---------- */
+:root{--ink-3:#5A6670}
+/* ---------- collection nav, the same strip on every page of the set ---------- */
+.family{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin-bottom:-24px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.06em}
+.family a{display:inline-flex;align-items:center;min-height:44px;padding-inline:8px;color:var(--ink-2);text-decoration:none;transition:color 120ms var(--ease-out)}
+.family .home{padding-left:0;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.family .home::before{content:"←";margin-right:8px;color:var(--ink-3)}
+.family .links{display:flex;flex-wrap:wrap;align-items:center;margin-inline:-8px}
+.family .sep{width:1px;height:16px;background:var(--rule);margin-inline:8px}
+.family a[aria-current]{color:var(--ink);font-weight:500;box-shadow:inset 0 -2px 0 var(--brass)}
+@media (hover:hover){.family a:hover{color:var(--path)}}
+.family{margin-bottom:-24px}
+button:active:not(:disabled){transform:scale(.97)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <nav class="family" aria-label="Structured products collection">
+    <a class="home" href="../">Structured products</a>
+    <span class="links"><a href="../equity-linked-note/">ELN</a><a href="../equity-linked-note/#koeln">KOELN</a><a href="../fixed-coupon-note/">FCN</a><a href="../bonus-enhanced-note/">BEN</a><span class="sep" aria-hidden="true"></span><a href="../equity-linked-investment/" aria-current="page">ELI</a><a href="../barrier-reverse-convertible/">BRC</a></span>
+  </nav>
 
   <header class="masthead">
     <div class="eyebrow">Structured products · Hong Kong retail · sale lifecycle</div>
