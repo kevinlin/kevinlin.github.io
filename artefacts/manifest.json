@@ -383,6 +383,13 @@
       "section": "Stories and epics",
       "section_order": 80,
       "order": 40
+    },
+    {
+      "id": "blackjack",
+      "title": "Blackjack",
+      "section": "Games",
+      "section_order": 90,
+      "order": 10
     }
   ],
   "entries": [
@@ -1413,6 +1420,17 @@
         "href=\"fx-accumulator.html": "href=\"../fx-accumulator/",
         "href=\"tokenized-gold.html": "href=\"../tokenized-gold/"
       },
+      "date": "2026-10-13"
+    },
+    {
+      "id": "blackjack-index",
+      "source": "blackjack/index.html",
+      "destination": "blackjack/index.html",
+      "title": "Blackjack: the rules, with cards you can play",
+      "collection": "blackjack",
+      "order": 10,
+      "replacements": {},
+      "description": "Seven rules of blackjack, each with an interactive demo, and a table to play a hand on.",
       "date": "2026-10-13"
     }
   ]

@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blackjack Rules</title>
+<meta name="description" content="The rules of blackjack, shown with cards you can play with.">
+<style>
+:root {
+  --bg: 160 36% 7%;
+  --surface: 158 28% 11%;
+  --surface-hi: 158 24% 15%;
+  --felt: 155 48% 17%;
+  --felt-hi: 155 42% 24%;
+  --felt-edge: 156 52% 10%;
+  --fg: 42 38% 92%;
+  --muted: 150 14% 72%;
+  --line: 42 40% 80%;
+  --gold: 42 72% 62%;
+  --gold-fg: 160 40% 7%;
+  --card: 44 50% 96%;
+  --ink: 220 25% 12%;
+  --suit-red: 356 70% 40%;
+  --win: 145 55% 68%;
+  --lose: 8 85% 76%;
+  --ring: 42 95% 72%;
+  --font-display: "Didot", "Bodoni 72", "Bodoni MT", "Playfair Display", Georgia, serif;
+  --font-body: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-suit: "Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", serif;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --shadow: 0 1px 2px hsl(0 0% 0% / .2), 0 4px 8px hsl(0 0% 0% / .18), 0 16px 32px hsl(0 0% 0% / .18);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, hsl(var(--felt) / .55), transparent 70%),
+    hsl(var(--bg));
+  color: hsl(var(--fg));
+  font: 400 17px/1.6 var(--font-body);
+}
+/* grain */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .07;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; }
+p, li { text-wrap: pretty; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 16px; top: -64px; z-index: 100; background: hsl(var(--gold)); color: hsl(var(--gold-fg)); padding: 12px 16px; border-radius: 8px; }
+.skip:focus { top: 16px; }
+
+.wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+/* ---------- hero ---------- */
+.hero { display: grid; gap: 32px; align-items: center; padding: 64px 0 48px; }
+.hero h1 { font-size: clamp(64px, 15vw, 152px); line-height: .9; letter-spacing: -.03em; }
+.hero h1 em { font-style: italic; color: hsl(var(--gold)); }
+.lede { font-size: 20px; max-width: 46ch; color: hsl(var(--muted)); margin-top: 24px; }
+.lede strong { color: hsl(var(--fg)); font-weight: 500; }
+.hero-cards { display: flex; justify-content: center; padding: 16px 0; }
+.hero-cards .card { --w: 120px; }
+.hero-cards .card:first-child { transform: rotate(-9deg) translateY(8px); }
+.hero-cards .card:last-child { transform: rotate(7deg); margin-left: -36px; }
+.hero > * > * { animation: rise 500ms var(--ease-out) both; }
+.hero > * > *:nth-child(2) { animation-delay: 80ms; }
+.hero > * > *:nth-child(3) { animation-delay: 160ms; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; padding: 0; list-style: none; }
+.toc a {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px;
+  border-radius: 999px; box-shadow: inset 0 0 0 1px hsl(var(--line) / .22);
+  color: hsl(var(--fg)); text-decoration: none; font-size: 15px; font-weight: 500;
+  transition: background-color 120ms, box-shadow 120ms;
+}
+@media (min-width: 860px) { .hero { grid-template-columns: 1.3fr 1fr; padding: 96px 0 64px; } }
+
+/* ---------- sections ---------- */
+section { padding: 48px 0; border-top: 1px solid hsl(var(--line) / .12); scroll-margin-top: 16px; }
+.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--gold)); }
+h2 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; margin-top: 8px; }
+.intro { max-width: 62ch; color: hsl(var(--muted)); margin: 16px 0 32px; }
+.intro strong { color: hsl(var(--fg)); font-weight: 500; }
+.panel {
+  background: hsl(var(--surface)); border-radius: 20px; padding: 16px;
+  box-shadow: var(--shadow), inset 0 1px 0 hsl(var(--line) / .08);
+}
+@media (min-width: 640px) { .panel { padding: 24px; } }
+.felt {
+  border-radius: 20px; padding: 16px;
+  background: radial-gradient(120% 90% at 50% 0%, hsl(var(--felt-hi)), hsl(var(--felt)) 55%, hsl(var(--felt-edge)));
+  box-shadow: var(--shadow), inset 0 0 0 1px hsl(var(--gold) / .28), inset 0 0 64px hsl(0 0% 0% / .3);
+}
+@media (min-width: 640px) { .felt { padding: 32px; } }
+.grid { display: grid; gap: 16px; }
+.grid > *, .step > *, .hero > * { min-width: 0; }
+@media (min-width: 760px) { .cols-2 { grid-template-columns: 1fr 1fr; } .cols-3 { grid-template-columns: repeat(3, 1fr); } }
+.tile { background: hsl(var(--surface)); border-radius: 16px; padding: 24px; box-shadow: var(--shadow), inset 0 1px 0 hsl(var(--line) / .08); }
+.tile h3 { font-size: 24px; margin-bottom: 8px; }
+.tile p { color: hsl(var(--muted)); font-size: 16px; }
+.tile .tag { margin-bottom: 16px; }
+.tag {
+  display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px currentColor;
+}
+.tag.win { color: hsl(var(--win)); } .tag.lose { color: hsl(var(--lose)); } .tag.even { color: hsl(var(--gold)); }
+
+/* ---------- cards ---------- */
+.card {
+  --w: 64px;
+  position: relative; flex: none; display: inline-grid; place-items: center;
+  width: var(--w); height: calc(var(--w) * 1.4); border-radius: calc(var(--w) * .12);
+  background: linear-gradient(160deg, hsl(var(--card)), hsl(44 35% 88%));
+  color: hsl(var(--ink)); font-family: var(--font-display);
+  box-shadow: 0 1px 1px hsl(0 0% 0% / .25), 0 3px 6px hsl(0 0% 0% / .25), 0 10px 20px hsl(0 0% 0% / .2);
+}
+.card.red { color: hsl(var(--suit-red)); }
+.card b { position: absolute; top: calc(var(--w) * .08); left: calc(var(--w) * .12); font-size: calc(var(--w) * .3); line-height: 1; font-weight: 400; }
+.card i { font: normal calc(var(--w) * .5)/1 var(--font-suit); margin-top: calc(var(--w) * .2); }
+.card.back {
+  background:
+    repeating-linear-gradient(45deg, hsl(var(--gold) / .35) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-45deg, hsl(var(--gold) / .35) 0 2px, transparent 2px 8px),
+    hsl(var(--felt-edge));
+  box-shadow: inset 0 0 0 4px hsl(var(--card)), 0 3px 6px hsl(0 0% 0% / .25), 0 10px 20px hsl(0 0% 0% / .2);
+}
+.card.in { animation: deal 320ms var(--ease-out) both; animation-delay: calc(var(--i) * 90ms); }
+.hand { display: flex; min-height: calc(64px * 1.4); }
+.hand .card + .card { margin-left: -20px; }
+.hand.sm { min-height: 62px; }
+.hand.sm .card { --w: 44px; }
+.hand.sm .card + .card { margin-left: -12px; }
+.hand.dim { opacity: .45; }
+@keyframes deal { from { opacity: 0; transform: translate(24px, -20px) rotate(8deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- table ---------- */
+.seat { display: grid; gap: 12px; justify-items: center; }
+.seat-label { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--fg) / .85); }
+.total {
+  min-width: 44px; padding: 2px 12px; border-radius: 999px; text-align: center;
+  background: hsl(0 0% 0% / .35); color: hsl(var(--fg));
+  font-size: 15px; letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums;
+}
+.total:empty { visibility: hidden; }
+.placard {
+  margin: 24px auto; text-align: center; font-family: var(--font-display); font-style: italic;
+  font-size: 15px; letter-spacing: .04em; color: hsl(var(--gold));
+  border-block: 1px solid hsl(var(--gold) / .3); padding: 8px 0; max-width: 420px;
+}
+
+/* ---------- controls ---------- */
+button { font: inherit; color: inherit; }
+.btn {
+  min-height: 48px; padding: 0 24px; border: 0; border-radius: 12px; cursor: pointer;
+  background: hsl(var(--gold)); color: hsl(var(--gold-fg)); font-weight: 600;
+  box-shadow: 0 1px 2px hsl(0 0% 0% / .3), 0 4px 12px hsl(var(--gold) / .18), inset 0 1px 0 hsl(0 0% 100% / .35);
+  transition: transform 120ms var(--ease-out), background-color 120ms, opacity 120ms;
+}
+.btn.ghost { background: hsl(var(--surface-hi)); color: hsl(var(--fg)); box-shadow: inset 0 0 0 1px hsl(var(--line) / .22); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px; margin: -4px -4px 20px; scrollbar-width: none; }
+.tab {
+  flex: none; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer;
+  background: transparent; color: hsl(var(--muted)); font-weight: 500;
+  box-shadow: inset 0 0 0 1px hsl(var(--line) / .2);
+  transition: background-color 120ms, color 120ms;
+}
+.tab .n { font-family: var(--font-display); font-style: italic; margin-right: 6px; }
+.tab[aria-selected="true"] { background: hsl(var(--gold)); color: hsl(var(--gold-fg)); box-shadow: none; }
+.check { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: hsl(var(--gold)); }
+input[type="range"] { width: 100%; height: 44px; accent-color: hsl(var(--gold)); }
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover { background: hsl(42 80% 68%); }
+  .btn.ghost:not(:disabled):hover, .tab[aria-selected="false"]:hover, .toc a:hover { background: hsl(var(--line) / .1); }
+  .rank:not(:disabled):hover { transform: translateY(-2px); }
+}
+
+/* ---------- 02 values ---------- */
+.legend { display: grid; gap: 12px; align-content: start; }
+.legend div { display: flex; align-items: baseline; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid hsl(var(--line) / .12); }
+.legend dt { font-family: var(--font-display); font-size: 24px; min-width: 112px; white-space: nowrap; }
+.legend dd { margin: 0; color: hsl(var(--muted)); }
+.legend dd b { color: hsl(var(--gold)); font-weight: 600; }
+.ranks { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; margin: 24px 0 8px; }
+.rank {
+  height: 56px; border: 0; border-radius: 8px; cursor: pointer;
+  background: hsl(var(--card)); color: hsl(var(--ink)); font: 20px var(--font-display);
+  box-shadow: 0 1px 2px hsl(0 0% 0% / .3), 0 3px 6px hsl(0 0% 0% / .2);
+  transition: transform 120ms var(--ease-out), opacity 120ms;
+}
+.rank:active { transform: scale(.96); }
+.rank:disabled { opacity: .4; cursor: not-allowed; }
+.readout { display: flex; align-items: center; gap: 16px; margin-top: 24px; }
+.big { font: 64px/1 var(--font-display); font-variant-numeric: tabular-nums; min-width: 2ch; }
+.explain { color: hsl(var(--muted)); min-height: 5.2em; margin-top: 12px; max-width: 52ch; }
+
+/* ---------- 03 round / 04 moves ---------- */
+.step { display: grid; gap: 24px; align-items: center; }
+.step h3 { font-size: 28px; margin-bottom: 8px; }
+.step p { color: hsl(var(--muted)); max-width: 48ch; }
+.step dl { margin: 16px 0 0; display: grid; gap: 8px; font-size: 15px; }
+.step dt { color: hsl(var(--gold)); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+.step dd { margin: 0; color: hsl(var(--muted)); }
+@media (min-width: 760px) { .step { grid-template-columns: 1fr 1fr; } }
+.demo { display: grid; gap: 12px; justify-items: center; }
+.demo figure { margin: 0; display: grid; gap: 8px; justify-items: center; }
+.demo .hands { display: flex; gap: 20px; }
+.demo figcaption { font-size: 14px; color: hsl(var(--fg) / .9); text-align: center; font-variant-numeric: tabular-nums; }
+.demo .arrow { color: hsl(var(--gold)); font-size: 20px; line-height: 1; }
+
+/* ---------- 05 dealer ---------- */
+.zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.zone { border-radius: 12px; padding: 16px 12px; text-align: center; background: hsl(var(--surface-hi)); }
+.zone b { display: block; font: 22px/1.2 var(--font-display); font-weight: 400; }
+.zone span { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.zone.hit span { color: hsl(var(--lose)); } .zone.stand span { color: hsl(var(--win)); }
+.log { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; min-height: 62px; }
+.log li { display: flex; align-items: center; gap: 16px; animation: rise 300ms var(--ease-out) both; animation-delay: calc(var(--i) * 120ms); }
+.log p { font-size: 16px; color: hsl(var(--fg) / .92); }
+
+/* ---------- 06 payouts ---------- */
+.bet-out { font: 40px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 16px; }
+th, td { text-align: left; padding: 12px 12px 12px 0; border-bottom: 1px solid hsl(var(--line) / .12); }
+th { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--muted)); }
+td.num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+td.pos { color: hsl(var(--win)); } td.neg { color: hsl(var(--lose)); }
+td small { display: block; color: hsl(var(--muted)); font-size: 14px; }
+
+/* ---------- 07 play ---------- */
+.play-seats { display: grid; gap: 8px; }
+.coach { text-align: center; max-width: 56ch; margin: 24px auto 0; min-height: 4.8em; color: hsl(var(--fg) / .92); }
+.coach strong { display: block; font: 24px/1.3 var(--font-display); font-weight: 400; color: hsl(var(--gold)); }
+.bar { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; margin-top: 16px; }
+.bets { border: 0; margin: 0; padding: 0; display: flex; align-items: center; gap: 8px; }
+.bets legend { float: left; margin-right: 8px; padding: 0; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--muted)); }
+.chip {
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; cursor: pointer;
+  border: 3px dashed hsl(var(--line) / .5); font-weight: 600; font-variant-numeric: tabular-nums;
+  transition: background-color 120ms, color 120ms, border-color 120ms;
+}
+.chip:has(:checked) { background: hsl(var(--gold)); color: hsl(var(--gold-fg)); border-color: hsl(var(--gold-fg) / .6); }
+.chip:has(:focus-visible) { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.chip:has(:disabled) { opacity: .5; cursor: not-allowed; }
+.bank { font-variant-numeric: tabular-nums; color: hsl(var(--muted)); }
+.bank b { color: hsl(var(--fg)); font: 24px var(--font-display); font-weight: 400; margin-left: 8px; }
+
+footer { padding: 48px 0 64px; border-top: 1px solid hsl(var(--line) / .12); color: hsl(var(--muted)); font-size: 15px; }
+footer p { max-width: 70ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the rules</a>
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <h1>Black<em>jack</em></h1>
+    <p class="lede">You against the dealer. <strong>Get closer to 21 than the dealer does, without going over.</strong> Seven rules cover the whole game, and each one below has cards you can push around.</p>
+    <nav aria-label="Rules">
+      <ul class="toc">
+        <li><a href="#goal">The goal</a></li>
+        <li><a href="#values">Card values</a></li>
+        <li><a href="#round">A round</a></li>
+        <li><a href="#moves">Your moves</a></li>
+        <li><a href="#dealer">The dealer</a></li>
+        <li><a href="#payouts">Payouts</a></li>
+        <li><a href="#play">Play a hand</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="hero-cards" aria-hidden="true">
+    <span class="card"><b>A</b><i>♠</i></span><span class="card red"><b>K</b><i>♥</i></span>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="goal" aria-labelledby="goal-h">
+  <p class="eyebrow">Rule 01</p>
+  <h2 id="goal-h">Beat the dealer, not the table</h2>
+  <p class="intro">Every player has their own contest with the dealer. Other players' hands don't affect yours. A hand ends in one of three ways.</p>
+  <div class="grid cols-3">
+    <div class="tile"><span class="tag win">You win</span><h3>Closer to 21</h3><p>Your total is higher than the dealer's, or the dealer goes over 21 while you are still in the hand.</p></div>
+    <div class="tile"><span class="tag lose">You lose</span><h3>Bust or fall short</h3><p>You go over 21, which loses at once, or the dealer finishes with a higher total than yours.</p></div>
+    <div class="tile"><span class="tag even">Push</span><h3>Same total</h3><p>You and the dealer tie. Nobody wins and your bet comes back to you.</p></div>
+  </div>
+</section>
+
+<section id="values" aria-labelledby="values-h">
+  <p class="eyebrow">Rule 02</p>
+  <h2 id="values-h">What the cards are worth</h2>
+  <p class="intro">Suits mean nothing. Only the rank counts, and the ace is the one card that can change its value. Build a hand to see how the total moves.</p>
+  <div class="grid cols-2">
+    <dl class="legend panel">
+      <div><dt>2 to 10</dt><dd>Worth the number on the card.</dd></div>
+      <div><dt>J, Q, K</dt><dd>Each worth <b>10</b>.</dd></div>
+      <div><dt>Ace</dt><dd>Worth <b>11</b>, or <b>1</b> if 11 would put you over 21.</dd></div>
+      <div><dt>Soft hand</dt><dd>Has an ace counted as 11. It can't bust on the next card.</dd></div>
+      <div><dt>Hard hand</dt><dd>No ace, or every ace counted as 1.</dd></div>
+      <div><dt>Blackjack</dt><dd>An ace and a ten-value card on the first two cards.</dd></div>
+    </dl>
+    <div class="felt">
+      <div class="hand" id="b-hand" aria-label="Your built hand"></div>
+      <div class="readout"><span class="big" id="b-total"></span><span class="tag even" id="b-kind"></span></div>
+      <p class="explain" id="b-explain" aria-live="polite"></p>
+      <div class="ranks" id="b-ranks" role="group" aria-label="Add a card"></div>
+      <div class="row">
+        <button class="btn ghost" id="b-undo">Remove last</button>
+        <button class="btn ghost" id="b-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="round" aria-labelledby="round-h">
+  <p class="eyebrow">Rule 03</p>
+  <h2 id="round-h">A round has five beats</h2>
+  <p class="intro">The order never changes: bet, deal, players act, dealer acts, bets are settled. Step through one hand.</p>
+  <div class="panel">
+    <div class="tabs" id="round-tabs" aria-label="Steps of a round"></div>
+    <div class="step" id="round-panel" role="tabpanel" tabindex="0" aria-label="Step">
+      <div aria-live="polite">
+        <h3 id="round-title"></h3>
+        <p id="round-text"></p>
+        <div class="row" style="margin-top:24px"><button class="btn" id="round-next">Next step</button></div>
+      </div>
+      <div class="felt" id="round-table"></div>
+    </div>
+  </div>
+</section>
+
+<section id="moves" aria-labelledby="moves-h">
+  <p class="eyebrow">Rule 04</p>
+  <h2 id="moves-h">Six things you can do</h2>
+  <p class="intro">Hit and stand are always there. The other four are only on offer at certain moments, mostly on your first two cards.</p>
+  <div class="panel">
+    <div class="tabs" id="move-tabs" aria-label="Player moves"></div>
+    <div class="step" id="move-panel" role="tabpanel" tabindex="0" aria-label="Move" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="dealer" aria-labelledby="dealer-h">
+  <p class="eyebrow">Rule 05</p>
+  <h2 id="dealer-h">The dealer has no choices</h2>
+  <p class="intro">The dealer follows one fixed rule: <strong>draw until the total is 17 or more, then stop.</strong> The only thing that differs between casinos is what happens on a soft 17.</p>
+  <div class="panel">
+    <div class="zones">
+      <div class="zone hit"><b>16 or less</b><span>Must hit</span></div>
+      <div class="zone" id="z-soft"><b>Soft 17</b><span></span></div>
+      <div class="zone stand"><b>Hard 17 +</b><span>Must stand</span></div>
+    </div>
+    <label class="check"><input type="checkbox" id="h17"> This house hits soft 17</label>
+    <div class="row" style="margin-top:16px">
+      <button class="btn" id="d-play">Play a dealer hand</button>
+      <button class="btn ghost" id="d-soft">Start from a soft 17</button>
+    </div>
+    <ol class="log" id="d-log" aria-live="polite"></ol>
+  </div>
+</section>
+
+<section id="payouts" aria-labelledby="payouts-h">
+  <p class="eyebrow">Rule 06</p>
+  <h2 id="payouts-h">What each result pays</h2>
+  <p class="intro">Odds are written as win-to-stake. 3:2 means you win 3 for every 2 you bet, and you keep your bet as well. Move the slider to put real numbers on it.</p>
+  <div class="panel grid cols-2">
+    <div>
+      <label for="bet-range" class="eyebrow">Your bet</label>
+      <div class="bet-out" id="bet-out" style="margin-top:8px">20</div>
+      <input type="range" id="bet-range" min="10" max="200" step="10" value="20">
+      <label class="check"><input type="checkbox" id="sixfive"> Blackjack pays 6:5 at this table</label>
+      <p class="explain" id="sixfive-note" aria-live="polite" style="min-height:0"></p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th scope="col">Result</th><th scope="col">Odds</th><th scope="col">Net</th></tr></thead>
+        <tbody id="pay-rows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="play" aria-labelledby="play-h">
+  <p class="eyebrow">Rule 07</p>
+  <h2 id="play-h">Now play a hand</h2>
+  <p class="intro">One deck, shuffled every round. The text under the cards tells you which rule is in play at each point.</p>
+  <div class="felt">
+    <div class="play-seats" id="play-table"></div>
+    <p class="coach" id="coach" aria-live="polite"></p>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <button class="btn" id="p-deal">Deal</button>
+      <button class="btn ghost" id="p-hit">Hit</button>
+      <button class="btn ghost" id="p-stand">Stand</button>
+      <button class="btn ghost" id="p-double">Double</button>
+      <button class="btn ghost" id="p-surrender">Surrender</button>
+    </div>
+  </div>
+  <div class="bar">
+    <fieldset class="bets" id="p-bets">
+      <legend>Bet</legend>
+      <label class="chip"><input class="sr-only" type="radio" name="bet" value="5">5</label>
+      <label class="chip"><input class="sr-only" type="radio" name="bet" value="10" checked>10</label>
+      <label class="chip"><input class="sr-only" type="radio" name="bet" value="25">25</label>
+    </fieldset>
+    <p class="bank">Chips<b id="p-bank">100</b></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>House rules vary. Before you sit down, read the placard on the table: how many decks are in play, whether the dealer hits soft 17, what a blackjack pays, and whether doubling after a split and surrender are allowed.</p>
+</footer>
+</div>
+
+<script type="module" id="core">
+/* ===================== RULES ===================== */
+/* A card is a string: rank + suit, e.g. "10♥". Everything below is pure so
+   test.mjs can import this block on its own. */
+export const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+export const SUITS = ['♠', '♥', '♦', '♣'];
+export const rankOf = (card) => card.slice(0, -1);
+
+export function handValue(cards) {
+  let total = 0, aces = 0;
+  for (const c of cards) {
+    const r = rankOf(c);
+    if (r === 'A') { aces++; total += 1; } else total += Math.min(10, +r || 10);
+  }
+  // At most one ace can ever count as 11 (two would already be 22).
+  const soft = aces > 0 && total + 10 <= 21;
+  return { total: soft ? total + 10 : total, soft };
+}
+
+export const isBlackjack = (cards) => cards.length === 2 && handValue(cards).total === 21;
+
+export function dealerHits(cards, hitSoft17 = false) {
+  const { total, soft } = handValue(cards);
+  return total < 17 || (hitSoft17 && soft && total === 17);
+}
+
+/* How many of the 13 ranks would bust this hand on the next card. */
+export const bustingRanks = (cards) =>
+  RANKS.filter((r) => handValue([...cards, r + '♠']).total > 21).length;
+
+/* bet is the amount at risk (already doubled if the player doubled). */
+export function settle(player, dealer, bet, { surrendered = false, blackjackPays = 1.5 } = {}) {
+  if (surrendered) return { outcome: 'surrender', net: -bet / 2 };
+  const p = handValue(player).total, d = handValue(dealer).total;
+  const pBJ = isBlackjack(player), dBJ = isBlackjack(dealer);
+  if (p > 21) return { outcome: 'bust', net: -bet };
+  if (pBJ && dBJ) return { outcome: 'push', net: 0 };
+  if (pBJ) return { outcome: 'blackjack', net: bet * blackjackPays };
+  if (dBJ) return { outcome: 'dealerBlackjack', net: -bet };
+  if (d > 21) return { outcome: 'dealerBust', net: bet };
+  if (p > d) return { outcome: 'win', net: bet };
+  if (p < d) return { outcome: 'lose', net: -bet };
+  return { outcome: 'push', net: 0 };
+}
+
+export function newDeck(rng = Math.random) {
+  const deck = SUITS.flatMap((s) => RANKS.map((r) => r + s));
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+/* ===================== PAGE ===================== */
+if (typeof document !== 'undefined') {
+  const $ = (id) => document.getElementById(id);
+  const RANK_NAME = { A: 'Ace', J: 'Jack', Q: 'Queen', K: 'King' };
+  const SUIT_NAME = { '♠': 'spades', '♥': 'hearts', '♦': 'diamonds', '♣': 'clubs' };
+  const money = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function cardHTML(c, i = -1) {
+    const anim = i >= 0 ? ` in" style="--i:${i}` : '';
+    if (c === '?') return `<span class="card back${anim}" role="img" aria-label="Face-down card"></span>`;
+    const r = rankOf(c), s = c.slice(-1);
+    return `<span class="card${'♥♦'.includes(s) ? ' red' : ''}${anim}" role="img" aria-label="${RANK_NAME[r] || r} of ${SUIT_NAME[s]}"><b>${r}</b><i>${s}</i></span>`;
+  }
+
+  /* Only cards that changed since the last render get the deal animation. */
+  function setHand(el, cards) {
+    const prev = el._cards || [];
+    let same = 0;
+    while (same < prev.length && same < cards.length && prev[same] === cards[same]) same++;
+    el._cards = [...cards];
+    el.innerHTML = cards.map((c, i) => cardHTML(c, i >= same ? i - same : -1)).join('');
+  }
+
+  function totalText(cards) {
+    const shown = cards.filter((c) => c !== '?');
+    if (!shown.length) return '';
+    if (isBlackjack(cards)) return 'Blackjack';
+    const { total, soft } = handValue(shown);
+    return total > 21 ? `${total} bust` : soft ? `soft ${total}` : `${total}`;
+  }
+
+  function mountTable(root, placard) {
+    const seat = (who) => `<div class="seat"><div class="seat-label">${who}<span class="total"></span></div><div class="hand"></div></div>`;
+    root.innerHTML = seat('Dealer') + `<p class="placard">${placard}</p>` + seat('You');
+    const [dealer, player] = root.querySelectorAll('.seat');
+    return (d, p) => [[dealer, d], [player, p]].forEach(([el, cards]) => {
+      setHand(el.querySelector('.hand'), cards);
+      el.querySelector('.total').textContent = totalText(cards);
+    });
+  }
+
+  function tabs(root, panel, labels, onSelect) {
+    root.setAttribute('role', 'tablist');
+    root.innerHTML = labels.map((l, i) =>
+      `<button class="tab" role="tab" id="${root.id}-${i}" aria-controls="${panel.id}">${l}</button>`).join('');
+    const btns = [...root.children];
+    const select = (i, focus) => {
+      btns.forEach((b, j) => { b.setAttribute('aria-selected', j === i); b.tabIndex = j === i ? 0 : -1; });
+      panel.setAttribute('aria-labelledby', btns[i].id);
+      if (focus) btns[i].focus();
+      btns[i].scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      onSelect(i);
+    };
+    root.addEventListener('click', (e) => { const i = btns.indexOf(e.target.closest('.tab')); if (i >= 0) select(i); });
+    root.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      select((btns.indexOf(document.activeElement) + step + btns.length) % btns.length, true);
+    });
+    return select;
+  }
+
+  /* ---------- 02 card values ---------- */
+  {
+    const built = ['A♠', '6♥'];
+    const hand = $('b-hand');
+    function explain() {
+      if (!built.length) return 'Pick a rank below to add a card.';
+      const { total, soft } = handValue(built);
+      if (isBlackjack(built)) return 'An ace and a ten-value card as your first two cards is a blackjack, the best hand in the game. It beats a 21 made from three or more cards.';
+      if (total > 21) return `${total} is over 21. That is a bust, and the hand loses at once.`;
+      if (soft) return `The ace counts as 11 because that keeps the total at 21 or under. This is a soft ${total}. One more card can't bust it, since the ace can drop back to 1.`;
+      if (built.some((c) => rankOf(c) === 'A')) return `Counting the ace as 11 would go over 21, so it counts as 1. This is a hard ${total}.`;
+      return `No ace is counted as 11, so this is a hard ${total}.`;
+    }
+    function render() {
+      const { total, soft } = handValue(built);
+      setHand(hand, built);
+      $('b-total').textContent = total;
+      const kind = !built.length ? '' : isBlackjack(built) ? 'Blackjack' : total > 21 ? 'Bust' : soft ? 'Soft' : 'Hard';
+      $('b-kind').textContent = kind;
+      $('b-kind').className = 'tag ' + (kind === 'Bust' ? 'lose' : 'even');
+      $('b-kind').hidden = !kind;
+      $('b-explain').textContent = explain();
+      const full = built.length >= 7 || total > 21;
+      $('b-ranks').querySelectorAll('button').forEach((b) => (b.disabled = full));
+      $('b-undo').disabled = $('b-clear').disabled = !built.length;
+    }
+    $('b-ranks').innerHTML = RANKS.map((r) =>
+      `<button class="rank" data-r="${r}" aria-label="Add ${RANK_NAME[r] || r}">${r}</button>`).join('');
+    $('b-ranks').addEventListener('click', (e) => {
+      const r = e.target.dataset.r;
+      if (!r) return;
+      built.push(r + SUITS[built.length % 4]);
+      render();
+    });
+    $('b-undo').addEventListener('click', () => { built.pop(); render(); });
+    $('b-clear').addEventListener('click', () => { built.length = 0; render(); });
+    render();
+  }
+
+  /* ---------- 03 a round ---------- */
+  {
+    const STEPS = [
+      { tab: 'Bet', title: 'Place your bet', d: [], p: [],
+        text: 'Before any cards come out, put your chips in the betting circle. Here the bet is 10. Once the deal starts, the bet is locked.' },
+      { tab: 'Deal', title: 'Two cards each', d: ['10♥', '?'], p: ['9♠', '7♦'],
+        text: 'You get two cards face up. The dealer gets one face up, the upcard, and one face down, the hole card. In most American games the dealer peeks for blackjack now if the upcard is an ace or a ten-value card.' },
+      { tab: 'Your turn', title: 'Play your hand', d: ['10♥', '?'], p: ['9♠', '7♦', '4♣'],
+        text: 'You act first, with only the upcard to go on. Here you hit a hard 16 and draw a 4 for 20, then stand. Go over 21 and you lose on the spot, even if the dealer busts later.' },
+      { tab: 'Dealer', title: 'The dealer draws', d: ['10♥', '6♠', '2♦'], p: ['9♠', '7♦', '4♣'],
+        text: 'The hole card is turned over. The dealer has 16, has to hit, and draws a 2 for 18. At 17 or more the dealer has to stop.' },
+      { tab: 'Settle', title: 'Compare and pay', d: ['10♥', '6♠', '2♦'], p: ['9♠', '7♦', '4♣'],
+        text: 'Your 20 beats the dealer\'s 18, so your bet of 10 wins another 10. Equal totals would be a push. A lower total would lose the bet.' },
+    ];
+    const show = mountTable($('round-table'), 'Dealer must draw to 16 and stand on 17');
+    let at = 0;
+    const select = tabs($('round-tabs'), $('round-panel'),
+      STEPS.map((s, i) => `<span class="n">${i + 1}</span>${s.tab}`), (i) => {
+        at = i;
+        $('round-title').textContent = STEPS[i].title;
+        $('round-text').textContent = STEPS[i].text;
+        $('round-next').textContent = i === STEPS.length - 1 ? 'Start over' : 'Next step';
+        show(STEPS[i].d, STEPS[i].p);
+      });
+    $('round-next').addEventListener('click', () => select((at + 1) % STEPS.length));
+    select(0);
+  }
+
+  /* ---------- 04 moves ---------- */
+  {
+    const MOVES = [
+      { name: 'Hit', what: 'Take one more card. You can keep hitting until you stand or go over 21.',
+        when: 'Any time your total is under 21.', cost: 'Nothing extra.',
+        before: [['5♣', '6♦']], bcap: 'Hard 11, bet 10', after: [['5♣', '6♦', '7♠']], acap: 'Now 18, bet still 10' },
+      { name: 'Stand', what: 'Take no more cards. Your total is locked and play moves to the next hand.',
+        when: 'Any time.', cost: 'Nothing extra.',
+        before: [['K♠', '8♥']], bcap: 'Hard 18', after: [['K♠', '8♥']], acap: '18 stays, the dealer plays next' },
+      { name: 'Double down', what: 'Double your bet, take exactly one more card, then you have to stand.',
+        when: 'On your first two cards only. Some houses limit it to totals of 9, 10 or 11.', cost: 'A second bet equal to the first.',
+        before: [['6♥', '5♠']], bcap: 'Hard 11, bet 10', after: [['6♥', '5♠', 'K♦']], acap: '21 with one card, bet now 20' },
+      { name: 'Split', what: 'If your first two cards have the same rank, separate them into two hands and play each one in turn. Each gets a new second card.',
+        when: 'On a pair. Split aces usually get one card each, and 21 on a split hand pays 1:1, not 3:2.', cost: 'A second bet equal to the first.',
+        before: [['8♠', '8♦']], bcap: 'Pair of eights, bet 10', after: [['8♠', '3♥'], ['8♦', 'K♣']], acap: 'Two hands, 11 and 18, bet 10 on each' },
+      { name: 'Surrender', what: 'Give up the hand before playing it and take back half your bet.',
+        when: 'On your first two cards, before any other move. Many tables don\'t offer it.', cost: 'Half your bet.',
+        before: [['10♠', '6♦']], bcap: 'Hard 16 against a dealer ace, bet 10', after: [['10♠', '6♦']], acap: 'Hand folded, 5 comes back', dim: true },
+      { name: 'Insurance', what: 'A side bet that the dealer\'s hole card is a ten-value card, which would make a blackjack. It pays 2:1.',
+        when: 'Only when the dealer\'s upcard is an ace. Four ranks in thirteen are worth ten, so the bet loses more often than 2:1 covers.', cost: 'Half your original bet.',
+        before: [['A♥', '?']], bcap: 'Dealer shows an ace, insurance costs 5', after: [['A♥', 'K♠']], acap: 'Dealer blackjack, insurance wins 10' },
+    ];
+    const hands = (list, dim) => `<div class="hands">${list.map((h) =>
+      `<div class="hand sm${dim ? ' dim' : ''}">${h.map((c, i) => cardHTML(c, i)).join('')}</div>`).join('')}</div>`;
+    tabs($('move-tabs'), $('move-panel'), MOVES.map((m) => m.name), (i) => {
+      const m = MOVES[i];
+      $('move-panel').innerHTML = `
+        <div>
+          <h3>${m.name}</h3>
+          <p>${m.what}</p>
+          <dl><dt>When</dt><dd>${m.when}</dd><dt>Costs</dt><dd>${m.cost}</dd></dl>
+        </div>
+        <div class="felt demo">
+          <figure>${hands(m.before)}<figcaption>${m.bcap}</figcaption></figure>
+          <span class="arrow" aria-hidden="true">↓</span>
+          <figure>${hands(m.after, m.dim)}<figcaption>${m.acap}</figcaption></figure>
+        </div>`;
+    })(0);
+  }
+
+  /* ---------- 05 dealer ---------- */
+  {
+    const h17 = $('h17'), log = $('d-log');
+    function zone() {
+      $('z-soft').className = 'zone ' + (h17.checked ? 'hit' : 'stand');
+      $('z-soft').querySelector('span').textContent = h17.checked ? 'Must hit' : 'Must stand';
+    }
+    function play(start) {
+      const deck = newDeck().filter((c) => !start.includes(c));
+      const cards = start.length ? [...start] : [deck.pop(), deck.pop()];
+      const rows = [];
+      for (;;) {
+        const { total, soft } = handValue(cards);
+        const hit = dealerHits(cards, h17.checked);
+        const why = total > 21 ? `${total}. Bust. Every player still in the hand wins.`
+          : soft && total === 17 ? `Soft 17. This house ${hit ? 'hits' : 'stands on'} soft 17.`
+          : hit ? `${soft ? 'Soft ' : ''}${total}. Under 17, so the dealer has to hit.`
+          : `${soft ? 'Soft ' : ''}${total}. That is 17 or more, so the dealer has to stand.`;
+        rows.push(`<li style="--i:${rows.length}"><div class="hand sm">${cards.map((c) => cardHTML(c)).join('')}</div><p>${why}</p></li>`);
+        if (!hit) break;
+        cards.push(deck.pop());
+      }
+      log.innerHTML = rows.join('');
+    }
+    h17.addEventListener('change', zone);
+    $('d-play').addEventListener('click', () => play([]));
+    $('d-soft').addEventListener('click', () => play(['A♠', '6♦']));
+    zone();
+    play(['A♠', '6♦']);
+  }
+
+  /* ---------- 06 payouts ---------- */
+  {
+    const range = $('bet-range'), sixfive = $('sixfive');
+    function render() {
+      const b = +range.value, bj = sixfive.checked ? 1.2 : 1.5;
+      $('bet-out').textContent = b;
+      $('sixfive-note').textContent = sixfive.checked
+        ? `At 6:5 a blackjack on this bet pays ${b * 1.2} where 3:2 would pay ${b * 1.5}. Avoid these tables if you can.` : '';
+      const rows = [
+        ['Blackjack', sixfive.checked ? '6:5' : '3:2', b * bj],
+        ['Win', '1:1', b],
+        ['Win after doubling', '1:1 on the doubled bet', b * 2],
+        ['Push', 'Bet returned', 0],
+        ['Lose or bust', '', -b],
+        ['Surrender', 'Half returned', -b / 2],
+        [`Insurance wins <small>side bet of ${b / 2}</small>`, '2:1', b],
+        ['Insurance loses', '', -b / 2],
+      ];
+      $('pay-rows').innerHTML = rows.map(([name, odds, net]) =>
+        `<tr><th scope="row" style="all:unset;display:table-cell;padding:12px 12px 12px 0;border-bottom:1px solid hsl(var(--line) / .12)">${name}</th><td>${odds}</td><td class="num ${net > 0 ? 'pos' : net < 0 ? 'neg' : ''}">${money(net)}</td></tr>`).join('');
+    }
+    range.addEventListener('input', render);
+    sixfive.addEventListener('change', render);
+    render();
+  }
+
+  /* ---------- 07 play ---------- */
+  {
+    // ponytail: no split or insurance at this table, and one deck reshuffled
+    // every round. Split needs a hands[] array here; add it if the page grows.
+    const g = { bank: 100, bet: 10, phase: 'idle', deck: [], p: [], d: [], doubled: false };
+    const show = mountTable($('play-table'), 'Blackjack pays 3 to 2 · Dealer stands on all 17s');
+    const btn = { deal: $('p-deal'), hit: $('p-hit'), stand: $('p-stand'), double: $('p-double'), surrender: $('p-surrender') };
+    const coach = (title, text) => ($('coach').innerHTML = (title ? `<strong>${title}</strong>` : '') + text);
+
+    function render() {
+      const mine = g.phase === 'player';
+      show(mine ? [g.d[0], '?'] : g.d, g.p);
+      btn.deal.disabled = mine || g.phase === 'dealer';
+      btn.hit.disabled = btn.stand.disabled = !mine;
+      btn.double.disabled = btn.surrender.disabled = !mine || g.p.length !== 2;
+      $('p-bets').disabled = btn.deal.disabled;
+      $('p-bank').textContent = g.bank;
+      (mine ? btn.hit : btn.deal).focus({ preventScroll: true });
+    }
+
+    function prompt() {
+      const { total, soft } = handValue(g.p);
+      const n = bustingRanks(g.p), up = rankOf(g.d[0]);
+      coach('', `You have ${soft ? 'soft' : 'hard'} ${total} against the dealer's ${RANK_NAME[up] ? RANK_NAME[up].toLowerCase() : up}. `
+        + (n ? `${n} of the 13 ranks would bust you on a hit. ` : 'No single card can bust you, so a hit is safe. ')
+        + (g.p.length === 2 ? 'Double and surrender are only open now, on your first two cards.'
+          : 'Double and surrender closed when you took a card.'));
+    }
+
+    function finish(surrendered = false) {
+      const stake = g.bet * (g.doubled ? 2 : 1);
+      const { outcome, net } = settle(g.p, g.d, stake, { surrendered });
+      const p = handValue(g.p).total, d = handValue(g.d).total;
+      const text = {
+        blackjack: 'An ace and a ten-value card on the deal. It pays 3:2, and the dealer doesn\'t draw.',
+        dealerBlackjack: 'The dealer has an ace and a ten-value card. Only a blackjack of your own would have saved the bet.',
+        bust: `You went over 21 with ${p}. That loses at once, so the dealer doesn't need to play.`,
+        dealerBust: `The dealer went over 21 with ${d}. Every hand still standing wins even money.`,
+        win: `Your ${p} beats the dealer's ${d}. Even money on your ${stake}.`,
+        lose: `The dealer's ${d} beats your ${p}.`,
+        push: `You both have ${p}. Your bet comes back.`,
+        surrender: 'You folded and took half your bet back.',
+      }[outcome];
+      const title = { blackjack: 'Blackjack', dealerBlackjack: 'Dealer blackjack', bust: 'Bust', dealerBust: 'Dealer busts',
+        win: 'You win', lose: 'Dealer wins', push: 'Push', surrender: 'Surrendered' }[outcome];
+      g.bank += net;
+      g.phase = 'done';
+      coach(`${title} ${net ? money(net) : ''}`, text);
+      render();
+    }
+
+    async function stand() {
+      g.phase = 'dealer';
+      coach('', 'The dealer turns over the hole card and draws to 17.');
+      render();
+      while (dealerHits(g.d)) {
+        await sleep(650);
+        g.d.push(g.deck.pop());
+        render();
+      }
+      await sleep(400);
+      finish();
+    }
+
+    btn.deal.addEventListener('click', () => {
+      g.bet = +document.querySelector('input[name="bet"]:checked').value;
+      if (g.bank < g.bet * 2) g.bank = 100; // keep enough to double; rebuy quietly
+      g.deck = newDeck();
+      g.p = [g.deck.pop(), g.deck.pop()];
+      g.d = [g.deck.pop(), g.deck.pop()];
+      g.doubled = false;
+      g.phase = 'player';
+      if (isBlackjack(g.p) || isBlackjack(g.d)) return finish();
+      prompt();
+      render();
+    });
+    btn.hit.addEventListener('click', () => {
+      g.p.push(g.deck.pop());
+      const { total } = handValue(g.p);
+      if (total > 21) return finish();
+      if (total === 21) return stand();
+      prompt();
+      render();
+    });
+    btn.stand.addEventListener('click', stand);
+    btn.double.addEventListener('click', () => {
+      g.doubled = true;
+      g.p.push(g.deck.pop());
+      handValue(g.p).total > 21 ? finish() : stand();
+    });
+    btn.surrender.addEventListener('click', () => finish(true));
+
+    coach('', 'Pick a bet and press Deal.');
+    show([], []);
+    btn.hit.disabled = btn.stand.disabled = btn.double.disabled = btn.surrender.disabled = true;
+  }
+}
+</script>
+</body>
+</html>
