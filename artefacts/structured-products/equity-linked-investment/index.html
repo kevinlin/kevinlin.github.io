@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDFTNWN28H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DDFTNWN28H');
+    </script>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Equity-Linked Investment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reading column, a term rail beside one payoff chart, then the numbered stages of a retail sale.
+   Styles are copied from fixed-coupon-note.html so the collection reads as one set. */
+:root{
+  color-scheme: light;
+  --paper:#EBEDE9;
+  --surface:#FBFBF9;
+  --surface-2:#E2E5E0;
+  --ink:#1A2129;
+  --ink-2:#4C5761;
+  --ink-3:#6E7A84;
+  --rule:#CBD0CA;
+  --rule-soft:#DDE1DB;
+  --brass:#7E6120;      /* strike */
+  --breach:#9C3A26;     /* knock-in / loss */
+  --call:#215B49;       /* knock-out / par */
+  --path:#1F4E63;       /* worst performer, selected state */
+  --shade:#9C3A2614;
+  --ring:#1F4E63;
+  --lift: 0 1px 1px rgba(26,33,41,.035), 0 2px 4px rgba(26,33,41,.035), 0 6px 14px rgba(26,33,41,.035);
+  --lift-1: 0 1px 2px rgba(26,33,41,.05);
+  --font-display:"Spectral", Georgia, "Times New Roman", serif;
+  --font-ui:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease-out: cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+    --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#85939C;
+    --rule:#313B44; --rule-soft:#28313A;
+    --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+    --shade:#E8836B16; --ring:#84C9E6;
+    --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+    --lift-1: 0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#11171C; --surface:#1A2127; --surface-2:#242D35;
+  --ink:#E8EBE8; --ink-2:#B2BCC3; --ink-3:#85939C;
+  --rule:#313B44; --rule-soft:#28313A;
+  --brass:#D8AC4C; --breach:#E8836B; --call:#6ACBA4; --path:#84C9E6;
+  --shade:#E8836B16; --ring:#84C9E6;
+  --lift: 0 1px 1px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.24), 0 8px 20px rgba(0,0,0,.22);
+  --lift-1: 0 1px 2px rgba(0,0,0,.35);
+}
+
+/* ---------- base ---------- */
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-padding-top:16px}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:32px 64px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+p,li{text-wrap:pretty}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:2px}
+.wrap{max-width:1140px;margin-inline:auto;display:flex;flex-direction:column;gap:48px}
+.mono-label,.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+
+/* ---------- masthead ---------- */
+.masthead{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule);padding-bottom:20px}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,5.2vw,44px);line-height:1.08;letter-spacing:-.01em}
+.standfirst{font-family:var(--font-display);font-size:17px;line-height:1.6;font-style:italic;color:var(--ink-2);max-width:64ch}
+.toc{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:8px}
+.toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;color:var(--path);text-decoration:none;border-bottom:1px solid var(--rule)}
+.toc a:hover{border-bottom-color:var(--path)}
+
+/* ---------- sections ---------- */
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+h2{font-family:var(--font-display);font-weight:600;font-size:26px;line-height:1.2}
+.lead{color:var(--ink-2);max-width:68ch}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:68ch}
+.card{background:var(--surface);border:1px solid var(--rule);box-shadow:var(--lift)}
+
+/* outcomes + verdict share one grid of cells */
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);box-shadow:var(--lift)}
+.cell{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--tone,transparent);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.cell .v{font-family:var(--font-display);font-size:23px;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cell .v.sm{font-family:var(--font-ui);font-size:15.5px;font-weight:600;line-height:1.35;letter-spacing:0}
+.cell .n{font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.v.up{color:var(--call)} .v.down{color:var(--breach)}
+#verdict .cell:first-child{grid-column:1/-1}   /* outcome on its own row, so the four figures fill the next */
+#schedule td:first-child{white-space:nowrap}
+
+/* tables */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500;text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.d{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.off td{color:var(--ink-3)}
+.pill{display:inline-block;font-family:var(--font-mono);font-size:11px;padding:1px 8px;border:1px solid var(--rule);color:var(--ink-2);white-space:nowrap}
+.pill.ko{border-color:var(--call);color:var(--call)}
+.pill.ki{border-color:var(--breach);color:var(--breach)}
+.up-arrow{color:var(--call);font-weight:600} .down-arrow{color:var(--breach);font-weight:600}
+
+/* ---------- lifecycle stepper ---------- */
+.stepper{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+@media (max-width:880px){.stepper{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:480px){.stepper{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stepper button{width:100%;height:100%;min-height:64px;text-align:left;background:var(--surface);border:none;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:background-color 120ms var(--ease-out)}
+.stepper .no{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.stepper .t{font-weight:600;font-size:13.5px;line-height:1.25}
+@media (hover:hover){.stepper button:hover{background:var(--surface-2)}}
+.stepper button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+.stepper button[aria-pressed=true] .no{color:inherit;opacity:.8}
+.stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:24px 32px;padding:20px}
+@media (max-width:880px){.stage{grid-template-columns:1fr}}
+.stage > div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.stage h3{font-family:var(--font-display);font-size:22px;font-weight:600}
+.stage h4{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:500;margin-top:6px}
+.stage p{color:var(--ink-2)}
+.stage ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--font-mono);font-size:11.5px;padding:3px 8px;background:var(--paper);border:1px solid var(--rule);cursor:pointer}
+@media (hover:hover){.chip:hover{border-color:var(--path);color:var(--path)}}
+.stage-nav{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.btn{min-height:36px;font-size:13px;font-weight:500;padding:6px 12px;border:1px solid var(--ink);background:transparent;cursor:pointer;transition:background-color 130ms var(--ease-out),color 130ms var(--ease-out)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+@media (hover:hover){.btn:hover:not(:disabled){background:var(--path);border-color:var(--path);color:var(--surface)}}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- workbench ---------- */
+.deck{display:grid;grid-template-columns:288px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:880px){.deck{grid-template-columns:1fr}}
+.termsheet{padding:20px;display:flex;flex-direction:column}
+.termsheet h3{margin-top:16px}
+.termsheet h3:first-child{margin-top:0}
+.term{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.term-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.term .lbl{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.term output{font-family:var(--font-mono);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:8px;height:8px;flex:none}
+.sw-strike{background:var(--brass)} .sw-ki{background:var(--breach)} .sw-ko{background:var(--call)}
+.what{width:18px;height:18px;flex:none;border-radius:50%;border:1px solid var(--rule);background:transparent;font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--ink-3);cursor:pointer;padding:0;position:relative}
+.what::before{content:"";position:absolute;inset:-8px}
+@media (hover:hover){.what:hover{border-color:var(--path);color:var(--path)}}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;height:24px;margin:0;cursor:pointer}
+input[type=range]:disabled{opacity:.35;cursor:default}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-moz-range-track{height:3px;background:linear-gradient(to right,var(--path) 0 var(--fill,50%),var(--surface-2) var(--fill,50%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-5.5px;border-radius:50%;background:var(--path);border:2px solid var(--surface);box-shadow:var(--lift-1)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;border:2px solid var(--surface);background:var(--path);box-shadow:var(--lift-1)}
+.seg{display:flex;border:1px solid var(--rule);width:100%;background:var(--paper)}
+.seg button{flex:1;min-height:32px;background:transparent;border:none;border-right:1px solid var(--rule);padding:5px 4px;font-family:var(--font-mono);font-size:11px;color:var(--ink-2);cursor:pointer;transition:background-color 120ms var(--ease-out),color 120ms var(--ease-out)}
+.seg button:last-child{border-right:none}
+@media (hover:hover){.seg button:hover{background:var(--surface-2);color:var(--ink)}}
+.seg button[aria-pressed=true]{background:var(--path);color:var(--surface)}
+
+.bench{display:flex;flex-direction:column;gap:20px;min-width:0}
+.scenarios{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scenarios .msg{font-size:13px;color:var(--breach);flex-basis:100%;min-height:1.5em}
+figure{margin:0;padding:16px 16px 12px}
+figcaption,.cap{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+figcaption b{font-weight:500;color:var(--ink-2)}
+.panel{padding:16px 4px 4px}
+.panel .cap{margin-inline:12px}
+svg{display:block;width:100%;height:auto;max-width:100%}
+#chart{touch-action:pan-y}
+.plot{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+text{font-family:var(--font-mono);font-size:11px;fill:var(--ink-3)}
+text.lvl{font-weight:500}
+text.rd{font-size:12px;font-weight:500;fill:var(--ink)}
+@media (max-width:640px){.plot svg{min-width:600px} text{font-size:15px} text.rd{font-size:15px}}
+
+/* ---------- field reference ---------- */
+.filter{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.filter input{font:inherit;padding:8px 10px;background:var(--surface);color:var(--ink);border:1px solid var(--rule)}
+.fgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px 32px;align-items:start}
+.fgroup{min-width:0}
+.fgroup h3{padding-bottom:8px;border-bottom:1px solid var(--rule)}
+details{border-bottom:1px solid var(--rule-soft)}
+summary{cursor:pointer;padding:9px 0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary .nm{font-weight:600;font-size:14px}
+summary .nm::before{content:"+";font-family:var(--font-mono);color:var(--ink-3);display:inline-block;width:16px}
+details[open] summary .nm::before{content:"−"}
+summary .st{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+details .body{padding:0 0 14px 16px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2)}
+details .aka{font-style:italic;color:var(--ink-3)}
+details.hit{background:var(--surface-2)}
+
+/* ---------- quiz ---------- */
+.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.q{padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.q p.ask{font-weight:500}
+.q .opts{display:flex;flex-direction:column;gap:6px}
+.q .opts button{text-align:left;padding:8px 10px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:13.5px}
+.q .opts button.right{border-color:var(--call);color:var(--call);font-weight:600}
+.q .opts button.wrong{border-color:var(--breach);color:var(--breach)}
+.q .why{font-size:13.5px;color:var(--ink-2)}
+.disclaimer{font-size:12px;line-height:1.6;color:var(--ink-3);max-width:84ch;border-top:1px solid var(--rule);padding-top:20px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ---------- this page only ---------- */
+.prose a,.sources a,.lead a{color:var(--path)}
+.sources{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--ink-2);max-width:84ch}
+.tag{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--rule);padding:0 6px;white-space:nowrap}
+td strong{font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Structured products · Hong Kong retail · sale lifecycle</div>
+    <h1>Equity-Linked Investment</h1>
+    <p class="standfirst">An ELI is the version of an equity-linked note that may be sold to the public in Hong Kong. The payoff is the one you already know from the fixed coupon note. What changes is the vocabulary, the documents and the steps a bank must take before and after the sale.</p>
+    <nav class="toc" aria-label="On this page">
+      <a href="#what">ELI and ELN</a>
+      <a href="#payoff">Payoff explorer</a>
+      <a href="#income">How the income is paid</a>
+      <a href="#words">Vocabulary</a>
+      <a href="#sale">The retail sale, stage by stage</a>
+      <a href="#check">Check yourself</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+  <section id="what">
+    <div class="sec-head"><h2>Same engine, different wrapper</h2></div>
+    <div class="prose">
+      <p>The investor in an ELI sells a put option on a share to the issuer and is paid for it. If the share finishes at or above the strike price, the investor gets the nominal amount back in cash. If it finishes below, the investor has to buy the share at the strike price. A basket ELI applies this to the worst-performing share. An early call ends the investment when the shares do well, and an airbag keeps the put switched off until a lower level is reached. All of this is the mechanism of the <a href="https://kevinlin.github.io/artefacts/structured-products/fixed-coupon-note/">fixed coupon note</a>.</p>
+      <p>The name ELI is used in Hong Kong for the form of this product that the Securities and Futures Commission has authorised for sale to the public. It is unlisted, and it falls under the SFC's Code on Unlisted Structured Investment Products. That code adds duties that a privately placed note does not have: standard offering documents, a cooling-off right on longer products and a commitment by the issuer to buy the product back at regular intervals.</p>
+      <p>For the placement flow this means two things. The trade economics can reuse the FCN model. The order process needs extra states, because a retail order can wait, be cancelled after it is placed, and be sold back on fixed days.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th></th><th>ELI, authorised for the public</th><th>ELN or FCN, privately placed</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Who buys</strong></td><td>Retail customers of banks and brokers</td><td>Usually professional investors and private banking clients</td></tr>
+          <tr><td><strong>Rule set</strong></td><td>SFC authorisation under the Code on Unlisted Structured Investment Products</td><td>Sold under a private placement exemption, with no product authorisation</td></tr>
+          <tr><td><strong>Documents</strong></td><td>The issuer's programme documents, a product booklet, a Product Key Facts Statement and an indicative term sheet</td><td>A term sheet, followed by final terms</td></tr>
+          <tr><td><strong>How terms are set</strong></td><td>The issuer offers a series during an offer period. Some terms are only final on the trade date.</td><td>Made to order for one client, priced and traded within minutes</td></tr>
+          <tr><td><strong>Ticket size</strong></td><td>Small. The regulator's examples run from HKD 12,000 to 100,000.</td><td>Large, often several hundred thousand and up</td></tr>
+          <tr><td><strong>Wait before the order</strong></td><td>A pre-investment cooling-off period for elderly and first-time buyers at banks</td><td>None</td></tr>
+          <tr><td><strong>Right to cancel after the order</strong></td><td>At least five business days when the tenor is over one year</td><td>None</td></tr>
+          <tr><td><strong>Selling before maturity</strong></td><td>Issuer market making at least every two weeks when the tenor is over six months</td><td>A bid on request, with no obligation to quote</td></tr>
+          <tr><td><strong>Income</strong></td><td>A discount, a fixed distribution, or a distribution that depends on the share price</td><td>A fixed coupon</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead">The right-hand column describes common practice and comes from general market knowledge. The left-hand column is taken from the sources listed at the end.</p>
+  </section>
+
+  <section id="payoff">
+    <div class="sec-head">
+      <h2>Payoff explorer</h2>
+      <p class="lead">One ELI of HKD 100,000 on a single share with an initial spot price of 50.00. Set the terms, then drag the final price to see what the investor receives at maturity. Early call is left out here, because it depends on the whole price path. The fixed coupon note page shows it.</p>
+    </div>
+    <div class="deck">
+      <aside class="card termsheet" id="rail"></aside>
+      <div class="bench">
+        <figure class="card">
+          <figcaption><span>Profit or loss at maturity, % of nominal amount</span><span id="legend"></span></figcaption>
+          <div class="plot">
+            <svg id="chart" viewBox="0 0 780 320" role="img" aria-labelledby="chartTitle"><title id="chartTitle">Profit or loss at maturity against the final price of the share</title></svg>
+          </div>
+        </figure>
+        <div class="cells" id="verdict" aria-live="polite"></div>
+        <div class="card scroll">
+          <table>
+            <thead><tr><th>Type</th><th>The investor's view</th><th>What the investor has sold</th><th>If the view is wrong</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Bull</strong></td><td>The share will stay flat or rise</td><td>A put option</td><td>Buys the share at the strike price, above its market price</td></tr>
+              <tr><td><strong>Bear</strong></td><td>The share will stay flat or fall</td><td>A call option</td><td>Receives less cash, reduced by the rise above the strike price</td></tr>
+              <tr><td><strong>Range</strong></td><td>The share will stay between two prices</td><td>A put and a call</td><td>Either of the two results above, depending on the side it leaves</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="lead">Nearly every ELI on offer today is a bull ELI, and the regulator's investor booklet covers only that type. Bear and range ELIs are shown from the older listed-ELI convention, and their formulas here were not checked against a current term sheet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="income">
+    <div class="sec-head">
+      <h2>How the income is paid</h2>
+      <p class="lead">This is the main difference in the economics. An FCN always pays a fixed coupon. An ELI can pay in four ways, and the placement flow needs a field for which one applies.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Style</th><th>How it works</th><th>Worked example</th><th>Extra fields</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Discount</strong></td><td>The investor pays less than the nominal amount and receives the nominal amount at maturity.</td><td>Pay 97,799 for a nominal 100,000. Maximum gain 2,201.</td><td>Purchase price</td></tr>
+          <tr><td><strong>Fixed distribution</strong></td><td>The investor pays the nominal amount and receives a fixed amount on each distribution date. This is the FCN.</td><td>20,000 × 1.5% a quarter = 300 each quarter.</td><td>Coupon rate, distribution dates</td></tr>
+          <tr><td><strong>Conditional distribution</strong></td><td>The amount for a period is paid only if the share closes at or above a coupon accrual price on that period's observation date.</td><td>300 for the quarter if the share closes at or above 46.00 on the observation date. Otherwise nothing.</td><td>Coupon accrual price, distribution observation dates</td></tr>
+          <tr><td><strong>Daily accrual</strong></td><td>The amount for a period is scaled by the share of trading days on which the share closed at or above the coupon accrual price.</td><td>30,000 × 4% × 90 ÷ 120 days = 900.</td><td>Coupon accrual price, calculation period, accrued days</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead">Documents call every one of these a potential distribution amount. On an early call the investor receives the nominal amount plus whatever has accrued up to the call date, and nothing after it.</p>
+  </section>
+
+  <section id="words">
+    <div class="sec-head">
+      <h2>Vocabulary</h2>
+      <p class="lead">ELI documents use their own words for things a structuring desk calls something else. Each bank's booklet varies them again, so map terms per issuer and keep one internal name.</p>
+    </div>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>In ELI documents</th><th>On the FCN page</th><th>Meaning, and what to watch</th></tr></thead>
+        <tbody>
+          <tr><td>Reference asset, linked stock</td><td>Underlying</td><td>The share the product is linked to. During the life the investor has no rights in it.</td></tr>
+          <tr><td>Nominal amount</td><td>Notional</td><td>The base for distributions and for the number of shares delivered.</td></tr>
+          <tr><td>Purchase price, issue price</td><td>Issue price</td><td>What the investor pays. Below the nominal amount for a discount ELI.</td></tr>
+          <tr><td>Initial spot price</td><td>Initial price</td><td>Fixed on the trade date. Every level is a percentage of it.</td></tr>
+          <tr><td>Strike price, reference stock price</td><td>Strike</td><td>The price at which the investor buys the share if it finishes below.</td></tr>
+          <tr><td>Airbag level</td><td>Knock-in barrier</td><td>Set below the strike. The put cannot be exercised until it is reached.</td></tr>
+          <tr><td>Airbag lapse event</td><td>Knock-in event</td><td>The share closes <em>at or below</em> the airbag level. Touching counts, which the FCN page's sample did not assume.</td></tr>
+          <tr><td>Airbag observation period</td><td>Knock-in type</td><td>Every exchange business day, periodic dates, or the final valuation date only.</td></tr>
+          <tr><td>Call price</td><td>Knock-out barrier</td><td>Can be different for each call date.</td></tr>
+          <tr><td>Call date, fixing date</td><td>Knock-out observation date</td><td>Daily or periodic.</td></tr>
+          <tr><td>Call condition, early call</td><td>Knock-out</td><td>The share closes at or above the call price on a call date.</td></tr>
+          <tr><td>Early settlement date</td><td>Early redemption date</td><td>A set number of business days after the call date.</td></tr>
+          <tr><td>Potential distribution amount</td><td>Coupon</td><td>Called potential because it may depend on the share price.</td></tr>
+          <tr><td>Coupon accrual price, cash distribution reference level</td><td>No equivalent</td><td>The level the share must hold for a distribution to be earned.</td></tr>
+          <tr><td>Final valuation date, final fixing date</td><td>Final valuation date</td><td>The close on this day decides the settlement.</td></tr>
+          <tr><td>Worst-performing stock</td><td>Worst performer</td><td>Lowest closing price divided by initial spot price. It can change every day.</td></tr>
+          <tr><td>Offer period</td><td>No equivalent</td><td>The days on which the distributor accepts orders for a series.</td></tr>
+          <tr><td>Market agent, market making day, sell-back order</td><td>Secondary market price</td><td>The issuer's buy-back arrangement and the order type that uses it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sale">
+    <div class="sec-head">
+      <h2>The retail sale, stage by stage</h2>
+      <p class="lead">Nine stages. The ones marked with a rule exist because of regulation, and they are where an ELI flow differs most from a private placement flow.</p>
+    </div>
+    <ol class="stepper" id="stepper"></ol>
+    <div class="card stage" id="stage" aria-live="polite"></div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <h2>Check yourself</h2>
+      <p class="lead">Six cases. The numbers in the first two come from the regulator's investor booklet.</p>
+    </div>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="sources">
+      <li><a href="https://www.sfc.hk/sfc/doc/en/intermediaries/products/handbooks/eng_sip.pdf">SFC, Code on Unlisted Structured Investment Products</a>. Paragraphs 7.3 and 7.4 on market making, chapter 8 on the cooling-off right. The copy read for this page carries a 2010 date, so check the current handbook before relying on a detail.</li>
+      <li><a href="https://www.ifec.org.hk/web/common/pdf/publication/en/ifec-eli-booklet-en.pdf">Investor and Financial Education Council, ELI booklet</a>, 2020. Key dates, bull ELI examples, airbag, daily accrual, early call and the risk list.</li>
+      <li><a href="https://www.hkma.gov.hk/eng/news-and-media/insight/2010/05/20100520">Hong Kong Monetary Authority, Enhanced Investor Protection through Pre-Investment Cooling-off Period</a>, 2010, with a 2012 extension. Later changes were not checked.</li>
+      <li><a href="https://cms.hangseng.com/cms/ivp/fld/emarketnews/eng/Bkt_ELI_PB_e.pdf">Hang Seng Bank, product booklet for basket callable ELIs</a>. One issuer's wording for terms, the cooling-off window, sell-back orders and share delivery.</li>
+    </ul>
+  </section>
+
+  <p class="disclaimer">For learning only. This page describes Hong Kong rules as read from the sources above on 13 October 2026 and is not legal or compliance advice. Rules and each issuer's terms change, and the offering documents of the actual product are the reference. The payoff explorer leaves out early call, fees, issuer credit risk and the price movement between final valuation and delivery. Not an offer or a recommendation.</p>
+</div>
+
+<script type="module" id="core">
+// ============ pure core, imported by test/equity-linked-investment.test.mjs ============
+// Settlement at maturity. Levels are % of the initial spot price; x is the final price in the same unit.
+// t = { type: "bull" | "bear" | "range", lower, upper, airbagType: "none" | "expiry" | "daily", airbag }
+// An airbag lapse is a close AT OR BELOW the airbag level, which is the wording of the IFEC booklet.
+export function settle(t, x, lapsedDuringLife, nominal, initPrice){
+  const cash = amount => ({ kind: "cash", cash: amount, shares: 0, residual: 0, value: amount });
+  const putArmed = t.type !== "bull" || t.airbagType === "none" || x <= t.airbag || (t.airbagType === "daily" && lapsedDuringLife);
+  if (t.type !== "bear" && x < t.lower && putArmed){
+    const strikePrice = initPrice * t.lower / 100, finalPrice = initPrice * x / 100;
+    const exact = nominal / strikePrice, shares = Math.floor(exact + 1e-9), residual = (exact - shares) * finalPrice;
+    return { kind: "shares", cash: 0, shares, residual, value: shares * finalPrice + residual, strikePrice, finalPrice };
+  }
+  // ponytail: bear leg from the old listed-ELI convention, cash settled and floored at zero
+  if (t.type !== "bull" && x > t.upper) return cash(nominal * Math.max(0, 2 - x / t.upper));
+  return cash(nominal);
+}
+// profit or loss in % of nominal; the same whether income comes as a discount or as a distribution
+export const pnl = (t, x, lapsed, incomePct) => settle(t, x, lapsed, 100, 100).value - 100 + incomePct;
+
+// ---------- content ----------
+const STAGES = [
+  { t: "Shelf", rule: "SFC", when: "Before any sale",
+    what: "The issuer holds an SFC authorisation for its ELI programme. The programme documents describe the issuer and the general terms, a product booklet describes one product type, and each series has an indicative term sheet. A Product Key Facts Statement summarises the product in plain language.",
+    who: "Issuer, its product arranger, the distributor's product approval function.",
+    flow: ["Sell only series that belong to an authorised programme, and tie every order to the exact document versions the customer was given.",
+           "Hold the product type as data: bull, basket, callable, with or without airbag, and the distribution style.",
+           "Give each product the distributor's own risk rating."] },
+  { t: "Customer", rule: "HKMA / SFC", when: "Before a product is discussed",
+    what: "The bank establishes who the customer is for the purpose of this sale: risk profile, knowledge of derivatives, and whether the customer is elderly, a first-time buyer of this product type or heavily concentrated in it. These answers decide whether the sale may go ahead and whether a waiting period applies.",
+    who: "Customer, relationship manager, the bank's suitability controls.",
+    flow: ["Store the assessment results with a date. They expire and are asked again.",
+           "Derive the flags that drive later stages, for example elderly, first-time buyer and concentration. Do not ask the seller to decide them by hand.",
+           "Stop the flow when the product risk rating is above the customer's profile, or record the exception process the bank allows."] },
+  { t: "Explanation", rule: "SFC", when: "The sales conversation",
+    what: "The seller explains the features and the risks and hands over the offering documents, including the Key Facts Statement. The risks that have to land are these: the product is not principal protected, the gain is capped, the investor is an unsecured creditor of the issuer, there is no collateral, and selling early may return much less than was paid.",
+    who: "Relationship manager, customer.",
+    flow: ["Record that each document was delivered and that the customer confirmed the risk statements.",
+           "Show the worst case in numbers for this customer's amount.",
+           "Keep the record of the conversation that the bank's policy requires."] },
+  { t: "Wait", rule: "HKMA", when: "At least two days, for some customers",
+    what: "Banks must give elderly customers and first-time buyers a pre-investment cooling-off period of at least two days between the explanation and the order. The price and terms are fixed only on the day the customer confirms the order after the period has ended. The rule applies to retail customers, and private banking customers are outside it. An elderly customer who is not a first-time buyer and has low concentration can be exempt.",
+    who: "Customer. The bank waits.",
+    flow: ["Add a waiting state to the order with a date before which it cannot be confirmed.",
+           "Treat every term quoted before the wait as indicative, and quote again when the customer comes back.",
+           "Record the exemption reason when the wait is skipped."] },
+  { t: "Order", rule: "", when: "During the offer period",
+    what: "The customer places the order with the distributor while the series is on offer. Some terms may only be finalised after the customer is committed, so the order carries indicative values or ranges for them.",
+    who: "Customer, distributor.",
+    flow: ["Accept orders only inside the offer period and above the minimum amount.",
+           "Show which terms are final and which will be fixed on the trade date.",
+           "Reserve the cash for the purchase price."] },
+  { t: "Trade date", rule: "", when: "End of the offer period",
+    what: "The issuer executes the order. The initial spot price of each share is determined and every term becomes final: strike price, call price, airbag level and coupon accrual price all turn from percentages into prices.",
+    who: "Issuer, distributor's dealing desk.",
+    flow: ["Store the final terms next to the indicative ones and tell the customer what was fixed.",
+           "Build the event calendar from the final term sheet: call dates, distribution dates, the final valuation date."] },
+  { t: "Cancel window", rule: "SFC", when: "At least five business days after the order, for tenors over one year",
+    what: "For a product with a scheduled tenor of more than one year, the investor may cancel the order or sell the product back for at least five Hong Kong business days after placing the order. Only the whole order can be cancelled. The investor receives the principal, less a market value adjustment and a handling fee that contains no profit margin, plus a refund of the sales commission. The total is capped at the principal.",
+    who: "Customer, distributor, issuer.",
+    flow: ["Compute the last day of the window per order. One issuer counts it to five business days after the end of the offer period.",
+           "Offer cancellation of the whole order only, and make it irrevocable once given.",
+           "Handle both cases: cancelled before payment, where nothing is debited, and after payment, where the refund is computed.",
+           "Reverse the commission."] },
+  { t: "Life", rule: "SFC", when: "Issue date to final valuation",
+    what: "Distributions are paid, call dates are observed and the airbag is monitored, as for an FCN. In addition, for a tenor of more than six months the issuer must make a market at least every two weeks. On a market making day indicative bid prices are available all day, and the issuer gives a firm bid and buys back on the same day if the investor accepts. The minimum size is the minimum denomination. The duty is suspended when the market in the share is disrupted.",
+    who: "Issuer or its market agent, distributor, calculation agent.",
+    flow: ["Hold the market making calendar per product and show the indicative bid on those days.",
+           "Support a sell-back order with the issuer's cut-off time. The customer has to accept the firm bid at once.",
+           "Warn before a sell-back that the amount can be far below the purchase price.",
+           "Send notices for a call, a distribution and an airbag lapse."] },
+  { t: "Maturity", rule: "", when: "Final valuation date, then maturity date",
+    what: "If the product was not called, the close on the final valuation date decides the settlement. At or above the strike price, the investor receives the nominal amount in cash. Below it, and with the airbag lapsed where there is one, the investor receives shares of the worst-performing stock: nominal amount divided by strike price. Board lots and odd lots are delivered and a fraction of a share is paid in cash. The shares arrive on the maturity date, so their price can move in the days between.",
+    who: "Calculation agent, operations, custodian.",
+    flow: ["Compute the share entitlement and the cash for the fraction, and compare with the issuer's notice.",
+           "Tell the customer on the final valuation date what will arrive and when.",
+           "Open the share position with the strike price as its cost."] }
+];
+
+const QUIZ = [
+  { ask: "Bull ELI, nominal 100,000, purchase price 97,799. Initial spot price 50, strike price 40, no airbag. The share closes at 38 on the final valuation date. What does the investor receive?",
+    opts: ["2,500 shares", "2,631 shares", "95,000 in cash"], right: 0,
+    why: "Nominal amount ÷ strike price = 100,000 ÷ 40 = 2,500 shares. At 38 they are worth 95,000, a paper loss of 2,799 against the purchase price." },
+  { ask: "Bull ELI with a daily airbag. Strike price 40, airbag level 35. The lowest close during the life was 35.00, and the final price is 36.",
+    opts: ["Nominal amount in cash, 35.00 is not below the level", "Shares at the strike price", "Shares at the airbag level"], right: 1,
+    why: "An airbag lapse is a close at or below the level, so 35.00 counts. The final price is below the strike price, so shares are delivered at 40." },
+  { ask: "A customer orders an ELI with a 9-month tenor and wants to cancel three days later. Which right applies?",
+    opts: ["The five-day post-sale cooling-off right", "No cooling-off right. A sell-back on a market making day is possible.", "Neither cancellation nor sell-back exists"], right: 1,
+    why: "The cooling-off right is for scheduled tenors over one year. Market making is required for tenors over six months, so the product can be sold back at the issuer's bid." },
+  { ask: "A retail customer aged 70, who has never bought an ELI, wants to place an order straight after the explanation. What does the order do?",
+    opts: ["Executes at today's terms", "Waits at least two days, then takes the terms of the day the customer confirms", "Executes, with five days to cancel"], right: 1,
+    why: "The pre-investment cooling-off period comes before the order. Terms are fixed only when the customer confirms after it ends." },
+  { ask: "Daily accrual: nominal 30,000, coupon rate 4% for the period, 120 trading days, and the share closed at or above the coupon accrual price on 30 of them.",
+    opts: ["1,200", "300", "0, because the share was below on most days"], right: 1,
+    why: "30,000 × 4% × 30 ÷ 120 = 300. Each day counts on its own." },
+  { ask: "You already have an FCN trade model. Which of these does an ELI need in addition?",
+    opts: ["A strike price and a call price", "Offer period, cancel window, market making days and a coupon accrual price", "A worst-performing stock rule"], right: 1,
+    why: "The payoff fields are shared. The additions come from the retail process and from distributions that depend on the share price." }
+];
+
+// ============ DOM from here down ============
+if (typeof document !== "undefined"){
+  const $ = id => document.getElementById(id);
+  const NOMINAL = 100000, INIT = 50;
+  const money = x => Math.round(x).toLocaleString("en-US");
+  const px = x => x.toFixed(2);
+  const signed = x => (x >= 0 ? "+" : "") + x.toFixed(1) + "%";
+
+  // ---------- sale stepper ----------
+  $("stepper").innerHTML = STAGES.map((s, i) =>
+    `<li><button type="button" data-i="${i}" aria-pressed="false"><span class="no">${i + 1}${s.rule ? " · " + s.rule : ""}</span><span class="t">${s.t}</span></button></li>`).join("");
+  function showStage(i){
+    const s = STAGES[i];
+    $("stepper").querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+    $("stage").innerHTML =
+      `<div><span class="eyebrow">Stage ${i + 1} of ${STAGES.length} · ${s.when}</span><h3>${s.t}</h3><p>${s.what}</p>
+         <div class="stage-nav"><button type="button" class="btn" data-go="${i - 1}" ${i === 0 ? "disabled" : ""}>Previous</button>
+         <button type="button" class="btn solid" data-go="${i + 1}" ${i === STAGES.length - 1 ? "disabled" : ""}>Next stage</button></div></div>
+       <div><h4>Who acts</h4><p>${s.who}</p>${s.rule ? `<h4>Rule from</h4><p>${s.rule}</p>` : ""}
+         <h4>What the placement flow has to do</h4><ul>${s.flow.map(x => `<li>${x}</li>`).join("")}</ul></div>`;
+  }
+  $("stepper").addEventListener("click", e => { const b = e.target.closest("button"); if (b) showStage(+b.dataset.i); });
+  $("stage").addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (b) showStage(+b.dataset.go); });
+  showStage(0);
+
+  // ---------- quiz ----------
+  $("quiz").innerHTML = QUIZ.map((q, i) =>
+    `<div class="card q"><p class="ask">${i + 1}. ${q.ask}</p><div class="opts">${q.opts.map((o, j) =>
+      `<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><p class="why" hidden></p></div>`).join("");
+  $("quiz").addEventListener("click", e => {
+    const b = e.target.closest("button[data-q]"); if (!b) return;
+    const q = QUIZ[+b.dataset.q], card = b.closest(".q");
+    card.querySelectorAll("button").forEach((x, j) => { x.className = j === q.right ? "right" : x === b ? "wrong" : ""; });
+    const why = card.querySelector(".why");
+    why.textContent = (+b.dataset.o === q.right ? "Correct. " : "Not this one. ") + q.why;
+    why.hidden = false;
+  });
+
+  // ---------- payoff explorer ----------
+  const T = { type: "bull", lower: 80, upper: 120, airbagType: "daily", airbag: 70, lapsed: "no", style: "discount", income: 3, final: 72 };
+  // [key, label, min, max, step, swatch, shown for types] or [key, label, [[value, text], ...], shown for types]
+  const TERMS = [
+    ["type", "Type", [["bull", "Bull"], ["bear", "Bear"], ["range", "Range"]]],
+    ["lower", "Strike price", 60, 100, 1, "sw-strike", "bull range"],
+    ["upper", "Strike price", 100, 140, 1, "sw-strike", "bear range"],
+    ["airbagType", "Airbag observed", [["none", "No airbag"], ["expiry", "Final day"], ["daily", "Daily"]], "bull"],
+    ["airbag", "Airbag level", 40, 95, 1, "sw-ki", "bull"],
+    ["lapsed", "Airbag lapsed during the life", [["no", "No"], ["yes", "Yes"]], "bull"],
+    ["style", "Income paid as", [["discount", "Discount"], ["coupon", "Distribution"]]],
+    ["income", "Income over the life", 0, 15, 0.5],
+    ["final", "Final price of the share", 0, 200, 1]
+  ];
+  $("rail").innerHTML = `<h3 class="mono-label">Terms and outcome</h3>` + TERMS.map(([key, label, a, max, step, sw, types]) => {
+    const forTypes = Array.isArray(a) ? max : types;
+    const attr = `data-row="${key}"${forTypes ? ` data-types="${forTypes}"` : ""}`;
+    return Array.isArray(a)
+      ? `<div class="term" ${attr}><div class="term-head"><span class="lbl">${label}</span></div>
+           <div class="seg" role="group" aria-label="${label}" data-key="${key}">${a.map(([v, text]) => `<button type="button" data-v="${v}">${text}</button>`).join("")}</div></div>`
+      : `<div class="term" ${attr}><div class="term-head"><span class="lbl">${sw ? `<span class="swatch ${sw}"></span>` : ""}<label for="${key}">${label}</label></span><output id="${key}Out" for="${key}"></output></div>
+           <input type="range" id="${key}" min="${a}" max="${max}" step="${step}"></div>`;
+  }).join("");
+  const sliders = TERMS.filter(c => !Array.isArray(c[2]));
+  const priceOf = p => px(INIT * p / 100);
+  const xMax = () => T.type === "bull" ? 150 : 200;   // a bull ELI has nothing to show above the strike
+
+  function syncControls(){
+    if (T.airbag > T.lower) T.airbag = T.lower;
+    $("final").max = xMax();
+    T.final = Math.min(T.final, xMax());
+    for (const row of $("rail").querySelectorAll("[data-row]")){
+      const types = row.dataset.types;
+      row.hidden = !!types && !types.includes(T.type);
+    }
+    document.querySelector('[data-row="airbag"]').hidden ||= T.airbagType === "none";
+    document.querySelector('[data-row="lapsed"]').hidden ||= T.airbagType !== "daily";
+    document.querySelector('[data-row="lower"] label').textContent = T.type === "range" ? "Lower strike price" : "Strike price";
+    document.querySelector('[data-row="upper"] label').textContent = T.type === "range" ? "Upper strike price" : "Strike price";
+    for (const [key, , min] of sliders){
+      const inp = $(key), max = +inp.max;
+      inp.value = T[key];
+      inp.style.setProperty("--fill", (100 * (T[key] - min) / (max - min)).toFixed(1) + "%");
+      $(key + "Out").textContent = key === "income" ? T.income.toFixed(1) + "%" : `${T[key]}% · ${priceOf(T[key])}`;
+    }
+    $("rail").querySelectorAll(".seg").forEach(g => g.querySelectorAll("button").forEach(b =>
+      b.setAttribute("aria-pressed", String(b.dataset.v === T[g.dataset.key]))));
+  }
+  $("rail").addEventListener("input", e => { if (e.target.type === "range"){ T[e.target.id] = +e.target.value; run(); } });
+  $("rail").addEventListener("click", e => {
+    const b = e.target.closest(".seg button"); if (!b) return;
+    T[b.parentNode.dataset.key] = b.dataset.v;
+    run();
+  });
+
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const narrow = () => window.matchMedia("(max-width: 640px)").matches;
+  const chart = $("chart");
+
+  function drawChart(){
+    while (chart.lastChild.nodeName !== "title") chart.removeChild(chart.lastChild);
+    const nar = narrow(), W = 780, H = 320, x0 = nar ? 62 : 50, x1 = W - (nar ? 150 : 116), y0 = H - 36, y1 = 52;
+    const lo = -100, hi = 20, xmax = xMax(), lapsed = T.lapsed === "yes";
+    const X = v => x0 + v / xmax * (x1 - x0), Y = v => y0 + (v - lo) / (hi - lo) * (y1 - y0);
+    const add = (tag, attrs, text) => chart.appendChild(el(tag, attrs, text));
+
+    for (let g = lo; g <= hi; g += 20){
+      add("line", { x1: x0, x2: x1, y1: Y(g), y2: Y(g), stroke: g === 0 ? "var(--ink-3)" : "var(--rule)", "stroke-width": 1 });
+      add("text", { x: x0 - 9, y: Y(g) + 4, "text-anchor": "end" }, (g > 0 ? "+" : "") + g + "%");
+    }
+    for (let v = 0; v <= xmax; v += 25) add("text", { x: X(v), y: y0 + 18, "text-anchor": "middle" }, priceOf(v));
+    add("text", { x: x1, y: H - 2, "text-anchor": "end" }, "final price of the share");
+
+    let lastX = -999, row = 0;
+    const vline = (v, color, label) => {   // called left to right; a label too close to the previous one takes the next row up
+      row = X(v) - lastX < (nar ? 90 : 64) ? row + 1 : 0;
+      lastX = X(v);
+      add("line", { x1: X(v), x2: X(v), y1: y0, y2: y1 - 4 - 13 * row, stroke: color, "stroke-width": 1, "stroke-dasharray": "3 3" });
+      add("text", { x: X(v), y: y1 - 8 - 13 * row, "text-anchor": "middle", fill: color, "class": "lvl" }, label);
+    };
+    const hasAirbag = T.type === "bull" && T.airbagType !== "none";
+    if (hasAirbag) vline(T.airbag, "var(--breach)", "airbag");
+    if (T.type !== "bear") vline(T.lower, "var(--brass)", "strike");
+    vline(100, "var(--ink-3)", "initial");
+    if (T.type !== "bull") vline(T.upper, "var(--brass)", "strike");
+
+    const line = (fn, from, color, dash) => {
+      let pts = "";
+      for (let v = from; v <= xmax; v += 0.5) pts += X(v).toFixed(1) + "," + Y(fn(v)).toFixed(1) + " ";
+      add("polyline", { points: pts, fill: "none", stroke: color, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-dasharray": dash });
+    };
+    const daily = hasAirbag && T.airbagType === "daily";
+    if (daily){
+      // two possible lines: the one this trade is on is solid, the other is dashed
+      line(v => pnl(T, v, true, T.income), 0, "var(--breach)", lapsed ? "0" : "6 4");
+      line(v => pnl(T, v, false, T.income), T.airbag + 0.5, "var(--path)", lapsed ? "6 4" : "0");
+      $("legend").innerHTML = `<b>blue</b> airbag intact · <b>red</b> airbag lapsed`;
+    } else {
+      line(v => pnl(T, v, false, T.income), 0, "var(--path)", "0");
+      $("legend").textContent = "";
+    }
+    const here = pnl(T, T.final, lapsed, T.income);
+    add("circle", { cx: X(T.final), cy: Y(here), r: 6, fill: "var(--ink)", stroke: "var(--surface)", "stroke-width": 2 });
+    add("text", { x: x1 + 10, y: Y(T.income) + 4, fill: "var(--call)", "class": "lvl" }, "maximum " + signed(T.income));
+  }
+
+  function drawVerdict(){
+    const lapsed = T.lapsed === "yes", r = settle(T, T.final, lapsed, NOMINAL, INIT);
+    const income = NOMINAL * T.income / 100, paid = T.style === "discount" ? NOMINAL - income : NOMINAL;
+    const dist = T.style === "coupon" ? income : 0, result = r.value + dist - paid;
+    const hasAirbag = T.type === "bull" && T.airbagType !== "none";
+    let head, reason, tone = "var(--call)";
+    if (r.kind === "shares"){
+      head = "Shares delivered"; tone = "var(--breach)";
+      reason = `The final price of ${priceOf(T.final)} is below the strike price of ${priceOf(T.lower)}` + (hasAirbag ? ", and the airbag has lapsed." : ".");
+    } else if (r.cash < NOMINAL){
+      head = "Reduced cash settlement"; tone = "var(--breach)";
+      reason = `The final price of ${priceOf(T.final)} is above the strike price of ${priceOf(T.upper)}. The rise above it is deducted.`;
+    } else {
+      head = "Nominal amount in cash";
+      reason = hasAirbag && T.final < T.lower
+        ? `The final price of ${priceOf(T.final)} is below the strike price, but the airbag level of ${priceOf(T.airbag)} was never reached, so the put cannot be exercised.`
+        : "The view was right, so the investor keeps the full income.";
+      if (hasAirbag && T.final < T.lower) tone = "var(--path)";
+    }
+    const receive = r.kind === "shares"
+      ? [`${money(r.shares)} shares`, `${money(NOMINAL)} ÷ ${px(r.strikePrice)}. Worth ${money(r.value)} at ${px(r.finalPrice)}` + (r.residual >= 0.5 ? `, including ${money(r.residual)} cash for the fraction.` : ".")]
+      : [money(r.cash), "in cash on the maturity date"];
+    const even = [];
+    if (T.type !== "bear") even.push(px(INIT * T.lower / 100 * (1 - T.income / 100)));
+    if (T.type !== "bull") even.push(px(INIT * T.upper / 100 * (1 + T.income / 100)));
+    const cell = (k, v, n, cls = "", lead = "") => `<div class="cell"${lead ? ` style="--tone:${lead}"` : ""}><span class="k">${k}</span><span class="v ${cls}">${v}</span><span class="n">${n}</span></div>`;
+    $("verdict").innerHTML =
+      cell("Outcome", head, reason, "sm", tone) +
+      cell("Investor paid", money(paid), T.style === "discount" ? `a ${T.income.toFixed(1)}% discount to the nominal ${money(NOMINAL)}` : "the nominal amount") +
+      cell("Investor receives", receive[0], receive[1] + (dist ? ` Plus ${money(dist)} in distributions.` : ""), r.kind === "shares" ? "sm" : "") +
+      cell("Profit or loss", (result >= 0 ? "+" : "−") + money(Math.abs(result)), signed(100 * result / NOMINAL) + " of the nominal amount", result >= 0 ? "up" : "down") +
+      cell("Break-even price", even.join(" and "), "once the put or call is exercised, the investor loses money beyond this price", "sm");
+  }
+
+  function run(){ syncControls(); drawChart(); drawVerdict(); }
+  let wasNarrow = narrow();
+  window.addEventListener("resize", () => { if (narrow() !== wasNarrow){ wasNarrow = narrow(); run(); } });
+  run();
+}
+</script>
+</body>
+</html>
