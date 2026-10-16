@@ -390,6 +390,14 @@
       "section": "Games",
       "section_order": 90,
       "order": 10
+    },
+    {
+      "id": "xilujun",
+      "title": "The Western Route Army",
+      "description": "An animated map of the Red Army's Western Route Army, 1936–1937: the Yellow River crossing, the defeat in the Hexi Corridor, and the march to Xingxingxia.",
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 41
     }
   ],
   "entries": [
@@ -1432,6 +1440,16 @@
       "replacements": {},
       "description": "Seven rules of blackjack, each with an interactive demo, and a table to play a hand on.",
       "date": "2026-10-13"
+    },
+    {
+      "id": "xilujun-xilujun",
+      "source": "xilujun/xilujun.html",
+      "destination": "xilujun/xilujun/index.html",
+      "title": "西路军悲歌 · Animated map",
+      "collection": "xilujun",
+      "order": 10,
+      "replacements": {},
+      "date": "2026-10-16"
     }
   ]
 }
