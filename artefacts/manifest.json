@@ -398,6 +398,14 @@
       "section": "Stories and epics",
       "section_order": 80,
       "order": 41
+    },
+    {
+      "id": "is-trailer",
+      "title": "I\"s Fan Trailer",
+      "description": "A fan trailer for I\"s, redrawn with AI in a MAPPA style.",
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 50
     }
   ],
   "entries": [
@@ -1450,6 +1458,17 @@
       "order": 10,
       "replacements": {},
       "date": "2026-10-16"
+    },
+    {
+      "id": "is-trailer-index",
+      "source": "is-trailer/index.html",
+      "destination": "is-trailer/index.html",
+      "title": "如果 MAPPA 来做《I\"s》",
+      "collection": "is-trailer",
+      "order": 10,
+      "replacements": {},
+      "description": "A 108-second AI-redrawn fan trailer for Masakazu Katsura's I\"s, in the style of MAPPA's trailers. Plays on Bilibili.",
+      "date": "2026-10-24"
     }
   ]
 }
