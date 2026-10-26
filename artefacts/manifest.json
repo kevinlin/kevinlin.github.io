@@ -406,6 +406,14 @@
       "section": "Stories and epics",
       "section_order": 80,
       "order": 50
+    },
+    {
+      "id": "botw-if",
+      "title": "Breath of the Wild IF",
+      "description": "A Zelda fan film, made with AI, in which the Champions win the Great Calamity.",
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 60
     }
   ],
   "entries": [
@@ -1469,6 +1477,17 @@
       "replacements": {},
       "description": "A 108-second AI-redrawn fan trailer for Masakazu Katsura's I\"s, in the style of MAPPA's trailers. Plays on Bilibili.",
       "date": "2026-10-24"
+    },
+    {
+      "id": "botw-if-index",
+      "source": "botw-if/index.html",
+      "destination": "botw-if/index.html",
+      "title": "Breath of the Wild IF: What If the Champions Had Won?",
+      "collection": "botw-if",
+      "order": 10,
+      "replacements": {},
+      "description": "A 6:50 AI fan film set 100 years before Breath of the Wild. English on YouTube, Japanese dub with Chinese subtitles on Bilibili.",
+      "date": "2026-10-26"
     }
   ]
 }
