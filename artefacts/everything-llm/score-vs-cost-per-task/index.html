@@ -999,7 +999,7 @@ document.addEventListener('DOMContentLoaded', function () {
     families: [
       { name: 'GPT-5.6 Luna', provider: 'OpenAI', points: [
           { x: 0.0853, y: 34.56, label: 'GPT-5.6 Luna (xhigh)', al: 'top', ao: 8 },
-          { x: 0.1783, y: 37.32, label: 'GPT-5.6 Luna (max)', al: 'left', ao: 8 } ] },
+          { x: 0.1783, y: 37.32, label: 'GPT-5.6 Luna (max)', al: 'bottom', ao: 8 } ] },
       { name: 'GPT-5.6 Sol', provider: 'OpenAI', points: [
           { x: 0.5050, y: 39.24, label: 'GPT-5.6 Sol (medium)', al: 'right', ao: 8 },
           { x: 0.8080, y: 42.35, label: 'GPT-5.6 Sol (high)', al: 'bottom', ao: 26 },
@@ -1033,8 +1033,7 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 0.1937, y: 45.36, label: 'GPT-6.1 Terra (xhigh)', al: 'top', ao: 10 },
           { x: 0.4035, y: 48.11, label: 'GPT-6.1 Terra (max)', al: 'right', ao: 8 } ] },
       { name: 'GPT-6 Luna', provider: 'OpenAI', points: [
-          { x: 0.0290, y: 32.93, label: 'GPT-6 Luna (high)', al: 'right', ao: 10 },
-          { x: 0.0422, y: 34.56, label: 'GPT-6 Luna (xhigh)', al: 'left', ao: 8 },
+          { x: 0.0422, y: 34.56, label: 'GPT-6 Luna (xhigh)', al: 'bottom', ao: 8 },
           { x: 0.0678, y: 38.12, label: 'GPT-6 Luna (max)', al: 'top', ao: 8 } ] },
       { name: 'Claude Opus 5.5', provider: 'Anthropic', points: [
           { x: 0.5512, y: 42.31, label: 'Claude Opus 5.5 (low)', tableLabel: 'Claude Opus 5.5 (low with fallback)', al: 'left', ao: 8 },
@@ -1082,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', function () {
           { x: 2.0120, y: 51.90, label: 'Claude Sonnet 5.5 (xhigh)', tableLabel: 'Claude Sonnet 5.5 (xhigh with fallback)', al: 'left', ao: 8 },
           { x: 5.4609, y: 56.00, label: 'Claude Sonnet 5.5 (max)', tableLabel: 'Claude Sonnet 5.5 (max with fallback)', al: 'right', ao: 6 } ] },
       { name: 'DeepSeek V4.1 Flash', provider: 'DeepSeek', dashed: true, points: [
-          { x: 0.1589, y: 39.46, label: 'DeepSeek V4.1 Flash (off-peak)', tableLabel: 'DeepSeek V4.1 Flash (max) · off-peak', al: 'bottom', ao: 46 },
+          { x: 0.1589, y: 39.46, label: 'DeepSeek V4.1 Flash (off-peak)', tableLabel: 'DeepSeek V4.1 Flash (max) · off-peak', al: 'bottom', ao: 8 },
           { x: 0.3178, y: 39.46, label: 'peak', tableLabel: 'DeepSeek V4.1 Flash (max) · peak', al: 'right', ao: 8 } ] },
       { name: 'DeepSeek V4.1 Flash 1017', provider: 'DeepSeek', dashed: true, points: [
           { x: 0.1310, y: 45.10, label: 'DeepSeek V4.1 Flash 1017 (off-peak)', tableLabel: 'DeepSeek V4.1 Flash 1017 (max) · off-peak', al: 'left', ao: 8 },
@@ -1111,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     x: {
       title: 'Cost per Task (USD)',
-      scale: { type: 'logarithmic', min: 0.024, max: 11 },
+      scale: { type: 'logarithmic', min: 0.03, max: 11 },
       tickFormat: function (v) {
         var allowed = [0.03, 0.05, 0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5, 10];
         if (allowed.indexOf(v) === -1) return null;
@@ -1123,7 +1122,9 @@ document.addEventListener('DOMContentLoaded', function () {
       title: 'Intelligence Index',
       grid: true,
       tickStep: 5,
-      scale: { min: 30, max: 60 }
+      scale: { min: 32, max: 59 },
+      // The bounds sit just outside the data; label only the round steps.
+      tickFormat: function (v) { return v % 5 === 0 ? v : null; }
     },
 
     tooltip: function (p) {
