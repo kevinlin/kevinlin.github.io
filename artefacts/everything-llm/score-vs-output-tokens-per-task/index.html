@@ -146,10 +146,13 @@ h1 {
   font: inherit;
   color: inherit;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: opacity 140ms var(--ease-out), background-color 140ms var(--ease-out);
 }
 
-.legend button:hover { background: hsl(var(--rule)); }
+@media (hover: hover) and (pointer: fine) {
+  .legend button:hover { background: hsl(var(--rule)); }
+}
 
 /* Providers the reader is not currently isolating recede but stay readable. */
 .legend button.is-dim { opacity: 0.38; }
@@ -309,7 +312,24 @@ td.num, th.num {
 
 @media (max-width: 640px) {
   body { padding: var(--space-8) var(--space-4) var(--space-6); }
-  .chart-wrap { height: 440px; }
+  /* Full-bleed card: on a phone the plot needs every horizontal pixel. */
+  .card {
+    margin: 0 calc(var(--space-4) * -1);
+    border-radius: 0;
+    padding: 0;
+  }
+  .chart-wrap {
+    height: clamp(400px, 62svh, 560px);
+    padding: var(--space-3) var(--space-1) var(--space-1);
+    border-radius: 0;
+  }
+  /* 44px finger targets; the pill background marks the hit area. */
+  .legend { gap: var(--space-1) var(--space-2); }
+  .legend button {
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    margin: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -389,6 +409,9 @@ td.num, th.num {
 
   var darkQuery = global.matchMedia('(prefers-color-scheme: dark)');
   var reducedMotion = global.matchMedia('(prefers-reduced-motion: reduce)');
+  // Fingers miss 6px dots; widen the hit radius without growing the dot.
+  var coarse = global.matchMedia('(pointer: coarse)');
+  var HIT_RADIUS = coarse.matches ? 14 : 1;
   var registry = [];
 
   // Filter state. `pinned` are the providers the reader has clicked; `hovered` is a
@@ -475,6 +498,7 @@ td.num, th.num {
         borderDash: f.dashed ? [5, 4] : [],
         pointRadius: 6,
         pointHoverRadius: 8,
+        pointHitRadius: HIT_RADIUS,
         datalabels: labelConfig
       };
     });
@@ -486,6 +510,7 @@ td.num, th.num {
       showLine: false,
       pointRadius: 6,
       pointHoverRadius: 8,
+      pointHitRadius: HIT_RADIUS,
       datalabels: labelConfig
     });
 
@@ -522,6 +547,7 @@ td.num, th.num {
         font: { family: FONT_MONO, size: 12 },
         color: t.axis,
         padding: 8,
+        maxRotation: 0,
         stepSize: cfg.tickStep,
         callback: cfg.tickFormat
       },
@@ -541,8 +567,18 @@ td.num, th.num {
         responsive: true,
         maintainAspectRatio: false,
         animation: reducedMotion.matches ? false : { duration: 420, easing: 'easeOutQuart' },
-        layout: { padding: { right: 96, top: 12, left: 4 } },
+        // The right gutter only exists for point labels, which hide below 720px.
+        layout: {
+          padding: function (ctx) {
+            return ctx.chart.width >= 720 ? { right: 96, top: 12, left: 4 } : { right: 8, top: 8, left: 0 };
+          }
+        },
+        // A phone can't spare the gutter for the rotated y title; the headline names the axis.
+        onResize: function (c, size) { c.options.scales.y.title.display = size.width >= 480; },
         interaction: { mode: 'nearest', intersect: true },
+        // On touch, only a tap opens a tooltip, so dragging to scroll the page
+        // doesn't sweep tooltips across the plot.
+        events: coarse.matches ? ['click'] : ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -565,6 +601,7 @@ td.num, th.num {
       }
     });
 
+    chart.options.scales.y.title.display = chart.width >= 480;
     var entry = { chart: chart, spec: spec };
     paint(entry);
     chart.update('none');
@@ -643,9 +680,11 @@ td.num, th.num {
       function enter() { hovered = name; applyFilters(); }
       function leave() { if (hovered === name) hovered = null; applyFilters(); }
 
-      button.addEventListener('mouseenter', enter);
-      button.addEventListener('mouseleave', leave);
-      button.addEventListener('focus', enter);
+      // Preview only for a real mouse or keyboard focus. A tap also fires enter and
+      // focus, which would keep the provider lit after a second tap unpins it.
+      button.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') enter(); });
+      button.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') leave(); });
+      button.addEventListener('focus', function () { if (button.matches(':focus-visible')) enter(); });
       button.addEventListener('blur', leave);
       button.addEventListener('click', function () {
         pinned[name] = !pinned[name];
