@@ -119,9 +119,9 @@
       "id": "java-interview",
       "title": "Java Interview",
       "description": "Java, messaging, and Kubernetes interview questions",
-      "section": "Software engineering",
-      "section_order": 30,
-      "order": 10
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 140
     },
     {
       "id": "star-wars",
