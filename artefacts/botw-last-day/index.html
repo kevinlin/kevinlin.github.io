@@ -11,7 +11,7 @@
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Zelda's seventeenth birthday, the day the Great Calamity returned. An 11-minute AI fan film. Watch on YouTube (English) or Bilibili (日配中字).">
+<meta name="description" content="Zelda&#x27;s seventeenth birthday, the day the Great Calamity returned. An 11-minute AI fan film. Watch on YouTube (English) or Bilibili (日配中字).">
 <title>The Last Day Before a Century of Slumber</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,12 +26,14 @@
   --muted: #a9b8c0;
   --accent: #7dd8e5;
   --on-accent: #0b1620;
-  --calamity: #f497af;
+  --highlight: #f497af;
   --rule: #2a3d4d;
   --shadow: rgba(0, 0, 0, 0.35);
+  --vignette: radial-gradient(ellipse at center, rgba(218, 184, 144, 0) 40%, rgba(218, 184, 144, 0.14) 72%, rgba(20, 16, 12, 0.55) 100%);
   --font-display: "Marcellus", Georgia, "Times New Roman", serif;
   --font-body: "Spectral", Georgia, "Times New Roman", serif;
   --font-zh: "Noto Serif SC", "Songti SC", SimSun, serif;
+  --font-zh-display: "Noto Serif SC", "Songti SC", SimSun, serif;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 @media (prefers-color-scheme: light) {
@@ -43,7 +45,7 @@
     --muted: #4b5b65;
     --accent: #126778;
     --on-accent: #ffffff;
-    --calamity: #a92d51;
+    --highlight: #a92d51;
     --rule: #cdd6da;
     --shadow: rgba(24, 38, 49, 0.12);
   }
@@ -65,7 +67,7 @@ main {
   padding-block: 48px 64px;
 }
 h1, h2 { font-family: var(--font-display); font-weight: 400; line-height: 1.2; text-wrap: balance; margin: 0; }
-:lang(zh-CN) h2, h2:lang(zh-CN) { font-family: var(--font-zh); font-weight: 600; }
+:lang(zh-CN) h1, :lang(zh-CN) h2 { font-family: var(--font-zh-display); font-weight: 600; }
 h1 { font-size: clamp(2.25rem, 6vw, 4rem); letter-spacing: -0.01em; }
 h2 { font-size: 1.5rem; margin-bottom: 16px; }
 p { margin: 0 0 16px; text-wrap: pretty; }
@@ -74,7 +76,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 img { display: block; max-width: 100%; height: auto; }
 
 .eyebrow { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
-.zh-title { font-family: var(--font-zh); font-size: 1.25rem; color: var(--muted); margin: 8px 0 0; }
+.subtitle { font-size: 1.25rem; color: var(--muted); margin: 8px 0 0; }
 
 .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-block: 32px 16px; }
 .tabs { display: inline-flex; padding: 4px; gap: 4px; background: var(--surface); border-radius: 12px; box-shadow: 0 0 0 1px var(--rule); }
@@ -94,22 +96,18 @@ img { display: block; max-width: 100%; height: auto; }
 .player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .play { position: absolute; inset: 0; display: block; color: #fff; text-decoration: none; }
 .play img { width: 100%; height: 100%; object-fit: cover; }
-/* The game's memory cutscenes fade warm at the edges. */
-.play::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(218, 184, 144, 0) 40%, rgba(218, 184, 144, 0.14) 72%, rgba(20, 16, 12, 0.55) 100%);
-}
+.play::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--vignette); }
 .play-badge {
   position: absolute; z-index: 1; left: 50%; top: 50%; transform: translate(-50%, -50%);
   display: inline-flex; align-items: center; gap: 12px;
   padding: 12px 24px 12px 18px; border-radius: 999px;
-  background: rgba(11, 22, 32, 0.72); backdrop-filter: blur(6px);
+  background: rgba(11, 16, 22, 0.72); backdrop-filter: blur(6px);
   font-size: 1.05rem; white-space: nowrap;
   transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out);
 }
 .play-badge svg { width: 20px; height: 20px; fill: currentColor; margin-left: 2px; }
 @media (hover: hover) and (pointer: fine) {
-  .play:hover .play-badge { background: rgba(11, 22, 32, 0.88); transform: translate(-50%, -50%) scale(1.04); }
+  .play:hover .play-badge { background: rgba(11, 16, 22, 0.88); transform: translate(-50%, -50%) scale(1.04); }
 }
 .play:active .play-badge { transform: translate(-50%, -50%) scale(0.97); }
 
@@ -124,7 +122,8 @@ section.block { margin-top: 56px; }
   transition: background-color 120ms var(--ease-out);
 }
 .chapters time { color: var(--accent); font-variant-numeric: tabular-nums; }
-.chapters .calamity, .chapters .calamity time { color: var(--calamity); }
+.chapters .desc { display: block; color: var(--muted); font-size: 1rem; line-height: 1.6; margin-top: 2px; }
+.chapters .highlight, .chapters .highlight time { color: var(--highlight); }
 @media (hover: hover) and (pointer: fine) {
   .chapters a:hover { background: var(--surface); }
 }
@@ -139,12 +138,13 @@ section.block { margin-top: 56px; }
 }
 .companion img { border-radius: 8px; aspect-ratio: 16 / 9; object-fit: cover; }
 .companion strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3; margin-bottom: 4px; color: var(--accent); }
-.companion:lang(zh-CN) strong { font-family: var(--font-zh); font-weight: 600; }
+.companion:lang(zh-CN) strong { font-family: var(--font-zh-display); font-weight: 600; }
 .companion span { color: var(--muted); font-size: 1rem; }
 @media (hover: hover) and (pointer: fine) {
   .companion:hover { box-shadow: 0 0 0 1px var(--accent), 0 8px 24px var(--shadow); }
 }
 
+.sources { padding-left: 1.25em; margin: 0; }
 .note { color: var(--muted); font-size: 0.9375rem; margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--rule); }
 
 @media (max-width: 560px) {
@@ -162,15 +162,15 @@ section.block { margin-top: 56px; }
   <header>
     <p class="eyebrow">A Breath of the Wild fan film · 11:00</p>
     <h1>The Last Day Before a Century of Slumber</h1>
-    <p class="zh-title" lang="zh-CN">沉睡百年前的最后一日</p>
+    <p class="subtitle" lang="zh-CN">沉睡百年前的最后一日</p>
   </header>
 
   <div class="controls">
     <div class="tabs" role="tablist" aria-label="Language">
-      <button role="tab" id="tab-en" aria-selected="true" aria-controls="panel-en" data-lang="en">English</button>
-      <button role="tab" id="tab-zh" aria-selected="false" aria-controls="panel-zh" data-lang="zh" tabindex="-1" lang="zh-CN">日配中字</button>
+      <button role="tab" id="tab-en" aria-selected="true" aria-controls="panel-en" data-lang="en" lang="en">English</button>
+      <button role="tab" id="tab-zh" aria-selected="false" aria-controls="panel-zh" data-lang="zh" lang="zh-CN" tabindex="-1">日配中字</button>
     </div>
-    <p class="external" data-for="en">Opens on <a href="https://youtu.be/cctSrSqt_pY">YouTube</a> · <a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/">Bilibili</a></p>
+    <p class="external" data-for="en" lang="en">Opens on <a href="https://youtu.be/cctSrSqt_pY">YouTube</a> · <a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/">Bilibili</a></p>
     <p class="external" data-for="zh" lang="zh-CN" hidden>在 <a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/">哔哩哔哩</a> 观看 · 英文版见 <a href="https://youtu.be/cctSrSqt_pY">YouTube</a></p>
   </div>
 
@@ -181,22 +181,22 @@ section.block { margin-top: 56px; }
     </a>
   </div>
 
-  <div role="tabpanel" id="panel-en" aria-labelledby="tab-en" data-lang="en">
+  <div role="tabpanel" id="panel-en" aria-labelledby="tab-en" data-panel="en" lang="en">
     <section class="block reading" aria-labelledby="synopsis-en">
       <h2 id="synopsis-en">Synopsis</h2>
-      <p>Zelda's seventeenth birthday, the day the Great Calamity returned. Breath of the Wild only shows it in scattered memories. This film plays it from morning to night.</p>
-      <p>The prayer at the Spring of Wisdom fails again. The Champions say goodbye on the road, not knowing it is the last time. Then the sky turns red: the Guardians turn on Hyrule, the Divine Beasts are taken, and Mipha, Daruk, Revali and Urbosa fall one by one, each leaving their power behind for Link. At Fort Hateno, Link fights until he can't stand, and Zelda's power wakes at last, too late to save him from the wounds. The Sheikah carry him to the Shrine of Resurrection, and Zelda goes to face Calamity Ganon alone. A hundred years of sleep for him, a hundred years of holding Ganon back for her.</p>
-      <p>Made to look like the game's own memory cutscenes.</p>
+      <p>Zelda&#x27;s seventeenth birthday, the day the Great Calamity returned. Breath of the Wild only shows it in scattered memories. This film plays it from morning to night.</p>
+      <p>The prayer at the Spring of Wisdom fails again. The Champions say goodbye on the road, not knowing it is the last time. Then the sky turns red: the Guardians turn on Hyrule, the Divine Beasts are taken, and Mipha, Daruk, Revali and Urbosa fall one by one, each leaving their power behind for Link. At Fort Hateno, Link fights until he can&#x27;t stand, and Zelda&#x27;s power wakes at last, too late to save him from the wounds. The Sheikah carry him to the Shrine of Resurrection, and Zelda goes to face Calamity Ganon alone. A hundred years of sleep for him, a hundred years of holding Ganon back for her.</p>
+      <p>Made to look like the game&#x27;s own memory cutscenes.</p>
     </section>
 
     <section class="block" aria-labelledby="chapters-en">
       <h2 id="chapters-en">Chapters</h2>
       <ol class="chapters">
-        <li><a href="https://youtu.be/cctSrSqt_pY?t=0" data-t="0"><time datetime="PT0S">0:00</time><span>A Birthday Wish</span></a></li>
-        <li><a href="https://youtu.be/cctSrSqt_pY?t=96" data-t="96" class="calamity"><time datetime="PT1M36S">1:36</time><span>The Sky Turns Red</span></a></li>
+        <li><a href="https://youtu.be/cctSrSqt_pY?t=0" data-t="0"><time datetime="PT0M0S">0:00</time><span>A Birthday Wish</span></a></li>
+        <li><a href="https://youtu.be/cctSrSqt_pY?t=96" data-t="96" class="highlight"><time datetime="PT1M36S">1:36</time><span>The Sky Turns Red</span></a></li>
         <li><a href="https://youtu.be/cctSrSqt_pY?t=182" data-t="182"><time datetime="PT3M2S">3:02</time><span>The Kingdom Falls</span></a></li>
         <li><a href="https://youtu.be/cctSrSqt_pY?t=354" data-t="354"><time datetime="PT5M54S">5:54</time><span>Despair</span></a></li>
-        <li><a href="https://youtu.be/cctSrSqt_pY?t=416" data-t="416"><time datetime="PT6M56S">6:56</time><span>The Knight's Final Stand</span></a></li>
+        <li><a href="https://youtu.be/cctSrSqt_pY?t=416" data-t="416"><time datetime="PT6M56S">6:56</time><span>The Knight&#x27;s Final Stand</span></a></li>
         <li><a href="https://youtu.be/cctSrSqt_pY?t=518" data-t="518"><time datetime="PT8M38S">8:38</time><span>A Promise to Return</span></a></li>
         <li><a href="https://youtu.be/cctSrSqt_pY?t=572" data-t="572"><time datetime="PT9M32S">9:32</time><span>A Century Apart</span></a></li>
       </ol>
@@ -219,7 +219,7 @@ section.block { margin-top: 56px; }
     <p class="note reading">Non-commercial fan work. The Legend of Zelda, its characters and its world belong to Nintendo. Not affiliated with or endorsed by Nintendo.</p>
   </div>
 
-  <div role="tabpanel" id="panel-zh" aria-labelledby="tab-zh" data-lang="zh" lang="zh-CN" hidden>
+  <div role="tabpanel" id="panel-zh" aria-labelledby="tab-zh" data-panel="zh" lang="zh-CN" hidden>
     <section class="block reading" aria-labelledby="synopsis-zh">
       <h2 id="synopsis-zh">简介</h2>
       <p>塞尔达十七岁生日那天，也是大灾厄复活的那一天。旷野之息里，这一天只零散地出现在回忆里；这部短片把它从早到晚完整演了一遍。</p>
@@ -230,8 +230,8 @@ section.block { margin-top: 56px; }
     <section class="block" aria-labelledby="chapters-zh">
       <h2 id="chapters-zh">章节</h2>
       <ol class="chapters">
-        <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=0" data-t="0"><time datetime="PT0S">00:00</time><span>生日的愿望</span></a></li>
-        <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=96" data-t="96" class="calamity"><time datetime="PT1M36S">01:36</time><span>天空染红</span></a></li>
+        <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=0" data-t="0"><time datetime="PT0M0S">00:00</time><span>生日的愿望</span></a></li>
+        <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=96" data-t="96" class="highlight"><time datetime="PT1M36S">01:36</time><span>天空染红</span></a></li>
         <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=182" data-t="182"><time datetime="PT3M2S">03:02</time><span>王国陷落</span></a></li>
         <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=354" data-t="354"><time datetime="PT5M54S">05:54</time><span>绝望</span></a></li>
         <li><a href="https://www.bilibili.com/video/BV1Ycxq6tEsi/?t=416" data-t="416"><time datetime="PT6M56S">06:56</time><span>骑士最后的坚守</span></a></li>
@@ -258,23 +258,20 @@ section.block { margin-top: 56px; }
   </div>
 </main>
 <script>
-// One player for both languages: the cover stands in until someone presses play,
-// so neither embed loads on page open. Chapters seek the embed instead of leaving the page.
-const SRC = {
-  en: { url: 'https://youtu.be/cctSrSqt_pY', label: 'Play the film',
-        embed: t => `https://www.youtube-nocookie.com/embed/cctSrSqt_pY?autoplay=1&start=${t}` },
-  zh: { url: 'https://www.bilibili.com/video/BV1Ycxq6tEsi/', label: '播放',
-        embed: t => `https://player.bilibili.com/player.html?bvid=BV1Ycxq6tEsi&page=1&high_quality=1&autoplay=1&t=${t}` },
-};
+// One player for every language: the cover stands in until someone presses play,
+// so no embed loads on page open. Chapters seek the embed instead of leaving the page.
+const SOURCES = {"en": {"url": "https://youtu.be/cctSrSqt_pY", "label": "Play the film", "title": "The Last Day Before a Century of Slumber (YouTube player)", "embed": "https://www.youtube-nocookie.com/embed/cctSrSqt_pY?autoplay=1&start={t}"}, "zh": {"url": "https://www.bilibili.com/video/BV1Ycxq6tEsi/", "label": "播放", "title": "沉睡百年前的最后一日（B 站播放器）", "embed": "https://player.bilibili.com/player.html?bvid=BV1Ycxq6tEsi&page=1&high_quality=1&autoplay=1&t={t}"}};
 const player = document.getElementById('player');
 const facade = player.querySelector('[data-play]');
 const tabs = [...document.querySelectorAll('[role="tab"]')];
-let lang = 'en';
+const htmlLang = l => l === 'zh' ? 'zh-CN' : 'en';
+let lang = Object.keys(SOURCES)[0];
 
 function play(t) {
+  const s = SOURCES[lang];
   const f = document.createElement('iframe');
-  f.src = SRC[lang].embed(t);
-  f.title = lang === 'zh' ? '沉睡百年前的最后一日（B 站播放器）' : 'The Last Day Before a Century of Slumber (YouTube player)';
+  f.src = s.embed.replace('{t}', t);
+  f.title = s.title;
   f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
   f.allowFullscreen = true;
   player.replaceChildren(f);
@@ -288,15 +285,15 @@ function show(next, focus) {
     b.tabIndex = on ? 0 : -1;
     if (on && focus) b.focus();
   });
-  document.querySelectorAll('[role="tabpanel"], .external').forEach(el => {
-    el.hidden = (el.dataset.lang || el.dataset.for) !== lang;
+  document.querySelectorAll('[data-panel], .external').forEach(el => {
+    el.hidden = (el.dataset.panel || el.dataset.for) !== lang;
   });
   // Switching language stops whatever is playing and puts the cover back.
-  facade.href = SRC[lang].url;
-  facade.querySelector('[data-label]').textContent = SRC[lang].label;
-  facade.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  facade.href = SOURCES[lang].url;
+  facade.querySelector('[data-label]').textContent = SOURCES[lang].label;
+  facade.lang = htmlLang(lang);
   player.replaceChildren(facade);
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.documentElement.lang = htmlLang(lang);
 }
 
 const isPlainClick = e => e.button === 0 && !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey);
@@ -325,7 +322,7 @@ tabs.forEach((b, i) => {
   });
 });
 
-show(/^zh/i.test(navigator.language) ? 'zh' : 'en');
+show('zh' in SOURCES && /^zh/i.test(navigator.language) ? 'zh' : lang);
 </script>
 </body>
 </html>
