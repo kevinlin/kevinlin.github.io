@@ -422,6 +422,13 @@
       "section": "Stories and epics",
       "section_order": 80,
       "order": 60
+    },
+    {
+      "id": "meta-muse",
+      "title": "Meta Muse",
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 150
     }
   ],
   "entries": [
@@ -1461,6 +1468,17 @@
       "order": 20,
       "replacements": {},
       "description": "An 11-minute AI fan film of Zelda's seventeenth birthday, the day the Great Calamity returned. English on YouTube, Japanese dub with Chinese subtitles on Bilibili.",
+      "date": "2026-10-31"
+    },
+    {
+      "id": "meta-muse-20261031-meta-muse-raw-v3",
+      "source": "meta-muse/20261031_meta-muse-raw-v3.md",
+      "destination": "meta-muse/20261031-meta-muse-raw-v3/index.html",
+      "title": "last30days v3.31.0: Meta Muse personal AI agent",
+      "collection": "meta-muse",
+      "order": 10,
+      "replacements": {},
+      "description": "Raw last30days run for October 2026: ranked evidence on Meta Muse, the personal AI agent, across eleven sources. Untrusted source text, kept as collected.",
       "date": "2026-10-31"
     }
   ]
