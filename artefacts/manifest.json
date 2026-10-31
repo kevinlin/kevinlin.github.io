@@ -414,6 +414,14 @@
       "section": "Stories and epics",
       "section_order": 80,
       "order": 60
+    },
+    {
+      "id": "botw-last-day",
+      "title": "The Last Day Before a Century of Slumber",
+      "description": "A Zelda fan film, made with AI, of the day the Great Calamity returned, as it happened in the game.",
+      "section": "Stories and epics",
+      "section_order": 80,
+      "order": 70
     }
   ],
   "entries": [
@@ -1488,6 +1496,17 @@
       "replacements": {},
       "description": "A 6:50 AI fan film set 100 years before Breath of the Wild. English on YouTube, Japanese dub with Chinese subtitles on Bilibili.",
       "date": "2026-10-26"
+    },
+    {
+      "id": "botw-last-day-index",
+      "source": "botw-last-day/index.html",
+      "destination": "botw-last-day/index.html",
+      "title": "The Last Day Before a Century of Slumber",
+      "collection": "botw-last-day",
+      "order": 10,
+      "replacements": {},
+      "description": "An 11-minute AI fan film of Zelda's seventeenth birthday, the day the Great Calamity returned. English on YouTube, Japanese dub with Chinese subtitles on Bilibili.",
+      "date": "2026-10-31"
     }
   ]
 }
