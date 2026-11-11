@@ -59,8 +59,8 @@
     "ai-augmented-sdlc/ai-dlc-guide.src.html",
     "ai-augmented-sdlc/frontier-engineering.src.html",
     "claude-tag/prompts/",
-    "fable5-21days/narrative/",
-    "fable5-21days/prompts/",
+    "fable5/narrative/",
+    "fable5/prompts/",
     "fde/analysis.md",
     "fde/prompts/",
     "fde/source-swen-fde.md",
@@ -237,8 +237,8 @@
     },
     {
       "id": "fable5-21days",
-      "title": "Fable5 21Days",
-      "description": "21 Days of Building with Fable 5.",
+      "title": "Fable 5",
+      "description": "Building with Fable 5: 21 days of agent sessions as infographics, plus a before/after comic of weekly quotas once Fable 5.2 landed.",
       "section": "AI agents and engineering",
       "section_order": 10,
       "order": 90
@@ -522,7 +522,7 @@
     },
     {
       "id": "fable5-21days-infographic-craft-handmade",
-      "source": "fable5-21days/infographic-craft-handmade.png",
+      "source": "fable5/infographic-craft-handmade.png",
       "destination": "fable5-21days/infographic-craft-handmade.png",
       "title": "21 days of building with agents: project-by-project breakdown",
       "collection": "fable5-21days",
@@ -533,7 +533,7 @@
     },
     {
       "id": "fable5-21days-infographic-cyberpunk",
-      "source": "fable5-21days/infographic-cyberpunk.png",
+      "source": "fable5/infographic-cyberpunk.png",
       "destination": "fable5-21days/infographic-cyberpunk.png",
       "title": "21 days of building with agents: effort ranked by project",
       "collection": "fable5-21days",
@@ -544,7 +544,7 @@
     },
     {
       "id": "fable5-21days-infographic-densemodules-morandi",
-      "source": "fable5-21days/infographic-densemodules-morandi.png",
+      "source": "fable5/infographic-densemodules-morandi.png",
       "destination": "fable5-21days/infographic-densemodules-morandi.png",
       "title": "21 days of building with agents: full report, vitals to top skills",
       "collection": "fable5-21days",
@@ -555,7 +555,7 @@
     },
     {
       "id": "fable5-21days-infographic-hubspoke-edu",
-      "source": "fable5-21days/infographic-hubspoke-edu.png",
+      "source": "fable5/infographic-hubspoke-edu.png",
       "destination": "fable5-21days/infographic-hubspoke-edu.png",
       "title": "21 days of building with agents: hub-and-spoke map of the work",
       "collection": "fable5-21days",
@@ -566,7 +566,7 @@
     },
     {
       "id": "fable5-21days-infographic-roadmap-watercolor",
-      "source": "fable5-21days/infographic-roadmap-watercolor.png",
+      "source": "fable5/infographic-roadmap-watercolor.png",
       "destination": "fable5-21days/infographic-roadmap-watercolor.png",
       "title": "21 days of building with agents: the journey, week by week",
       "collection": "fable5-21days",
@@ -1480,6 +1480,39 @@
       "replacements": {},
       "description": "Raw last30days run for October 2026: ranked evidence on Meta Muse, the personal AI agent, across eleven sources. Untrusted source text, kept as collected.",
       "date": "2026-10-31"
+    },
+    {
+      "id": "fable5-v1-american-16x9",
+      "source": "fable5/v1-american-16x9.png",
+      "destination": "fable5/v1-american-16x9.png",
+      "title": "Before and after Fable 5.2: weekly quota comic (American comic style)",
+      "collection": "fable5-21days",
+      "order": 80,
+      "replacements": {},
+      "description": "Left: 12% of the weekly limit used and wondering how to burn the rest. Right: 100% used with six days to the reset, asking for more Fable resets.",
+      "date": "2026-11-11"
+    },
+    {
+      "id": "fable5-v2-manga-2-35x1",
+      "source": "fable5/v2-manga-2.35x1.png",
+      "destination": "fable5/v2-manga-2-35x1.png",
+      "title": "Before and after Fable 5.2: weekly quota comic (manga style)",
+      "collection": "fable5-21days",
+      "order": 81,
+      "replacements": {},
+      "description": "The same quota joke as a chibi manga strip, in black-and-white screentone with coral accents.",
+      "date": "2026-11-11"
+    },
+    {
+      "id": "fable5-v3-retro-4x3",
+      "source": "fable5/v3-retro-4x3.png",
+      "destination": "fable5/v3-retro-4x3.png",
+      "title": "Before and after Fable 5.2: weekly quota comic (retro strip style)",
+      "collection": "fable5-21days",
+      "order": 82,
+      "replacements": {},
+      "description": "The same quota joke as a 1960s Sunday-paper strip printed in risograph colours.",
+      "date": "2026-11-11"
     }
   ]
 }
