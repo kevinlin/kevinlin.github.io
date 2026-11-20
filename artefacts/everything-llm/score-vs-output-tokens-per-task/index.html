@@ -11,6 +11,7 @@
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230063a3"/><text x="50" y="75" font-size="60" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">K</text></svg>'>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Intelligence Index: Score vs. Output Tokens per Task</title>
 <style>
 /* Shared styling for the Artificial Analysis Intelligence Index scatter charts.
@@ -18,6 +19,9 @@
    depth from layered shadow rather than borders. */
 
 :root {
+  /* Lets the browser theme scrollbars and the initial canvas to match. */
+  color-scheme: light dark;
+
   /* Type */
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --font-ui: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
@@ -339,8 +343,8 @@ td.num, th.num {
   }
 }
 </style>
-<script src="../../vendor/chart.umd.min.js"></script>
-<script src="../../vendor/chartjs-plugin-datalabels.min.js"></script>
+<script defer src="../../vendor/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer src="../../vendor/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 <a class="skip-link" href="#data-table">Skip to the data table</a>
@@ -363,7 +367,7 @@ td.num, th.num {
 
     <details class="data-details" id="data-table">
       <summary>Data table</summary>
-      <div class="table-scroll">
+      <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-caption">
         <table id="table"></table>
       </div>
     </details>
@@ -715,7 +719,7 @@ td.num, th.num {
   function buildTable(el, spec) {
     var rows = allPoints(spec);
     var head =
-      '<caption>' + rows.length + ' models, highest score first.</caption>' +
+      '<caption id="table-caption">' + rows.length + ' models, highest score first.</caption>' +
       '<thead><tr><th scope="col">Model</th><th scope="col">Provider</th>' +
       '<th scope="col" class="num">' + spec.y.title + '</th>' +
       '<th scope="col" class="num">' + spec.x.title + '</th></tr></thead>';
