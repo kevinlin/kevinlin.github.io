@@ -7,7 +7,10 @@
     "catalogue": {
       "mode": "inject",
       "page": "index.html"
-    }
+    },
+    "allowed_external_hosts": [
+      "fonts.googleapis.com"
+    ]
   },
   "protected_files": [
     "vendor/chart.umd.min.js",
@@ -15,6 +18,13 @@
     "vendor/marked.min.js",
     "vendor/three.core.min.js",
     "vendor/three.module.min.js",
+    "vendor/leaflet/leaflet.js",
+    "vendor/leaflet/leaflet.css",
+    "vendor/leaflet/images/layers.png",
+    "vendor/leaflet/images/layers-2x.png",
+    "vendor/leaflet/images/marker-icon.png",
+    "vendor/leaflet/images/marker-icon-2x.png",
+    "vendor/leaflet/images/marker-shadow.png",
     "showcase/index.html",
     "showcase/atlas.jpg",
     "showcase/atlas.js",
@@ -1109,7 +1119,10 @@
       "title": "Asia Pacific Earthquake Map",
       "collection": "earthquake-map",
       "order": 10,
-      "replacements": {},
+      "replacements": {
+        "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css": "../../vendor/leaflet/leaflet.css",
+        "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js": "../../vendor/leaflet/leaflet.js"
+      },
       "description": "An interactive map of every magnitude 6.0+ quake in the Asia Pacific over the last 200 years, coloured by depth, pulled live from the USGS catalog with a bundled CSV as fallback.",
       "date": "2026-08-29"
     },
@@ -1178,7 +1191,10 @@
       "title": "Punggol Secondary Schools",
       "collection": "secondary-schools",
       "order": 10,
-      "replacements": {},
+      "replacements": {
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css": "../../vendor/leaflet/leaflet.css",
+        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js": "../../vendor/leaflet/leaflet.js"
+      },
       "date": "2026-11-20"
     },
     {
@@ -1190,7 +1206,7 @@
       "order": 20,
       "replacements": {},
       "description": "Product requirements for a compliance tool that builds change-board evidence from the work itself, then fast-tracks low-risk changes. Workshop-scoped build.",
-      "date": "2026-10-04"
+      "date": "2026-10-05"
     },
     {
       "id": "product-idea-prd-luggage-packing-genie",
@@ -1201,7 +1217,7 @@
       "order": 30,
       "replacements": {},
       "description": "Product requirements for a packing assistant that checks from a photo whether your things fit the suitcase, and suggests fixes tied to the itinerary when they don’t. Workshop-scoped build.",
-      "date": "2026-10-04"
+      "date": "2026-10-05"
     },
     {
       "id": "product-idea-prd-point-and-fix",
@@ -1212,7 +1228,7 @@
       "order": 40,
       "replacements": {},
       "description": "Product requirements for a voice-and-video agent that diagnoses a faulty appliance through the phone camera and guides a fix or books a technician. Workshop-scoped build.",
-      "date": "2026-10-04"
+      "date": "2026-10-05"
     },
     {
       "id": "product-idea-prd-try-before-you-decide",
@@ -1223,7 +1239,7 @@
       "order": 50,
       "replacements": {},
       "description": "Product requirements for a banking-app simulator that plays out the next 24 months of a financial choice using the customer’s own numbers. Workshop-scoped build.",
-      "date": "2026-10-04"
+      "date": "2026-10-05"
     },
     {
       "id": "product-idea-prd-voice-first-banking",
@@ -1234,7 +1250,7 @@
       "order": 60,
       "replacements": {},
       "description": "Product requirements for a voice banking agent that spots likely scams mid-conversation and offers to call a family member before money moves. Workshop-scoped build.",
-      "date": "2026-10-04"
+      "date": "2026-10-05"
     },
     {
       "id": "openai-tts-openai-tts-playground",
