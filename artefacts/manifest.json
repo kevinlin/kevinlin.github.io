@@ -95,7 +95,9 @@
     "all-code-is-slop/prompts/",
     "all-code-is-slop/refs/",
     "all-code-is-slop/source-lauren-tan.md",
-    "all-code-is-slop/structured-content.md"
+    "all-code-is-slop/structured-content.md",
+    "homeric-epics/tools/tripo/",
+    "all-code-is-slop/enterprise-question.md"
   ],
   "collections": [
     {
@@ -1123,7 +1125,7 @@
       "collection": "homeric-epics",
       "order": 20,
       "replacements": {},
-      "date": "2026-09-04"
+      "date": "2026-11-22"
     },
     {
       "id": "earthquake-map-index",
