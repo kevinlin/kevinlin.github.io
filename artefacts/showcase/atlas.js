@@ -304,13 +304,65 @@ export default {
    ]
   },
   {
+   "id": "all-code-is-slop-01-hierarchical-layers-craft-handmade",
+   "href": "all-code-is-slop/01-hierarchical-layers-craft-handmade.png",
+   "title": "The poteto pyramid, hand-drawn",
+   "collection": "All Code Is Slop (Except Mine)",
+   "aspect": 0.75,
+   "uv": [
+    0.303711,
+    0.500163,
+    0.106864,
+    0.166341
+   ]
+  },
+  {
+   "id": "all-code-is-slop-02-dense-modules-morandi-journal",
+   "href": "all-code-is-slop/02-dense-modules-morandi-journal.png",
+   "title": "All Code Is Slop: sketch notes",
+   "collection": "All Code Is Slop (Except Mine)",
+   "aspect": 0.75,
+   "uv": [
+    0.446568,
+    0.500163,
+    0.106864,
+    0.166341
+   ]
+  },
+  {
+   "id": "all-code-is-slop-03-hierarchical-layers-graffiti",
+   "href": "all-code-is-slop/03-hierarchical-layers-graffiti.png",
+   "title": "The poteto pyramid, graffiti edition",
+   "collection": "All Code Is Slop (Except Mine)",
+   "aspect": 0.75,
+   "uv": [
+    0.589425,
+    0.500163,
+    0.106864,
+    0.166341
+   ]
+  },
+  {
+   "id": "all-code-is-slop-04-dense-modules-pop-laboratory",
+   "href": "all-code-is-slop/04-dense-modules-pop-laboratory.png",
+   "title": "All Code Is Slop: field guide",
+   "collection": "All Code Is Slop (Except Mine)",
+   "aspect": 0.75,
+   "uv": [
+    0.732282,
+    0.500163,
+    0.106864,
+    0.166341
+   ]
+  },
+  {
    "id": "everything-llm-4-best-practices-for-claude-opus-4-7",
    "href": "everything-llm/4-best-practices-for-claude-opus-4-7.jpg",
    "title": "Four best practices for Claude Opus 4.7 xhigh mode",
    "collection": "Everything LLM",
    "aspect": 0.55814,
    "uv": [
-    0.317383,
+    0.888811,
     0.500163,
     0.07952,
     0.166341
@@ -323,8 +375,8 @@ export default {
    "collection": "Everything LLM",
    "aspect": 1.5,
    "uv": [
-    0.428711,
-    0.527995,
+    0.00014,
+    0.694661,
     0.142578,
     0.110677
    ]
@@ -336,8 +388,8 @@ export default {
    "collection": "Everything LLM",
    "aspect": 0.666667,
    "uv": [
-    0.595424,
-    0.500163,
+    0.166853,
+    0.666829,
     0.094866,
     0.166341
    ]
@@ -349,8 +401,8 @@ export default {
    "collection": "minGPT vs toy-transformer",
    "aspect": 1.777778,
    "uv": [
-    0.714425,
-    0.536621,
+    0.285854,
+    0.703288,
     0.142578,
     0.093424
    ]
@@ -362,8 +414,8 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.707579,
    "uv": [
-    0.878209,
-    0.500163,
+    0.449637,
+    0.666829,
     0.100725,
     0.166341
    ]
@@ -375,7 +427,7 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.666667,
    "uv": [
-    0.023996,
+    0.595424,
     0.666829,
     0.094866,
     0.166341
@@ -388,7 +440,7 @@ export default {
    "collection": "Product Builder",
    "aspect": 0.750293,
    "uv": [
-    0.160854,
+    0.732282,
     0.666829,
     0.106864,
     0.166341
@@ -401,7 +453,7 @@ export default {
    "collection": "AI Native Organisation",
    "aspect": 1.791667,
    "uv": [
-    0.285854,
+    0.857282,
     0.703613,
     0.142578,
     0.092773
@@ -414,8 +466,8 @@ export default {
    "collection": "AI Native Organisation",
    "aspect": 1.791667,
    "uv": [
-    0.428711,
-    0.703613,
+    0.00014,
+    0.87028,
     0.142578,
     0.092773
    ]
@@ -427,8 +479,8 @@ export default {
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.571568,
-    0.703288,
+    0.142997,
+    0.869954,
     0.142578,
     0.093424
    ]
@@ -440,8 +492,8 @@ export default {
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.714425,
-    0.703288,
+    0.285854,
+    0.869954,
     0.142578,
     0.093424
    ]
@@ -453,8 +505,8 @@ export default {
    "collection": "Forward Deployed Engineer",
    "aspect": 1.776833,
    "uv": [
-    0.857282,
-    0.703288,
+    0.428711,
+    0.869954,
     0.142578,
     0.093424
    ]
@@ -466,7 +518,7 @@ export default {
    "collection": "People Lead lifecycle",
    "aspect": 2.64514,
    "uv": [
-    0.00014,
+    0.571568,
     0.885254,
     0.142578,
     0.062826
@@ -479,7 +531,7 @@ export default {
    "collection": "Homeric Epics",
    "aspect": 1.777857,
    "uv": [
-    0.142997,
+    0.714425,
     0.869954,
     0.142578,
     0.093424
