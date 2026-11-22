@@ -90,7 +90,12 @@
     "secondary-schools/schools.src.html",
     "openai-tts/voice-research.md",
     "long-march/work/",
-    "cross-module-access.svg"
+    "cross-module-access.svg",
+    "all-code-is-slop/analysis.md",
+    "all-code-is-slop/prompts/",
+    "all-code-is-slop/refs/",
+    "all-code-is-slop/source-lauren-tan.md",
+    "all-code-is-slop/structured-content.md"
   ],
   "collections": [
     {
@@ -439,6 +444,14 @@
       "section": "AI agents and engineering",
       "section_order": 10,
       "order": 150
+    },
+    {
+      "id": "all-code-is-slop",
+      "title": "All Code Is Slop (Except Mine)",
+      "description": "Lauren Tan's AI Engineer CODE 2026 talk as poster variants: the poteto pyramid, why verification is the step that matters most, and what 11,000 agent PRs a month look like.",
+      "section": "AI agents and engineering",
+      "section_order": 10,
+      "order": 160
     }
   ],
   "entries": [
@@ -1529,6 +1542,50 @@
       "replacements": {},
       "description": "The same quota joke as a 1960s Sunday-paper strip printed in risograph colours.",
       "date": "2026-11-11"
+    },
+    {
+      "id": "all-code-is-slop-01-hierarchical-layers-craft-handmade",
+      "source": "all-code-is-slop/01-hierarchical-layers-craft-handmade.png",
+      "destination": "all-code-is-slop/01-hierarchical-layers-craft-handmade.png",
+      "title": "The poteto pyramid, hand-drawn",
+      "collection": "all-code-is-slop",
+      "order": 10,
+      "replacements": {},
+      "description": "The inverted pyramid of agent trust, from codebase and static analysis down to human review, drawn in the talk's own sketchy style, with Cindy Sridharan's testing chart and the results.",
+      "date": "2026-11-22"
+    },
+    {
+      "id": "all-code-is-slop-02-dense-modules-morandi-journal",
+      "source": "all-code-is-slop/02-dense-modules-morandi-journal.png",
+      "destination": "all-code-is-slop/02-dense-modules-morandi-journal.png",
+      "title": "All Code Is Slop: sketch notes",
+      "collection": "all-code-is-slop",
+      "order": 20,
+      "replacements": {},
+      "description": "The whole talk in six journal-style modules: the thesis, the poteto pyramid, verification first, the testing chart, lint rules that weed the codebase, and the results.",
+      "date": "2026-11-22"
+    },
+    {
+      "id": "all-code-is-slop-03-hierarchical-layers-graffiti",
+      "source": "all-code-is-slop/03-hierarchical-layers-graffiti.png",
+      "destination": "all-code-is-slop/03-hierarchical-layers-graffiti.png",
+      "title": "The poteto pyramid, graffiti edition",
+      "collection": "all-code-is-slop",
+      "order": 30,
+      "replacements": {},
+      "description": "The same pyramid spray-painted on a brick wall, verification band glowing, testing chart pasted up as posters.",
+      "date": "2026-11-22"
+    },
+    {
+      "id": "all-code-is-slop-04-dense-modules-pop-laboratory",
+      "source": "all-code-is-slop/04-dense-modules-pop-laboratory.png",
+      "destination": "all-code-is-slop/04-dense-modules-pop-laboratory.png",
+      "title": "All Code Is Slop: field guide",
+      "collection": "all-code-is-slop",
+      "order": 40,
+      "replacements": {},
+      "description": "The six modules again as a blueprint lab manual, with verification as the one band in fluorescent pink.",
+      "date": "2026-11-22"
     }
   ]
 }
