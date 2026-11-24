@@ -97,7 +97,8 @@
     "all-code-is-slop/source-lauren-tan.md",
     "all-code-is-slop/structured-content.md",
     "homeric-epics/tools/tripo/",
-    "all-code-is-slop/enterprise-question.md"
+    "all-code-is-slop/enterprise-question.md",
+    "secondary-schools/recommendation.md"
   ],
   "collections": [
     {
@@ -1210,7 +1211,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css": "../../vendor/leaflet/leaflet.css",
         "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js": "../../vendor/leaflet/leaflet.js"
       },
-      "date": "2026-11-20"
+      "date": "2026-11-24"
     },
     {
       "id": "product-idea-prd-evidence-autopilot",
